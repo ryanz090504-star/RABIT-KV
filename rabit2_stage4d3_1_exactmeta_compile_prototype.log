@@ -1,0 +1,137 @@
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-Ttjg1aPiUzwDjfoXRiNo7a
+Building image im-xxhfGmncs6wRhNuXLZ0ukp
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 550.46ms
+
+Built image im-xxhfGmncs6wRhNuXLZ0ukp in 2.48s
+
+
+Building image im-bkJPSNAagjdHS3leNJMDXk
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_stage4d3_1_exactmeta_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 1.28s
+
+Built image im-bkJPSNAagjdHS3leNJMDXk in 4.46s
+
+
+Building image im-SAqkcmbOlxPqQXX7ZVCdbb
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 845.48ms
+
+Built image im-SAqkcmbOlxPqQXX7ZVCdbb in 2.14s
+
+
+Building image im-OfwVx1T30pFz8psrZQ8YOE
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm.log 2>&1 || (tail -n 250 /tmp/vllm.log; exit 1))
+Saving image...
+Image saved, took 12.01s
+
+Built image im-OfwVx1T30pFz8psrZQ8YOE in 126.28s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\modal_rabit2_stage4d3_1_exactmeta.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\rabit2_stage4d3_1_exactmeta_snapshot.zip
+└── 🔨 Created function prototype.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+======================================================================================================================
+RABIT-2 Stage4D3.1 — exactmeta prep compile prototype
+======================================================================================================================
+torch=2.11.0+cu130 cuda=13.0
+gpu=NVIDIA H100 80GB HBM3
+Locked-source preflight: PASSED
+REFERENCE PREP @ open=28: K3=0.5271 ms VminMETA=0.0868 ms VscaleMETA=0.0868 ms combined=0.7084 ms
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0] Graph break from `Tensor.item()`, consider setting:
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0]     torch._dynamo.config.capture_scalar_outputs = True
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0] or:
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0]     env TORCHDYNAMO_CAPTURE_SCALAR_OUTPUTS=1
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0] to include these operations in the captured graph.
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0] 
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0] Graph break: from user code at:
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0]   File "/root/modal_rabit2_stage4d3_1_exactmeta.py", line 128, in prep_ref
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0]     ks = r.quantize_k3_sequence_affine_ref(open_k)
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0]   File "/root/vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py", line 381, in quantize_k3_sequence_affine_ref
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0]     "packed": pack_int3_values(codes),
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0]   File "/root/vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py", line 67, in pack_int3_values
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0]     if bool(((codes < KVQUANT_K3_CODE_MIN) | (codes > KVQUANT_K3_CODE_MAX)).any()):
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0] 
+W0814 12:53:37.194000 2 site-packages/torch/_dynamo/variables/tensor.py:1379] [0/0] 
+torch.compile prep candidate: COMPILED
+EXACT MISMATCH tokens=1 seed=2001 output_index=1 max_abs=1.0
+COMPILED PREP BYTE/TENSOR EXACTNESS: False
+STAGE4D3_1_JSON={"attention_baseline_cuda_ms": null, "attention_candidate_cuda_ms": null, "attention_exact": false, "attention_max_abs": null, "compile_error": null, "compiled_exact": false, "compiled_prep_cuda_ms": null, "compiled_prep_speedup": null, "compiled_prep_wall_ms": null, "exact_cases_tested": [{"exact": true, "seed": 1001, "tokens": 1}, {"exact": false, "seed": 2001, "tokens": 1}], "reference": {"combined_prep_cuda_ms": 0.708403205871582, "k3_cuda_ms": 0.5271227836608887, "vmin_meta_cuda_ms": 0.08677719831466675, "vscale_meta_cuda_ms": 0.08680040240287781}}
+RABIT-2 STAGE4D3.1 EXACTMETA COMPILE PROTOTYPE COMPLETED
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-Ttjg1aPiUzwDjfoXRiNo7a

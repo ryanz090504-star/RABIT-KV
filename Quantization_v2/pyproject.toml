@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kvquant"
+version = "2.0.0"
+description = "KV cache quantization benchmark framework — vLLM-integrated, paper-ready"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "torch>=2.3",
+    "transformers>=4.43",
+]
+
+[project.optional-dependencies]
+# vLLM only works on Linux with CUDA — install on GPU server, not macOS
+vllm = ["vllm>=0.8; sys_platform == 'linux'"]
+triton = ["triton>=3.0"]
+datasets = ["datasets>=2.19"]
+dev = ["pytest>=7"]
+
+[project.scripts]
+kvq = "kvquant.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kvquant*"]

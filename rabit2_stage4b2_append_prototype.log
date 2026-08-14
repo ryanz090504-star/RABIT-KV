@@ -1,0 +1,130 @@
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-rwrqIwsMj4Dpc5lY4qvekO
+Building image im-4ugDNJm4P7WV7RYUc2XPtC
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 601.28ms
+
+Built image im-4ugDNJm4P7WV7RYUc2XPtC in 2.46s
+
+
+Building image im-ThNBDr2eFwhAiG0Un42ony
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_stage4b2_append_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 1.57s
+
+Built image im-ThNBDr2eFwhAiG0Un42ony in 4.40s
+
+
+Building image im-WfrfzbmCkqUnELEEqAqlaP
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 1.96s
+
+Built image im-WfrfzbmCkqUnELEEqAqlaP in 4.00s
+
+
+Building image im-DzGDTpvY42mKoWfIPccPEK
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm_install.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm_install.log 2>&1 || (tail -n 250 /tmp/vllm_install.log; exit 1))
+Saving image...
+Image saved, took 5.83s
+
+Built image im-DzGDTpvY42mKoWfIPccPEK in 123.20s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\modal_rabit2_stage4b2_append.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\rabit2_stage4b2_append_snapshot.zip
+└── 🔨 Created function run_stage4b2.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+====================================================================================================
+RABIT-2 Stage 4B2 — append-path prototype (NO source modification)
+====================================================================================================
+Python:       3.11.5
+PyTorch:      2.11.0+cu130
+CUDA:         13.0
+GPU:          NVIDIA H100 80GB HBM3
+Goal: remove decode-time torch.cat allocation and test exact compiled V2 quantization.
+NOTE: diagnostic only; not final TTFT/TPOT data.
+compiled V2 exact across 64 seeds: False
+first compiled mismatch: {'seed': 101, 'packed_bytes': 2, 'min_max_abs': 0.0, 'scale_max_abs': 0.0}
+V2 eager exact:    0.4819 ms/token
+fixed-buffer state exactness: {'open_k': True, 'open_v_packed': True, 'open_v_min': True, 'open_v_scale': True, 'recent_k': True, 'recent_v': True}
+----------------------------------------------------------------------------------------------------
+Current runtime.append:          0.6519 ms/token
+Fixed buffers + eager exact V2: 0.5457 ms/token  (1.19x)
+Fixed buffers + eager exact V2 fallback: 0.5126 ms/token  (1.27x)
+----------------------------------------------------------------------------------------------------
+STAGE4B2_JSON={"compiled_v2_exact": false, "compiled_v2_ms": null, "current_append_ms": 0.651904793981489, "eager_v2_ms": 0.4819034921875187, "first_compile_mismatch": {"min_max_abs": 0.0, "packed_bytes": 2, "scale_max_abs": 0.0, "seed": 101}, "fixed_best_append_ms": 0.5126188912037031, "fixed_best_speedup": 1.2717143382108345, "fixed_eager_append_ms": 0.5456584282407456, "fixed_eager_speedup": 1.1947122233285972, "state_exactness": {"open_k": true, "open_v_min": true, "open_v_packed": true, "open_v_scale": true, "recent_k": true, "recent_v": true}}
+RABIT-2 STAGE 4B2 APPEND PROTOTYPE PASSED
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-rwrqIwsMj4Dpc5lY4qvekO

@@ -1,0 +1,143 @@
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-4oMyVnuGYEw0UaEl30MFKb
+Building image im-zkpFJYDMpgtLdgscc1PsLs
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 717.11ms
+
+Built image im-zkpFJYDMpgtLdgscc1PsLs in 3.09s
+
+
+Building image im-9d8oWcfLcY3dy0WVpZuMXu
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_stage4b3_1_gqa_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 728.98ms
+
+Built image im-9d8oWcfLcY3dy0WVpZuMXu in 4.33s
+
+
+Building image im-CA3TDX9Wy1tOg3zmeyKPy4
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 2.50s
+
+Built image im-CA3TDX9Wy1tOg3zmeyKPy4 in 3.86s
+
+
+Building image im-YTz6CGpAHHcEvZbcsYCl6Z
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm.log 2>&1 || (tail -n 250 /tmp/vllm.log; exit 1))
+Saving image...
+Image saved, took 5.77s
+
+Built image im-YTz6CGpAHHcEvZbcsYCl6Z in 147.46s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\modal_rabit2_stage4b3_1_gqa.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\rabit2_stage4b3_1_gqa_snapshot.zip
+└── 🔨 Created function verify.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+==========================================================================================================
+RABIT-2 Stage 4B3.1 — GQA KV-decode reuse prototype
+==========================================================================================================
+Python:  3.11.5
+PyTorch: 2.11.0+cu130
+CUDA:    13.0
+GPU:     NVIDIA H100 80GB HBM3
+Geometry: QH=32, KVH=8, GQA ratio=4, D=128, block=32
+Variants: QPP=2 and QPP=4 query heads share one packed K/V decode
+NOTE: diagnostic prototype only; source tree is NOT modified.
+Stage4B2 source preflight: PASSED
+----------------------------------------------------------------------------------------------------------
+CTX=  512 pages=  16 baseline=0.0374 ms
+  QPP=2 programs=  256 time=0.0308 ms speedup=1.21x programs=2.0x fewer max_abs=0.00000000
+  QPP=4 programs=  128 time=0.0308 ms speedup=1.21x programs=4.0x fewer max_abs=0.00000000
+----------------------------------------------------------------------------------------------------------
+CTX= 2048 pages=  64 baseline=0.1301 ms
+  QPP=2 programs= 1024 time=0.0747 ms speedup=1.74x programs=2.0x fewer max_abs=0.00000000
+  QPP=4 programs=  512 time=0.0470 ms speedup=2.77x programs=4.0x fewer max_abs=0.00000000
+----------------------------------------------------------------------------------------------------------
+CTX= 8192 pages= 256 baseline=0.4894 ms
+  QPP=2 programs= 4096 time=0.2734 ms speedup=1.79x programs=2.0x fewer max_abs=0.00000000
+  QPP=4 programs= 2048 time=0.1612 ms speedup=3.04x programs=4.0x fewer max_abs=0.00000000
+----------------------------------------------------------------------------------------------------------
+CTX=16384 pages= 512 baseline=0.9648 ms
+  QPP=2 programs= 8192 time=0.5320 ms speedup=1.81x programs=2.0x fewer max_abs=0.00000000
+  QPP=4 programs= 4096 time=0.3129 ms speedup=3.08x programs=4.0x fewer max_abs=0.00000000
+----------------------------------------------------------------------------------------------------------
+Full online correctness, selected QPP=4: max_abs=0.00000000 mean_abs=0.00000000
+----------------------------------------------------------------------------------------------------------
+SELECTED at 16K: QPP=4, 0.9648 -> 0.3129 ms, 3.08x; program count 4.0x smaller
+STAGE4B3_1_JSON={"full_online_max_abs": 0.0, "full_online_mean_abs": 0.0, "rows": [{"baseline_ms": 0.03739413420359294, "baseline_programs": 512, "context": 512, "gqa_ms": 0.03081279993057251, "gqa_programs": 256, "max_abs": 0.0, "mean_abs": 0.0, "pages": 16, "program_reduction": 2.0, "q_per_program": 2, "speedup": 1.213590919612937}, {"baseline_ms": 0.03739413420359294, "baseline_programs": 512, "context": 512, "gqa_ms": 0.030793599287668862, "gqa_programs": 128, "max_abs": 0.0, "mean_abs": 0.0, "pages": 16, "program_reduction": 4.0, "q_per_program": 4, "speedup": 1.2143476264097268}, {"baseline_ms": 0.1301205317179362, "baseline_programs": 2048, "context": 2048, "gqa_ms": 0.07474133173624674, "gqa_programs": 1024, "max_abs": 0.0, "mean_abs": 0.0, "pages": 64, "program_reduction": 2.0, "q_per_program": 2, "speedup": 1.7409447851038573}, {"baseline_ms": 0.1301205317179362, "baseline_programs": 2048, "context": 2048, "gqa_ms": 0.046963198979695635, "gqa_programs": 512, "max_abs": 0.0, "mean_abs": 0.0, "pages": 64, "program_reduction": 4.0, "q_per_program": 4, "speedup": 2.7706914040117523}, {"baseline_ms": 0.48935680389404296, "baseline_programs": 8192, "context": 8192, "gqa_ms": 0.2733546574910482, "gqa_programs": 4096, "max_abs": 0.0, "mean_abs": 0.0, "pages": 256, "program_reduction": 2.0, "q_per_program": 2, "speedup": 1.7901901082847596}, {"baseline_ms": 0.48935680389404296, "baseline_programs": 8192, "context": 8192, "gqa_ms": 0.16121919949849448, "gqa_programs": 2048, "max_abs": 0.0, "mean_abs": 0.0, "pages": 256, "program_reduction": 4.0, "q_per_program": 4, "speedup": 3.0353506618088173}, {"baseline_ms": 0.9648192087809245, "baseline_programs": 16384, "context": 16384, "gqa_ms": 0.5319775899251302, "gqa_programs": 8192, "max_abs": 0.0, "mean_abs": 0.0, "pages": 512, "program_reduction": 2.0, "q_per_program": 2, "speedup": 1.8136463397202724}, {"baseline_ms": 0.9648192087809245, "baseline_programs": 16384, "context": 16384, "gqa_ms": 0.3128629366556803, "gqa_programs": 4096, "max_abs": 0.0, "mean_abs": 0.0, "pages": 512, "program_reduction": 4.0, "q_per_program": 4, "speedup": 3.0838399047655534}], "selected_16k": {"baseline_ms": 0.9648192087809245, "baseline_programs": 16384, "context": 16384, "gqa_ms": 0.3128629366556803, "gqa_programs": 4096, "max_abs": 0.0, "mean_abs": 0.0, "pages": 512, "program_reduction": 4.0, "q_per_program": 4, "speedup": 3.0838399047655534}, "selected_qpp": 4, "worst_closed_max_abs": 0.0}
+RABIT-2 STAGE 4B3.1 GQA-REUSE PROTOTYPE PASSED
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-4oMyVnuGYEw0UaEl30MFKb

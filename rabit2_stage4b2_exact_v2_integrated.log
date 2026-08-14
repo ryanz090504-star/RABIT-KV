@@ -1,0 +1,484 @@
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-LLObIGM6KEp3nzhTAw29rp
+Building image im-TwJgLaaIkjlkLfc1MrVun5
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.61s
+
+Built image im-TwJgLaaIkjlkLfc1MrVun5 in 4.42s
+
+
+Building image im-7yhZnQaGp423tr0E0RuJVX
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_stage4b2_exactv2_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 1.71s
+
+Built image im-7yhZnQaGp423tr0E0RuJVX in 4.72s
+
+
+Building image im-IxAMQNlmKyCvQsE5UzMvKU
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 1.28s
+
+Built image im-IxAMQNlmKyCvQsE5UzMvKU in 8.72s
+
+
+Building image im-xKHPpuxLgiwSV6p6Bv84qn
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm.log 2>&1 || (tail -n 250 /tmp/vllm.log; exit 1))
+Saving image...
+Image saved, took 4.66s
+
+Built image im-xKHPpuxLgiwSV6p6Bv84qn in 117.36s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\modal_rabit2_stage4b2_exactv2.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\rabit2_stage4b2_exactv2_snapshot.zip
+└── 🔨 Created function verify.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+================================================================================================
+RABIT-2 Stage 4B2 — exact hybrid V2 integration
+================================================================================================
+GPU: NVIDIA H100 80GB HBM3
+Stage4B2 dispatch preflight: PASSED
+...................................................................F.... [ 91%]
+.......                                                                  [100%]
+=================================== FAILURES ===================================
+____ test_stage3c_two_sequences_share_physical_cache_without_state_aliasing ____
+vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py:80: in test_stage3c_two_sequences_share_physical_cache_without_state_aliasing
+    r1.append(k1, v1, cache, row1)
+vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py:1509: in append
+    self._append_aged(old_k, old_v, kv_cache, block_table_row)
+vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py:1486: in _append_aged
+    self.open_v_packed = packed if self.open_v_packed is None else torch.cat([self.open_v_packed, packed], dim=0)
+                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   RuntimeError: Error: accessing tensor output of CUDAGraphs that has been overwritten by a subsequent run. Stack trace: File "/root/vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py", line 2011, in _rabit2_stage4b2_pack_8x128
+E       return (c[...,0] | (c[...,1] << 2) | (c[...,2] << 4) | (c[...,3] << 6)).to(torch.uint8).contiguous(). To prevent overwriting, clone the tensor outside of torch.compile() or call torch.compiler.cudagraph_mark_step_begin() before each model invocation.
+------------------------------ Captured log call -------------------------------
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:convert_frame.py:276 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:499 
+DEBUG    torch.__trace:meta_utils.py:499 
+DEBUG    torch.__trace:meta_utils.py:2107 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:output_graph.py:2423 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:2452 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:2483 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2165 
+DEBUG    torch.__trace:autograd_cache.py:892 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:graph_capture.py:337 
+DEBUG    torch.__trace:graph_capture.py:355 
+DEBUG    torch.__trace:graph_compile.py:380 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:2314 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:2328 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:1279 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:1330 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:1368 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:graph.py:2575 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:async_compile.py:122 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2165 
+DEBUG    torch.__trace:compile_fx.py:1120 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:guards.py:3977 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:1796 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:1796 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:convert_frame.py:276 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:499 
+DEBUG    torch.__trace:meta_utils.py:499 
+DEBUG    torch.__trace:meta_utils.py:2107 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:output_graph.py:2423 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:2452 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:2483 
+DEBUG    torch.__trace:utils.py:2165 
+DEBUG    torch.__trace:autograd_cache.py:892 
+Traceback (most recent call last):
+  File "/pkg/modal/_runtime/container_io_manager.py", line 945, in handle_input_exception
+    yield
+  File "/pkg/modal/_container_entrypoint.py", line 189, in run_input_sync
+    values = io_context.call_function_sync()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pkg/modal/_runtime/container_io_manager.py", line 225, in call_function_sync
+    expected_value_or_values = self.finalized_function.callable(*args, **kwargs)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/modal_rabit2_stage4b2_exactv2.py", line 62, in verify
+    if res.returncode: raise RuntimeError("Stage4B2 regression failed")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Stage4B2 regression failed
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:graph_capture.py:337 
+DEBUG    torch.__trace:graph_capture.py:355 
+DEBUG    torch.__trace:graph_compile.py:380 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:2314 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:2328 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:1279 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:1330 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:compile_fx.py:1368 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:graph.py:2575 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:async_compile.py:122 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2165 
+DEBUG    torch.__trace:compile_fx.py:1120 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:guards.py:3977 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:1796 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:1796 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:1796 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:2126 
+DEBUG    torch.__trace:utils.py:1796
+=============================== warnings summary ===============================
+tests/quantization/test_kvquant_k3.py: 14 warnings
+  /usr/local/lib/python3.11/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py::test_stage3c_two_sequences_share_physical_cache_without_state_aliasing
+1 failed, 78 passed, 14 warnings in 27.14s
+
+pytest exit code: 1
+Stopping app - uncaught exception raised locally: RuntimeError('Stage4B2 regression failed').
+┌───────────────────── Traceback (most recent call last) ─────────────────────┐
+│ C:\Users\ryanz\AppData\Local\Temp\modal_rabit2_stage4b2_exactv2.py:105 in   │
+│ main                                                                        │
+│                                                                             │
+│   104 @app.local_entrypoint()                                               │
+│ > 105 def main(): verify.remote()                                           │
+│   106                                                                       │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_object.py:46 in wrapped                                            │
+│                                                                             │
+│    45 │   │   await self.hydrate()                                          │
+│ >  46 │   │   return await method(self, *args, **kwargs)                    │
+│    47                                                                       │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_functions.py:1696 in remote                                        │
+│                                                                             │
+│   1695 │   │                                                                │
+│ > 1696 │   │   return await self._call_function(args, kwargs)               │
+│   1697                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_functions.py:1640 in _call_function                                │
+│                                                                             │
+│   1639 │   │                                                                │
+│ > 1640 │   │   return await invocation.run_function()                       │
+│   1641                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_functions.py:493 in run_function                                   │
+│                                                                             │
+│    492 │   │   │   # No more retries left.                                  │
+│ >  493 │   │   │   return await _process_result(                            │
+│    494 │   │   │   │   await_response.output.result, await_response.output. │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_utils\function_utils.py:548 in _process_result                     │
+│                                                                             │
+│   547 │   │   │                                                             │
+│ > 548 │   │   │   raise exc_with_hints(exc)                                 │
+│   549                                                                       │
+│                                                                             │
+│     ...Remote call to Modal Function (ta-01KZT0YPS3XWQT037T3JBH68VR)...     │
+│                                                                             │
+│ /root/modal_rabit2_stage4b2_exactv2.py:62 in verify                         │
+│                                                                             │
+│ > 62 if res.returncode: raise RuntimeError("Stage4B2 regression failed")    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+RuntimeError: Stage4B2 regression failed

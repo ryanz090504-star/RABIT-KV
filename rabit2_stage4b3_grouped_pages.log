@@ -1,0 +1,147 @@
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-qRrVxkvX4lm58X5u6tVJFH
+Building image im-6EY9qdTgtzgvlkSAcIOcJx
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 545.73ms
+
+Built image im-6EY9qdTgtzgvlkSAcIOcJx in 2.24s
+
+
+Building image im-28l6bTd4bNUa4yE0W5ZUlz
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_stage4b3_grouped_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 1.63s
+
+Built image im-28l6bTd4bNUa4yE0W5ZUlz in 6.09s
+
+
+Building image im-ngKgd4ByCzzi4QTG2ZwZJp
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 747.10ms
+
+Built image im-ngKgd4ByCzzi4QTG2ZwZJp in 1.86s
+
+
+Building image im-YXu3GxY9lCVzUCnsgJZpO4
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm.log 2>&1 || (tail -n 250 /tmp/vllm.log; exit 1))
+Saving image...
+Image saved, took 20.84s
+
+Built image im-YXu3GxY9lCVzUCnsgJZpO4 in 180.98s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\modal_rabit2_stage4b3_grouped.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\rabit2_stage4b3_grouped_snapshot.zip
+└── 🔨 Created function verify.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+========================================================================================================
+RABIT-2 Stage 4B3 — grouped closed-page attention prototype
+========================================================================================================
+Python:  3.11.5
+PyTorch: 2.11.0+cu130
+CUDA:    13.0
+GPU:     NVIDIA H100 80GB HBM3
+Geometry: q_heads=32, kv_heads=8, head_dim=128, block=32
+Variants: 2 / 4 / 8 physical pages per softmax partial
+NOTE: diagnostic prototype only; source tree is NOT modified.
+Stage4B1 + Stage4B2 source preflight: PASSED
+--------------------------------------------------------------------------------------------------------
+CTX=  512 pages=  16 baseline=0.0487 ms scratch=0.254 MiB
+  PPG= 2 groups=  8 time=0.0457 ms speedup=1.07x scratch=0.127 MiB (2.00x smaller) max_abs=0.00000000
+  PPG= 4 groups=  4 time=0.0458 ms speedup=1.06x scratch=0.063 MiB (4.00x smaller) max_abs=0.00000001
+  PPG= 8 groups=  2 time=0.0811 ms speedup=0.60x scratch=0.032 MiB (8.00x smaller) max_abs=0.00000001
+--------------------------------------------------------------------------------------------------------
+CTX= 2048 pages=  64 baseline=0.1305 ms scratch=1.016 MiB
+  PPG= 2 groups= 32 time=0.1575 ms speedup=0.83x scratch=0.508 MiB (2.00x smaller) max_abs=0.00000000
+  PPG= 4 groups= 16 time=0.1517 ms speedup=0.86x scratch=0.254 MiB (4.00x smaller) max_abs=0.00000000
+  PPG= 8 groups=  8 time=0.1610 ms speedup=0.81x scratch=0.127 MiB (8.00x smaller) max_abs=0.00000000
+--------------------------------------------------------------------------------------------------------
+CTX= 8192 pages= 256 baseline=0.4893 ms scratch=4.062 MiB
+  PPG= 2 groups=128 time=0.6071 ms speedup=0.81x scratch=2.031 MiB (2.00x smaller) max_abs=0.00000000
+  PPG= 4 groups= 64 time=0.5857 ms speedup=0.84x scratch=1.016 MiB (4.00x smaller) max_abs=0.00006104
+  PPG= 8 groups= 32 time=0.6315 ms speedup=0.77x scratch=0.508 MiB (8.00x smaller) max_abs=0.00006104
+--------------------------------------------------------------------------------------------------------
+CTX=16384 pages= 512 baseline=0.9653 ms scratch=8.125 MiB
+  PPG= 2 groups=256 time=1.1890 ms speedup=0.81x scratch=4.062 MiB (2.00x smaller) max_abs=0.00003052
+  PPG= 4 groups=128 time=1.1623 ms speedup=0.83x scratch=2.031 MiB (4.00x smaller) max_abs=0.00000763
+  PPG= 8 groups= 64 time=1.2583 ms speedup=0.77x scratch=1.016 MiB (8.00x smaller) max_abs=0.00000763
+--------------------------------------------------------------------------------------------------------
+Full online correctness with tail, selected PPG=4: max_abs=0.00000000, mean_abs=0.00000000
+--------------------------------------------------------------------------------------------------------
+SELECTED at 16K: PPG=4, 0.9653 -> 1.1623 ms, 0.83x; scratch 8.125 -> 2.031 MiB (4.00x smaller)
+STAGE4B3_JSON={"full_online_max_abs": 0.0, "full_online_mean_abs": 0.0, "rows": [{"baseline_ms": 0.0487008015314738, "baseline_scratch_mib": 0.25390625, "context": 512, "grouped_ms": 0.04572266737620036, "grouped_scratch_mib": 0.126953125, "groups": 8, "max_abs": 0.0, "mean_abs": 0.0, "pages": 16, "pages_per_group": 2, "scratch_reduction": 2.0, "speedup": 1.0651347422662314}, {"baseline_ms": 0.0487008015314738, "baseline_scratch_mib": 0.25390625, "context": 512, "grouped_ms": 0.0458346684773763, "grouped_scratch_mib": 0.0634765625, "groups": 4, "max_abs": 1.4901161193847656e-08, "mean_abs": 3.637978807091713e-12, "pages": 16, "pages_per_group": 4, "scratch_reduction": 4.0, "speedup": 1.0625319905065356}, {"baseline_ms": 0.0487008015314738, "baseline_scratch_mib": 0.25390625, "context": 512, "grouped_ms": 0.08112746874491374, "grouped_scratch_mib": 0.03173828125, "groups": 2, "max_abs": 1.4901161193847656e-08, "mean_abs": 3.637978807091713e-12, "pages": 16, "pages_per_group": 8, "scratch_reduction": 8.0, "speedup": 0.6002997786680863}, {"baseline_ms": 0.13050133387247723, "baseline_scratch_mib": 1.015625, "context": 2048, "grouped_ms": 0.15752426783243814, "grouped_scratch_mib": 0.5078125, "groups": 32, "max_abs": 0.0, "mean_abs": 0.0, "pages": 64, "pages_per_group": 2, "scratch_reduction": 2.0, "speedup": 0.8284522484579596}, {"baseline_ms": 0.13050133387247723, "baseline_scratch_mib": 1.015625, "context": 2048, "grouped_ms": 0.15173120498657228, "grouped_scratch_mib": 0.25390625, "groups": 16, "max_abs": 0.0, "mean_abs": 0.0, "pages": 64, "pages_per_group": 4, "scratch_reduction": 4.0, "speedup": 0.8600823666036671}, {"baseline_ms": 0.13050133387247723, "baseline_scratch_mib": 1.015625, "context": 2048, "grouped_ms": 0.16097599665323895, "grouped_scratch_mib": 0.126953125, "groups": 8, "max_abs": 0.0, "mean_abs": 0.0, "pages": 64, "pages_per_group": 8, "scratch_reduction": 8.0, "speedup": 0.8106881559093081}, {"baseline_ms": 0.4893312136332194, "baseline_scratch_mib": 4.0625, "context": 8192, "grouped_ms": 0.6070666631062825, "grouped_scratch_mib": 2.03125, "groups": 128, "max_abs": 0.0, "mean_abs": 0.0, "pages": 256, "pages_per_group": 2, "scratch_reduction": 2.0, "speedup": 0.8060584502027737}, {"baseline_ms": 0.4893312136332194, "baseline_scratch_mib": 4.0625, "context": 8192, "grouped_ms": 0.5856501261393229, "grouped_scratch_mib": 1.015625, "groups": 64, "max_abs": 6.103515625e-05, "mean_abs": 1.4901161193847656e-08, "pages": 256, "pages_per_group": 4, "scratch_reduction": 4.0, "speedup": 0.835535060598297}, {"baseline_ms": 0.4893312136332194, "baseline_scratch_mib": 4.0625, "context": 8192, "grouped_ms": 0.6314762751261394, "grouped_scratch_mib": 0.5078125, "groups": 32, "max_abs": 6.103515625e-05, "mean_abs": 1.4901161193847656e-08, "pages": 256, "pages_per_group": 8, "scratch_reduction": 8.0, "speedup": 0.7749003927906459}, {"baseline_ms": 0.9652640024820963, "baseline_scratch_mib": 8.125, "context": 16384, "grouped_ms": 1.1889920552571616, "grouped_scratch_mib": 4.0625, "groups": 256, "max_abs": 3.0517578125e-05, "mean_abs": 9.327777661383152e-09, "pages": 512, "pages_per_group": 2, "scratch_reduction": 2.0, "speedup": 0.8118338539052087}, {"baseline_ms": 0.9652640024820963, "baseline_scratch_mib": 8.125, "context": 16384, "grouped_ms": 1.1623179117838542, "grouped_scratch_mib": 2.03125, "groups": 128, "max_abs": 7.62939453125e-06, "mean_abs": 1.877197064459324e-09, "pages": 512, "pages_per_group": 4, "scratch_reduction": 4.0, "speedup": 0.8304647056506841}, {"baseline_ms": 0.9652640024820963, "baseline_scratch_mib": 8.125, "context": 16384, "grouped_ms": 1.2583488464355468, "grouped_scratch_mib": 1.015625, "groups": 64, "max_abs": 7.62939453125e-06, "mean_abs": 1.877197064459324e-09, "pages": 512, "pages_per_group": 8, "scratch_reduction": 8.0, "speedup": 0.7670877636327516}], "selected_16k": {"baseline_ms": 0.9652640024820963, "baseline_scratch_mib": 8.125, "context": 16384, "grouped_ms": 1.1623179117838542, "grouped_scratch_mib": 2.03125, "groups": 128, "max_abs": 7.62939453125e-06, "mean_abs": 1.877197064459324e-09, "pages": 512, "pages_per_group": 4, "scratch_reduction": 4.0, "speedup": 0.8304647056506841}, "selected_ppg": 4, "tolerance_closed": 0.02, "tolerance_full_online": 0.025, "worst_closed_max_abs": 6.103515625e-05}
+RABIT-2 STAGE 4B3 GROUPED CLOSED-PAGE PROTOTYPE PASSED
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-qRrVxkvX4lm58X5u6tVJFH

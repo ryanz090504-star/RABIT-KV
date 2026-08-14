@@ -1,0 +1,14 @@
+{
+  "kv_cache_dtype": "kvquant_k3",
+  "policy_name": "kvquant_int3",
+  "nbits": 3,
+  "scale_strategy": "per_token_head",
+  "scale_dtype_bytes": 4,
+  "vllm_root": "/Users/chen/vs_code/vllm-kvquant",
+  "vllm_branch": "kvquant-k3-local",
+  "vllm_base_commit": "f329ce4",
+  "target_hardware": ["A100", "H100"],
+  "serving_backend": "vllm_bench_serve",
+  "evidence_label": "deploy_latency",
+  "claim_boundary": "Only valid after the vLLM fork stores packed INT3 KV cache and reads it directly in attention."
+}

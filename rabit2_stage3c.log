@@ -1,0 +1,483 @@
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-zkFLs5eP2SezOzNHuNImhA
+Building image im-idJ1r1NaB7hwJzK4ME2yRv
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.96s
+
+Built image im-idJ1r1NaB7hwJzK4ME2yRv in 4.55s
+
+
+Building image im-swkZbPlr7D6kL2nFVa5u7N
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_stage3c_vllm_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 2.28s
+
+Built image im-swkZbPlr7D6kL2nFVa5u7N in 7.06s
+
+
+Building image im-xUyF0jh6eW4jOIIU0axnOP
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 792.64ms
+
+Built image im-xUyF0jh6eW4jOIIU0axnOP in 2.17s
+
+
+Building image im-9n7bN2NjlEWNUMRRKGTF23
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm_precompiled_install.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm_precompiled_install.log 2>&1 || (echo '===== INSTALL FAILED: FINAL 250 LINES ====='; tail -n 250 /tmp/vllm_precompiled_install.log; exit 1)) && echo '===== PRECOMPILED INSTALL COMPLETED =====' && tail -n 25 /tmp/vllm_precompiled_install.log
+===== PRECOMPILED INSTALL COMPLETED =====
+Downloading setproctitle-1.3.7-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (32 kB)
+Downloading tabulate-0.10.0-py3-none-any.whl (39 kB)
+Downloading torch_c_dlpack_ext-0.1.5-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (897 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 897.8/897.8 kB 310.5 MB/s  0:00:00
+Building wheels for collected packages: vllm
+  Building editable for vllm (pyproject.toml): started
+  Building editable for vllm (pyproject.toml): finished with status 'done'
+  Created wheel for vllm: filename=vllm-0.10.0+kvquant-0.editable-cp311-cp311-linux_x86_64.whl size=13247 sha256=b850b8539765fef009ff585cbfdd096db434b7e9c5f590425eab2f92cd138858
+  Stored in directory: /tmp/pip-ephem-wheel-cache-1z9qs19k/wheels/73/59/57/5eda8ccc6e9203a65aa2e0f0a725dd46d145a7a75e0189a72a
+Successfully built vllm
+Installing collected packages: z3-solver, supervisor, py-cpuinfo, nvtx, nvidia-ml-py, websockets, uvloop, urllib3, typing-inspection, truststore, tqdm, tokenspeed-triton, tabulate, sniffio, shellingham, setproctitle, sentencepiece, safetensors, rpds-py, rignore, regex, pyzmq, pyyaml, python-multipart, python-json-logger, python-dotenv, PyNvVideoCodec, pyjwt, pyelftools, pydantic-core, pycparser, pycountry, pybase64, psutil, protobuf, propcache, prometheus_client, partial-json-parser, outlines_core, opentelemetry-api, nvidia-nvvm, nvidia-cudnn-frontend, nvidia-cuda-crt, nvidia-cuda-cccl, numpy, multidict, msgspec, mdurl, loguru, llvmlite, llguidance, lark, jmespath, jiter, interegular, ijson, idna, httptools, hf-xet, h11, grpcio, frozenlist, flashinfer-cubin, fastar, einops, docstring-parser, dnspython, distro, diskcache, dill, detect-installer, cuda-tile, cuda-pathfinder, cloudpickle, click, charset_normalizer, certifi, cbor2, cachetools, blake3, attrs, astor, apache-tvm-ffi, annotated-types, annotated-doc, aiohappyeyeballs, yarl, uvicorn, sentry-sdk, requests, referencing, pydantic, opentelemetry-semantic-conventions, opentelemetry-proto, opencv-python-headless, nvidia-cuda-nvcc, numba, ml-dtypes, markdown-it-py, httpcore2, httpcore, googleapis-common-protos, email-validator, depyf, cuda-core, cuda-bindings, cffi, anyio, aiosignal, watchfiles, tiktoken, starlette, rich, pydantic-settings, pydantic-extra-types, opentelemetry-sdk, opentelemetry-exporter-otlp-proto-common, openai-harmony, nvidia-cuda-tileiras, mcp-types, lm-format-enforcer, jsonschema-specifications, httpx2, httpx, cuda-python, cryptography, aiohttp, typer, sse-starlette, rich-toolkit, prometheus-fastapi-instrumentator, opentelemetry-semantic-conventions-ai, opentelemetry-exporter-otlp-proto-http, opentelemetry-exporter-otlp-proto-grpc, openai, nvidia-cutlass-dsl-libs-base, jsonschema, huggingface-hub, fastapi, anthropic, torch-c-dlpack-ext, tokenizers, opentelemetry-exporter-otlp, nvidia-cutlass-dsl-libs-cu13, nvidia-cutlass-dsl, model-hosting-container-standards, mistral_common, mcp, humming-kernels, fastsafetensors, fastapi-cloud-cli, fastapi-cli, transformers, tokenspeed-mla, tilelang, quack-kernels, flashinfer-python, xgrammar, compressed-tensors, vllm
+  Attempting uninstall: numpy
+    Found existing installation: numpy 2.4.4
+    Uninstalling numpy-2.4.4:
+      Successfully uninstalled numpy-2.4.4
+  Attempting uninstall: cuda-pathfinder
+    Found existing installation: cuda-pathfinder 1.2.2
+    Uninstalling cuda-pathfinder-1.2.2:
+      Successfully uninstalled cuda-pathfinder-1.2.2
+  Attempting uninstall: cuda-bindings
+    Found existing installation: cuda-bindings 13.0.3
+    Uninstalling cuda-bindings-13.0.3:
+      Successfully uninstalled cuda-bindings-13.0.3
+
+Successfully installed PyNvVideoCodec-2.1.0 aiohappyeyeballs-2.7.1 aiohttp-3.14.3 aiosignal-1.4.0 annotated-doc-0.0.5 annotated-types-0.8.0 anthropic-0.121.0 anyio-4.14.2 apache-tvm-ffi-0.1.9 astor-0.8.1 attrs-26.1.0 blake3-1.0.9 cachetools-7.1.7 cbor2-6.1.4 certifi-2026.7.22 cffi-2.1.1 charset_normalizer-3.4.9 click-8.4.2 cloudpickle-3.1.2 compressed-tensors-0.17.0 cryptography-50.0.0 cuda-bindings-13.3.1 cuda-core-1.0.1 cuda-pathfinder-1.6.0 cuda-python-13.3.1 cuda-tile-1.3.0 depyf-0.20.0 detect-installer-0.1.0 dill-0.4.1 diskcache-5.6.3 distro-1.9.0 dnspython-2.8.0 docstring-parser-0.18.0 einops-0.8.2 email-validator-2.3.0 fastapi-0.136.3 fastapi-cli-0.0.32 fastapi-cloud-cli-0.23.0 fastar-0.11.0 fastsafetensors-0.3.3 flashinfer-cubin-0.6.13 flashinfer-python-0.6.13 frozenlist-1.8.0 googleapis-common-protos-1.75.1 grpcio-1.83.0 h11-0.16.0 hf-xet-1.6.0 httpcore-1.0.9 httpcore2-2.10.0 httptools-0.8.0 httpx-0.28.1 httpx2-2.10.0 huggingface-hub-1.27.0 humming-kernels-0.1.6 idna-3.18 ijson-3.5.1 interegular-0.3.3 jiter-0.16.0 jmespath-1.1.0 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 lark-1.2.2 llguidance-1.7.6 llvmlite-0.47.0 lm-format-enforcer-0.11.3 loguru-0.7.3 markdown-it-py-4.2.0 mcp-2.0.0 mcp-types-2.0.0 mdurl-0.1.2 mistral_common-1.11.7 ml-dtypes-0.5.4 model-hosting-container-standards-0.1.16 msgspec-0.21.1 multidict-6.7.1 numba-0.65.0 numpy-2.3.5 nvidia-cuda-cccl-13.3.3.4.1 nvidia-cuda-crt-13.3.73 nvidia-cuda-nvcc-13.2.86 nvidia-cuda-tileiras-13.2.86 nvidia-cudnn-frontend-1.27.0 nvidia-cutlass-dsl-4.5.2 nvidia-cutlass-dsl-libs-base-4.5.2 nvidia-cutlass-dsl-libs-cu13-4.5.2 nvidia-ml-py-13.610.43 nvidia-nvvm-13.2.86 nvtx-0.2.15 openai-2.53.0 openai-harmony-0.0.8 opencv-python-headless-5.0.0.93 opentelemetry-api-1.44.0 opentelemetry-exporter-otlp-1.44.0 opentelemetry-exporter-otlp-proto-common-1.44.0 opentelemetry-exporter-otlp-proto-grpc-1.44.0 opentelemetry-exporter-otlp-proto-http-1.44.0 opentelemetry-proto-1.44.0 opentelemetry-sdk-1.44.0 opentelemetry-semantic-conventions-0.65b0 opentelemetry-semantic-conventions-ai-0.5.1 outlines_core-0.2.14 partial-json-parser-0.2.1.1.post7 prometheus-fastapi-instrumentator-8.1.0 prometheus_client-0.26.0 propcache-0.5.2 protobuf-7.35.1 psutil-7.2.2 py-cpuinfo-9.0.0 pybase64-1.5.0 pycountry-26.2.16 pycparser-3.0 pydantic-2.13.4 pydantic-core-2.46.4 pydantic-extra-types-2.11.1 pydantic-settings-2.15.0 pyelftools-0.33 pyjwt-2.13.0 python-dotenv-1.2.2 python-json-logger-4.1.0 python-multipart-0.0.32 pyyaml-6.0.3 pyzmq-27.1.0 quack-kernels-0.5.0 referencing-0.37.0 regex-2026.7.19 requests-2.34.2 rich-15.0.0 rich-toolkit-0.20.3 rignore-0.8.1 rpds-py-2026.6.3 safetensors-0.8.0 sentencepiece-0.2.2 sentry-sdk-2.67.1 setproctitle-1.3.7 shellingham-1.5.4 sniffio-1.3.1 sse-starlette-3.4.8 starlette-1.6.0 supervisor-4.3.0 tabulate-0.10.0 tiktoken-0.13.0 tilelang-0.1.9 tokenizers-0.22.2 tokenspeed-mla-0.1.2 tokenspeed-triton-3.8.10.post20260721 torch-c-dlpack-ext-0.1.5 tqdm-4.70.0 transformers-5.15.0 truststore-0.10.4 typer-0.27.1 typing-inspection-0.4.3 urllib3-2.7.0 uvicorn-0.52.1 uvloop-0.22.1 vllm-0.10.0+kvquant watchfiles-1.2.0 websockets-17.0.1 xgrammar-0.2.3 yarl-1.24.5 z3-solver-4.15.4.0
+Saving image...
+Image saved, took 4.67s
+
+Built image im-9n7bN2NjlEWNUMRRKGTF23 in 116.89s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\modal_rabit2_stage3c_frozen_test.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\rabit2_stage3c_vllm_snapshot.zip
+└── 🔨 Created function verify_stage3c.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+====================================================================================================
+RABIT-2 Stage 3C — multi-request + chunked-prefill + cleanup serving lifecycle
+====================================================================================================
+Base wheel commit: f329ce405b12623fb8b1cf1830f12e5a712523be
+Python:            3.11.5
+PyTorch:           2.11.0+cu130
+CUDA runtime:      13.0
+GPU:               NVIDIA H100 80GB HBM3
+vLLM version:      0.10.0+kvquant
+
+....................................................................     [100%]
+=============================== warnings summary ===============================
+tests/quantization/test_kvquant_k3.py: 14 warnings
+  /usr/local/lib/python3.11/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+68 passed, 14 warnings in 20.56s
+
+pytest exit code: 0
+RABIT-2 STAGE 3C UNIT/LIFECYCLE CHECK PASSED
+
+====================================================================================================
+Starting actual multi-request + forced chunked-prefill vLLM engine smoke...
+====================================================================================================
+INFO 08-10 13:17:55 [api_utils.py:273] non-default args: {'dtype': 'bfloat16', 'kv_cache_dtype': 'rabit_kv2', 'max_model_len': 256, 'block_size': 32, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.45, 'max_num_batched_tokens': 64, 'max_num_seqs': 3, 'disable_log_stats': True, 'enforce_eager': True, 'enable_chunked_prefill': True, 'attention_backend': 'TRITON_ATTN', 'model': 'TinyLlama/TinyLlama-1.1B-Chat-v1.0'}
+WARNING 08-10 13:17:55 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_PRECOMPILED_WHEEL_VARIANT
+WARNING 08-10 13:17:55 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_PRECOMPILED_WHEEL_COMMIT
+WARNING 08-10 13:17:55 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_USE_V1
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+INFO 08-10 13:18:09 [model.py:606] Resolved architecture: LlamaForCausalLM
+INFO 08-10 13:18:09 [model.py:1736] Using max model len 256
+INFO 08-10 13:18:09 [cache.py:297] Using rabit_kv2 data type to store kv cache. It reduces the GPU memory footprint and boosts the performance. Meanwhile, it may cause accuracy drop without a proper scaling factor
+INFO 08-10 13:18:09 [scheduler.py:252] Chunked prefill is enabled with max_num_batched_tokens=64.
+INFO 08-10 13:18:09 [vllm.py:1042] Asynchronous scheduling is enabled.
+WARNING 08-10 13:18:09 [vllm.py:1096] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+WARNING 08-10 13:18:09 [vllm.py:1144] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 08-10 13:18:09 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+INFO 08-10 13:18:09 [vllm.py:1322] Cudagraph is disabled under eager mode
+INFO 08-10 13:18:09 [compilation.py:312] Enabled custom fusions: norm_quant, act_quant
+WARNING 08-10 13:18:12 [system_utils.py:157] We must use the `spawn` multiprocessing start method. Overriding VLLM_WORKER_MULTIPROC_METHOD to 'spawn'. See https://docs.vllm.ai/en/latest/usage/troubleshooting.html#python-multiprocessing for more information. Reasons: CUDA is initialized
+(EngineCore pid=174) INFO 08-10 13:18:21 [core.py:114] Initializing a V1 LLM engine (v0.10.0+kvquant) with config: model='TinyLlama/TinyLlama-1.1B-Chat-v1.0', speculative_config=None, tokenizer='TinyLlama/TinyLlama-1.1B-Chat-v1.0', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=256, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=rabit_kv2, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=TinyLlama/TinyLlama-1.1B-Chat-v1.0, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [64], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=174) INFO 08-10 13:18:22 [parallel_state.py:1588] world_size=1 rank=0 local_rank=0 distributed_init_method=tcp://172.20.13.125:44810 backend=nccl
+(EngineCore pid=174) INFO 08-10 13:18:22 [parallel_state.py:1923] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(EngineCore pid=174) INFO 08-10 13:18:22 [gpu_worker.py:360] Using V2 Model Runner
+(EngineCore pid=174) INFO 08-10 13:18:23 [model_runner.py:281] Loading model from scratch...
+(EngineCore pid=174) INFO 08-10 13:18:23 [cuda.py:416] Using AttentionBackendEnum.TRITON_ATTN backend.
+(EngineCore pid=174) INFO 08-10 13:18:32 [weight_utils.py:530] Time spent downloading weights for TinyLlama/TinyLlama-1.1B-Chat-v1.0: 8.527857 seconds
+(EngineCore pid=174) INFO 08-10 13:18:32 [weight_utils.py:574] No model.safetensors.index.json found in remote.
+(EngineCore pid=174) INFO 08-10 13:18:32 [weight_utils.py:849] Filesystem type for checkpoints: OVERLAY. Checkpoint size: 2.05 GiB. Available RAM: 1018.32 GiB.
+(EngineCore pid=174) INFO 08-10 13:18:32 [weight_utils.py:872] Auto-prefetch is disabled because the filesystem (OVERLAY) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=174) Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+(EngineCore pid=174) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  2.13it/s]
+(EngineCore pid=174) Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  2.13it/s]
+(EngineCore pid=174) 
+(EngineCore pid=174) INFO 08-10 13:18:33 [default_loader.py:430] Loading weights took 0.47 seconds
+(EngineCore pid=174) INFO 08-10 13:18:33 [model_runner.py:302] Model loading took 2.05 GiB and 10.479470 seconds
+(EngineCore pid=174) INFO 08-10 13:18:34 [topk_topp_sampler.py:55] Using FlashInfer for top-p & top-k sampling.
+(EngineCore pid=174) INFO 08-10 13:18:37 [gpu_worker.py:538] Available KV cache memory: 33.32 GiB
+(EngineCore pid=174) INFO 08-10 13:18:37 [kv_cache_utils.py:2146] GPU KV cache size: 8,382,624 tokens
+(EngineCore pid=174) INFO 08-10 13:18:37 [kv_cache_utils.py:2147] Maximum concurrency for 256 tokens per request: 32744.62x
+(EngineCore pid=174) INFO 08-10 13:18:38 [deep_gemm.py:175] deep_gemm not found in site-packages, trying vendored vllm.third_party.deep_gemm
+(EngineCore pid=174) INFO 08-10 13:18:38 [deep_gemm.py:202] DeepGEMM PDL enabled on vllm.third_party.deep_gemm.
+(EngineCore pid=174) INFO 08-10 13:18:38 [kernel_warmup.py:177] Using FlashInfer autotune cache file: /root/.cache/vllm/flashinfer_autotune_cache/0.6.13/90a/63622fadf6e09b588d6ad8768bd72d30d9228929a1104584af60410998f2b622/autotune_configs.json
+(EngineCore pid=174) 2026-08-10 13:18:38,202 - INFO - autotuner.py:651 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore pid=174) INFO 08-10 13:18:38 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:39 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:40 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:40 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:40 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:40 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:40 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:40 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:40 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) INFO 08-10 13:18:40 [triton_attn.py:809] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=3
+(EngineCore pid=174) 2026-08-10 13:18:40,254 - INFO - autotuner.py:674 - flashinfer.jit: [Autotuner]: Autotuning process ends
+(EngineCore pid=174) WARNING 08-10 13:18:40 [kernel_warmup.py:206] No FlashInfer autotune cache entries found.Falling back to default tactics.
+(EngineCore pid=174) INFO 08-10 13:18:40 [cutedsl_warmup.py:97] Skipping CuTeDSL warmup because no compile units were requested.
+(EngineCore pid=174) INFO 08-10 13:20:03 [jit_monitor.py:72] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=174) INFO 08-10 13:20:03 [core.py:344] init engine (profile, create kv cache, warmup model) took 89.07 s
+(EngineCore pid=174) Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+(EngineCore pid=174) INFO 08-10 13:20:05 [vllm.py:1042] Asynchronous scheduling is enabled.
+(EngineCore pid=174) WARNING 08-10 13:20:05 [vllm.py:1096] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+(EngineCore pid=174) WARNING 08-10 13:20:05 [vllm.py:1144] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore pid=174) INFO 08-10 13:20:05 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+(EngineCore pid=174) INFO 08-10 13:20:05 [vllm.py:1322] Cudagraph is disabled under eager mode
+(EngineCore pid=174) INFO 08-10 13:20:05 [compilation.py:312] Enabled custom fusions: norm_quant, act_quant
+
+[1ARendering prompts:   0%|          | 0/3 [00:00<?, ?it/s]Rendering prompts: 100%|██████████| 3/3 [00:00<00:00, 134.13it/s]
+
+(EngineCore pid=174) INFO 08-10 13:20:05 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) WARNING 08-10 13:20:05 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_closed_page_partial_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=174) WARNING 08-10 13:20:05 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_tail_partial_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=174) WARNING 08-10 13:20:05 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_reduce_partials_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=174) INFO 08-10 13:20:06 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:06 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+[1AProcessed prompts:   0%|          | 0/3 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s](EngineCore pid=174) INFO 08-10 13:20:06 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:06 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:06 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:07 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:07 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:07 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:07 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:07 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:08 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:08 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:08 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:08 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:08 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:08 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:09 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:09 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:09 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:09 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) INFO 08-10 13:20:09 [triton_attn.py:876] RABIT2_STAGE3C_CHUNKED_PREFILL_ACTIVE q_len=64 context_len=64
+(EngineCore pid=174) ERROR 08-10 13:20:10 [dump_input.py:72] Dumping input data for V1 LLM engine (v0.10.0+kvquant) with config: model='TinyLlama/TinyLlama-1.1B-Chat-v1.0', speculative_config=None, tokenizer='TinyLlama/TinyLlama-1.1B-Chat-v1.0', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=256, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=rabit_kv2, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=TinyLlama/TinyLlama-1.1B-Chat-v1.0, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [64], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, moe_backend='auto', linear_backend='auto'), 
+(EngineCore pid=174) ERROR 08-10 13:20:10 [dump_input.py:79] Dumping scheduler output for model execution: SchedulerOutput(scheduled_new_reqs=[NewRequestData(req_id=1-9d135911,prompt_token_ids_len=110,prefill_token_ids_len=110,mm_features=[],sampling_params=SamplingParams(n=1, presence_penalty=0.0, frequency_penalty=0.0, repetition_penalty=1.0, temperature=0.0, top_p=1.0, top_k=0, min_p=0.0, seed=None, stop=[], stop_token_ids=[], bad_words=[], thinking_token_budget=None, include_stop_str_in_output=False, ignore_eos=False, max_tokens=4, min_tokens=0, logprobs=None, prompt_logprobs=None, skip_special_tokens=True, spaces_between_special_tokens=True, structured_outputs=None, extra_args=None),block_ids=([7],),num_computed_tokens=0,lora_request=None,prompt_embeds_shape=None)], scheduled_cached_reqs=CachedRequestData(req_ids=['0-bbc0f477'],resumed_req_ids=set(),new_token_ids_lens=[],all_token_ids_lens={},new_block_ids=[([5, 6],)],num_computed_tokens=[128],num_output_tokens=[0]), num_scheduled_tokens={1-9d135911: 9, 0-bbc0f477: 55}, total_num_scheduled_tokens=64, scheduled_spec_decode_tokens={}, scheduled_encoder_inputs={}, num_common_prefix_blocks=[0], finished_req_ids=[], free_encoder_mm_hashes=[], preempted_req_ids=[], has_structured_output_requests=false, pending_structured_output_tokens=false, num_invalid_spec_tokens=null, kv_connector_metadata=null, ec_connector_metadata=null, new_block_ids_to_zero=null, num_spec_tokens_to_schedule=0)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233] EngineCore encountered a fatal error.
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233] Traceback (most recent call last):
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/engine/core.py", line 1224, in run_engine_core
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     engine_core.run_busy_loop()
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/engine/core.py", line 1265, in run_busy_loop
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     self._process_engine_step()
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/engine/core.py", line 1304, in _process_engine_step
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     outputs, model_executed = self.step_fn()
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]                               ^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/engine/core.py", line 549, in step_with_batch_queue
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     exec_future = self.model_executor.execute_model(
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/executor/uniproc_executor.py", line 120, in execute_model
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     output.result()
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return self.__get_result()
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     raise self._exception
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/executor/uniproc_executor.py", line 98, in collective_rpc
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     result = run_method(self.driver_worker, method, args, kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/serial_utils.py", line 510, in run_method
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return func(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/worker/worker_base.py", line 351, in execute_model
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return self.worker.execute_model(scheduler_output)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return func(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/worker/gpu_worker.py", line 1015, in execute_model
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     output = self.model_runner.execute_model(
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return func(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/worker/gpu/model_runner.py", line 1324, in execute_model
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     model_output = self.model(**model_inputs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return self._call_impl(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return forward_call(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/model_executor/models/llama.py", line 523, in forward
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     model_output = self.model(
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]                    ^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/compilation/decorators.py", line 507, in __call__
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return self.forward(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/model_executor/models/llama.py", line 423, in forward
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     hidden_states, residual = layer(
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]                               ^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return self._call_impl(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return forward_call(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/model_executor/models/llama.py", line 322, in forward
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     hidden_states = self.self_attn(positions=positions, hidden_states=hidden_states)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return self._call_impl(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return forward_call(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/model_executor/models/llama.py", line 229, in forward
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     attn_output = self.attn(q, k, v)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]                   ^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return self._call_impl(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return forward_call(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/model_executor/layers/attention/attention.py", line 571, in forward
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     torch.ops.vllm.unified_attention_with_output(
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/usr/local/lib/python3.11/site-packages/torch/_ops.py", line 1269, in __call__
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return self._op(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/model_executor/layers/attention/kv_transfer_utils.py", line 40, in wrapper
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return func(*args, **kwargs)
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/model_executor/layers/attention/attention.py", line 830, in unified_attention_with_output
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     self.impl.forward(
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/attention/backends/triton_attn.py", line 650, in forward
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     return self._forward_rabit_kv2(
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]            ^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]   File "/root/vllm-kvquant/vllm/v1/attention/backends/triton_attn.py", line 841, in _forward_rabit_kv2
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233]     raise RuntimeError(
+(EngineCore pid=174) ERROR 08-10 13:20:10 [core.py:1233] RuntimeError: RABIT-2 sidecar length mismatch for __rabit_profile_1: runtime=3, scheduler_context=128
+Traceback (most recent call last):
+  File "/pkg/modal/_runtime/container_io_manager.py", line 945, in handle_input_exception
+    yield
+  File "/pkg/modal/_container_entrypoint.py", line 189, in run_input_sync
+    values = io_context.call_function_sync()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pkg/modal/_runtime/container_io_manager.py", line 225, in call_function_sync
+    expected_value_or_values = self.finalized_function.callable(*args, **kwargs)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/modal_rabit2_stage3c_frozen_test.py", line 159, in verify_stage3c
+    outputs = llm.generate(prompts, sampling)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/entrypoints/llm.py", line 476, in generate
+    return self._run_completion(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/entrypoints/offline_utils.py", line 349, in _run_completion
+    return self._run_engine(use_tqdm=use_tqdm, output_type=output_type)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/entrypoints/offline_utils.py", line 595, in _run_engine
+    step_outputs = self.llm_engine.step()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/v1/engine/llm_engine.py", line 304, in step
+    outputs = self.engine_core.get_output()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/v1/engine/core_client.py", line 856, in get_output
+    raise self._format_exception(outputs) from None
+vllm.v1.engine.exceptions.EngineDeadError: EngineCore encountered an issue. See stack trace (above) for the root cause.
+Processed prompts:   0%|          | 0/3 [00:04<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s]
+Stopping app - uncaught exception raised locally: ExecutionError('Could not deserialize remote exception due to local error:\nDeserialization failed because the \'vllm\' module is not available in the local environment.\nThis can happen if your local environment does not have the remote exception definitions.\nHere is the remote traceback:\nTraceback (most recent call last):\n  File "/pkg/modal/_runtime/container_io_manager.py", line 945, in handle_input_exception\n    yield\n  File "/pkg/modal/_container_entrypoint.py", line 189, in run_input_sync\n    values = io_context.call_function_sync()\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/pkg/modal/_runtime/container_io_manager.py", line 225, in call_function_sync\n    expected_value_or_values = self.finalized_function.callable(*args, **kwargs)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "/root/modal_rabit2_stage3c_frozen_test.py", line 159, in verify_stage3c\n    outputs = llm.generate(prompts, sampling)\n              ^^^^^^^^^.
+┌───────────────────── Traceback (most recent call last) ─────────────────────┐
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_serialization.py:115 in deserialize                                │
+│                                                                             │
+│   114 │   try:                                                              │
+│ > 115 │   │   return Unpickler(client, io.BytesIO(s)).load()                │
+│   116 │   except AttributeError as exc:                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+ModuleNotFoundError: No module named 'vllm'
+
+The above exception was the direct cause of the following exception:
+
+┌───────────────────── Traceback (most recent call last) ─────────────────────┐
+│ C:\Users\ryanz\AppData\Local\Temp\modal_rabit2_stage3c_frozen_test.py:182   │
+│ in main                                                                     │
+│                                                                             │
+│   181 def main() -> None:                                                   │
+│ > 182 │   verify_stage3c.remote()                                           │
+│   183                                                                       │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_object.py:46 in wrapped                                            │
+│                                                                             │
+│    45 │   │   await self.hydrate()                                          │
+│ >  46 │   │   return await method(self, *args, **kwargs)                    │
+│    47                                                                       │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_functions.py:1696 in remote                                        │
+│                                                                             │
+│   1695 │   │                                                                │
+│ > 1696 │   │   return await self._call_function(args, kwargs)               │
+│   1697                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_functions.py:1640 in _call_function                                │
+│                                                                             │
+│   1639 │   │                                                                │
+│ > 1640 │   │   return await invocation.run_function()                       │
+│   1641                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_functions.py:493 in run_function                                   │
+│                                                                             │
+│    492 │   │   │   # No more retries left.                                  │
+│ >  493 │   │   │   return await _process_result(                            │
+│    494 │   │   │   │   await_response.output.result, await_response.output. │
+│                                                                             │
+│ C:\Users\ryanz\Documents\GitHub\benchquant\turboquant\venv\Lib\site-package │
+│ s\modal\_utils\function_utils.py:523 in _process_result                     │
+│                                                                             │
+│   522 │   │   │   except DeserializationError as deser_exc:                 │
+│ > 523 │   │   │   │   raise ExecutionError(                                 │
+│   524 │   │   │   │   │   "Could not deserialize remote exception due to lo │
+└─────────────────────────────────────────────────────────────────────────────┘
+ExecutionError: Could not deserialize remote exception due to local error:
+Deserialization failed because the 'vllm' module is not available in the local 
+environment.
+This can happen if your local environment does not have the remote exception 
+definitions.
+Here is the remote traceback:
+Traceback (most recent call last):
+  File "/pkg/modal/_runtime/container_io_manager.py", line 945, in 
+handle_input_exception
+    yield
+  File "/pkg/modal/_container_entrypoint.py", line 189, in run_input_sync
+    values = io_context.call_function_sync()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pkg/modal/_runtime/container_io_manager.py", line 225, in 
+call_function_sync
+    expected_value_or_values = self.finalized_function.callable(*args, 
+**kwargs)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^
+  File "/root/modal_rabit2_stage3c_frozen_test.py", line 159, in verify_stage3c
+    outputs = llm.generate(prompts, sampling)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/entrypoints/llm.py", line 476, in generate
+    return self._run_completion(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/entrypoints/offline_utils.py", line 349, in 
+_run_completion
+    return self._run_engine(use_tqdm=use_tqdm, output_type=output_type)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/entrypoints/offline_utils.py", line 595, in 
+_run_engine
+    step_outputs = self.llm_engine.step()
+                   ^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/v1/engine/llm_engine.py", line 304, in step
+    outputs = self.engine_core.get_output()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/vllm-kvquant/vllm/v1/engine/core_client.py", line 856, in 
+get_output
+    raise self._format_exception(outputs) from None
+vllm.v1.engine.exceptions.EngineDeadError: EngineCore encountered an issue. See
+stack trace (above) for the root cause.
+
