@@ -1,0 +1,172 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-k3flw8oF7yW4jvPJbor5hW
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\scr
+│   ipts\quality\Rabit_KV_longbench_qasper_latest.py
+└── 🔨 Created function run_longbench.
+GPU: NVIDIA H100 80GB HBM3
+Model: LLM-Research/Meta-Llama-3.1-8B-Instruct
+Dataset: LongBench-E qasper_e
+Length bucket: 8k+
+Samples: 24, starting at filtered index 0
+Maximum input length: 16384 tokens
+Methods: ['bf16', 'rabit2']
+Metric: official LongBench QA token-level F1
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+
+2026-08-16 07:55:44,411 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  33%|███▎      | 6/18 [00:07<00:15,  1.32s/file]
+[1ADownloading:  94%|█████████▍| 17/18 [00:09<00:00,  2.19file/s]
+[1ADownloading: 100%|██████████| 18/18 [00:19<00:00,  1.29s/file]Downloading: 100%|██████████| 18/18 [00:19<00:00,  1.08s/file]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  6.69it/s]
+[1ALoading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  8.17it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  9.78it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  9.22it/s]
+
+[1AGenerating test split: 0 examples [00:00, ? examples/s]
+[1AGenerating test split: 224 examples [00:00, 9516.48 examples/s]
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Sample 1/24 (dataset index 200): 10680 original tokens, 10680 used tokens
+Ground truth: ['Domain experts and fellow researchers can provide feedback on questions and help with dynamically revising them., connect to multiple disciplines, dual use', "Modeling considerations:  the variables (both predictors and outcomes)  are rarely simply binary or categorical;  using a particular classification scheme means deciding which variations are visible,; Supervised and unsupervised learning are the most common approaches to learning from data;  the unit of text that we are labeling (or annotating, or coding), either automatic or manual, can sometimes be different than one's final unit of analysis."]
+  bf16     score=0.202 KV=1334.875 MB answer='They use a combination of computational methods, including supervised and unsupervised learning, topic modeling, and dictionary-based approaches, as well as human annotation and close reading'
+  rabit2   score=0.202 KV=253.483 MB answer='They use a combination of computational methods, including supervised and unsupervised learning, topic modeling, and dictionary-based approaches, as well as human annotation and close reading'
+
+Sample 2/24 (dataset index 201): 10679 original tokens, 10679 used tokens
+Ground truth: ['Unanswerable']
+  bf16     score=0.000 KV=1334.750 MB answer='Reddit forums and Twitter data.'
+  rabit2   score=0.000 KV=253.471 MB answer='Reddit forums and social media data, including Twitter.'
+
+Sample 3/24 (dataset index 202): 15597 original tokens, 15597 used tokens
+Ground truth: ['Energy with accuracy of 0.538', 'Energy']
+  bf16     score=0.000 KV=1949.500 MB answer='unanswerable'
+  rabit2   score=0.000 KV=370.075 MB answer='unanswerable'
+
+Sample 4/24 (dataset index 203): 10677 original tokens, 10677 used tokens
+Ground truth: ['Unanswerable']
+  bf16     score=0.000 KV=1334.500 MB answer='The authors have a diverse disciplinary background, including the humanities and social sciences.'
+  rabit2   score=0.000 KV=253.451 MB answer='The authors have a diverse disciplinary background, including the humanities and social sciences.'
+
+Sample 5/24 (dataset index 204): 19573 original tokens, 16384 used tokens
+Ground truth: ['Structural Support Vector Machine', 'SVMhmm ']
+  bf16     score=0.421 KV=2047.875 MB answer='Supervised and semi-supervised machine learning methods, specifically Structural Support Vector Machines (SVMhmm) for sequence labeling.'
+  rabit2   score=0.421 KV=388.453 MB answer='Supervised and semi-supervised machine learning methods, specifically Structural Support Vector Machines (SVMhmm) for sequence labeling.'
+
+Sample 6/24 (dataset index 205): 17371 original tokens, 16384 used tokens
+Ground truth: ['Yes', 'Yes']
+  bf16     score=1.000 KV=2047.875 MB answer='yes'
+  rabit2   score=1.000 KV=388.453 MB answer='yes'
+
+Sample 7/24 (dataset index 206): 17667 original tokens, 16384 used tokens
+Ground truth: ['ELIZA,  PARRY, A.L.I.C.E., Cleverbot']
+  bf16     score=0.000 KV=2047.875 MB answer='The state of the art on conversational systems is described in three perspectives: types of interactions, types of architecture, and types of context reasoning.'
+  rabit2   score=0.000 KV=388.453 MB answer='The state of the art on conversational systems is described in three perspectives: types of interactions, types of architecture, and types of context reasoning.'
+
+Sample 8/24 (dataset index 207): 10930 original tokens, 10930 used tokens
+Ground truth: ['corpus of state speeches delivered during the annual UN General Debate', 'corpus of state speeches delivered during the annual UN General Debate']
+  bf16     score=0.429 KV=1366.125 MB answer="The UN General Debate Corpus and the Correlates of War (COW) project's Militarized Interstate Dispute (MID) dataset."
+  rabit2   score=0.333 KV=259.486 MB answer='The UN General Debate Corpus, which contains every country statement in the UN General Debate between 1970 and 2014.'
+
+Sample 9/24 (dataset index 208): 11280 original tokens, 11280 used tokens
+Ground truth: ['Document to Vector (Doc2Vec)', 'Doc2Vec, PV-DBOW model']
+  bf16     score=0.167 KV=1409.875 MB answer='Doc2Vec and Distributed Bag of Words (DBOW) are used.'
+  rabit2   score=0.154 KV=267.802 MB answer='Deep neural network high-dimensional text-embedding algorithms, specifically Doc2Vec, are used.'
+
+Sample 10/24 (dataset index 209): 19575 original tokens, 16384 used tokens
+Ground truth: ['claim, premise, backing, rebuttal, and refutation', 'claim, premise, backing, rebuttal, refutation']
+  bf16     score=0.222 KV=2047.875 MB answer='argument components in the discourse, specifically claims, premises, backing, rebuttals, and refutations.'
+  rabit2   score=0.286 KV=388.453 MB answer='Claims, premises, backing, rebuttals, refutations, and non-argumentative text.'
+
+Sample 11/24 (dataset index 210): 19573 original tokens, 16384 used tokens
+Ground truth: ['Yes', 'Yes']
+  bf16     score=1.000 KV=2047.875 MB answer='Yes.'
+  rabit2   score=1.000 KV=388.453 MB answer='Yes.'
+
+Sample 12/24 (dataset index 211): 17660 original tokens, 16384 used tokens
+Ground truth: ['Custom dataset with user questions; set of documents, twitter posts and news articles, all related to finance.', 'a self-collected financial intents dataset in Portuguese']
+  bf16     score=0.333 KV=2047.875 MB answer='The Switchboard dataset, the Dialog State Tracking Challenge (DSTC) dataset, and a set of 246,945 documents, corresponding to 184,001'
+  rabit2   score=0.333 KV=388.453 MB answer='The Switchboard dataset, the Dialog State Tracking Challenge (DSTC) dataset, and a set of 246,945 documents, corresponding to 184,001'
+
+Sample 13/24 (dataset index 212): 17374 original tokens, 16384 used tokens
+Ground truth: ['Yes', 'Yes']
+  bf16     score=1.000 KV=2047.875 MB answer='Yes.'
+  rabit2   score=1.000 KV=388.453 MB answer='Yes.'
+
+Sample 14/24 (dataset index 213): 10936 original tokens, 10936 used tokens
+Ground truth: ['Unanswerable', 'Unanswerable']
+  bf16     score=0.000 KV=1366.875 MB answer='A node in the network approach represents a state.'
+  rabit2   score=0.000 KV=259.545 MB answer='A node in the network approach represents a state.'
+
+Sample 15/24 (dataset index 214): 19575 original tokens, 16384 used tokens
+Ground truth: ['user comments to newswire articles or to blog posts, forum posts, blog posts, newswire articles', 'refer to each article, blog post, comment, or forum posts as a document']
+  bf16     score=0.524 KV=2047.875 MB answer='The data in the new corpus come from a variety of sources, including user comments to newswire articles or blog posts, posts in discussion forums, blog posts,'
+  rabit2   score=0.462 KV=388.453 MB answer='The data in the new corpus come from user-generated Web content, including comments to articles, discussion forum posts, blog posts, and professional newswire articles.'
+
+Sample 16/24 (dataset index 215): 17380 original tokens, 16384 used tokens
+Ground truth: ['act paragraphs containing any word from a predetermined list of LGTBQ terms ']
+  bf16     score=0.556 KV=2047.875 MB answer='They identify discussions of LGBTQ people in the New York Times by extracting paragraphs containing any word from a predetermined list of LGBTQ terms.'
+  rabit2   score=0.556 KV=388.453 MB answer='They identify discussions of LGBTQ people in the New York Times by extracting paragraphs containing any word from a predetermined list of LGBTQ terms.'
+
+Sample 17/24 (dataset index 216): 10680 original tokens, 10680 used tokens
+Ground truth: ['No', 'No']
+  bf16     score=0.000 KV=1334.875 MB answer='Yes.'
+  rabit2   score=0.000 KV=253.483 MB answer='Yes.'
+
+Sample 18/24 (dataset index 217): 10691 original tokens, 10691 used tokens
+Ground truth: ['identifying the questions we wish to explore, Can text analysis provide a new perspective on a “big question” that has been attracting interest for years?, How can we explain what we observe?, hope to connect to multiple disciplines']
+  bf16     score=0.115 KV=1336.250 MB answer='Thorny issues not always at the forefront of discussions about computational text analysis methods.'
+  rabit2   score=0.115 KV=253.590 MB answer='Thorny issues not always at the forefront of discussions about computational text analysis methods.'
+
+Sample 19/24 (dataset index 218): 17662 original tokens, 16384 used tokens
+Ground truth: ['precision, recall, F1 and accuracy', 'Response time, resource consumption (memory, CPU, network bandwidth), precision, recall, F1, accuracy.']
+  bf16     score=0.519 KV=2047.875 MB answer='time taken to answer an utterance, other resource consumption metrics (e.g., memory, CPU, network bandwidth).'
+  rabit2   score=0.389 KV=388.453 MB answer='The evaluation metrics looked at included time taken to answer an utterance, other resource consumption metrics (e.g., memory, CPU, network bandwidth), and correctness of'
+
+Sample 20/24 (dataset index 219): 10936 original tokens, 10936 used tokens
+Ground truth: ['No', 'Yes']
+  bf16     score=1.000 KV=1366.875 MB answer='No.'
+  rabit2   score=1.000 KV=259.545 MB answer='No.'
+
+Sample 21/24 (dataset index 220): 19576 original tokens, 16384 used tokens
+Ground truth: ['linguistic variability']
+  bf16     score=0.000 KV=2047.875 MB answer='Different registers and domains pose challenges such as varying levels of agreement among annotators, correlation with document length and readability scores, and the presence of rhetorical questions, narratives'
+  rabit2   score=0.174 KV=388.453 MB answer='Different registers and domains pose challenges to this task due to their properties, such as document length, readability, and linguistic variability.'
+
+Sample 22/24 (dataset index 221): 21308 original tokens, 16384 used tokens
+Ground truth: ['1. Each annotator must assign an integer score between 0 and 6 (inclusive) indicating how semantically similar the two words in a given pair are. A score of 6 indicates very high similarity (i.e., perfect synonymy), while zero indicates no similarity., 2. Each annotator must score the entire set of 1,888 pairs in the dataset.,  able to use external sources (e.g. dictionaries, thesauri, WordNet) if required, not able to communicate with each other during the annotation process']
+  bf16     score=0.190 KV=2047.875 MB answer='Human raters scored each pair in the translated set as well as the English set, with at least ten valid annotations for each word pair in each language.'
+  rabit2   score=0.190 KV=388.453 MB answer='Human raters scored each pair in the translated set as well as the English set, with at least ten valid annotations for each word pair in each language.'
+
+Sample 23/24 (dataset index 222): 19580 original tokens, 16384 used tokens
+Ground truth: ['Unanswerable']
+  bf16     score=0.000 KV=2047.875 MB answer='Rhetorical questions, figurative language, narratives, and fallacies in general.'
+  rabit2   score=0.000 KV=388.453 MB answer='Rhetorical questions, fallacies, narratives, and figurative language.'
+
+Sample 24/24 (dataset index 223): 21310 original tokens, 16384 used tokens
+Ground truth: ['Chinese Mandarin, Welsh, English, Estonian, Finnish, French, Hebrew, Polish, Russian, Spanish, Kiswahili, Yue Chinese', 'Chinese Mandarin, Welsh, English, Estonian, Finnish, French, Hebrew, Polish, Russian, Spanish, Kiswahili, Yue Chinese']
+  bf16     score=0.929 KV=2047.875 MB answer='Mandarin, Russian, French, Kiswahili, Welsh, Yue Chinese, Estonian, Finnish, Spanish, English, Hebrew, and Polish.'
+  rabit2   score=0.929 KV=388.453 MB answer='Mandarin, Russian, French, Kiswahili, Welsh, Yue Chinese, Spanish, English, Estonian, Finnish, Hebrew, and Polish.'
+
+==================================================================================================
+LongBench-E Qasper Results
+==================================================================================================
+Method        F1 %          F1 total      Avg KV MB     Samples   
+--------------------------------------------------------------------------------------------------
+bf16          35.9          8.61          1783.531      24        
+rabit2        35.6          8.54          338.428       24        
+
+Important: the reported run time is only for experiment planning. It is not deployment latency.
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-k3flw8oF7yW4jvPJbor5hW

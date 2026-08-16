@@ -1,0 +1,119 @@
+{
+  "project": "RABIT-KV",
+  "status": "final unified quality complete; performance frozen",
+  "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+  "policy": "K3/V2/G32/R4/META8g64",
+  "final_quality": {
+    "continuation_ppl_wikitext2": {
+      "context_tokens": 1024,
+      "eval_tokens": 128,
+      "samples": 8,
+      "bf16_ppl": 8.502,
+      "rabit_ppl": 8.6317,
+      "relative_ppl_delta_percent": 1.53,
+      "bf16_avg_logical_kv_mb": 128.0,
+      "rabit_avg_logical_kv_mb": 24.71,
+      "logical_compression_x": 5.18,
+      "scored_tokens_per_method": 1024
+    },
+    "multilingual_continuation_ppl": {
+      "languages": [
+        "zh",
+        "es"
+      ],
+      "samples_per_language": 8,
+      "context_tokens": 1024,
+      "eval_tokens": 128,
+      "chinese": {
+        "bf16_ppl": 10.1176,
+        "rabit_ppl": 10.3308,
+        "relative_ppl_delta_percent": 2.11
+      },
+      "spanish": {
+        "bf16_ppl": 5.0035,
+        "rabit_ppl": 5.1139,
+        "relative_ppl_delta_percent": 2.21
+      },
+      "mean_relative_ppl_delta_percent": 2.16,
+      "worst_relative_ppl_delta_percent": 2.21,
+      "logical_compression_x": 5.18
+    },
+    "needle_in_a_haystack": {
+      "context_lengths": [
+        4096,
+        8192,
+        16384
+      ],
+      "depths": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        0.9
+      ],
+      "total_cases_per_method": 15,
+      "bf16_passed": 15,
+      "rabit_passed": 15,
+      "bf16_accuracy_percent": 100.0,
+      "rabit_accuracy_percent": 100.0,
+      "rabit_avg_logical_kv_mb": 226.786,
+      "avg_logical_compression_x": 5.263
+    },
+    "longbench_passage_retrieval": {
+      "samples": 10,
+      "bf16_accuracy_percent": 100.0,
+      "rabit_accuracy_percent": 100.0,
+      "bf16_avg_logical_kv_mb": 1517.375,
+      "rabit_avg_logical_kv_mb": 288.09,
+      "logical_compression_x": 5.267017251553335
+    },
+    "longbench_hotpotqa_e": {
+      "length_bucket": "8k+",
+      "samples": 20,
+      "bf16_f1_percent": 60.6,
+      "rabit_f1_percent": 55.2,
+      "absolute_f1_delta_points": -5.399999999999999,
+      "relative_f1_delta_percent": -8.910891089108908,
+      "bf16_avg_logical_kv_mb": 1896.106,
+      "rabit_avg_logical_kv_mb": 359.85,
+      "logical_compression_x": 5.269156593024871
+    },
+    "longbench_qasper_e": {
+      "length_bucket": "8k+",
+      "samples": 24,
+      "bf16_f1_percent": 35.9,
+      "rabit_f1_percent": 35.6,
+      "absolute_f1_delta_points": -0.29999999999999716,
+      "relative_f1_delta_percent": -0.8356545961002659,
+      "bf16_avg_logical_kv_mb": 1783.531,
+      "rabit_avg_logical_kv_mb": 338.428,
+      "logical_compression_x": 5.270045622702614
+    },
+    "suite_status": "ALL PASSED",
+    "rerun_policy": "No rerun or parameter tuning from these results."
+  },
+  "frozen_deployment": {
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "kv_cache_dtype": "rabit_kv2",
+    "physical_capacity_tokens": {
+      "bf16": 393024,
+      "rabit": 2074592,
+      "ratio_x": 5.278537697443413
+    },
+    "real_engine_benchmark": {
+      "context_tokens": 2048,
+      "output_tokens": 32,
+      "tpot_ms_median": 21.609469967742253,
+      "ttft_ms_median": 121.13785743713379,
+      "wall_ms_median": 790.778457000016
+    },
+    "correctness": {
+      "final_fast_decode_append_exactness": "PASSED",
+      "regression_tests_passed": 105
+    }
+  },
+  "interpretation": {
+    "headline": "RABIT-KV preserves retrieval and Qasper quality closely while reducing logical KV storage by about 5.18-5.27x; the clearest quality regression in the final suite is HotpotQA, where F1 falls from 60.6 to 55.2.",
+    "reporting_note": "Call the 8.5020 -> 8.6317 result 'WikiText-2 continuation perplexity' rather than generic full-dataset perplexity. Quality-suite KV numbers are logical packed-prefix storage measurements; deployment capacity is a separate physical allocator result."
+  }
+}

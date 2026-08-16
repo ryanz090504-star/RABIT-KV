@@ -1,0 +1,155 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-MBXPrZAHJSpg22hC3aWFMf
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\scr
+│   ipts\quality\Rabit_KV_longbench_hotpotqa_latest.py
+└── 🔨 Created function run_longbench.
+GPU: NVIDIA H100 80GB HBM3
+Model: LLM-Research/Meta-Llama-3.1-8B-Instruct
+Dataset: LongBench-E hotpotqa_e
+Length bucket: 8k+
+Samples: 20, starting at filtered index 0
+Maximum input length: 16384 tokens
+Methods: ['bf16', 'rabit2']
+Metric: official LongBench QA token-level F1
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+
+2026-08-16 07:54:08,423 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  33%|███▎      | 6/18 [00:05<00:11,  1.01file/s]
+[1ADownloading:  39%|███▉      | 7/18 [00:06<00:09,  1.13file/s]
+[1ADownloading:  89%|████████▉ | 16/18 [00:07<00:00,  3.20file/s]
+[1ADownloading:  94%|█████████▍| 17/18 [00:08<00:00,  2.45file/s]
+[1ADownloading: 100%|██████████| 18/18 [00:16<00:00,  1.35s/file]Downloading: 100%|██████████| 18/18 [00:16<00:00,  1.11file/s]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  7.84it/s]
+[1ALoading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  8.07it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00,  8.65it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  9.11it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  8.78it/s]
+
+[1AGenerating test split: 0 examples [00:00, ? examples/s]
+[1AGenerating test split: 300 examples [00:00, 6960.61 examples/s]
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Sample 1/20 (dataset index 200): 16192 original tokens, 16192 used tokens
+Ground truth: ['331 episodes']
+  bf16     score=0.667 KV=2023.875 MB answer='331'
+  rabit2   score=0.667 KV=383.906 MB answer='331'
+
+Sample 2/20 (dataset index 201): 14845 original tokens, 14845 used tokens
+Ground truth: ['2016–17 NHL season']
+  bf16     score=0.500 KV=1855.500 MB answer='2016–17'
+  rabit2   score=0.000 KV=352.046 MB answer='2016-17'
+
+Sample 3/20 (dataset index 202): 14376 original tokens, 14376 used tokens
+Ground truth: ['Neneh Cherry']
+  bf16     score=0.190 KV=1796.875 MB answer='The Clash, Will Self, Jock Scott, Shane MacGowan, Neneh Cherry, Joe Rush of Mutoid Waste, Keith and Kevin Allen,'
+  rabit2   score=0.190 KV=341.231 MB answer='The Clash, Will Self, Jock Scott, Shane MacGowan, Neneh Cherry, Joe Rush of Mutoid Waste, Keith and Kevin Allen,'
+
+Sample 4/20 (dataset index 203): 16148 original tokens, 16148 used tokens
+Ground truth: ['Passion Pit is an American indietronica band']
+  bf16     score=0.065 KV=2018.375 MB answer='Both bands have had a member who has struggled with mental health issues, specifically Deryck Whibley of Sum 41 and Michael Angelakos of Passion'
+  rabit2   score=0.000 KV=383.029 MB answer='Both bands have had their music featured in various video games, with Sum 41\'s "Underclass Hero" being used in the EA Sports video game Madden'
+
+Sample 5/20 (dataset index 204): 15636 original tokens, 15636 used tokens
+Ground truth: ['1924November 22, 1993']
+  bf16     score=0.000 KV=1954.375 MB answer='July 14, 1978'
+  rabit2   score=0.000 KV=370.904 MB answer='July 14, 1978'
+
+Sample 6/20 (dataset index 205): 16044 original tokens, 16044 used tokens
+Ground truth: ['Beauty and the Beast']
+  bf16     score=1.000 KV=2005.375 MB answer='Beauty and the Beast'
+  rabit2   score=1.000 KV=380.677 MB answer='Beauty and the Beast'
+
+Sample 7/20 (dataset index 206): 14362 original tokens, 14362 used tokens
+Ground truth: ['Ohio River']
+  bf16     score=1.000 KV=1795.125 MB answer='Ohio River'
+  rabit2   score=1.000 KV=340.651 MB answer='Ohio River'
+
+Sample 8/20 (dataset index 207): 16115 original tokens, 16115 used tokens
+Ground truth: ['Vice President']
+  bf16     score=1.000 KV=2014.250 MB answer='Vice President'
+  rabit2   score=0.500 KV=382.260 MB answer='Vice President of the United States.'
+
+Sample 9/20 (dataset index 208): 14950 original tokens, 14950 used tokens
+Ground truth: ['no']
+  bf16     score=1.000 KV=1868.625 MB answer='No'
+  rabit2   score=1.000 KV=354.852 MB answer='No'
+
+Sample 10/20 (dataset index 209): 13686 original tokens, 13686 used tokens
+Ground truth: ['4']
+  bf16     score=1.000 KV=1710.625 MB answer='4'
+  rabit2   score=1.000 KV=324.698 MB answer='4'
+
+Sample 11/20 (dataset index 210): 15471 original tokens, 15471 used tokens
+Ground truth: ['Appointed Deputy Führer']
+  bf16     score=0.800 KV=1933.750 MB answer='Deputy Führer'
+  rabit2   score=0.800 KV=367.064 MB answer='Deputy Führer'
+
+Sample 12/20 (dataset index 211): 16353 original tokens, 16353 used tokens
+Ground truth: ['at age 27']
+  bf16     score=0.000 KV=2044.000 MB answer='1970'
+  rabit2   score=0.000 KV=387.703 MB answer='October 4, 1970'
+
+Sample 13/20 (dataset index 212): 11642 original tokens, 11642 used tokens
+Ground truth: ['New York Giants']
+  bf16     score=1.000 KV=1455.125 MB answer='New York Giants'
+  rabit2   score=1.000 KV=276.237 MB answer='New York Giants'
+
+Sample 14/20 (dataset index 213): 15905 original tokens, 15905 used tokens
+Ground truth: ['Duchess Eleanor of Aquitaine']
+  bf16     score=0.222 KV=1988.000 MB answer='King Richard I of England.'
+  rabit2   score=0.222 KV=377.093 MB answer='King Richard I of England.'
+
+Sample 15/20 (dataset index 214): 15982 original tokens, 15982 used tokens
+Ground truth: ['published campaign settings']
+  bf16     score=0.667 KV=1997.625 MB answer='published campaign setting'
+  rabit2   score=0.667 KV=379.181 MB answer='Published campaign setting.'
+
+Sample 16/20 (dataset index 215): 15240 original tokens, 15240 used tokens
+Ground truth: ['Two of his novels, "The Prince of Tides" and "The Great Santini", were made into Oscar-nominated films.']
+  bf16     score=0.000 KV=1904.875 MB answer='Pat Conroy'
+  rabit2   score=0.000 KV=361.692 MB answer='Pat Conroy'
+
+Sample 17/20 (dataset index 216): 15948 original tokens, 15948 used tokens
+Ground truth: ['Chris Corbould and Neil Corbould']
+  bf16     score=1.000 KV=1993.375 MB answer='Chris Corbould and Neil Corbould.'
+  rabit2   score=1.000 KV=378.403 MB answer='Chris Corbould and Neil Corbould.'
+
+Sample 18/20 (dataset index 217): 12094 original tokens, 12094 used tokens
+Ground truth: ['yes']
+  bf16     score=1.000 KV=1511.625 MB answer='Yes'
+  rabit2   score=1.000 KV=286.886 MB answer='Yes'
+
+Sample 19/20 (dataset index 218): 16418 original tokens, 16384 used tokens
+Ground truth: ['40 million']
+  bf16     score=0.000 KV=2047.875 MB answer='There is no information in the given passages about Josh Abraham selling albums with the help of Adam Lambert.'
+  rabit2   score=0.000 KV=388.453 MB answer='There is no information in the given passages about Josh Abraham selling albums with Adam Lambert.'
+
+Sample 20/20 (dataset index 219): 16024 original tokens, 16024 used tokens
+Ground truth: ['Duke Cunningham']
+  bf16     score=1.000 KV=2002.875 MB answer='Duke Cunningham'
+  rabit2   score=1.000 KV=380.038 MB answer='Duke Cunningham'
+
+==================================================================================================
+LongBench-E HotpotQA Results
+==================================================================================================
+Method        F1 %          F1 total      Avg KV MB     Samples   
+--------------------------------------------------------------------------------------------------
+bf16          60.6          12.11         1896.106      20        
+rabit2        55.2          11.05         359.850       20        
+
+Important: the reported run time is only for experiment planning. It is not deployment latency.
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-MBXPrZAHJSpg22hC3aWFMf
