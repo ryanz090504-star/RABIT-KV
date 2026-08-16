@@ -3180,3 +3180,810 @@ Rabit2CausalChunkPlan.__init__ = _rabit2_stage4d2_chunkplan_init
 Rabit2CausalChunkPlan.__init__ = _rabit2_stage4d2_old_chunkplan_init
 _RABIT2_STAGE4D2_2_WRITER_ONLY_LOCKED = True
 # === RABIT2_STAGE4D2_2_WRITER_ONLY_LOCKED_END ===
+
+# === RABIT2_STAGE4D3_4_TRITON_TAILPREP_BEGIN ===
+# Stage4D3.4: exact Triton tail preparation for the bounded open K/V sidecar.
+# Controlled H100 prototype:
+#   - prep byte/tensor exact for open_len 1..31 (62 cases)
+#   - reference prep ~0.8215 ms -> Triton ~0.0619 ms
+#   - full packed decode attention ~1.0226 ms -> ~0.1693 ms
+#
+# IMPORTANT:
+# - closed physical pages remain unchanged (K3/V2/META8g64/R4)
+# - open K remains BF16 staging state
+# - transient K codes are UINT8 scratch only; they are NOT persistent KV storage
+# - scratch is shared per (CUDA device, CUDA stream, shape), not per request/layer
+_RABIT2_STAGE4D3_4_TRITON_TAILPREP = True
+_rabit2_stage4d3_4_old_emit_tail_partial = _rabit2_stage4b1_exactmeta_emit_tail_partial
+_RABIT2_STAGE4D3_4_WORKSPACES = {}
+
+
+@triton.jit
+def _rabit2_stage4d3_4_round_even_nonneg(x):
+    lo = tl.floor(x)
+    frac = x - lo
+    loi = lo.to(tl.int32)
+    add = (frac > 0.5) | ((frac == 0.5) & ((loi & 1) != 0))
+    return lo + add.to(tl.float32)
+
+
+@triton.jit
+def _rabit2_stage4d3_4_k_stats_codes_kernel(
+    open_k_ptr,
+    k_codes_ptr,
+    k_min_ptr,
+    k_scale_ptr,
+    open_len,
+    NUM_KV_HEADS: tl.constexpr,
+    HEAD_SIZE: tl.constexpr,
+):
+    p = tl.program_id(0)
+    kvh = p // HEAD_SIZE
+    d = p % HEAD_SIZE
+    t = tl.arange(0, 32)
+
+    off = (t * NUM_KV_HEADS + kvh) * HEAD_SIZE + d
+    x = tl.load(
+        open_k_ptr + off,
+        mask=t < open_len,
+        other=0.0,
+    ).to(tl.float32)
+
+    qmin = tl.min(x, axis=0)
+    qmax = tl.max(x, axis=0)
+    scale = (qmax - qmin) / 7.0
+    scale = tl.where(tl.abs(scale) < 1.0e-8, 1.0, scale)
+
+    q = tl.div_rn(x - qmin, scale)
+    q = _rabit2_stage4d3_4_round_even_nonneg(q)
+    q = tl.maximum(0.0, tl.minimum(7.0, q)).to(tl.uint8)
+
+    tl.store(k_codes_ptr + off, q)
+    tl.store(k_min_ptr + p, qmin)
+    tl.store(k_scale_ptr + p, scale)
+
+
+@triton.jit
+def _rabit2_stage4d3_4_pack_k3_kernel(
+    k_codes_ptr,
+    k_packed_ptr,
+    HEAD_SIZE: tl.constexpr,
+    K_PACKED_DIM: tl.constexpr,
+    BLOCK_B: tl.constexpr,
+):
+    # One program per [token, kv_head] row.
+    row = tl.program_id(0)
+    b = tl.arange(0, BLOCK_B)
+    bmask = b < K_PACKED_DIM
+
+    # Canonical little-endian 3-bit stream.
+    bit_pos = b * 8
+    c0_idx = bit_pos // 3
+    shift = bit_pos % 3
+
+    c0 = tl.load(
+        k_codes_ptr + row * HEAD_SIZE + c0_idx,
+        mask=bmask & (c0_idx < HEAD_SIZE),
+        other=0,
+    ).to(tl.int32)
+    c1 = tl.load(
+        k_codes_ptr + row * HEAD_SIZE + c0_idx + 1,
+        mask=bmask & ((c0_idx + 1) < HEAD_SIZE),
+        other=0,
+    ).to(tl.int32)
+    c2 = tl.load(
+        k_codes_ptr + row * HEAD_SIZE + c0_idx + 2,
+        mask=bmask & ((c0_idx + 2) < HEAD_SIZE),
+        other=0,
+    ).to(tl.int32)
+    c3 = tl.load(
+        k_codes_ptr + row * HEAD_SIZE + c0_idx + 3,
+        mask=bmask & ((c0_idx + 3) < HEAD_SIZE),
+        other=0,
+    ).to(tl.int32)
+
+    word = c0 | (c1 << 3) | (c2 << 6) | (c3 << 9)
+    byte = (word >> shift) & 255
+
+    tl.store(
+        k_packed_ptr + row * K_PACKED_DIM + b,
+        byte.to(tl.uint8),
+        mask=bmask,
+    )
+
+
+@triton.jit
+def _rabit2_stage4d3_4_meta64_kernel(
+    data_ptr,
+    codes_ptr,
+    secmin_ptr,
+    secscale_ptr,
+    n_values,
+):
+    g = tl.program_id(0)
+    j = tl.arange(0, 64)
+    idx = g * 64 + j
+    last = n_values - 1
+    safe_idx = tl.where(idx < n_values, idx, last)
+    x = tl.load(data_ptr + safe_idx).to(tl.float32)
+
+    qmin = tl.min(x, axis=0)
+    qmax = tl.max(x, axis=0)
+    scale = (qmax - qmin) / 255.0
+    scale = tl.where(tl.abs(scale) < 1.0e-12, 1.0, scale)
+
+    q = tl.div_rn(x - qmin, scale)
+    q = _rabit2_stage4d3_4_round_even_nonneg(q)
+    q = tl.maximum(0.0, tl.minimum(255.0, q)).to(tl.uint8)
+
+    tl.store(codes_ptr + g * 64 + j, q)
+    tl.store(secmin_ptr + g, qmin)
+    tl.store(secscale_ptr + g, scale)
+
+
+@triton.jit
+def _rabit2_stage4d3_4_tail_unpacked_k_partial_kernel(
+    q_ptr,
+    k_codes_ptr,
+    open_v_packed_ptr,
+    recent_k_ptr,
+    recent_v_ptr,
+    kmin_code_ptr,
+    kmin_secmin_ptr,
+    kmin_secscale_ptr,
+    kscale_code_ptr,
+    kscale_secmin_ptr,
+    kscale_secscale_ptr,
+    vmin_code_ptr,
+    vmin_secmin_ptr,
+    vmin_secscale_ptr,
+    vscale_code_ptr,
+    vscale_secmin_ptr,
+    vscale_secscale_ptr,
+    partial_m_ptr,
+    partial_l_ptr,
+    partial_acc_ptr,
+    open_len,
+    recent_len,
+    segment_idx,
+    softmax_scale,
+    NUM_Q_HEADS: tl.constexpr,
+    NUM_KV_HEADS: tl.constexpr,
+    HEAD_SIZE: tl.constexpr,
+    V_PACKED_DIM: tl.constexpr,
+    V_GROUPS: tl.constexpr,
+    V_GROUP_SIZE: tl.constexpr,
+    META_GROUP_SIZE: tl.constexpr,
+    BLOCK_D: tl.constexpr,
+):
+    qh = tl.program_id(0)
+    kvh = qh // (NUM_Q_HEADS // NUM_KV_HEADS)
+    t = tl.arange(0, 64)
+    d = tl.arange(0, BLOCK_D)
+    dmask = d < HEAD_SIZE
+    open_mask = t < open_len
+    ridx = t - open_len
+    recent_mask = (t >= open_len) & (ridx < recent_len)
+    valid = open_mask | recent_mask
+
+    q = tl.load(
+        q_ptr + qh * HEAD_SIZE + d,
+        mask=dmask,
+        other=0.0,
+    ).to(tl.float32)
+
+    # Transient unpacked K3 codes. Persistent/closed K remains packed INT3.
+    krow = (t[:, None] * NUM_KV_HEADS + kvh) * HEAD_SIZE
+    kcode = tl.load(
+        k_codes_ptr + krow + d[None, :],
+        mask=open_mask[:, None] & dmask[None, :],
+        other=0,
+    ).to(tl.float32)
+
+    kidx = kvh * HEAD_SIZE + d
+    kmg = kidx // 64
+
+    kmin_code = tl.load(
+        kmin_code_ptr + kidx, mask=dmask, other=0
+    ).to(tl.float32)
+    kmin_secmin = tl.load(
+        kmin_secmin_ptr + kmg, mask=dmask, other=0.0
+    ).to(tl.float32)
+    kmin_secscale = tl.load(
+        kmin_secscale_ptr + kmg, mask=dmask, other=1.0
+    ).to(tl.float32)
+    kmin = kmin_code * kmin_secscale + kmin_secmin
+
+    kscale_code = tl.load(
+        kscale_code_ptr + kidx, mask=dmask, other=0
+    ).to(tl.float32)
+    kscale_secmin = tl.load(
+        kscale_secmin_ptr + kmg, mask=dmask, other=0.0
+    ).to(tl.float32)
+    kscale_secscale = tl.load(
+        kscale_secscale_ptr + kmg, mask=dmask, other=1.0
+    ).to(tl.float32)
+    kscale = kscale_code * kscale_secscale + kscale_secmin
+
+    kopen = (
+        kcode * kscale[None, :] + kmin[None, :]
+    ).to(tl.bfloat16).to(tl.float32)
+
+    v_byte = d // 4
+    v_shift = (d % 4) * 2
+    v_row = (t[:, None] * NUM_KV_HEADS + kvh) * V_PACKED_DIM
+    vb = tl.load(
+        open_v_packed_ptr + v_row + v_byte[None, :],
+        mask=open_mask[:, None] & dmask[None, :],
+        other=0,
+    ).to(tl.int32)
+    vcode = (vb >> v_shift[None, :]) & 3
+
+    vg = d // V_GROUP_SIZE
+    vidx = (t[:, None] * NUM_KV_HEADS + kvh) * V_GROUPS + vg[None, :]
+    vmg = vidx // META_GROUP_SIZE
+
+    vmin_code = tl.load(
+        vmin_code_ptr + vidx,
+        mask=open_mask[:, None] & dmask[None, :],
+        other=0,
+    ).to(tl.float32)
+    vmin_secmin = tl.load(
+        vmin_secmin_ptr + vmg,
+        mask=open_mask[:, None] & dmask[None, :],
+        other=0.0,
+    ).to(tl.float32)
+    vmin_secscale = tl.load(
+        vmin_secscale_ptr + vmg,
+        mask=open_mask[:, None] & dmask[None, :],
+        other=1.0,
+    ).to(tl.float32)
+    vmin = vmin_code * vmin_secscale + vmin_secmin
+
+    vscale_code = tl.load(
+        vscale_code_ptr + vidx,
+        mask=open_mask[:, None] & dmask[None, :],
+        other=0,
+    ).to(tl.float32)
+    vscale_secmin = tl.load(
+        vscale_secmin_ptr + vmg,
+        mask=open_mask[:, None] & dmask[None, :],
+        other=0.0,
+    ).to(tl.float32)
+    vscale_secscale = tl.load(
+        vscale_secscale_ptr + vmg,
+        mask=open_mask[:, None] & dmask[None, :],
+        other=1.0,
+    ).to(tl.float32)
+    vscale = vscale_code * vscale_secscale + vscale_secmin
+
+    vopen = (
+        vcode.to(tl.float32) * vscale + vmin
+    ).to(tl.bfloat16).to(tl.float32)
+
+    rbase = (
+        (ridx[:, None] * NUM_KV_HEADS + kvh) * HEAD_SIZE
+        + d[None, :]
+    )
+    rk = tl.load(
+        recent_k_ptr + rbase,
+        mask=recent_mask[:, None] & dmask[None, :],
+        other=0.0,
+    ).to(tl.float32)
+    rv = tl.load(
+        recent_v_ptr + rbase,
+        mask=recent_mask[:, None] & dmask[None, :],
+        other=0.0,
+    ).to(tl.float32)
+
+    kval = tl.where(open_mask[:, None], kopen, rk)
+    vval = tl.where(open_mask[:, None], vopen, rv)
+    scores = tl.sum(kval * q[None, :], axis=1) * softmax_scale
+    scores = tl.where(valid, scores, float("-inf"))
+    m = tl.max(scores, axis=0)
+    p = tl.where(valid, tl.exp(scores - m), 0.0)
+    l = tl.sum(p, axis=0)
+    acc = tl.sum(p[:, None] * vval, axis=0)
+
+    seg = segment_idx * NUM_Q_HEADS + qh
+    tl.store(partial_m_ptr + seg, m)
+    tl.store(partial_l_ptr + seg, l)
+    tl.store(
+        partial_acc_ptr + seg * HEAD_SIZE + d,
+        acc,
+        mask=dmask,
+    )
+
+
+def _rabit2_stage4d3_4_workspace(runtime, q):
+    device = q.device
+    stream_id = int(torch.cuda.current_stream(device).cuda_stream)
+    key = (
+        device.index,
+        stream_id,
+        int(runtime.num_kv_heads),
+        int(runtime.head_size_k),
+        int(runtime.head_size_v),
+    )
+    ws = _RABIT2_STAGE4D3_4_WORKSPACES.get(key)
+    if ws is not None:
+        return ws
+
+    h = int(runtime.num_kv_heads)
+    dk = int(runtime.head_size_k)
+    dv = int(runtime.head_size_v)
+    if dv % RABIT2_GROUP_SIZE:
+        raise ValueError("RABIT-2 Stage4D3.4 requires V head size divisible by group size")
+
+    k_primary = h * dk
+    k_meta_groups = (k_primary + RABIT2_METADATA_GROUP_SIZE - 1) // RABIT2_METADATA_GROUP_SIZE
+    v_groups = dv // RABIT2_GROUP_SIZE
+    v_primary_max = int(runtime.block_size) * h * v_groups
+    v_meta_groups = (
+        v_primary_max + RABIT2_METADATA_GROUP_SIZE - 1
+    ) // RABIT2_METADATA_GROUP_SIZE
+
+    def meta(groups):
+        return {
+            "codes": torch.empty(
+                (groups, RABIT2_METADATA_GROUP_SIZE),
+                dtype=torch.uint8,
+                device=device,
+            ),
+            "min": torch.empty((groups, 1), dtype=torch.bfloat16, device=device),
+            "scale": torch.empty((groups, 1), dtype=torch.bfloat16, device=device),
+        }
+
+    ws = {
+        "k_codes": torch.empty(
+            (runtime.block_size, h, dk), dtype=torch.uint8, device=device
+        ),
+        "k_packed": torch.empty(
+            (runtime.block_size, h, rabit2_packed_dim(dk, 3)),
+            dtype=torch.uint8,
+            device=device,
+        ),
+        "k_min": torch.empty((h, dk), dtype=torch.float32, device=device),
+        "k_scale": torch.empty((h, dk), dtype=torch.float32, device=device),
+        "kmin_meta": meta(k_meta_groups),
+        "kscale_meta": meta(k_meta_groups),
+        "vmin_meta": meta(v_meta_groups),
+        "vscale_meta": meta(v_meta_groups),
+        "k_meta_groups": k_meta_groups,
+        "v_meta_groups": v_meta_groups,
+    }
+    _RABIT2_STAGE4D3_4_WORKSPACES[key] = ws
+    return ws
+
+
+def _rabit2_stage4d3_4_meta_launch(data, dst):
+    n_values = int(data.numel())
+    groups = (
+        n_values + RABIT2_METADATA_GROUP_SIZE - 1
+    ) // RABIT2_METADATA_GROUP_SIZE
+    if groups <= 0:
+        raise RuntimeError("Stage4D3.4 metadata input must be non-empty")
+    _rabit2_stage4d3_4_meta64_kernel[(groups,)](
+        data,
+        dst["codes"],
+        dst["min"],
+        dst["scale"],
+        n_values,
+        num_warps=4,
+    )
+    return groups
+
+
+def _rabit2_stage4d3_4_fast_prep(runtime, q):
+    if runtime.open_k is None:
+        raise RuntimeError("Stage4D3.4 fast prep requires open K")
+    if runtime.open_v_min is None or runtime.open_v_scale is None:
+        raise RuntimeError("Stage4D3.4 fast prep requires open V metadata")
+
+    ws = _rabit2_stage4d3_4_workspace(runtime, q)
+    open_len = int(runtime.open_k.shape[0])
+    h = int(runtime.num_kv_heads)
+    d = int(runtime.head_size_k)
+
+    _rabit2_stage4d3_4_k_stats_codes_kernel[(h * d,)](
+        runtime.open_k,
+        ws["k_codes"],
+        ws["k_min"],
+        ws["k_scale"],
+        open_len,
+        NUM_KV_HEADS=h,
+        HEAD_SIZE=d,
+        num_warps=1,
+    )
+
+    k_packed_dim = rabit2_packed_dim(d, 3)
+    _rabit2_stage4d3_4_pack_k3_kernel[(int(runtime.block_size) * h,)](
+        ws["k_codes"],
+        ws["k_packed"],
+        HEAD_SIZE=d,
+        K_PACKED_DIM=k_packed_dim,
+        BLOCK_B=triton.next_power_of_2(k_packed_dim),
+        num_warps=1,
+    )
+
+    _rabit2_stage4d3_4_meta_launch(ws["k_min"], ws["kmin_meta"])
+    _rabit2_stage4d3_4_meta_launch(ws["k_scale"], ws["kscale_meta"])
+    vmin_groups = _rabit2_stage4d3_4_meta_launch(
+        runtime.open_v_min, ws["vmin_meta"]
+    )
+    vscale_groups = _rabit2_stage4d3_4_meta_launch(
+        runtime.open_v_scale, ws["vscale_meta"]
+    )
+    return ws, vmin_groups, vscale_groups
+
+
+def _rabit2_stage4d3_4_emit_tail_partial(
+    q, runtime, partial_m, partial_l, partial_acc, segment_idx, softmax_scale
+):
+    recent_k = runtime.recent_k
+    recent_v = runtime.recent_v
+    if recent_k is None or recent_v is None:
+        raise RuntimeError("RABIT-2 Stage4D3.4 requires recent tokens")
+
+    q_heads = int(q.shape[0])
+    d = int(q.shape[1])
+    block_d = triton.next_power_of_2(d)
+    recent_len = int(recent_k.shape[0])
+
+    if runtime.open_k is None:
+        _rabit2_tail_partial_kernel[(q_heads,)](
+            q, recent_k, recent_v, partial_m, partial_l, partial_acc,
+            recent_len, int(segment_idx), float(softmax_scale),
+            NUM_Q_HEADS=q_heads,
+            NUM_KV_HEADS=runtime.num_kv_heads,
+            HEAD_SIZE=d,
+            BLOCK_T=4,
+            BLOCK_D=block_d,
+            num_warps=4,
+        )
+        return
+
+    if runtime.open_v_packed is None:
+        raise RuntimeError("RABIT-2 Stage4D3.4 requires open V payload")
+
+    ws, _, _ = _rabit2_stage4d3_4_fast_prep(runtime, q)
+    v_groups = runtime.head_size_v // RABIT2_GROUP_SIZE
+
+    # Preserve frozen Stage4B1 attention arithmetic/layout exactly.
+    # D3.4 accelerates prep only; packed K is transient scratch.
+    _rabit2_stage4b1_exactmeta_tail_partial_kernel[(q_heads,)](
+        q,
+        ws["k_packed"],
+        runtime.open_v_packed,
+        recent_k,
+        recent_v,
+        ws["kmin_meta"]["codes"].reshape(-1),
+        ws["kmin_meta"]["min"].reshape(-1),
+        ws["kmin_meta"]["scale"].reshape(-1),
+        ws["kscale_meta"]["codes"].reshape(-1),
+        ws["kscale_meta"]["min"].reshape(-1),
+        ws["kscale_meta"]["scale"].reshape(-1),
+        ws["vmin_meta"]["codes"].reshape(-1),
+        ws["vmin_meta"]["min"].reshape(-1),
+        ws["vmin_meta"]["scale"].reshape(-1),
+        ws["vscale_meta"]["codes"].reshape(-1),
+        ws["vscale_meta"]["min"].reshape(-1),
+        ws["vscale_meta"]["scale"].reshape(-1),
+        partial_m, partial_l, partial_acc,
+        int(runtime.open_k.shape[0]),
+        recent_len,
+        int(segment_idx),
+        float(softmax_scale),
+        NUM_Q_HEADS=q_heads,
+        NUM_KV_HEADS=runtime.num_kv_heads,
+        HEAD_SIZE=d,
+        K_PACKED_DIM=rabit2_packed_dim(d, 3),
+        V_PACKED_DIM=rabit2_packed_dim(runtime.head_size_v, 2),
+        V_GROUPS=v_groups,
+        BLOCK_D=block_d,
+        num_warps=8,
+    )
+
+
+_rabit2_stage4b1_exactmeta_emit_tail_partial = _rabit2_stage4d3_4_emit_tail_partial
+# === RABIT2_STAGE4D3_4_TRITON_TAILPREP_END ===
+
+# === RABIT2_FINAL_FAST_DECODE_APPEND_BEGIN ===
+# Final bounded performance cycle:
+# - keep the frozen K3/V2/G32/R4/META8g64 policy unchanged
+# - keep D3.4-v5 exact attention unchanged
+# - optimize only the common CUDA q_len=1 runtime.append path
+# - replace per-token torch.cat/slice + eager V2 ageing with fixed buffers
+#   and an exact Triton V2 one-token ageing kernel
+_RABIT2_FINAL_FAST_DECODE_APPEND = True
+_rabit2_final_old_append = Rabit2SingleSequenceRuntime.append
+
+
+@triton.jit
+def _rabit2_final_v2_age_kernel(
+    recent_v_ptr,
+    open_v_packed_ptr,
+    open_v_min_ptr,
+    open_v_scale_ptr,
+    open_slot,
+    NUM_HEADS: tl.constexpr,
+    HEAD_SIZE: tl.constexpr,
+    GROUP_SIZE: tl.constexpr,
+    V_GROUPS: tl.constexpr,
+    PACKED_DIM: tl.constexpr,
+):
+    p = tl.program_id(0)
+    h = p // V_GROUPS
+    g = p % V_GROUPS
+
+    d = tl.arange(0, GROUP_SIZE)
+    base = h * HEAD_SIZE + g * GROUP_SIZE
+    x = tl.load(recent_v_ptr + base + d).to(tl.float32)
+
+    qmin = tl.min(x, axis=0)
+    qmax = tl.max(x, axis=0)
+    scale = (qmax - qmin) / 3.0
+    scale = tl.where(tl.abs(scale) < 1.0e-8, 1.0, scale)
+
+    # Canonical V2 packing: four 2-bit codes per byte.
+    b = tl.arange(0, 8)
+    i0 = base + b * 4
+    x0 = tl.load(recent_v_ptr + i0 + 0).to(tl.float32)
+    x1 = tl.load(recent_v_ptr + i0 + 1).to(tl.float32)
+    x2 = tl.load(recent_v_ptr + i0 + 2).to(tl.float32)
+    x3 = tl.load(recent_v_ptr + i0 + 3).to(tl.float32)
+
+    q0 = _rabit2_stage4d3_4_round_even_nonneg(tl.div_rn(x0 - qmin, scale))
+    q1 = _rabit2_stage4d3_4_round_even_nonneg(tl.div_rn(x1 - qmin, scale))
+    q2 = _rabit2_stage4d3_4_round_even_nonneg(tl.div_rn(x2 - qmin, scale))
+    q3 = _rabit2_stage4d3_4_round_even_nonneg(tl.div_rn(x3 - qmin, scale))
+
+    q0 = tl.maximum(0.0, tl.minimum(3.0, q0)).to(tl.int32)
+    q1 = tl.maximum(0.0, tl.minimum(3.0, q1)).to(tl.int32)
+    q2 = tl.maximum(0.0, tl.minimum(3.0, q2)).to(tl.int32)
+    q3 = tl.maximum(0.0, tl.minimum(3.0, q3)).to(tl.int32)
+
+    byte = q0 | (q1 << 2) | (q2 << 4) | (q3 << 6)
+    packed_off = (
+        (open_slot * NUM_HEADS + h) * PACKED_DIM
+        + g * 8
+        + b
+    )
+    tl.store(open_v_packed_ptr + packed_off, byte.to(tl.uint8))
+
+    meta_off = (open_slot * NUM_HEADS + h) * V_GROUPS + g
+    tl.store(open_v_min_ptr + meta_off, qmin)
+    tl.store(open_v_scale_ptr + meta_off, scale)
+
+
+@triton.jit
+def _rabit2_final_shift_recent_kernel(
+    recent_k_ptr,
+    recent_v_ptr,
+    open_k_ptr,
+    new_k_ptr,
+    new_v_ptr,
+    open_slot,
+    N: tl.constexpr,
+    BLOCK: tl.constexpr,
+):
+    off = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+    mask = off < N
+
+    # Every program owns one feature index across all four residual slots,
+    # so all old values are loaded before that feature's stores.
+    k0 = tl.load(recent_k_ptr + 0 * N + off, mask=mask, other=0.0)
+    k1 = tl.load(recent_k_ptr + 1 * N + off, mask=mask, other=0.0)
+    k2 = tl.load(recent_k_ptr + 2 * N + off, mask=mask, other=0.0)
+    k3 = tl.load(recent_k_ptr + 3 * N + off, mask=mask, other=0.0)
+    v1 = tl.load(recent_v_ptr + 1 * N + off, mask=mask, other=0.0)
+    v2 = tl.load(recent_v_ptr + 2 * N + off, mask=mask, other=0.0)
+    v3 = tl.load(recent_v_ptr + 3 * N + off, mask=mask, other=0.0)
+    nk = tl.load(new_k_ptr + off, mask=mask, other=0.0)
+    nv = tl.load(new_v_ptr + off, mask=mask, other=0.0)
+
+    tl.store(open_k_ptr + open_slot * N + off, k0, mask=mask)
+    tl.store(recent_k_ptr + 0 * N + off, k1, mask=mask)
+    tl.store(recent_k_ptr + 1 * N + off, k2, mask=mask)
+    tl.store(recent_k_ptr + 2 * N + off, k3, mask=mask)
+    tl.store(recent_k_ptr + 3 * N + off, nk, mask=mask)
+
+    tl.store(recent_v_ptr + 0 * N + off, v1, mask=mask)
+    tl.store(recent_v_ptr + 1 * N + off, v2, mask=mask)
+    tl.store(recent_v_ptr + 2 * N + off, v3, mask=mask)
+    tl.store(recent_v_ptr + 3 * N + off, nv, mask=mask)
+
+
+def _rabit2_final_drop_fast_buffers(runtime):
+    runtime._rabit2_final_fast_ready = False
+
+
+def _rabit2_final_prepare_fast_buffers(runtime):
+    if getattr(runtime, "_rabit2_final_fast_ready", False):
+        return True
+
+    rk = runtime.recent_k
+    rv = runtime.recent_v
+    if (
+        rk is None
+        or rv is None
+        or not rk.is_cuda
+        or not rv.is_cuda
+        or rk.dtype != torch.bfloat16
+        or rv.dtype != torch.bfloat16
+        or int(rk.shape[0]) != int(runtime.residual_tokens)
+        or int(runtime.residual_tokens) != 4
+        or int(runtime.block_size) != 32
+        or int(runtime.num_kv_heads) != 8
+        or int(runtime.head_size_k) != 128
+        or int(runtime.head_size_v) != 128
+    ):
+        return False
+
+    # The engine supplies contiguous per-token K/V for the production layout.
+    if not rk.is_contiguous() or not rv.is_contiguous():
+        return False
+
+    device = rk.device
+    h = int(runtime.num_kv_heads)
+    dk = int(runtime.head_size_k)
+    dv = int(runtime.head_size_v)
+    v_groups = dv // int(RABIT2_GROUP_SIZE)
+    v_packed_dim = rabit2_packed_dim(dv, 2)
+
+    recent_k_buf = torch.empty((4, h, dk), dtype=torch.bfloat16, device=device)
+    recent_v_buf = torch.empty((4, h, dv), dtype=torch.bfloat16, device=device)
+    recent_k_buf.copy_(rk)
+    recent_v_buf.copy_(rv)
+
+    open_k_buf = torch.empty((32, h, dk), dtype=torch.bfloat16, device=device)
+    open_v_packed_buf = torch.empty(
+        (32, h, v_packed_dim), dtype=torch.uint8, device=device
+    )
+    open_v_min_buf = torch.empty(
+        (32, h, v_groups, 1), dtype=torch.float32, device=device
+    )
+    open_v_scale_buf = torch.empty_like(open_v_min_buf)
+
+    open_len = 0 if runtime.open_k is None else int(runtime.open_k.shape[0])
+    if open_len:
+        if (
+            runtime.open_v_packed is None
+            or runtime.open_v_min is None
+            or runtime.open_v_scale is None
+        ):
+            return False
+        open_k_buf[:open_len].copy_(runtime.open_k)
+        open_v_packed_buf[:open_len].copy_(runtime.open_v_packed)
+        open_v_min_buf[:open_len].copy_(runtime.open_v_min)
+        open_v_scale_buf[:open_len].copy_(runtime.open_v_scale)
+
+    runtime._rabit2_final_recent_k_buf = recent_k_buf
+    runtime._rabit2_final_recent_v_buf = recent_v_buf
+    runtime._rabit2_final_open_k_buf = open_k_buf
+    runtime._rabit2_final_open_v_packed_buf = open_v_packed_buf
+    runtime._rabit2_final_open_v_min_buf = open_v_min_buf
+    runtime._rabit2_final_open_v_scale_buf = open_v_scale_buf
+    runtime._rabit2_final_open_len = int(open_len)
+    runtime._rabit2_final_fast_ready = True
+
+    runtime.recent_k = recent_k_buf
+    runtime.recent_v = recent_v_buf
+    if open_len:
+        runtime.open_k = open_k_buf[:open_len]
+        runtime.open_v_packed = open_v_packed_buf[:open_len]
+        runtime.open_v_min = open_v_min_buf[:open_len]
+        runtime.open_v_scale = open_v_scale_buf[:open_len]
+    else:
+        runtime.open_k = None
+        runtime.open_v_packed = None
+        runtime.open_v_min = None
+        runtime.open_v_scale = None
+    return True
+
+
+def _rabit2_final_fast_decode_append(
+    self,
+    key: torch.Tensor,
+    value: torch.Tensor,
+    kv_cache: torch.Tensor,
+    block_table_row: torch.Tensor,
+) -> None:
+    fast_shape = (
+        key.shape == value.shape
+        and key.ndim == 3
+        and int(key.shape[0]) == 1
+        and key.is_cuda
+        and value.is_cuda
+        and key.dtype == torch.bfloat16
+        and value.dtype == torch.bfloat16
+        and key.is_contiguous()
+        and value.is_contiguous()
+        and tuple(key.shape[1:]) == (8, 128)
+        and int(self.num_kv_heads) == 8
+        and int(self.head_size_k) == 128
+        and int(self.head_size_v) == 128
+        and int(self.block_size) == 32
+        and int(self.residual_tokens) == 4
+    )
+
+    if not fast_shape:
+        if getattr(self, "_rabit2_final_fast_ready", False):
+            _rabit2_final_drop_fast_buffers(self)
+        return _rabit2_final_old_append(
+            self, key, value, kv_cache, block_table_row
+        )
+
+    # Until four residual tokens exist, the frozen path is already tiny and
+    # also defines startup semantics. Lazily switch only at steady-state decode.
+    if self.recent_k is None or int(self.recent_k.shape[0]) < 4:
+        if getattr(self, "_rabit2_final_fast_ready", False):
+            _rabit2_final_drop_fast_buffers(self)
+        return _rabit2_final_old_append(
+            self, key, value, kv_cache, block_table_row
+        )
+
+    if not _rabit2_final_prepare_fast_buffers(self):
+        return _rabit2_final_old_append(
+            self, key, value, kv_cache, block_table_row
+        )
+
+    open_slot = int(self._rabit2_final_open_len)
+    if not (0 <= open_slot < 32):
+        raise RuntimeError("RABIT-2 fast append open slot is out of range")
+
+    h = 8
+    d = 128
+    v_groups = 4
+    v_packed_dim = rabit2_packed_dim(d, 2)
+
+    # 1) Quantize the aged V token (recent slot 0) directly into the open
+    #    persistent sidecar buffers, byte/tensor exact to frozen V2.
+    _rabit2_final_v2_age_kernel[(h * v_groups,)](
+        self._rabit2_final_recent_v_buf,
+        self._rabit2_final_open_v_packed_buf,
+        self._rabit2_final_open_v_min_buf,
+        self._rabit2_final_open_v_scale_buf,
+        open_slot,
+        NUM_HEADS=h,
+        HEAD_SIZE=d,
+        GROUP_SIZE=32,
+        V_GROUPS=v_groups,
+        PACKED_DIM=v_packed_dim,
+        num_warps=1,
+    )
+
+    # 2) Copy aged K into open K and rotate R4 in-place.
+    n = h * d
+    block = 256
+    _rabit2_final_shift_recent_kernel[(triton.cdiv(n, block),)](
+        self._rabit2_final_recent_k_buf,
+        self._rabit2_final_recent_v_buf,
+        self._rabit2_final_open_k_buf,
+        key,
+        value,
+        open_slot,
+        N=n,
+        BLOCK=block,
+        num_warps=4,
+    )
+
+    new_open = open_slot + 1
+    self.recent_k = self._rabit2_final_recent_k_buf
+    self.recent_v = self._rabit2_final_recent_v_buf
+    self.open_k = self._rabit2_final_open_k_buf[:new_open]
+    self.open_v_packed = self._rabit2_final_open_v_packed_buf[:new_open]
+    self.open_v_min = self._rabit2_final_open_v_min_buf[:new_open]
+    self.open_v_scale = self._rabit2_final_open_v_scale_buf[:new_open]
+
+    if new_open == 32:
+        # Keep the frozen exact physical-page writer/format. This happens only
+        # once per 32 aged decode tokens and remains amortized.
+        self._flush_open_page(kv_cache, block_table_row)
+        self._rabit2_final_open_len = 0
+    else:
+        self._rabit2_final_open_len = int(new_open)
+
+
+Rabit2SingleSequenceRuntime.append = _rabit2_final_fast_decode_append
+# === RABIT2_FINAL_FAST_DECODE_APPEND_END ===
