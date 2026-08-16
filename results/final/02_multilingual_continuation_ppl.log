@@ -1,0 +1,137 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-I9LYlsNX1IgME34RGvOTjD
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\scr
+│   ipts\quality\Rabit_KV_multilingual_continuation_ppl.py
+└── 🔨 Created function run_quality.
+GPU: NVIDIA H100 80GB HBM3
+Model: LLM-Research/Meta-Llama-3.1-8B-Instruct
+Dataset: Wikimedia Wikipedia 20231101 (revision pinned)
+Dataset revision: cf584d1dc131caa92a5cb910f41a8b7591b12732
+Languages: ['zh', 'es']
+Context tokens per sample: 1024
+Continuation tokens per sample: 128
+Independent article samples per language: 8
+Scored tokens per language and method: 1024
+Total scored tokens per method: 2048
+Methods: ['bf16', 'rabit2']
+Metric: teacher-forced continuation perplexity
+Mode: multilingual quality-only prefix-cache quantization diagnostic
+Memory: logical packed prefix-KV storage, including metadata and residuals
+
+2026-08-16 07:48:26,289 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  33%|███▎      | 6/18 [00:04<00:09,  1.24file/s]
+[1ADownloading:  94%|█████████▍| 17/18 [00:05<00:00,  3.37file/s]
+[1ADownloading: 100%|██████████| 18/18 [00:15<00:00,  1.07s/file]
+[1ADownloading: 100%|██████████| 18/18 [00:15<00:00,  1.18file/s]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  8.93it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00, 11.79it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 12.14it/s]
+Selected 8 Chinese articles after scanning 33:
+  01. id=53 tokens=18467 offset=7817 title='经济学'
+  02. id=5640455 tokens=3389 offset=993 title='人子 (基督教)'
+  03. id=210 tokens=4293 offset=2287 title='计算机网络'
+  04. id=3579408 tokens=3164 offset=497 title='許迺曼 (德國)'
+  05. id=1024832 tokens=6326 offset=696 title='Lamento -BEYOND THE VOID-'
+  06. id=427 tokens=16716 offset=9941 title='河南省'
+  07. id=270 tokens=33369 offset=18992 title='中华人民共和国历史'
+  08. id=135 tokens=2302 offset=136 title='理查德·斯托曼'
+
+Selected 8 Spanish articles after scanning 44:
+  01. id=561561 tokens=1576 offset=38 title='William Stanley Jevons'
+  02. id=3639614 tokens=1434 offset=282 title='Les Hunter'
+  03. id=9724113 tokens=1211 offset=55 title='Neohinduismo'
+  04. id=7001474 tokens=1318 offset=105 title='Luis de Sirval'
+  05. id=561484 tokens=1320 offset=116 title='Hetera'
+  06. id=1336448 tokens=3927 offset=312 title='Santuario de Nuestra Señora de la Fuensanta (Córdoba)'
+  07. id=562011 tokens=3354 offset=1887 title='Juntas Generales de Guipúzcoa'
+  08. id=1336394 tokens=1667 offset=327 title='Nuño Pérez de Lara'
+
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+============================================================================================================================
+LANGUAGE: Chinese (zh)
+============================================================================================================================
+Running zh/bf16...
+  sample 1/8: PPL=8.2417, KV=128.000 MB, title='经济学', quality-run time=1.23s
+  sample 2/8: PPL=13.4707, KV=128.000 MB, title='人子 (基督教)', quality-run time=0.06s
+  sample 3/8: PPL=7.4606, KV=128.000 MB, title='计算机网络', quality-run time=0.08s
+  sample 4/8: PPL=8.3140, KV=128.000 MB, title='許迺曼 (德國)', quality-run time=0.05s
+  sample 5/8: PPL=13.8108, KV=128.000 MB, title='Lamento -BEYOND THE VOID-', quality-run time=0.05s
+  sample 6/8: PPL=14.3303, KV=128.000 MB, title='河南省', quality-run time=0.05s
+  sample 7/8: PPL=6.8084, KV=128.000 MB, title='中华人民共和国历史', quality-run time=0.05s
+  sample 8/8: PPL=11.8332, KV=128.000 MB, title='理查德·斯托曼', quality-run time=0.10s
+
+Running zh/rabit2...
+  sample 1/8: PPL=8.3243, KV=24.710 MB, title='经济学', quality-run time=0.19s
+  sample 2/8: PPL=14.5232, KV=24.710 MB, title='人子 (基督教)', quality-run time=0.07s
+  sample 3/8: PPL=7.7108, KV=24.710 MB, title='计算机网络', quality-run time=0.07s
+  sample 4/8: PPL=8.1743, KV=24.710 MB, title='許迺曼 (德國)', quality-run time=0.08s
+  sample 5/8: PPL=13.9091, KV=24.710 MB, title='Lamento -BEYOND THE VOID-', quality-run time=0.09s
+  sample 6/8: PPL=14.6199, KV=24.710 MB, title='河南省', quality-run time=0.08s
+  sample 7/8: PPL=6.9058, KV=24.710 MB, title='中华人民共和国历史', quality-run time=0.08s
+  sample 8/8: PPL=12.1240, KV=24.710 MB, title='理查德·斯托曼', quality-run time=0.09s
+
+----------------------------------------------------------------------------------------------------------------------------
+RABIT-KV MULTILINGUAL CONTINUATION PPL — CHINESE
+----------------------------------------------------------------------------------------------------------------------------
+Method      PPL           PPL d%        Median sample PPL     Avg KV MB       Compression     Tokens    
+----------------------------------------------------------------------------------------------------------------------------
+bf16        10.1176       0.00          10.0736               128.000         1.000           1024      
+rabit2      10.3308       2.11          10.2241               24.710          5.180           1024      
+
+============================================================================================================================
+LANGUAGE: Spanish (es)
+============================================================================================================================
+Running es/bf16...
+  sample 1/8: PPL=3.5996, KV=128.000 MB, title='William Stanley Jevons', quality-run time=0.05s
+  sample 2/8: PPL=2.5965, KV=128.000 MB, title='Les Hunter', quality-run time=0.05s
+  sample 3/8: PPL=4.6160, KV=128.000 MB, title='Neohinduismo', quality-run time=0.05s
+  sample 4/8: PPL=7.8358, KV=128.000 MB, title='Luis de Sirval', quality-run time=0.09s
+  sample 5/8: PPL=9.3837, KV=128.000 MB, title='Hetera', quality-run time=0.11s
+  sample 6/8: PPL=7.8596, KV=128.000 MB, title='Santuario de Nuestra Señora de la Fuensant', quality-run time=0.05s
+  sample 7/8: PPL=3.6055, KV=128.000 MB, title='Juntas Generales de Guipúzcoa', quality-run time=0.06s
+  sample 8/8: PPL=4.3694, KV=128.000 MB, title='Nuño Pérez de Lara', quality-run time=0.05s
+
+Running es/rabit2...
+  sample 1/8: PPL=3.9604, KV=24.710 MB, title='William Stanley Jevons', quality-run time=0.08s
+  sample 2/8: PPL=2.5822, KV=24.710 MB, title='Les Hunter', quality-run time=0.11s
+  sample 3/8: PPL=4.6537, KV=24.710 MB, title='Neohinduismo', quality-run time=0.07s
+  sample 4/8: PPL=8.2724, KV=24.710 MB, title='Luis de Sirval', quality-run time=0.07s
+  sample 5/8: PPL=9.4970, KV=24.710 MB, title='Hetera', quality-run time=0.07s
+  sample 6/8: PPL=8.0867, KV=24.710 MB, title='Santuario de Nuestra Señora de la Fuensant', quality-run time=0.07s
+  sample 7/8: PPL=3.5070, KV=24.710 MB, title='Juntas Generales de Guipúzcoa', quality-run time=0.07s
+  sample 8/8: PPL=4.4112, KV=24.710 MB, title='Nuño Pérez de Lara', quality-run time=0.07s
+
+----------------------------------------------------------------------------------------------------------------------------
+RABIT-KV MULTILINGUAL CONTINUATION PPL — SPANISH
+----------------------------------------------------------------------------------------------------------------------------
+Method      PPL           PPL d%        Median sample PPL     Avg KV MB       Compression     Tokens    
+----------------------------------------------------------------------------------------------------------------------------
+bf16        5.0035        0.00          4.4927                128.000         1.000           1024      
+rabit2      5.1139        2.21          4.5324                24.710          5.180           1024      
+
+======================================================================================================================
+MULTILINGUAL RELATIVE-QUALITY SUMMARY
+======================================================================================================================
+Method      Chinese d%        Spanish d%        Mean d%       Worst d%      Mean comp     
+----------------------------------------------------------------------------------------------------------------------
+bf16        0.00              0.00              0.00          0.00          1.000         
+rabit2      2.11              2.21              2.16          2.21          5.180         
+
+Important: this is a deterministic multilingual diagnostic using Wikipedia article spans. Quality-run time is not deployment latency.
+Stopping app - local entrypoint completed.
+Runner terminated.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-I9LYlsNX1IgME34RGvOTjD

@@ -1,0 +1,70 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-Po7LTxwQ6fsfGgJL4yNXG3
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\scr
+│   ipts\quality\Rabit_KV_continuation_ppl_latest.py
+└── 🔨 Created function run_quality.
+GPU: NVIDIA H100 80GB HBM3
+Model: LLM-Research/Meta-Llama-3.1-8B-Instruct
+Dataset: WikiText-2 test
+Context tokens per sample: 1024
+Continuation tokens per sample: 128
+Independent samples: 8
+Total scored continuation tokens per method: 1024
+Methods: ['bf16', 'rabit2']
+Metric: teacher-forced continuation perplexity
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+Memory: logical packed prefix-KV storage, including metadata and residuals
+
+2026-08-16 07:47:37,275 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  33%|███▎      | 6/18 [00:05<00:10,  1.18file/s]
+[1ADownloading:  89%|████████▉ | 16/18 [00:05<00:00,  3.84file/s]
+[1ADownloading: 100%|██████████| 18/18 [00:15<00:00,  1.14file/s]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  9.80it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00, 11.07it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 12.04it/s]
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Running bf16...
+  sample 1/8: PPL=3.2852, KV=128.000 MB, quality-run time=1.30s
+  sample 2/8: PPL=6.4981, KV=128.000 MB, quality-run time=0.05s
+  sample 3/8: PPL=10.6066, KV=128.000 MB, quality-run time=0.05s
+  sample 4/8: PPL=15.7193, KV=128.000 MB, quality-run time=0.05s
+  sample 5/8: PPL=8.2092, KV=128.000 MB, quality-run time=0.05s
+  sample 6/8: PPL=10.5001, KV=128.000 MB, quality-run time=0.05s
+  sample 7/8: PPL=8.2317, KV=128.000 MB, quality-run time=0.05s
+  sample 8/8: PPL=10.8100, KV=128.000 MB, quality-run time=0.05s
+
+Running rabit2...
+  sample 1/8: PPL=3.4214, KV=24.710 MB, quality-run time=0.16s
+  sample 2/8: PPL=6.5956, KV=24.710 MB, quality-run time=0.08s
+  sample 3/8: PPL=10.7045, KV=24.710 MB, quality-run time=0.08s
+  sample 4/8: PPL=15.6377, KV=24.710 MB, quality-run time=0.07s
+  sample 5/8: PPL=8.3485, KV=24.710 MB, quality-run time=0.08s
+  sample 6/8: PPL=10.7096, KV=24.710 MB, quality-run time=0.08s
+  sample 7/8: PPL=8.3879, KV=24.710 MB, quality-run time=0.08s
+  sample 8/8: PPL=10.8775, KV=24.710 MB, quality-run time=0.17s
+
+====================================================================================================================
+RABIT-KV LONG-CONTEXT CONTINUATION PERPLEXITY
+====================================================================================================================
+Method      PPL         PPL d%      Median sample PPL   Avg KV MB     Compression   Tokens    
+--------------------------------------------------------------------------------------------------------------------
+bf16        8.5020      0.00        9.3659              128.000       1.000         1024      
+rabit2      8.6317      1.53        9.5462              24.710        5.180         1024      
+
+Important: quality-run time is only for experiment planning. It is not deployment latency.
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-Po7LTxwQ6fsfGgJL4yNXG3
