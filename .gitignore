@@ -11,3 +11,5 @@ build/
 dist/
 .env
 .env.*
+*.pem
+*.key

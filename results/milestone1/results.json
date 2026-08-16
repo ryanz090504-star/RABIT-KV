@@ -1,0 +1,32 @@
+﻿{
+  "milestone": "RABIT-KV Milestone 1",
+  "status": "Frozen Core + Exact Physical Deployment",
+  "policy": "K3/V2/G32/R4/META8g64",
+  "quality": {
+    "bf16_ppl": 11.225819,
+    "rabit_ppl": 11.477385,
+    "relative_ppl_delta_percent": 2.241,
+    "logical_kv_mb": 6.499756,
+    "logical_compression_x": 4.892491,
+    "raw_meta8_log_in_initial_github_snapshot": false
+  },
+  "physical_capacity": {
+    "bf16_tokens": 393024,
+    "rabit_tokens": 2074592,
+    "capacity_ratio_x": 5.278537697443413
+  },
+  "stable_checkpoint": {
+    "stage": "Stage4D2.2 writer-only locked",
+    "tests_passed": 105,
+    "kv_cache_dtype": "rabit_kv2"
+  },
+  "experimental_d3_4": {
+    "production_integrated": false,
+    "prep_exact": true,
+    "prep_cases": 62,
+    "tail_prep_speedup_x": 13.27,
+    "full_attention_exact": true,
+    "full_attention_max_abs": 0.0,
+    "full_attention_microbenchmark_speedup_x": 6.04
+  }
+}
