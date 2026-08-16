@@ -1,4 +1,4 @@
-﻿# Milestone 1
+# Milestone 1
 
 ## Stable scope
 
@@ -13,6 +13,7 @@
 ## Experimental
 
 D3.4 fused exact tail preparation:
+
 - 13.27x tail-prep microbenchmark
 - 6.04x full-attention microbenchmark
 - exact output
@@ -25,8 +26,9 @@ D3.1-D3.3 remain research history, not final-method components.
 After D3.4 integration:
 
 - TPOT <= 20 ms/token: close single-request latency immediately.
-- 20 < TPOT <= 30: one targeted optimization, then freeze.
-- TPOT > 30: profile once, one targeted fix, then freeze.
+- 20 < TPOT <= 30 ms/token: one targeted optimization, then freeze.
+- TPOT > 30 ms/token: profile once, make one targeted fix, then freeze.
 
 **Maximum two performance optimization cycles after D3.4. No third redesign.**
+
 Then freeze performance, run the unified quality suite once, and package v1.0.

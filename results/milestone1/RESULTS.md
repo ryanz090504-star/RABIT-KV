@@ -1,4 +1,4 @@
-﻿# RABIT-KV Milestone 1 Results
+# RABIT-KV Milestone 1 Results
 
 ## Frozen method
 
@@ -6,18 +6,18 @@
 
 - K: 3-bit sequence-axis affine quantization
 - V: 2-bit last-dimension/token-axis affine quantization
-- group size: 32
-- newest four K/V tokens: BF16 residual
-- primary metadata: UINT8 grouped metadata, group size 64
+- Group size: 32
+- Newest four K/V tokens: BF16 residual
+- Primary metadata: UINT8 grouped metadata, group size 64
 
 ## Quality
 
 | Metric | BF16 | RABIT-KV |
 |---|---:|---:|
 | Perplexity | 11.225819 | **11.477385** |
-| Relative PPL change | 鈥?| **+2.241%** |
+| Relative PPL change | - | **+2.241%** |
 | Logical KV compression | 1.00x | **4.892491x** |
-| RABIT logical KV | 鈥?| 6.499756 MB |
+| RABIT logical KV | - | 6.499756 MB |
 
 The initial GitHub snapshot did not contain the raw META8g64 quality logfile.
 These values are preserved as the latest consolidated result. After performance
@@ -48,8 +48,8 @@ This is a real allocator-capacity result on H100, not a logical byte estimate.
 
 | Microbenchmark | Before | D3.4 | Speedup |
 |---|---:|---:|---:|
-| exact tail prep | 0.8215 ms | 0.0619 ms | **13.27x** |
-| full attention | 1.0226 ms | 0.1693 ms | **6.04x** |
+| Exact tail prep | 0.8215 ms | 0.0619 ms | **13.27x** |
+| Full attention | 1.0226 ms | 0.1693 ms | **6.04x** |
 
 D3.4 is exact (`max_abs=0.0`) but is **not production-integrated yet**.
 These are prototype microbenchmark numbers, not an end-to-end speedup claim.
