@@ -1,0 +1,9 @@
+﻿{
+  "model": "Llama 3.1 8B Instruct",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "block_size": 32,
+  "gpu_memory_utilization": 0.82,
+  "bf16_capacity_tokens": 393024,
+  "rabit_kv_capacity_tokens": 2074592,
+  "capacity_gain_x": 5.278537697443413
+}

@@ -13,3 +13,7 @@ dist/
 .env.*
 *.pem
 *.key
+
+# Reproduction outputs
+results/reproduced/
+results/performance/*_reproduced.log

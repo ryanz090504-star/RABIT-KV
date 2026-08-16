@@ -1,0 +1,10 @@
+﻿{
+  "model": "Llama 3.1 8B Instruct",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "kv_cache_dtype": "rabit_kv2",
+  "context_tokens": 2048,
+  "output_tokens": 32,
+  "tpot_ms_median": 21.609469967742253,
+  "ttft_ms_median": 121.13785743713379,
+  "wall_ms_median": 790.778457000016
+}

@@ -1,21 +1,31 @@
 # Reproducibility
 
-## Primary recorded deployment environment
+## Recorded environment
 
-- Llama 3.1 8B Instruct
-- NVIDIA H100 80GB HBM3
-- CUDA 13.0 / 13.0.2
-- PyTorch 2.11.0+cu130 in D3.4
-- custom vLLM 0.10.0+kvquant
-- vLLM base commit `f329ce405b12623fb8b1cf1830f12e5a712523be`
+The final deployment measurements were recorded with:
 
-## Controlled configuration
+- **Model:** `LLM-Research/Meta-Llama-3.1-8B-Instruct`
+- **GPU:** NVIDIA H100 80GB HBM3
+- **CUDA:** 13.0 / 13.0.2
+- **PyTorch:** 2.11.0+cu130 in the final deployment path
+- **vLLM:** custom `0.10.0+kvquant` fork
+- **vLLM base commit:** `f329ce405b12623fb8b1cf1830f12e5a712523be`
+
+The authoritative RABIT-KV implementation is:
+
+```text
+vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py
+```
+
+## Controlled deployment configuration
+
+The physical-capacity and deployment measurements use:
 
 - eager execution
 - Triton attention backend
 - CUDA graphs disabled
-- torch.compile disabled
-- `gpu_memory_utilization=0.82`
+- `torch.compile` disabled
+- `gpu_memory_utilization = 0.82`
 - block size 32
 - max model length 32768
 - max batched tokens 16384
@@ -23,33 +33,139 @@
 - prefix caching disabled
 - chunked prefill enabled
 
-## Milestone evidence
+## Canonical committed results
 
-Stage4C V3 controlled capacity:
+Compact summary:
 
-`results/capacity_latency/rabit2_stage4c_v3_results.json`
+```text
+results/summary.json
+```
 
-Stage4D2.2 regression:
+Raw quality evidence:
 
-`results/capacity_latency/rabit2_stage4d2_2_lock_writer_only.log`
+```text
+results/quality/
+```
 
-Stage4D3.4 prototype:
+Performance summaries and raw deployment log:
 
-`results/experiments/stage4d3_4/rabit2_stage4d3_4_triton_fused_tailprep_prototype.log`
+```text
+results/performance/
+├── capacity.json
+├── latency.json
+└── deployment.log
+```
 
-Expected physical capacity:
+The committed result files are the canonical evidence and should not be overwritten during reproduction.
 
-- BF16: 393,024 tokens
-- RABIT: 2,074,592 tokens
-- ratio: 5.2785x
+## Quality suite
 
-Latest META8 quality:
+Entry point:
 
-- BF16 PPL 11.225819
-- RABIT PPL 11.477385
-- +2.241%
-- 4.892491x logical compression
+```text
+benchmarks/quality/run_suite.py
+```
 
-The raw META8 quality logfile was absent from the initial GitHub snapshot.
-The final post-performance unified quality rerun will replace this consolidated
-quality evidence with a fully archived raw run.
+Individual benchmark scripts:
+
+```text
+benchmarks/quality/continuation_ppl.py
+benchmarks/quality/multilingual_ppl.py
+benchmarks/quality/niah.py
+benchmarks/quality/passage_retrieval.py
+benchmarks/quality/hotpotqa.py
+benchmarks/quality/qasper.py
+```
+
+The quality scripts use Modal to request an H100 environment and run the recorded Llama 3.1 8B configuration.
+
+From the repository root:
+
+```powershell
+python .\benchmarks\quality\run_suite.py
+```
+
+For a clean public reproduction workflow, reproduced quality outputs should be written under:
+
+```text
+results/reproduced/quality/
+```
+
+rather than replacing `results/quality/`.
+
+## Deployment benchmark
+
+Entry point:
+
+```text
+benchmarks/performance/benchmark_deployment.py
+```
+
+From the repository root:
+
+```powershell
+python .\benchmarks\performance\benchmark_deployment.py
+```
+
+The benchmark validates the integrated `rabit_kv2` source and records the deployment run separately from the committed canonical result.
+
+Reproduced deployment output should be written to:
+
+```text
+results/performance/deployment_reproduced.log
+```
+
+## Reported physical capacity
+
+```text
+BF16      393,024 tokens
+RABIT-KV  2,074,592 tokens
+ratio     5.2785×
+```
+
+## Reported deployment latency
+
+Configuration:
+
+```text
+context tokens = 2048
+output tokens  = 32
+```
+
+Final RABIT-KV medians:
+
+```text
+TPOT = 21.6095 ms/token
+TTFT = 121.1379 ms
+wall = 790.7785 ms
+```
+
+These latency values are RABIT-KV deployment measurements. They are not presented as a matched BF16 speedup result.
+
+## Quality evaluation
+
+The committed quality suite compares BF16 against the final RABIT-KV operating point only.
+
+Key results:
+
+```text
+WikiText-2 continuation PPL: 8.5020 -> 8.6317 (+1.53%)
+Chinese continuation PPL:   10.1176 -> 10.3308 (+2.11%)
+Spanish continuation PPL:    5.0035 ->  5.1139 (+2.21%)
+NIAH:                        15/15   -> 15/15
+Passage Retrieval:           100%    -> 100%
+Qasper 8K+:                  35.9    -> 35.6 F1
+HotpotQA 8K+:                60.6    -> 55.2 F1
+```
+
+WikiText-2 should be described specifically as **continuation perplexity**, not generic full-dataset perplexity.
+
+## Integrity checks
+
+The final deployment path passed:
+
+- **105 regression tests**
+- targeted decode-append state/byte exactness checks
+- full-attention exactness checks
+
+The quality harness also verifies the expected SHA-256 of the authoritative `rabit_kv2.py` source before running.
