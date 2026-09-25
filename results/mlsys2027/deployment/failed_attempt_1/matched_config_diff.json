@@ -1,0 +1,420 @@
+{
+  "rule": "All non-dtype engine/workload fields must be identical across all four ABBA legs. Only DTYPE_INDUCED_ALLOWLIST fields may differ, and only between dtypes (never between the two legs of the same dtype). Capacity/latency are outcomes, compared separately.",
+  "legs": {
+    "A1": "bfloat16",
+    "B1": "rabit_kv2",
+    "B2": "rabit_kv2",
+    "A2": "bfloat16"
+  },
+  "configs": {
+    "A1": {
+      "requested.attention_config.backend": "TRITON_ATTN",
+      "requested.block_size": 32,
+      "requested.disable_log_stats": false,
+      "requested.dtype": "bfloat16",
+      "requested.enable_chunked_prefill": true,
+      "requested.enable_prefix_caching": false,
+      "requested.enforce_eager": true,
+      "requested.gpu_memory_utilization": 0.82,
+      "requested.kv_cache_dtype": "bfloat16",
+      "requested.max_model_len": 32768,
+      "requested.max_num_batched_tokens": 16384,
+      "requested.max_num_seqs": 32,
+      "requested.model": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+      "requested.trust_remote_code": true,
+      "effective.attention_backend": "AttentionBackendEnum.TRITON_ATTN",
+      "effective.block_size": 32,
+      "effective.compilation_mode": "0",
+      "effective.cudagraph_mode": "NONE",
+      "effective.enable_chunked_prefill": true,
+      "effective.enable_prefix_caching": false,
+      "effective.enforce_eager": true,
+      "effective.gpu_memory_utilization": 0.82,
+      "effective.log_stats": true,
+      "effective.max_model_len": 32768,
+      "effective.max_num_batched_tokens": 16384,
+      "effective.max_num_seqs": 32,
+      "effective.model": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+      "effective.model_dtype": "torch.bfloat16",
+      "effective.quantization": null,
+      "effective.seed": 0,
+      "effective.tensor_parallel_size": 1,
+      "effective.trust_remote_code": true,
+      "kv_dtype.engine_cache_dtype": "bfloat16",
+      "kv_dtype.requested_kv_cache_dtype": "bfloat16",
+      "kv_dtype.resolved_kv_torch_dtype": "torch.bfloat16",
+      "kv_cache_representation.kv_spec": "null"
+    },
+    "B1": {
+      "kv_cache_representation.kv_spec": "null"
+    },
+    "B2": {
+      "kv_cache_representation.kv_spec": "null"
+    },
+    "A2": {
+      "kv_cache_representation.kv_spec": "null"
+    }
+  },
+  "fields_compared": 36,
+  "dtype_induced_allowlist": [
+    "requested.kv_cache_dtype",
+    "kv_dtype.requested_kv_cache_dtype",
+    "kv_dtype.engine_cache_dtype",
+    "kv_dtype.resolved_kv_torch_dtype",
+    "kv_cache_representation.kv_spec"
+  ],
+  "fields_differing_between_dtypes": [],
+  "violations": [
+    {
+      "field": "effective.attention_backend",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": "AttentionBackendEnum.TRITON_ATTN",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.block_size",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 32,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.compilation_mode",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": "0",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.cudagraph_mode",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": "NONE",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.enable_chunked_prefill",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": true,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.enable_prefix_caching",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": false,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.enforce_eager",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": true,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.gpu_memory_utilization",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 0.82,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.log_stats",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": true,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.max_model_len",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 32768,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.max_num_batched_tokens",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 16384,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.max_num_seqs",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 32,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.model",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.model_dtype",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": "torch.bfloat16",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.quantization",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": null,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.seed",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 0,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.tensor_parallel_size",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 1,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "effective.trust_remote_code",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": true,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "kv_dtype.engine_cache_dtype",
+      "reason": "allowlisted field differs within dtype bfloat16",
+      "values": {
+        "A1": "bfloat16",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "kv_dtype.requested_kv_cache_dtype",
+      "reason": "allowlisted field differs within dtype bfloat16",
+      "values": {
+        "A1": "bfloat16",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "kv_dtype.resolved_kv_torch_dtype",
+      "reason": "allowlisted field differs within dtype bfloat16",
+      "values": {
+        "A1": "torch.bfloat16",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.attention_config.backend",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": "TRITON_ATTN",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.block_size",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 32,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.disable_log_stats",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": false,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.dtype",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": "bfloat16",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.enable_chunked_prefill",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": true,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.enable_prefix_caching",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": false,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.enforce_eager",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": true,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.gpu_memory_utilization",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 0.82,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.kv_cache_dtype",
+      "reason": "allowlisted field differs within dtype bfloat16",
+      "values": {
+        "A1": "bfloat16",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.max_model_len",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 32768,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.max_num_batched_tokens",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 16384,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.max_num_seqs",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": 32,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.model",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    },
+    {
+      "field": "requested.trust_remote_code",
+      "reason": "non-dtype field differs between legs",
+      "values": {
+        "A1": true,
+        "B1": "<missing>",
+        "B2": "<missing>",
+        "A2": "<missing>"
+      }
+    }
+  ],
+  "matched": false
+}

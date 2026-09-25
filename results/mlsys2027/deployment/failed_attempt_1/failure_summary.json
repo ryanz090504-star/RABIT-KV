@@ -1,0 +1,47 @@
+{
+  "attempt": 1,
+  "status": "failed",
+  "accepted_scientific_evidence": false,
+  "run_window_utc": {
+    "started": "2026-09-25T19:27:08.427039+00:00",
+    "completed": "2026-09-25T21:00:37.973296+00:00"
+  },
+  "modal_app": "ap-KqcLHlXxLZBLe5UQYMd8xy",
+  "git_head": "3c066d10b77de541b7610316e1dfa8ca26dfc937",
+  "script_sha256": {
+    "runner_script_sha256": "b4a4de681d3262650fbf4f3881a432f19e0ec7238490501b5d1613d129d89cf6",
+    "modal_app_sha256": "f4e7a57671cff0304e5395ba8d0d754e088c22fbb7b3d993c8ee7a585eb4af05",
+    "worker_sha256": "56667e381020c4bd5512cc7e9b8957d24f39bd53484614093fe3282d79ba81cb",
+    "correctness_gate_sha256": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce"
+  },
+  "root_cause": "KV-spec collective RPC serialization/hang: after measuring A1 capacity, the worker's best-effort llm.collective_rpc('get_kv_cache_spec', timeout=120) made the EngineCore output thread raise TypeError: Object of type <class 'torch.dtype'> is not serializable (msgpack; VLLM_ALLOW_INSECURE_SERIALIZATION unset). The reply never arrived, the RPC timeout did not fire, and leg A1 hung until the 5400 s Modal function timeout (FunctionTimeoutError).",
+  "second_latent_issue": "Enum string expectation: integrity expected str(CompilationMode.NONE) == 'CompilationMode.NONE' and str(CUDAGraphMode.NONE) == 'CUDAGraphMode.NONE', but the actual strings are '0' (IntEnum) and 'NONE'. The engine WAS in eager mode (log: 'Enforce eager set, disabling torch.compile and CUDAGraphs'), but this string check would have failed every leg.",
+  "correctness_gate": {
+    "passed": true,
+    "pytest_passed": 105,
+    "pytest_warnings": 14,
+    "pytest_exit": 0
+  },
+  "legs_reached": {
+    "A1": "engine initialized and capacity measured; hung before warmup",
+    "B1": "not started",
+    "B2": "not started",
+    "A2": "not started"
+  },
+  "latency_samples": 0,
+  "no_latency_samples_existed": true,
+  "only_measurement_reached": "A1 BF16 allocator capacity (num_gpu_blocks=12282, block_size=32)",
+  "observed_a1_bf16_capacity_tokens": 393024,
+  "observed_a1_bf16_capacity_accepted_as_experiment3_evidence": false,
+  "note": "The observed 393,024-token BF16 capacity from this failed attempt is NOT accepted as Experiment 3 evidence. Integrity in this attempt was evaluated by the pre-fix runner, which reported some checks for never-started legs as passing; see integrity_check.json only as raw failure evidence.",
+  "files_sha256": {
+    "bf16_deployment.log": "2f32ac5d697219ed3ee626882112e889d09f9e90bdeb11031c9c14b03788a20a",
+    "correctness_gate.log": "75c4e5844d64d036cad659a6b620c3c1d142ca3d76d1c7e723b1fcc66639295b",
+    "integrity_check.json": "8d2923a4eebb9bf9dda908126126bee0e274d8e26feaa3c68d611891bf8e1a63",
+    "manifest.json": "60887fceb9dd44cf26272e6b51f695f27d068ed3308aac515fd76da01909757c",
+    "matched_config_diff.json": "928448ded360f7123362b72eead43211e58babe49c4afdba85dc43b1e129c1d1",
+    "modal_session.log": "0a30c1c4f48532669eb66725994eb1d3d0103e2cd3571fbdc8e1a1126dadcc50",
+    "rabit_kv2_deployment.log": "1691634ed4adbfc97c8b9aac14002402c48813e59d202d34a2abc5df27cdbf8b"
+  },
+  "archived_from": "results/mlsys2027/deployment/ (top level)"
+}
