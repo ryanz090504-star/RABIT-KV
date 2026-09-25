@@ -14,6 +14,12 @@ from the canonical run (fixed for every dtype):
   * the engine configuration actually in effect, the resolved KV dtype and
     the allocator capacity are printed as machine-readable lines.
 
+The resolved KV dtype is established WITHOUT any engine RPC: requested
+kv_cache_dtype, the engine config's cache_dtype, and local resolution via
+get_kv_cache_torch_dtype (the runner adds a physical bytes/token cross-check).
+(Attempt 1 hung on a collective_rpc("get_kv_cache_spec") whose torch.dtype
+payload the engine could not serialize; that RPC has been removed.)
+
 Machine-readable output lines (parsed by run_experiment3_deployment.py):
   EXP3_LEG=<json>
   EXP3_REQUESTED_ENGINE_KWARGS=<json>
@@ -21,7 +27,6 @@ Machine-readable output lines (parsed by run_experiment3_deployment.py):
   EXP3_EFFECTIVE_ENGINE_CONFIG=<json>
   EXP3_KV_DTYPE=<json>
   EXP3_CAPACITY=<json>
-  EXP3_KV_SPEC=<json>
   EXP3_WORKLOAD=<json>
   EXP3_WARMUP_BEGIN / EXP3_WARMUP {...} / EXP3_WARMUP_END
   EXP3_MEASUREMENT_BEGIN / EXP3_SAMPLE {...} / EXP3_MEASUREMENT_END
@@ -64,6 +69,16 @@ def emit(tag: str, payload) -> None:
     print(f"{tag}={json.dumps(payload, sort_keys=True, default=str)}", flush=True)
 
 
+def enum_name(value, enum_cls) -> str:
+    """Member name of `value` in `enum_cls`, independent of Enum.__str__."""
+    if isinstance(value, enum_cls):
+        return value.name
+    try:
+        return enum_cls(value).name
+    except (ValueError, TypeError):
+        return f"UNRECOGNIZED:{value!r}"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--kv-cache-dtype", required=True, choices=ALLOWED_KV_CACHE_DTYPES)
@@ -77,6 +92,7 @@ def main() -> int:
     emit("EXP3_LEG", {"leg": args.leg, "kv_cache_dtype": args.kv_cache_dtype})
 
     from vllm import LLM, SamplingParams
+    from vllm.config.compilation import CompilationMode, CUDAGraphMode
     from vllm.utils.torch_utils import get_kv_cache_torch_dtype
     import vllm.v1.attention.ops.rabit_kv2 as r
 
@@ -114,8 +130,13 @@ def main() -> int:
         "max_num_seqs": sc.max_num_seqs,
         "enable_chunked_prefill": sc.enable_chunked_prefill,
         "attention_backend": str(cfg.attention_config.backend),
-        "compilation_mode": str(comp.mode),
-        "cudagraph_mode": str(comp.cudagraph_mode),
+        # Raw representations plus names normalized via the enum classes
+        # themselves (never via Enum.__str__, which differs between IntEnum
+        # and Enum: CompilationMode.NONE prints as "0").
+        "compilation_mode": enum_name(comp.mode, CompilationMode),
+        "compilation_mode_raw": {"repr": repr(comp.mode), "str": str(comp.mode)},
+        "cudagraph_mode": enum_name(comp.cudagraph_mode, CUDAGraphMode),
+        "cudagraph_mode_raw": {"repr": repr(comp.cudagraph_mode), "str": str(comp.cudagraph_mode)},
         "tensor_parallel_size": cfg.parallel_config.tensor_parallel_size,
         "log_stats": bool(getattr(llm.llm_engine, "log_stats", False)),
     }
@@ -135,23 +156,6 @@ def main() -> int:
         "EXP3_CAPACITY",
         {"num_gpu_blocks": cc.num_gpu_blocks, "block_size": cc.block_size, "capacity_tokens": capacity},
     )
-
-    # Worker-side KV cache spec (best effort; the config-level resolution and
-    # the capacity/bytes-per-token cross-check do not depend on it).
-    try:
-        specs = llm.collective_rpc("get_kv_cache_spec", timeout=120)
-        summary = {}
-        for spec_map in specs:
-            for spec in spec_map.values():
-                key = (
-                    f"{type(spec).__name__}|dtype={getattr(spec, 'dtype', None)}"
-                    f"|block_size={getattr(spec, 'block_size', None)}"
-                    f"|page_size_bytes={getattr(spec, 'page_size_bytes', None)}"
-                )
-                summary[key] = summary.get(key, 0) + 1
-        emit("EXP3_KV_SPEC", {"ok": True, "layers_by_spec": summary})
-    except Exception as exc:  # noqa: BLE001
-        emit("EXP3_KV_SPEC", {"ok": False, "error": f"{type(exc).__name__}: {exc}"})
 
     tok = llm.get_tokenizer()
     bos = tok.bos_token_id

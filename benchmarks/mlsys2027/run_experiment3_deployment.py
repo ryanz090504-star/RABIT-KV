@@ -10,11 +10,12 @@ Design (one `modal run` of benchmarks/mlsys2027/exp3_deployment_modal.py):
   * idle GPU baseline recorded first;
   * RABIT-KV correctness gate (benchmarks/mlsys2027/exp3_correctness_gate.py,
     the canonical regression() verbatim) must pass before any measurement;
-  * counterbalanced ABBA legs, A = bfloat16, B = rabit_kv2:
-        A1, B1, B2, A2
+  * counterbalanced ABBA legs, A = bfloat16, B = rabit_kv2: A1, B1, B2, A2,
     each a fresh worker/engine process (exp3_engine_worker.py) with 5
-    full-shape warmups (excluded) + 15 measured reps -> 30 measured reps
-    per dtype;
+    full-shape warmups (excluded) + 15 measured reps -> 30 per dtype;
+  * gate and every leg run under a hard watchdog (exp3_watchdog.py): own
+    process group, whole-group kill on timeout (gate 600 s, leg 900 s), and a
+    timeout aborts the whole experiment;
   * before EVERY leg: no GPU compute process and memory back within a small
     tolerance of the idle baseline, else hard fail;
   * engine arguments byte-identical except kv_cache_dtype.
@@ -22,14 +23,16 @@ Design (one `modal run` of benchmarks/mlsys2027/exp3_deployment_modal.py):
 Before any run this script proves by AST that the worker's engine arguments,
 the Modal image and the correctness gate are identical to the canonical
 embedded runner in benchmarks/performance/benchmark_deployment.py (except
-kv_cache_dtype). After the run it proves from the logs that all four legs
-share every non-dtype configuration/workload field (only an explicit
-allowlist of kv_cache_dtype-induced fields may differ, and only between
-dtypes), that duplicate capacity measurements agree exactly, and that every
-integrity condition holds; otherwise it hard fails.
+kv_cache_dtype). After the run it evaluates every integrity check with an
+explicit state -- passed / failed / not_run / not_evaluated -- and only a run
+in which EVERY check is "passed" produces a summary. Every terminal path
+(success, Modal non-zero exit, gate failure, watchdog timeout, parser
+failure, integrity/config failure, local exception) runs the protected-path
+post-check and persists it in manifest.json.
 
 This script does NOT modify benchmark_deployment.py, vllm-kvquant or any
-result; it writes ONLY under results/mlsys2027/deployment/.
+result; it writes ONLY top-level files under results/mlsys2027/deployment/
+and never touches archived attempts (results/mlsys2027/deployment/failed_attempt_*/).
 
 Usage:
     python benchmarks/mlsys2027/run_experiment3_deployment.py --dry-run
@@ -58,6 +61,7 @@ RUNNER_SCRIPT = Path(__file__).resolve()
 MODAL_APP = ROOT / "benchmarks" / "mlsys2027" / "exp3_deployment_modal.py"
 WORKER = ROOT / "benchmarks" / "mlsys2027" / "exp3_engine_worker.py"
 GATE = ROOT / "benchmarks" / "mlsys2027" / "exp3_correctness_gate.py"
+WATCHDOG = ROOT / "benchmarks" / "mlsys2027" / "exp3_watchdog.py"
 CANONICAL_DEPLOYMENT = ROOT / "benchmarks" / "performance" / "benchmark_deployment.py"
 CANONICAL_CAPACITY = ROOT / "results" / "performance" / "capacity.json"
 CANONICAL_LATENCY = ROOT / "results" / "performance" / "latency.json"
@@ -65,6 +69,7 @@ RABIT_KV2 = ROOT / "vllm-kvquant" / "vllm" / "v1" / "attention" / "ops" / "rabit
 EXPECTED_RABIT_SHA256_LF = "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
 
 OUT_DIR = ROOT / "results" / "mlsys2027" / "deployment"
+ARCHIVE_GLOB = "failed_attempt_*"
 SESSION_LOG = OUT_DIR / "modal_session.log"
 GATE_LOG = OUT_DIR / "correctness_gate.log"
 MANIFEST = OUT_DIR / "manifest.json"
@@ -81,7 +86,7 @@ PROTECTED_PATHS = [
     ROOT / "results" / "mlsys2027" / "quality_frontier",
     ROOT / "results" / "mlsys2027" / "multilingual_frontier",
 ]
-MUST_BE_COMMITTED = [RUNNER_SCRIPT, MODAL_APP, WORKER, GATE]
+MUST_BE_COMMITTED = [RUNNER_SCRIPT, MODAL_APP, WORKER, GATE, WATCHDOG]
 
 # ABBA counterbalanced plan: A = bfloat16, B = rabit_kv2.
 A, B = "bfloat16", "rabit_kv2"
@@ -94,20 +99,19 @@ REPS_PER_DTYPE = 30
 CONTEXT_TOKENS = 2048
 OUTPUT_TOKENS = 32
 
-# GPU clean-state rule (must equal the Modal app constants; verified by AST).
+# Must equal the Modal app constants (verified by AST).
 GPU_CLEAN_TOLERANCE_MIB = 256
 GPU_CLEAN_MAX_WAIT_S = 60
+GATE_TIMEOUT_S = 600
+LEG_TIMEOUT_S = 900
 
-# Config comparison. Every flattened field of every leg is compared. Only
-# these fields may differ, only between dtypes (never within a dtype), because
-# they are directly induced by kv_cache_dtype. Measurements (capacity,
-# latency) are outcomes, not configuration, and are checked separately.
+# Config comparison: only these kv_cache_dtype-induced fields may differ, and
+# only between dtypes (never between the two legs of one dtype).
 DTYPE_INDUCED_ALLOWLIST = [
     "requested.kv_cache_dtype",
     "kv_dtype.requested_kv_cache_dtype",
     "kv_dtype.engine_cache_dtype",
     "kv_dtype.resolved_kv_torch_dtype",
-    "kv_cache_representation.kv_spec",
 ]
 
 # Llama-3.1-8B: 32 layers x (K,V) x 8 KV heads x 128 head_dim x 2 bytes.
@@ -125,8 +129,6 @@ EXPECTED_EFFECTIVE = {
     "max_num_seqs": 32,
     "enable_chunked_prefill": True,
     "attention_backend": "AttentionBackendEnum.TRITON_ATTN",
-    "compilation_mode": "CompilationMode.NONE",
-    "cudagraph_mode": "CUDAGraphMode.NONE",
     "tensor_parallel_size": 1,
     "log_stats": True,
     "quantization": None,
@@ -141,6 +143,12 @@ EXPECTED_WORKLOAD = {
 }
 CANONICAL_GATE_PYTEST_PASSED = 105  # informational (results/performance/deployment.log)
 
+# vllm/config/compilation.py member values (name -> value), for normalization
+# of raw representations without importing vllm locally.
+COMPILATION_MODE_VALUES = {"NONE": 0, "STOCK_TORCH_COMPILE": 1, "DYNAMO_TRACE_ONCE": 2, "VLLM_COMPILE": 3}
+CUDAGRAPH_MODE_VALUES = {"NONE": 0, "PIECEWISE": 1, "FULL": 2, "FULL_DECODE_ONLY": (2, 0),
+                         "FULL_AND_PIECEWISE": (2, 1)}
+
 CAPACITY_LABEL = "PHYSICAL vLLM allocator KV capacity (num_gpu_blocks x block_size) from the real engine"
 LATENCY_LABEL = (
     "Real-engine single-request latency: TTFT = frontend first_token_latency; "
@@ -148,6 +156,8 @@ LATENCY_LABEL = (
     "wall = perf_counter around llm.generate. p90 = statistics.quantiles(n=10, "
     "method='inclusive')[8]. Headline statistics are over the pooled 30 samples per dtype."
 )
+
+PASSED, FAILED, NOT_RUN, NOT_EVALUATED = "passed", "failed", "not_run", "not_evaluated"
 
 
 # ---------------------------------------------------------------- utilities
@@ -169,7 +179,11 @@ def sha256_raw(path: Path) -> str:
 
 
 def rel(path: Path) -> str:
-    return path.relative_to(ROOT).as_posix()
+    """Repo-relative path; never raises (a failure path must not crash here)."""
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def now() -> str:
@@ -186,6 +200,49 @@ def assert_protected_paths_clean(context: str) -> None:
 
 def uncommitted_experiment_files() -> str:
     return run_git("status", "--short", "--", *[rel(p) for p in MUST_BE_COMMITTED])
+
+
+def archived_attempts_digest() -> dict:
+    """SHA-256 of every file in archived attempt folders (must never change)."""
+    out = {}
+    if OUT_DIR.is_dir():
+        for d in sorted(OUT_DIR.glob(ARCHIVE_GLOB)):
+            for f in sorted(p for p in d.rglob("*") if p.is_file()):
+                out[f.relative_to(OUT_DIR).as_posix()] = sha256_raw(f)
+    return out
+
+
+def top_level_output_files() -> list[str]:
+    if not OUT_DIR.is_dir():
+        return []
+    return sorted(p.name for p in OUT_DIR.iterdir() if p.is_file())
+
+
+def normalize_mode(value, table: dict) -> str:
+    """Normalize a compilation/CUDA-graph mode representation to its member
+    NAME without relying on Enum.__str__. Accepts a member name ("NONE"),
+    "Class.NAME", repr "<Class.NAME: v>", or a raw value (0, "0", "(2, 0)")."""
+    if isinstance(value, dict):  # {"repr": ..., "str": ...}
+        names = {normalize_mode(v, table) for v in value.values()}
+        return names.pop() if len(names) == 1 else f"INCONSISTENT:{sorted(names)}"
+    if isinstance(value, (int, tuple)) and not isinstance(value, bool):
+        for name, v in table.items():
+            if v == value:
+                return name
+        return f"UNRECOGNIZED:{value!r}"
+    s = str(value).strip()
+    m = re.fullmatch(r"<\w+\.(\w+): .*>", s)
+    if m:
+        s = m.group(1)
+    elif re.fullmatch(r"\w+\.\w+", s):
+        s = s.split(".")[-1]
+    if s in table:
+        return s
+    try:
+        parsed = ast.literal_eval(s)
+    except (ValueError, SyntaxError):
+        return f"UNRECOGNIZED:{value!r}"
+    return normalize_mode(parsed, table) if isinstance(parsed, (int, tuple)) else f"UNRECOGNIZED:{value!r}"
 
 
 # ------------------------------------------------ canonical equivalence (AST)
@@ -221,11 +278,13 @@ def canonical_llm_kwargs(src: str) -> dict:
 
 def verify_canonical_equivalence() -> dict:
     """Prove worker/image/gate equal the canonical deployment runner except
-    kv_cache_dtype, and that the clean-state constants match this runner."""
+    kv_cache_dtype, that the KV-spec RPC is gone, and that the clean-state and
+    watchdog constants match this runner."""
     csrc = canonical_runner_source()
     ctree = ast.parse(csrc)
     mtree = ast.parse(MODAL_APP.read_text(encoding="utf-8"))
-    wtree = ast.parse(WORKER.read_text(encoding="utf-8"))
+    wsrc = WORKER.read_text(encoding="utf-8")
+    wtree = ast.parse(wsrc)
     gtree = ast.parse(GATE.read_text(encoding="utf-8"))
 
     canon_kwargs = canonical_llm_kwargs(csrc)
@@ -243,18 +302,24 @@ def verify_canonical_equivalence() -> dict:
             raise RuntimeError(f"{const} differs from the canonical runner")
 
     cfn, gfn = _function(ctree, "regression"), _function(gtree, "regression")
-    gate_equal = (ast.dump(ast.Module(body=cfn.body, type_ignores=[])) ==
-                  ast.dump(ast.Module(body=gfn.body, type_ignores=[]))
-                  and ast.dump(cfn.args) == ast.dump(gfn.args))
-    if not gate_equal:
+    if not (ast.dump(ast.Module(body=cfn.body, type_ignores=[])) ==
+            ast.dump(ast.Module(body=gfn.body, type_ignores=[])) and ast.dump(cfn.args) == ast.dump(gfn.args)):
         raise RuntimeError("exp3_correctness_gate.regression() is not verbatim the canonical regression()")
 
     for const, expected in (("GPU_CLEAN_TOLERANCE_MIB", GPU_CLEAN_TOLERANCE_MIB),
-                            ("GPU_CLEAN_MAX_WAIT_S", GPU_CLEAN_MAX_WAIT_S)):
+                            ("GPU_CLEAN_MAX_WAIT_S", GPU_CLEAN_MAX_WAIT_S),
+                            ("GATE_TIMEOUT_S", GATE_TIMEOUT_S),
+                            ("LEG_TIMEOUT_S", LEG_TIMEOUT_S)):
         if ast.literal_eval(_module_assign(mtree, const)) != expected:
             raise RuntimeError(f"Modal app {const} differs from runner")
 
-    wsrc = WORKER.read_text(encoding="utf-8")
+    # Attempt-1 root cause must stay removed: no engine RPC from the worker.
+    for node in ast.walk(wtree):
+        if isinstance(node, ast.Attribute) and node.attr == "collective_rpc":
+            raise RuntimeError("worker still calls collective_rpc (attempt-1 hang cause)")
+    if "EXP3_KV_SPEC" in wsrc:
+        raise RuntimeError("worker still emits EXP3_KV_SPEC")
+
     for snippet in (
         "m.first_token_latency * 1000.0",
         "(m.last_token_ts - m.first_token_ts) / (n - 1) * 1000.0",
@@ -274,6 +339,7 @@ def verify_canonical_equivalence() -> dict:
         "modal_image_expression_ast_equal": True,
         "model_and_base_commit_equal": True,
         "correctness_gate_regression_ast_equal_to_canonical": True,
+        "worker_has_no_engine_rpc": True,
         "timing_definitions_shared": True,
     }
 
@@ -301,10 +367,13 @@ def preflight(dry_run: bool) -> dict:
             "Refusing to run: Experiment 3 code has uncommitted changes, so recorded SHAs "
             "would not match a commit:\n" + uncommitted
         )
-    if MANIFEST.exists():
-        existing = json.loads(MANIFEST.read_text(encoding="utf-8"))
-        if existing.get("status") == "passed":
-            raise RuntimeError(f"{rel(MANIFEST)} already records a passed run; refusing to overwrite.")
+    leftovers = top_level_output_files()
+    if leftovers and not dry_run:
+        raise RuntimeError(
+            f"Refusing to run: {rel(OUT_DIR)}/ already contains files from a previous attempt "
+            f"({leftovers}). Archive them under {ARCHIVE_GLOB.replace('*', 'N')}/ first; this "
+            "runner never overwrites earlier evidence."
+        )
 
     return {
         "git_branch": branch,
@@ -315,10 +384,13 @@ def preflight(dry_run: bool) -> dict:
         "modal_app_sha256": sha256(MODAL_APP),
         "worker_sha256": sha256(WORKER),
         "correctness_gate_sha256": sha256(GATE),
+        "watchdog_sha256": sha256(WATCHDOG),
         "canonical_benchmark_deployment_sha256": sha256(CANONICAL_DEPLOYMENT),
         "sha256_basis": "LF-normalized bytes (CRLF -> LF); equals committed git content",
         "canonical_equivalence": equivalence,
         "protected_paths_baseline_status": "clean",
+        "archived_attempts_sha256": archived_attempts_digest(),
+        "existing_top_level_output_files": leftovers or None,
         "uncommitted_experiment_files": uncommitted or None,
     }
 
@@ -419,7 +491,7 @@ def demux(session_text: str) -> tuple[dict, list[str], list[str]]:
 
 def parse_worker(lines: list[str]) -> dict:
     out: dict = {"tags": {}, "samples": [], "warmups": [], "markers": [], "jit_during_measurement": [],
-                 "kv_log_tokens": None, "kv_log_gib": None}
+                 "kv_log_tokens": None, "kv_log_gib": None, "line_count": len(lines)}
     phase = None
     for i, line in enumerate(lines, start=1):
         m = TAG.match(line)
@@ -448,8 +520,9 @@ def parse_worker(lines: list[str]) -> dict:
 
 
 def parse_gate(lines: list[str]) -> dict:
-    out: dict = {"begin": None, "result": None, "pytest_passed": None, "pytest_warnings": None,
-                 "pytest_seconds": None, "pytest_exit": None, "regression_passed_line": False}
+    out: dict = {"line_count": len(lines), "begin": None, "result": None, "pytest_passed": None,
+                 "pytest_warnings": None, "pytest_seconds": None, "pytest_exit": None,
+                 "regression_passed_line": False}
     for line in lines:
         s = line.strip()
         m = TAG.match(s)
@@ -471,7 +544,8 @@ def parse_gate(lines: list[str]) -> dict:
 
 
 def parse_top(lines: list[str]) -> dict:
-    out: dict = {"pre_leg": {}, "leg_exit": {}, "leg_start": {}, "abba_complete": False}
+    out: dict = {"pre_leg": {}, "leg_exit": {}, "leg_start": {}, "process_exit": {}, "watchdog_timeouts": [],
+                 "abba_complete": False}
     for line in lines:
         s = line.strip()
         m = TAG.match(s)
@@ -486,6 +560,10 @@ def parse_top(lines: list[str]) -> dict:
             out["leg_exit"][payload["leg"]] = payload
         elif tag == "EXP3_LEG_START":
             out["leg_start"][payload["leg"]] = payload
+        elif tag == "EXP3_PROCESS_EXIT":
+            out["process_exit"][payload["label"]] = payload
+        elif tag == "EXP3_WATCHDOG_TIMEOUT":
+            out["watchdog_timeouts"].append(payload)
         else:
             out[tag] = payload
     return out
@@ -510,48 +588,52 @@ def leg_config(p: dict) -> dict:
         **flatten("effective", t.get("EXP3_EFFECTIVE_ENGINE_CONFIG", {})),
         **flatten("workload", t.get("EXP3_WORKLOAD", {})),
         **flatten("kv_dtype", t.get("EXP3_KV_DTYPE", {})),
-        "kv_cache_representation.kv_spec": json.dumps(t.get("EXP3_KV_SPEC"), sort_keys=True),
     }
+
+
+CONFIG_SECTIONS = ("EXP3_REQUESTED_ENGINE_KWARGS", "EXP3_EFFECTIVE_ENGINE_CONFIG", "EXP3_WORKLOAD", "EXP3_KV_DTYPE")
 
 
 def config_diff(parsed: dict) -> dict:
     """All four legs: every non-allowlisted field identical across all legs;
-    allowlisted (kv_cache_dtype-induced) fields identical within each dtype."""
-    configs = {label: leg_config(parsed[k]) for k, label, _ in LEGS}
+    allowlisted (kv_cache_dtype-induced) fields identical within each dtype.
+    Not evaluated at all unless every leg reported every config section."""
     dtype_of = {label: d for _, label, d in LEGS}
+    missing = {label: [s for s in CONFIG_SECTIONS if s not in parsed[k]["tags"]] for k, label, _ in LEGS}
+    missing = {label: v for label, v in missing.items() if v}
+    base = {
+        "rule": ("All non-dtype engine/workload fields must be identical across all four ABBA legs. "
+                 "Only DTYPE_INDUCED_ALLOWLIST fields may differ, and only between dtypes "
+                 "(never between the two legs of the same dtype). Capacity/latency are outcomes, "
+                 "compared separately. Not evaluated unless all four legs reported their config."),
+        "legs": dtype_of,
+        "dtype_induced_allowlist": DTYPE_INDUCED_ALLOWLIST,
+    }
+    if missing:
+        return {**base, "status": NOT_EVALUATED, "matched": None,
+                "missing_config_sections_by_leg": missing,
+                "configs": {label: leg_config(parsed[k]) for k, label, _ in LEGS}}
+    configs = {label: leg_config(parsed[k]) for k, label, _ in LEGS}
     keys = sorted(set().union(*configs.values()))
-    violations = []
-    differing_across_dtypes = []
+    violations, differing_across_dtypes = [], []
     for key in keys:
         vals = {label: cfg.get(key, "<missing>") for label, cfg in configs.items()}
-        distinct = {json.dumps(v, sort_keys=True, default=str) for v in vals.values()}
-        if len(distinct) == 1:
+        if len({json.dumps(v, sort_keys=True, default=str) for v in vals.values()}) == 1:
             continue
         if key not in DTYPE_INDUCED_ALLOWLIST:
             violations.append({"field": key, "reason": "non-dtype field differs between legs", "values": vals})
             continue
         within_ok = True
         for d in DTYPES:
-            same_dtype = {json.dumps(vals[l], sort_keys=True, default=str) for l in vals if dtype_of[l] == d}
-            if len(same_dtype) != 1:
+            if len({json.dumps(vals[l], sort_keys=True, default=str) for l in vals if dtype_of[l] == d}) != 1:
                 within_ok = False
                 violations.append({"field": key, "reason": f"allowlisted field differs within dtype {d}",
                                    "values": vals})
         if within_ok:
             differing_across_dtypes.append(key)
-    return {
-        "rule": ("All non-dtype engine/workload fields must be identical across all four ABBA legs. "
-                 "Only DTYPE_INDUCED_ALLOWLIST fields may differ, and only between dtypes "
-                 "(never between the two legs of the same dtype). Capacity/latency are outcomes, "
-                 "compared separately."),
-        "legs": {label: dtype_of[label] for label in configs},
-        "configs": configs,
-        "fields_compared": len(keys),
-        "dtype_induced_allowlist": DTYPE_INDUCED_ALLOWLIST,
-        "fields_differing_between_dtypes": differing_across_dtypes,
-        "violations": violations,
-        "matched": not violations,
-    }
+    return {**base, "status": PASSED if not violations else FAILED, "matched": not violations,
+            "configs": configs, "fields_compared": len(keys),
+            "fields_differing_between_dtypes": differing_across_dtypes, "violations": violations}
 
 
 # ---------------------------------------------------------- checks / stats
@@ -570,7 +652,7 @@ def stats(rows: list[dict], key: str) -> dict:
 
 def gpu_leg_clean(pre: dict, baseline: dict) -> bool:
     """Independent re-check of the Modal app's clean-state decision."""
-    if not pre or not pre.get("readings"):
+    if not pre or not pre.get("readings") or not baseline:
         return False
     last = pre["readings"][-1]
     return (not last["compute_apps"]
@@ -580,90 +662,146 @@ def gpu_leg_clean(pre: dict, baseline: dict) -> bool:
 
 
 def integrity(parsed: dict, gate: dict, top: dict, diff: dict) -> dict:
+    """Every check has an explicit state. Only 'passed' counts as passed;
+    all_ok requires every check to be 'passed'."""
     checks: list[dict] = []
 
-    def add(name: str, ok: bool, observed=None) -> None:
-        checks.append({"check": name, "ok": bool(ok), "observed": observed})
+    def add(name: str, category: str, state, observed=None) -> None:
+        if isinstance(state, bool):
+            state = PASSED if state else FAILED
+        checks.append({"check": name, "category": category, "state": state, "observed": observed})
 
     env = top.get("EXP3_ENVIRONMENT", {})
     gpus = env.get("gpus", [])
     baseline = top.get("EXP3_GPU_BASELINE", {})
-    add("ABBA completed", top.get("abba_complete", False))
-    add("exactly one GPU, H100", len(gpus) == 1 and "H100" in gpus[0].get("name", ""),
-        [g.get("name") for g in gpus])
-    add("leg order is ABBA", env.get("leg_dtypes") == [d for _, _, d in LEGS], env.get("leg_dtypes"))
-    add("rabit_kv2.py in image is frozen source", env.get("rabit_kv2_sha256_lf") == EXPECTED_RABIT_SHA256_LF,
+    add("ABBA completed", "completion", top.get("abba_complete", False))
+    add("no watchdog timeout", "watchdog", not top["watchdog_timeouts"], top["watchdog_timeouts"] or None)
+    add("exactly one GPU, H100", "environment",
+        (len(gpus) == 1 and "H100" in gpus[0].get("name", "")) if env else NOT_EVALUATED,
+        [g.get("name") for g in gpus] or None)
+    add("leg order is ABBA", "environment",
+        env.get("leg_dtypes") == [d for _, _, d in LEGS] if env else NOT_EVALUATED, env.get("leg_dtypes"))
+    add("rabit_kv2.py in image is frozen source", "environment",
+        env.get("rabit_kv2_sha256_lf") == EXPECTED_RABIT_SHA256_LF if env else NOT_EVALUATED,
         env.get("rabit_kv2_sha256_lf"))
-    add("model snapshot hashed", bool(top.get("EXP3_MODEL", {}).get("files")))
-    add("idle baseline recorded with no compute process",
+    add("idle baseline recorded with no compute process", "gpu_clean",
         bool(baseline) and not baseline.get("compute_apps") and "memory_used_mib" in baseline,
         baseline.get("memory_used_mib"))
 
     # Correctness gate.
-    add("gate: process exit 0", top.get("EXP3_GATE_EXIT", {}).get("returncode") == 0,
+    gate_ran = "EXP3_GATE_START" in top
+    gstate = (lambda ok: ok) if gate_ran else (lambda ok: NOT_RUN)
+    add("gate: process exit 0", "gate", gstate(top.get("EXP3_GATE_EXIT", {}).get("returncode") == 0),
         top.get("EXP3_GATE_EXIT"))
-    add("gate: result passed", (gate.get("result") or {}).get("passed") is True, gate.get("result"))
-    add("gate: pytest exit 0", gate.get("pytest_exit") == 0, gate.get("pytest_exit"))
-    add("gate: pytest passed count parsed", isinstance(gate.get("pytest_passed"), int), gate.get("pytest_passed"))
-    add("gate: canonical 'REGRESSION PASSED' line", gate.get("regression_passed_line"))
-    add("gate: ran against frozen rabit_kv2.py",
-        (gate.get("begin") or {}).get("rabit_kv2_sha256_lf") == EXPECTED_RABIT_SHA256_LF)
-    add("gate completed before first leg", "EXP3_GATE_EXIT" in top and bool(top["leg_start"]))
+    add("gate: result passed", "gate", gstate((gate.get("result") or {}).get("passed") is True), gate.get("result"))
+    add("gate: pytest exit 0", "gate", gstate(gate.get("pytest_exit") == 0), gate.get("pytest_exit"))
+    add("gate: pytest passed count parsed", "gate", gstate(isinstance(gate.get("pytest_passed"), int)),
+        gate.get("pytest_passed"))
+    add("gate: canonical 'REGRESSION PASSED' line", "gate", gstate(gate.get("regression_passed_line")))
+    add("gate: ran against frozen rabit_kv2.py", "gate",
+        gstate((gate.get("begin") or {}).get("rabit_kv2_sha256_lf") == EXPECTED_RABIT_SHA256_LF))
+    if not top["leg_start"]:
+        add("gate completed before first leg", "gate", NOT_EVALUATED if gate_ran else NOT_RUN,
+            "no leg started")
+    else:
+        add("gate completed before first leg", "gate", "EXP3_GATE_EXIT" in top)
 
-    add("config: all non-dtype fields identical across ABBA legs", diff["matched"],
-        diff["violations"] or None)
+    model = top.get("EXP3_MODEL", {})
+    add("model snapshot hashed", "model", bool(model.get("files")) if model else NOT_RUN)
 
     for k, label, d in LEGS:
         p = parsed[k]
         t = p["tags"]
+        started = label in top["leg_start"]
+
+        def leg(name: str, category: str, ok, observed=None, _started=started) -> None:
+            add(f"{label}: {name}", category, ok if _started else NOT_RUN, observed if _started else None)
+
+        def measured(name: str, category: str, ok, observed=None, _p=p, _started=started) -> None:
+            """Only evaluable once the leg actually entered measurement."""
+            if not _started:
+                add(f"{label}: {name}", category, NOT_RUN)
+            elif "EXP3_MEASUREMENT_BEGIN" not in _p["markers"]:
+                add(f"{label}: {name}", category, NOT_EVALUATED, "measurement phase never started")
+            else:
+                add(f"{label}: {name}", category, ok, observed)
+
+        pre = top["pre_leg"].get(label)
         add(f"{label}: GPU clean before leg (no compute process, within {GPU_CLEAN_TOLERANCE_MIB} MiB of baseline)",
-            gpu_leg_clean(top["pre_leg"].get(label), baseline),
-            (top["pre_leg"].get(label) or {}).get("readings", [{}])[-1] if top["pre_leg"].get(label) else None)
-        add(f"{label}: worker exit 0", (top["leg_exit"].get(label) or {}).get("returncode") == 0)
-        add(f"{label}: worker reports leg/dtype", t.get("EXP3_LEG") == {"leg": label, "kv_cache_dtype": d},
-            t.get("EXP3_LEG"))
-        add(f"{label}: RABIT frozen-source markers", all((t.get("EXP3_RABIT_MARKERS") or {"x": False}).values()))
+            "gpu_clean", gpu_leg_clean(pre, baseline) if pre else NOT_RUN,
+            pre["readings"][-1] if pre and pre.get("readings") else None)
+        leg("worker exit 0", "leg", (top["leg_exit"].get(label) or {}).get("returncode") == 0,
+            top["leg_exit"].get(label))
+        leg("worker reports leg/dtype", "leg", t.get("EXP3_LEG") == {"leg": label, "kv_cache_dtype": d}, t.get("EXP3_LEG"))
+        leg("RABIT frozen-source markers", "leg", bool(t.get("EXP3_RABIT_MARKERS")) and all(t["EXP3_RABIT_MARKERS"].values()))
         req = t.get("EXP3_REQUESTED_ENGINE_KWARGS", {})
-        add(f"{label}: requested kwargs as planned", req == requested_kwargs(d, req.get("model", "<missing>")))
+        leg("requested kwargs as planned", "config", req == requested_kwargs(d, req.get("model", "<missing>")))
+        leg("model path is the hashed snapshot", "model",
+            bool(model) and req.get("model") == model.get("snapshot_dir"), req.get("model"))
         eff = t.get("EXP3_EFFECTIVE_ENGINE_CONFIG", {})
         bad = {x: eff.get(x, "<missing>") for x, v in EXPECTED_EFFECTIVE.items() if eff.get(x, "<missing>") != v}
-        add(f"{label}: effective engine config as planned (CUDA graphs/torch.compile off, Triton, ...)",
-            not bad, bad or None)
+        leg("effective engine config as planned (eager, Triton, block/len/batch limits, ...)", "config",
+            bool(eff) and not bad, bad or None)
+        cm = {"name": normalize_mode(eff.get("compilation_mode"), COMPILATION_MODE_VALUES),
+              "raw": normalize_mode(eff["compilation_mode_raw"], COMPILATION_MODE_VALUES)
+              if "compilation_mode_raw" in eff else None}
+        leg("compilation mode = NONE (torch.compile off)", "config",
+            cm["name"] == "NONE" and cm["raw"] in (None, "NONE"), cm)
+        gm = {"name": normalize_mode(eff.get("cudagraph_mode"), CUDAGRAPH_MODE_VALUES),
+              "raw": normalize_mode(eff["cudagraph_mode_raw"], CUDAGRAPH_MODE_VALUES)
+              if "cudagraph_mode_raw" in eff else None}
+        leg("CUDA graph mode = NONE", "config", gm["name"] == "NONE" and gm["raw"] in (None, "NONE"), gm)
         wl = t.get("EXP3_WORKLOAD", {})
-        add(f"{label}: workload as planned",
-            all(wl.get(x) == v for x, v in EXPECTED_WORKLOAD.items()) and bool(wl.get("prompt_token_ids_sha256")),
-            wl)
+        leg("workload as planned", "workload",
+            all(wl.get(x) == v for x, v in EXPECTED_WORKLOAD.items()) and bool(wl.get("prompt_token_ids_sha256")), wl or None)
         kv = t.get("EXP3_KV_DTYPE", {})
-        add(f"{label}: resolved KV dtype", all(kv.get(x) == v for x, v in EXPECTED_KV[d].items()), kv)
+        leg("resolved KV dtype", "kv_dtype", bool(kv) and all(kv.get(x) == v for x, v in EXPECTED_KV[d].items()), kv or None)
         cap = t.get("EXP3_CAPACITY", {})
-        add(f"{label}: capacity = num_gpu_blocks x block_size",
-            bool(cap) and cap["capacity_tokens"] == cap["num_gpu_blocks"] * cap["block_size"], cap)
-        add(f"{label}: capacity matches engine log 'GPU KV cache size'",
+        leg("capacity = num_gpu_blocks x block_size", "capacity",
+            bool(cap) and cap["capacity_tokens"] == cap["num_gpu_blocks"] * cap["block_size"], cap or None)
+        leg("capacity matches engine log 'GPU KV cache size'", "capacity",
             bool(cap) and p["kv_log_tokens"] == cap.get("capacity_tokens"), p["kv_log_tokens"])
-        if d == A and cap and p["kv_log_gib"]:
-            bpt = p["kv_log_gib"] * 2**30 / cap["capacity_tokens"]
-            add(f"{label}: physical bytes/token consistent with 2-byte BF16 KV",
-                abs(bpt / BF16_BYTES_PER_TOKEN - 1) <= BYTES_PER_TOKEN_REL_TOL, round(bpt, 1))
-        add(f"{label}: warmups == {WARMUPS_PER_LEG}", len(p["warmups"]) == WARMUPS_PER_LEG, len(p["warmups"]))
-        add(f"{label}: measured reps == {REPS_PER_LEG}", [r["rep"] for r in p["samples"]] == list(range(REPS_PER_LEG)),
-            len(p["samples"]))
-        add(f"{label}: every request {CONTEXT_TOKENS} prompt / {OUTPUT_TOKENS} output tokens",
-            bool(p["samples"]) and all(r["prompt_tokens"] == CONTEXT_TOKENS and r["output_tokens"] == OUTPUT_TOKENS
-                                       for r in p["samples"] + p["warmups"]))
-        add(f"{label}: marker order", p["markers"] == ["EXP3_WARMUP_BEGIN", "EXP3_WARMUP_END", "EXP3_MEASUREMENT_BEGIN",
-                                                      "EXP3_MEASUREMENT_END", "EXP3_WORKER_COMPLETE"], p["markers"])
-        add(f"{label}: no Triton JIT compilation during measurement", not p["jit_during_measurement"],
-            p["jit_during_measurement"] or None)
+        if d == A:
+            if started and cap and p["kv_log_gib"]:
+                bpt = p["kv_log_gib"] * 2**30 / cap["capacity_tokens"]
+                add(f"{label}: physical bytes/token consistent with 2-byte BF16 KV", "kv_dtype",
+                    abs(bpt / BF16_BYTES_PER_TOKEN - 1) <= BYTES_PER_TOKEN_REL_TOL, round(bpt, 1))
+            else:
+                leg("physical bytes/token consistent with 2-byte BF16 KV", "kv_dtype", False)
+        measured(f"warmups == {WARMUPS_PER_LEG}", "measurement", len(p["warmups"]) == WARMUPS_PER_LEG, len(p["warmups"]))
+        measured(f"measured reps == {REPS_PER_LEG}", "measurement",
+                 [r["rep"] for r in p["samples"]] == list(range(REPS_PER_LEG)), len(p["samples"]))
+        measured(f"every request {CONTEXT_TOKENS} prompt / {OUTPUT_TOKENS} output tokens", "measurement",
+                 bool(p["samples"]) and all(r["prompt_tokens"] == CONTEXT_TOKENS and r["output_tokens"] == OUTPUT_TOKENS
+                                            for r in p["samples"] + p["warmups"]))
+        leg("marker order", "leg", p["markers"] == ["EXP3_WARMUP_BEGIN", "EXP3_WARMUP_END", "EXP3_MEASUREMENT_BEGIN",
+                                                  "EXP3_MEASUREMENT_END", "EXP3_WORKER_COMPLETE"], p["markers"])
+        measured("no Triton JIT compilation during measurement", "measurement",
+                 "EXP3_MEASUREMENT_END" in p["markers"] and not p["jit_during_measurement"],
+                 p["jit_during_measurement"] or None)
 
-    # Duplicate capacity measurements must agree exactly within each dtype.
+    # Cross-leg checks: evaluated only when every required leg has the data.
+    add("config: all non-dtype fields identical across ABBA legs", "config",
+        diff["status"], diff.get("violations") or diff.get("missing_config_sections_by_leg"))
+    hashes = {label: parsed[k]["tags"].get("EXP3_WORKLOAD", {}).get("prompt_token_ids_sha256") for k, label, _ in LEGS}
+    add("prompt token hash identical across all legs", "workload",
+        (len(set(hashes.values())) == 1) if all(hashes.values()) else NOT_EVALUATED, hashes)
     for d in DTYPES:
         caps = {label: parsed[k]["tags"].get("EXP3_CAPACITY") for k, label, dd in LEGS if dd == d}
-        vals = {json.dumps(c, sort_keys=True) for c in caps.values()}
-        add(f"{d}: duplicate capacity measurements identical", len(vals) == 1 and None not in caps.values(), caps)
+        add(f"{d}: duplicate capacity measurements identical", "capacity",
+            (len({json.dumps(c, sort_keys=True) for c in caps.values()}) == 1)
+            if all(caps.values()) else NOT_EVALUATED, caps)
+        legs_measured = all("EXP3_MEASUREMENT_END" in parsed[k]["markers"] for k, _, dd in LEGS if dd == d)
         n = sum(len(parsed[k]["samples"]) for k, _, dd in LEGS if dd == d)
-        add(f"{d}: pooled measured samples == {REPS_PER_DTYPE}", n == REPS_PER_DTYPE, n)
+        add(f"{d}: pooled measured samples == {REPS_PER_DTYPE}", "measurement",
+            (n == REPS_PER_DTYPE) if legs_measured else NOT_EVALUATED, n)
 
-    return {"checks": checks, "all_ok": all(c["ok"] for c in checks)}
+    counts = {s: sum(1 for c in checks if c["state"] == s) for s in (PASSED, FAILED, NOT_RUN, NOT_EVALUATED)}
+    return {"state_semantics": "passed / failed / not_run (leg never started) / not_evaluated "
+                               "(required data or legs missing); only 'passed' counts as passed",
+            "checks": checks, "counts": counts, "all_ok": counts[PASSED] == len(checks),
+            "failed_categories": sorted({c["category"] for c in checks if c["state"] == FAILED}),
+            "non_passed_categories": sorted({c["category"] for c in checks if c["state"] != PASSED})}
 
 
 def build_summary(parsed: dict, gate: dict, top: dict) -> dict:
@@ -680,6 +818,7 @@ def build_summary(parsed: dict, gate: dict, top: dict) -> dict:
             "warmup_samples_excluded": p["warmups"],
             "measured_samples": p["samples"],
             "pre_leg_gpu_state": top["pre_leg"].get(label),
+            "process": top["process_exit"].get(label),
         }
     pooled = {}
     for d in DTYPES:
@@ -696,7 +835,6 @@ def build_summary(parsed: dict, gate: dict, top: dict) -> dict:
             "capacity_identical_across_legs": True,
             "available_kv_cache_memory_gib_logged": gib,
             "physical_bytes_per_token_implied": round(gib * 2**30 / cap["capacity_tokens"], 1) if gib else None,
-            "kv_cache_spec": legs[0][1]["tags"].get("EXP3_KV_SPEC"),
             "headline": {
                 "tpot_ms_median": statistics.median(r["tpot_ms"] for r in rows),
                 "tpot_ms_p90": statistics.quantiles([r["tpot_ms"] for r in rows], n=10, method="inclusive")[8],
@@ -725,7 +863,8 @@ def build_summary(parsed: dict, gate: dict, top: dict) -> dict:
                    "warmups_per_leg_excluded": WARMUPS_PER_LEG, "measured_reps_per_leg": REPS_PER_LEG,
                    "measured_reps_per_dtype": REPS_PER_DTYPE, "context_tokens": CONTEXT_TOKENS,
                    "output_tokens": OUTPUT_TOKENS, "same_container_same_gpu": True,
-                   "fresh_process_per_leg": True},
+                   "fresh_process_per_leg": True, "gate_timeout_s": GATE_TIMEOUT_S,
+                   "leg_timeout_s": LEG_TIMEOUT_S},
         "correctness_gate": {
             "command": (gate.get("begin") or {}).get("pytest_command"),
             "wrapper": GATE_COMMAND_DOC,
@@ -735,6 +874,7 @@ def build_summary(parsed: dict, gate: dict, top: dict) -> dict:
             "pytest_warnings": gate.get("pytest_warnings"),
             "canonical_pytest_passed_informational": CANONICAL_GATE_PYTEST_PASSED,
             "rabit_kv2_sha256_lf": (gate.get("begin") or {}).get("rabit_kv2_sha256_lf"),
+            "process": top["process_exit"].get("gate"),
         },
         "gpu_clean_state": {"baseline": top.get("EXP3_GPU_BASELINE"),
                             "tolerance_mib": GPU_CLEAN_TOLERANCE_MIB,
@@ -778,6 +918,8 @@ def analyze(session_text: str, write: bool) -> tuple[dict, dict, dict | None]:
     integ["correctness_gate"] = gate
     integ["gpu_clean_state"] = {"baseline": top.get("EXP3_GPU_BASELINE"), "tolerance_mib": GPU_CLEAN_TOLERANCE_MIB,
                                 "max_wait_s": GPU_CLEAN_MAX_WAIT_S, "pre_leg": top["pre_leg"]}
+    integ["processes"] = {"exits": top["process_exit"], "watchdog_timeouts": top["watchdog_timeouts"]}
+    # A summary exists ONLY for a complete run in which every check passed.
     summary = build_summary(parsed, gate, top) if integ["all_ok"] else None
     if write:
         OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -802,21 +944,46 @@ def write_manifest(manifest: dict) -> None:
     MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
 
 
-def record_runner_failure(manifest: dict, exc: BaseException) -> None:
-    t = now()
-    error = {"type": type(exc).__name__, "message": str(exc)}
-    for row in manifest["runs"]:
-        if row.get("status") == "running":
-            row.update(status="runner_failed", completed_utc=t, error=error)
-    manifest.update(runner_error=error, status="failed", completed_utc=t)
+def finalize(manifest: dict, status: str, failure: dict | None) -> None:
+    """Single terminal path: protected-path post-check + archived-attempt
+    integrity, persisted in manifest.json. The original failure reason is
+    kept even if the post-check itself fails."""
+    manifest["status"] = status
+    manifest["completed_utc"] = now()
+    if failure is not None:
+        manifest.setdefault("failure", failure)
     try:
-        assert_protected_paths_clean("runner exception path")
-    except Exception as check_exc:  # noqa: BLE001
+        assert_protected_paths_clean(f"post-run ({status})")
+    except Exception as exc:  # noqa: BLE001
         manifest["protected_paths_post_run_status"] = "check_failed"
-        manifest["protected_paths_check_error"] = {"type": type(check_exc).__name__, "message": str(check_exc)}
+        manifest["protected_paths_check_error"] = {"type": type(exc).__name__, "message": str(exc)}
+        manifest["status"] = "failed"
     else:
         manifest["protected_paths_post_run_status"] = "clean"
+    archived_now = archived_attempts_digest()
+    archived_before = manifest["provenance"].get("archived_attempts_sha256", {})
+    manifest["archived_attempts_unchanged"] = archived_now == archived_before
+    if not manifest["archived_attempts_unchanged"]:
+        manifest["status"] = "failed"
+        manifest.setdefault("failure", {"stage": "archived_attempt_modified",
+                                        "reason": "an archived failed_attempt_* file changed during the run"})
     write_manifest(manifest)
+
+
+def classify_failure(code: int, integ: dict) -> dict:
+    """Stage from checks that actually FAILED (not_run / not_evaluated are
+    consequences of an earlier stop, never a cause)."""
+    cats = integ["failed_categories"]
+    info = {"modal_returncode": code, "failed_categories": cats,
+            "non_passed_categories": integ["non_passed_categories"]}
+    for stage, cat in (("watchdog_timeout", "watchdog"), ("correctness_gate", "gate"), ("gpu_clean", "gpu_clean")):
+        if cat in cats:
+            return {"stage": stage, **info}
+    if code != 0:
+        return {"stage": "modal_nonzero_exit", **info}
+    if "config" in cats:
+        return {"stage": "config_diff", **info}
+    return {"stage": "integrity", **info}
 
 
 def run(manifest: dict) -> int:
@@ -831,27 +998,31 @@ def run(manifest: dict) -> int:
     write_manifest(manifest)
 
     code = stream_command(command, SESSION_LOG, {"EXP3_VLLM_SNAPSHOT": snapshot["path"]})
-    assert_protected_paths_clean("immediately after ABBA run")
     row.update(returncode=code, completed_utc=now())
 
+    manifest["stage"] = "parse"
     diff, integ, summary = analyze(SESSION_LOG.read_text(encoding="utf-8", errors="replace"), write=True)
-    row["integrity_all_ok"] = integ["all_ok"]
+    row["integrity_counts"] = integ["counts"]
     manifest["gpu_clean_state"] = integ["gpu_clean_state"]
     manifest["correctness_gate"] = integ["correctness_gate"]
+    manifest["processes"] = integ["processes"]
+    manifest["integrity_counts"] = integ["counts"]
+    manifest["config_diff_status"] = diff["status"]
+    manifest.pop("stage", None)
+
     if code != 0 or not integ["all_ok"]:
-        row["status"] = "failed" if code != 0 else "integrity_failed"
-        manifest.update(status="failed", completed_utc=now())
-        write_manifest(manifest)
-        failing = [c["check"] for c in integ["checks"] if not c["ok"]]
+        failure = classify_failure(code, integ)
+        row["status"] = failure["stage"]
+        finalize(manifest, "failed", failure)
         raise SystemExit(
-            f"\nEXPERIMENT 3 STOPPED: modal exit={code}; failing integrity checks: {failing}. "
-            f"Logs and {rel(INTEGRITY)} preserved."
+            f"\nEXPERIMENT 3 STOPPED ({failure['stage']}): modal exit={code}; integrity {integ['counts']}; "
+            f"non-passed categories {integ['non_passed_categories']}. Logs and {rel(INTEGRITY)} preserved."
         )
 
     row["status"] = "passed"
-    assert_protected_paths_clean("after run completed")
-    manifest.update(status="passed", completed_utc=now(), protected_paths_post_run_status="clean")
-    write_manifest(manifest)
+    finalize(manifest, "passed", None)
+    if manifest["status"] != "passed":
+        raise SystemExit(f"\nEXPERIMENT 3 FAILED at post-run checks: {manifest.get('failure')}")
     print("\n" + "=" * 118 + "\nEXPERIMENT 3: ABBA MATCHED RUN PASSED\n"
           f"Summary: {SUMMARY}\n" + "=" * 118)
     return 0
@@ -870,26 +1041,32 @@ def main(argv: list[str] | None = None) -> int:
           f"{[f'{label}={d}' for _, label, d in LEGS]}")
     print(f"Per leg: {WARMUPS_PER_LEG} full-shape warmups (excluded) + {REPS_PER_LEG} measured reps "
           f"-> {REPS_PER_DTYPE} measured reps per dtype. Workload: {CONTEXT_TOKENS} ctx / {OUTPUT_TOKENS} out")
+    print(f"Watchdogs: gate {GATE_TIMEOUT_S}s, each leg {LEG_TIMEOUT_S}s (own process group, group kill, abort)")
     print()
 
     prov = preflight(args.dry_run)
     print("Preflight OK.")
     for k in ("git_branch", "git_head", "vllm_kvquant_tree", "rabit_kv2_sha256", "runner_script_sha256",
-              "modal_app_sha256", "worker_sha256", "correctness_gate_sha256",
+              "modal_app_sha256", "worker_sha256", "correctness_gate_sha256", "watchdog_sha256",
               "canonical_benchmark_deployment_sha256"):
         print(f"  {k:<40} {prov[k]}")
     print("  canonical equivalence: LLM kwargs equal except kv_cache_dtype/model path; image AST equal; "
-          "gate regression() AST equal; timing definitions shared; clean-state constants match")
+          "gate regression() AST equal; no engine RPC in worker; timing definitions shared; "
+          "clean-state + watchdog constants match")
+    print(f"  archived attempts protected: {len(prov['archived_attempts_sha256'])} files hashed")
     if prov["uncommitted_experiment_files"]:
         print("  WARNING (dry-run only): a real run would refuse until these are committed:")
         for line in prov["uncommitted_experiment_files"].splitlines():
             print(f"    {line}")
+    if prov["existing_top_level_output_files"]:
+        print(f"  WARNING (dry-run only): a real run would refuse; previous-attempt files present: "
+              f"{prov['existing_top_level_output_files']}")
 
     plan = {label: flatten("requested", requested_kwargs(d)) for _, label, d in LEGS}
     keys = sorted(set().union(*plan.values()))
     differing = [x for x in keys if len({json.dumps(p.get(x)) for p in plan.values()}) > 1]
     print("\nPlanned requested-config comparison across ABBA legs "
-          "(post-run the same check covers effective config, workload, KV dtype and KV spec):")
+          "(post-run the same check covers effective config, workload and KV dtype):")
     print(json.dumps({"fields_compared": len(keys), "differing_fields": differing,
                       "dtype_induced_allowlist": DTYPE_INDUCED_ALLOWLIST,
                       "only_allowlisted_fields_differ": set(differing) <= set(DTYPE_INDUCED_ALLOWLIST)},
@@ -899,10 +1076,10 @@ def main(argv: list[str] | None = None) -> int:
 
     print("\nLocal command (one Modal run):\n  " + " ".join(build_command()))
     print("Step 0 (in container): idle GPU baseline; no compute process allowed")
-    print("Step 1 (in container): correctness gate, fresh process, must pass before any leg:\n  "
-          + " ".join(GATE_COMMAND_DOC))
+    print(f"Step 1 (in container): correctness gate, fresh process group, watchdog {GATE_TIMEOUT_S}s, "
+          "must pass before any leg:\n  " + " ".join(GATE_COMMAND_DOC))
     for k, label, d in LEGS:
-        print(f"Step {k + 1} (in container): GPU clean check, then leg {label} ({d}):\n  "
+        print(f"Step {k + 1} (in container): GPU clean check, then leg {label} ({d}), watchdog {LEG_TIMEOUT_S}s:\n  "
               + " ".join(worker_command(label, d)))
     print(f"Outputs: {rel(OUT_DIR)}/ ({SESSION_LOG.name}, {GATE_LOG.name}, {', '.join(LOG_NAME.values())}, "
           f"{MANIFEST.name}, {CONFIG_DIFF.name}, {INTEGRITY.name}, {SUMMARY.name})")
@@ -922,17 +1099,34 @@ def main(argv: list[str] | None = None) -> int:
                      "output_tokens": OUTPUT_TOKENS, "same_container_same_gpu": True,
                      "fresh_process_per_leg": True, "dtype_induced_allowlist": DTYPE_INDUCED_ALLOWLIST,
                      "gpu_clean_tolerance_mib": GPU_CLEAN_TOLERANCE_MIB,
-                     "gpu_clean_max_wait_s": GPU_CLEAN_MAX_WAIT_S},
+                     "gpu_clean_max_wait_s": GPU_CLEAN_MAX_WAIT_S,
+                     "gate_timeout_s": GATE_TIMEOUT_S, "leg_timeout_s": LEG_TIMEOUT_S},
         "capacity_label": CAPACITY_LABEL,
         "latency_label": LATENCY_LABEL,
         "started_utc": now(), "completed_utc": None, "status": "running",
+        "protected_paths_post_run_status": "pending",
         "provenance": prov, "runs": [],
     }
     write_manifest(manifest)
+    return execute(manifest)
+
+
+def execute(manifest: dict) -> int:
+    """Run and guarantee a finalized manifest on every terminal path."""
     try:
         return run(manifest)
+    except SystemExit:
+        raise
     except (Exception, KeyboardInterrupt) as exc:
-        record_runner_failure(manifest, exc)
+        t = now()
+        error = {"type": type(exc).__name__, "message": str(exc)}
+        for row in manifest["runs"]:
+            if row.get("status") == "running":
+                row.update(status="runner_failed", completed_utc=t, error=error)
+        manifest["runner_error"] = error
+        stage = manifest.pop("stage", "local_runner")
+        finalize(manifest, "failed", {"stage": "parser_failure" if stage == "parse" else "local_runner_exception",
+                                      **error})
         ce = manifest.get("protected_paths_check_error")
         extra = f"\nPROTECTED-PATH CHECK ALSO FAILED: {ce['type']}: {ce['message']}" if ce else ""
         raise SystemExit(f"\nEXPERIMENT 3 RUNNER FAILED: {type(exc).__name__}: {exc}{extra}\n"

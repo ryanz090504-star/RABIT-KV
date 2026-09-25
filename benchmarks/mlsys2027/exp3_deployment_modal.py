@@ -14,6 +14,9 @@ Inside ONE container / ONE physical GPU:
   1. the idle GPU baseline (memory.used, compute processes) is recorded;
   2. the RABIT-KV correctness gate (exp3_correctness_gate.py, the canonical
      regression() verbatim) runs in its own fresh process and must pass;
+     it and every leg run under a hard watchdog (exp3_watchdog.py: own
+     process group, whole-group SIGTERM/SIGKILL on timeout, reaped); gate
+     GATE_TIMEOUT_S, each leg LEG_TIMEOUT_S; a timeout aborts the experiment;
   3. the ABBA legs run sequentially, each a fresh worker/engine process.
      Before EVERY leg the GPU must have no compute process and memory.used
      within GPU_CLEAN_TOLERANCE_MIB of the idle baseline (polled for at most
@@ -44,11 +47,17 @@ WORKER_LOCAL = Path(__file__).resolve().parent / "exp3_engine_worker.py"
 WORKER_REMOTE = "/opt/exp3/exp3_engine_worker.py"
 GATE_LOCAL = Path(__file__).resolve().parent / "exp3_correctness_gate.py"
 GATE_REMOTE = "/opt/exp3/exp3_correctness_gate.py"
+WATCHDOG_LOCAL = Path(__file__).resolve().parent / "exp3_watchdog.py"
+WATCHDOG_REMOTE = "/opt/exp3/exp3_watchdog.py"
 RABIT_KV2_REMOTE = "/root/vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py"
 EXPECTED_RABIT_SHA256_LF = "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
 GPU_CLEAN_TOLERANCE_MIB = 256
 GPU_CLEAN_MAX_WAIT_S = 60
 GPU_CLEAN_POLL_S = 2
+# Hard per-process watchdogs (process-group kill; see exp3_watchdog.py). The
+# function timeout below is only a final backstop.
+GATE_TIMEOUT_S = 600
+LEG_TIMEOUT_S = 900
 
 if modal.is_local() and not SNAP.is_file():
     raise RuntimeError(
@@ -105,8 +114,10 @@ image = (
     .pip_install("pytest", "modelscope")
 )
 
-image = image.add_local_file(str(WORKER_LOCAL), WORKER_REMOTE, copy=True).add_local_file(
-    str(GATE_LOCAL), GATE_REMOTE, copy=True
+image = (
+    image.add_local_file(str(WORKER_LOCAL), WORKER_REMOTE, copy=True)
+    .add_local_file(str(GATE_LOCAL), GATE_REMOTE, copy=True)
+    .add_local_file(str(WATCHDOG_LOCAL), WATCHDOG_REMOTE, copy=True)
 )
 
 
@@ -182,15 +193,22 @@ def _require_clean(label: str, baseline_mib: list[int]) -> None:
         )
 
 
-def _relay(cmd: list[str], prefix: str) -> int:
-    p = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-        text=True, encoding="utf-8", errors="replace", bufsize=1,
-    )
-    assert p.stdout is not None
-    for line in p.stdout:
-        print(f"{prefix}{line}", end="", flush=True)
-    return p.wait()
+def _run_guarded(cmd: list[str], prefix: str, timeout_s: int, label: str) -> dict:
+    """Run under the hard watchdog (own process group, group kill on timeout)."""
+    sys.path.insert(0, str(Path(WATCHDOG_REMOTE).parent))
+    from exp3_watchdog import run_with_watchdog
+
+    meta = run_with_watchdog(cmd, prefix, timeout_s, label)
+    _emit("EXP3_PROCESS_EXIT", meta)
+    if meta["timed_out"]:
+        _emit("EXP3_WATCHDOG_TIMEOUT", meta)
+        raise RuntimeError(
+            f"{label} exceeded its {timeout_s}s watchdog; process group {meta['pgid']} killed "
+            f"({meta['signals_sent']}); aborting the whole experiment, no retry"
+        )
+    if meta["group_processes_remaining"]:
+        raise RuntimeError(f"{label}: processes survived group kill: {meta['group_processes_remaining']}")
+    return meta
 
 
 @app.function(
@@ -239,8 +257,8 @@ def abba(legs: str, warmups: int, reps_per_leg: int) -> None:
 
     # Correctness gate: must pass before any measurement. Not timed.
     gate_cmd = [sys.executable, GATE_REMOTE]
-    _emit("EXP3_GATE_START", {"cmd": gate_cmd})
-    code = _relay(gate_cmd, "[gate] ")
+    _emit("EXP3_GATE_START", {"cmd": gate_cmd, "timeout_s": GATE_TIMEOUT_S})
+    code = _run_guarded(gate_cmd, "[gate] ", GATE_TIMEOUT_S, "gate")["returncode"]
     _emit("EXP3_GATE_EXIT", {"returncode": code})
     if code != 0:
         raise RuntimeError(f"correctness gate failed with exit code {code}; no measurement run")
@@ -276,8 +294,9 @@ def abba(legs: str, warmups: int, reps_per_leg: int) -> None:
             "--reps", str(reps_per_leg),
             "--leg", label,
         ]
-        _emit("EXP3_LEG_START", {"leg": label, "index": k, "kv_cache_dtype": dtype, "cmd": cmd})
-        code = _relay(cmd, f"[leg{k}:{dtype}] ")
+        _emit("EXP3_LEG_START", {"leg": label, "index": k, "kv_cache_dtype": dtype, "cmd": cmd,
+                                 "timeout_s": LEG_TIMEOUT_S})
+        code = _run_guarded(cmd, f"[leg{k}:{dtype}] ", LEG_TIMEOUT_S, label)["returncode"]
         _emit("EXP3_LEG_EXIT", {"leg": label, "index": k, "kv_cache_dtype": dtype, "returncode": code})
         if code != 0:
             raise RuntimeError(f"leg {label} ({dtype}) failed with exit code {code}; not continuing")
