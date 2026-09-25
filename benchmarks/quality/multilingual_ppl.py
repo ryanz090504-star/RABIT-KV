@@ -12,10 +12,18 @@ For each language and independent article sample, this script:
 4. Scores a fixed continuation with teacher forcing.
 5. Reports continuation PPL and logical prefix-KV memory.
 
-The comparison is intentionally focused on the final Pareto points:
-- BF16 baseline
-- 8-bit: META8g256, symmetric G128, R0
-- 2-bit target: META8g64, K3/V2 affine G32, R4
+Accepted methods (--methods): bf16, rabit8, rabit4, rabit3, rabit2.
+- bf16:   BF16 baseline
+- rabit8: 8-bit, META8g256, symmetric G128, R0
+- rabit4: 4-bit, META8g64, symmetric G128, R0
+- rabit3: 3-bit, META8g64, symmetric G32, R2
+- rabit2: 2-bit target, META8g64, K3/V2 affine G32, R4
+The presets are identical to continuation_ppl.py. The default --methods remains
+bf16,rabit8,rabit2 (the original final Pareto points), so a default invocation
+behaves exactly as before; rabit4/rabit3 run only when requested explicitly
+(e.g. by benchmarks/mlsys2027/run_experiment2_multilingual_frontier.py).
+The canonical multilingual result (results/quality/multilingual_ppl.log) was
+produced with --methods bf16,rabit2.
 
 This is a multilingual diagnostic, not a deployment-latency benchmark. It does
 not measure physically allocated GPU memory. Logical memory counts packed
@@ -113,12 +121,12 @@ def run_quality(
         for item in methods.split(",")
         if item.strip()
     ]
-    allowed = {"bf16", "rabit8", "rabit2"}
+    allowed = {"bf16", "rabit8", "rabit4", "rabit3", "rabit2"}
     invalid = [item for item in requested if item not in allowed]
     if invalid:
         raise ValueError(
             f"Unsupported methods: {invalid}. "
-            "Use bf16,rabit8,rabit2."
+            "Use bf16,rabit8,rabit4,rabit3,rabit2."
         )
     if "bf16" not in requested:
         requested.insert(0, "bf16")

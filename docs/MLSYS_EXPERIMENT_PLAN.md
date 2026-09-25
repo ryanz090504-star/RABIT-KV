@@ -68,8 +68,8 @@ result.
 - **Fixed variables:** model, dataset, context/eval token counts, sample counts, seed —
   identical to the canonical committed runs for each benchmark.
 - **Existing script(s) to reuse:**
-  `benchmarks/quality/continuation_ppl.py`, `multilingual_ppl.py` (bf16/rabit8/rabit2 only —
-  see Experiment 2), `niah.py`, `passage_retrieval.py`, `hotpotqa.py`, `qasper.py`.
+  `benchmarks/quality/continuation_ppl.py`, `multilingual_ppl.py` (handled separately
+  in Experiment 2; its canonical run covered bf16/rabit2 only), `niah.py`, `passage_retrieval.py`, `hotpotqa.py`, `qasper.py`.
 - **Exact code changes required:** **None.** Pass
   `--methods bf16,rabit8,rabit4,rabit3,rabit2` instead of the canonical `bf16,rabit2`.
 - **Model:** `LLM-Research/Meta-Llama-3.1-8B-Instruct`.
@@ -105,35 +105,51 @@ result.
   (Experiment 1) hold for Chinese and Spanish continuation PPL at the 4-bit and 3-bit
   points, not just 8-bit and the final 2-bit target?
 - **Why MLSys reviewers would care:** Multilingual generalization is currently only shown
-  at two frontier points (8-bit, 2-bit); a reviewer will ask whether the omission of
-  4-bit/3-bit multilingual data is because it was unfavorable or simply unrun. Closing this
-  gap removes an easy rejection point.
-- **Hypothesis:** the shape of the multilingual degradation curve mirrors English, but
-  Chinese may show larger relative PPL delta than Spanish at the more aggressive bit-widths
-  (already true at 2-bit: +2.11% zh vs +2.21% es is close, but the gap may widen).
+  at the final 2-bit target: the canonical multilingual run
+  (`results/quality/multilingual_ppl.log`, `run_suite.py` `--methods bf16,rabit2`) contains
+  **only `bf16` and `rabit2`**. There is **no canonical `rabit8` multilingual result**. A
+  reviewer will ask whether the omission of 8/4/3-bit multilingual data is because it was
+  unfavorable or simply unrun. Closing this gap removes an easy rejection point.
+- **Hypothesis:** the shape of the multilingual degradation curve mirrors English.
+  At the final 2-bit target, Spanish shows a slightly larger relative PPL delta than Chinese
+  (+2.21% vs +2.11%). Experiment 2 tests whether language-specific sensitivity diverges at
+  the intermediate operating points.
 - **Control / baseline:** `bf16`.
 - **Treatment:** `rabit8`, `rabit4`, `rabit3`, `rabit2`.
+- **Canonical regression baselines:** `bf16` and `rabit2` are the **only** methods with a
+  canonical multilingual result, and therefore the only ones regression-checked. `rabit8`,
+  `rabit4` and `rabit3` are **all new MLSys 2027 evidence**; no claim is made that `rabit8`
+  reproduces a canonical multilingual result.
 - **Fixed variables:** languages `zh,es`; pinned dataset revision
   `cf584d1dc131caa92a5cb910f41a8b7591b12732`; shuffle seed `20260804`, shuffle buffer 1000;
   context/eval tokens 1024/128; samples/language = 8.
 - **Existing script to reuse:** `benchmarks/quality/multilingual_ppl.py`.
-- **Exact code changes required:** add `rabit3` and `rabit4` entries to
-  `config_for_method`, mirroring the definitions already present in
-  `continuation_ppl.py` (3b: K3/V3 group_sym, G32, R2, META8g64; 4b: K4/V4 group_sym, G128,
-  R0, META8g64). Extend the `allowed` set from `{"bf16","rabit8","rabit2"}` to
-  `{"bf16","rabit8","rabit4","rabit3","rabit2"}` and update the default `methods` string.
-  This is an additive change to one file; no change to `rabit8`/`rabit2` logic.
+- **Exact code changes required:** `config_for_method` in `multilingual_ppl.py` already
+  contains `rabit4` and `rabit3` entries identical to `continuation_ppl.py` (3b: K3/V3
+  group_sym, G32, R2, META8g64; 4b: K4/V4 group_sym, G128, R0, META8g64); the whole
+  preset/quantization/accounting/evaluation section is byte-identical between the two
+  scripts, and the Experiment 2 runner re-verifies this at preflight. The only change is to
+  extend the `allowed` set from `{"bf16","rabit8","rabit2"}` to
+  `{"bf16","rabit8","rabit4","rabit3","rabit2"}` (plus its error message). The default
+  `methods` string stays `bf16,rabit8,rabit2` so a default invocation behaves exactly as
+  before; the runner passes `--methods bf16,rabit8,rabit4,rabit3,rabit2` explicitly. No
+  change to `bf16`/`rabit8`/`rabit2` logic.
+- **Runner:** `benchmarks/mlsys2027/run_experiment2_multilingual_frontier.py`.
 - **Model:** `LLM-Research/Meta-Llama-3.1-8B-Instruct`.
 - **Dataset/workload:** pinned Chinese/Spanish Wikipedia revision (as canonical).
 - **GPU:** H100 80GB, Modal.
 - **Metrics:** PPL, PPL delta % per language, mean/worst relative delta across languages.
 - **Repetitions/samples:** 8 samples/language (matches canonical).
-- **Raw output path:** `results/mlsys2027/quality_frontier/multilingual_ppl_extended.log`.
+- **Raw output path:** `results/mlsys2027/multilingual_frontier/multilingual_ppl.log`
+  (with `manifest.json` and `regression_check.json` alongside).
 - **Paper figure/table:** extends Experiment 1's frontier table/figure with zh/es rows at
   all 4 bit-widths.
 - **Completion criterion:** script runs to completion for all 5 methods across both
-  languages; bf16/rabit8/rabit2 rows match the canonical `results/quality/multilingual_ppl.log`
-  numbers exactly (regression check on the code change).
+  languages; **`bf16` and `rabit2`** reproduce the canonical
+  `results/quality/multilingual_ppl.log` values for both languages within explicit
+  tolerances (PPL 0.5% relative, avg logical KV MB 0.1% relative — the same tolerances as
+  Experiment 1). `rabit8`/`rabit4`/`rabit3` have no canonical baseline and are recorded as
+  new evidence, not regression-checked.
 - **Estimated engineering difficulty:** Low–medium (small, isolated code addition plus a
   regression check against canonical numbers).
 - **Estimated GPU cost:** Low, comparable to Experiment 1's per-script cost.
