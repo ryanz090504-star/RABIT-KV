@@ -173,7 +173,12 @@ result.
   assumed — RABIT-KV's online packing/aging/dequant path may add per-token overhead in
   eager mode that a naive reader would not expect from a "compression" method. Report
   whatever is measured.
-- **Control:** `kv_cache_dtype=auto` (i.e., native `bfloat16` KV cache).
+- **Control:** explicit `kv_cache_dtype="bfloat16"` (native BF16 KV cache). Not `auto`:
+  in vLLM, `auto` resolves to the model dtype (BF16 here) but can be silently overridden
+  by a checkpoint `kv_cache_scheme`/`quantization_config`; an explicit value cannot. The
+  run records the actually resolved KV dtype (engine `cache_dtype` + resolved torch dtype,
+  worker KV-cache spec) and cross-checks it physically (implied bytes/token must match
+  2-byte BF16 KV within 1%).
 - **Treatment:** `kv_cache_dtype=rabit_kv2`.
 - **Variables that must remain fixed:** eager execution (`enforce_eager=True`), Triton
   attention backend, CUDA graphs disabled, `torch.compile` disabled,
@@ -181,16 +186,39 @@ result.
   `max_num_batched_tokens=16384`, `max_num_seqs=32`, prefix caching disabled, chunked
   prefill enabled, context tokens = 2048, output tokens = 32, same model checkpoint, same
   GPU/Modal image, same vLLM commit (`f329ce4...`).
-- **Existing script to reuse:** `benchmarks/performance/benchmark_deployment.py`.
-- **Exact code changes required:** parameterize the embedded Modal runner with a
-  `--kv-cache-dtype` argument (currently hardcoded to `rabit_kv2` in the run config passed
-  to the engine) so the identical script can launch with `auto`/`bfloat16` or `rabit_kv2`;
-  increase decode repetitions from the canonical 5 to ≥20 with the first rep explicitly
-  excluded as warmup (the canonical log already shows a 50ms outlier on rep 0 vs. ~21ms on
-  reps 1–4 — this must be handled with a documented, fixed rule, not silently); redirect
-  `LOG` to `results/mlsys2027/deployment/` instead of the reproducibility doc's
-  `deployment_reproduced.log` path (that path is reserved for plain reproduction of the
-  canonical run, not new MLSys evidence).
+- **Canonical script (NOT modified):** `benchmarks/performance/benchmark_deployment.py`.
+  Its measurement code is a zlib+base64 blob (`RUNNER_Z`, `kv_cache_dtype="rabit_kv2"`
+  hardcoded), its `install()` can append a patch to `rabit_kv2.py`, and it writes into the
+  protected `results/performance/`. It stays untouched as the provenance of the canonical
+  result.
+- **New Experiment 3 files instead:** `benchmarks/mlsys2027/`
+  `run_experiment3_deployment.py` (local runner), `exp3_deployment_modal.py` (Modal app),
+  `exp3_engine_worker.py` (one engine per leg, parameterized only by `kv_cache_dtype`),
+  `exp3_correctness_gate.py` (canonical `regression()` verbatim). Before every run the
+  runner proves by AST against the decoded canonical `RUNNER_Z` that the worker's
+  `LLM(...)` arguments are identical except `kv_cache_dtype`, the Modal image expression is
+  identical, the gate's `regression()` is identical, and the TTFT/TPOT/wall and prompt
+  definitions are shared. The `vllm-kvquant` snapshot is `git archive` of the committed tree.
+- **Protocol:** one Modal container / one physical H100 / one image / one model snapshot.
+  (1) Record the idle GPU baseline. (2) Correctness gate in a fresh process (dispatch
+  preflight, Stage4D3.4 prep + attention exactness, fast decode-append exactness, pytest on
+  `test_kvquant_k3.py` + `test_rabit_kv2*.py` excluding `stage4b1`); must pass before any
+  measurement and is not timed. (3) Counterbalanced **ABBA** legs, A = `bfloat16`,
+  B = `rabit_kv2`: A1, B1, B2, A2, each a fresh worker/engine process with **5 full-shape
+  warmups** (2048 in / 32 out, excluded from statistics; replaces the canonical 2 × 8-token
+  warmup, after which rep 0 was still a 50 ms outlier) and **15 measured reps** → **30
+  measured reps per dtype**.
+- **GPU clean state:** before every leg, no GPU compute process and `memory.used` within
+  256 MiB of the idle baseline (polled at most 60 s while a previous process releases
+  memory; a wait, never a rerun). A stale allocation hard-fails the experiment rather than
+  shrinking the next dtype's allocator capacity.
+- **Matched-config enforcement:** requested kwargs, effective engine config, workload
+  (including a hash of the prompt token IDs), resolved KV dtype and worker KV spec are
+  flattened per leg and compared across all four legs. Only the kv_cache_dtype-induced
+  allowlist (`requested.kv_cache_dtype`, `kv_dtype.requested_kv_cache_dtype`,
+  `kv_dtype.engine_cache_dtype`, `kv_dtype.resolved_kv_torch_dtype`,
+  `kv_cache_representation.kv_spec`) may differ, and only between dtypes, never between
+  the two legs of one dtype. Any other difference hard-fails.
 - **Model:** `LLM-Research/Meta-Llama-3.1-8B-Instruct`.
 - **Dataset/workload:** synthetic single-request decode microbenchmark, 2048-token prefill,
   32 generated tokens (identical to canonical methodology).
@@ -198,23 +226,34 @@ result.
 - **Metrics:** TPOT median/p50/p90, TTFT median, wall-time median, allocator capacity
   (tokens), capacity ratio ×, latency delta % (RABIT-KV vs BF16, signed — do not report as
   "speedup" unless negative/positive is confirmed).
-- **Repetitions/samples:** ≥20 decode reps per dtype (vs. canonical 5), first rep excluded
-  as warmup; capacity read once per dtype (deterministic given fixed config).
-- **Raw output path:** `results/mlsys2027/deployment/{bf16,rabit_kv2}_deployment.log` +
-  `results/mlsys2027/deployment/matched_capacity_latency_summary.json`.
+- **Repetitions/samples:** ABBA, 15 measured reps per leg = 30 per dtype (vs. canonical
+  5), plus 5 excluded full-shape warmups per leg. All raw samples, per-leg statistics and
+  pooled 30-sample statistics are reported; headline TPOT median/p90, TTFT median and wall
+  median come from the pooled samples. Capacity (`num_gpu_blocks × block_size`, physical
+  allocator) is measured in both legs of each dtype and the two measurements must agree
+  exactly, else hard fail.
+- **BF16 capacity:** the historical 393,024-token BF16 figure is a derived value with no
+  run log in the repository; it is NOT reused. The new BF16 capacity is directly measured
+  by this experiment.
+- **Raw output path:** `results/mlsys2027/deployment/`: `modal_session.log`,
+  `correctness_gate.log`, `bf16_deployment.log`, `rabit_kv2_deployment.log`,
+  `manifest.json`, `matched_config_diff.json`, `integrity_check.json`,
+  `matched_capacity_latency_summary.json`.
 - **Paper figure/table:** Table — "Matched BF16 vs. RABIT-KV deployment" (capacity tokens,
   ratio, TPOT/TTFT/wall absolute + delta %). This is the headline systems table for the
   paper.
-- **Completion criterion:** both runs complete under byte-identical config except dtype;
-  summary JSON contains capacity ratio and signed latency deltas; the plan document and any
-  paper draft state the measured direction of latency change explicitly (no assumed
-  speedup).
-- **Estimated engineering difficulty:** Medium (small, careful script parameterization;
-  risk is inadvertently changing an engine arg between the two runs — must diff the two
-  launch configs programmatically before trusting results).
-- **Estimated GPU cost:** Low. Two engine boot-ups (~90s init each, per canonical log) plus
-  ~20 short decode reps each; well under an H100-hour total, with margin for 2–3 retries if
-  results look unstable.
+- **Completion criterion:** correctness gate passes; all four ABBA legs complete; every
+  integrity check passes (matched config per the allowlist rule, GPU clean before every
+  leg, duplicate capacities identical, resolved KV dtypes as expected, 5 warmups + 15 reps
+  per leg with 2048/32 tokens, no Triton JIT during measurement); summary JSON contains the
+  capacity ratio and signed (rabit_kv2 − bf16) latency deltas from pooled samples; the plan
+  document and any paper draft state the measured direction of latency change explicitly
+  (no assumed speedup).
+- **Estimated engineering difficulty:** Medium (careful, programmatically verified
+  equivalence to the canonical engine configuration).
+- **Estimated GPU cost:** Low. One correctness gate (~1–2 min) plus four engine boot-ups
+  (~90 s each, per canonical log) and 4 × 20 short requests; well under an H100-hour. No
+  automatic retries; any rerun is an explicit decision.
 
 ### Experiment 4 — FP8 baseline: matched physical capacity and latency (real engine only)
 
