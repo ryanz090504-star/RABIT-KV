@@ -1,0 +1,161 @@
+{
+  "note": "bf16/rabit2 regression check only (the canonical multilingual run covered bf16 and rabit2 only). rabit8/rabit4/rabit3 have no canonical multilingual baseline and are new evidence -- see multilingual_ppl.log. All avg_kv_mb figures: LOGICAL fake-quant KV storage; not physical vLLM allocator capacity.",
+  "tolerances": {
+    "ppl_relative": 0.005,
+    "avg_kv_mb_relative": 0.001
+  },
+  "result": {
+    "benchmark": "multilingual_ppl",
+    "checks": [
+      {
+        "metric": "logged presets == expected presets",
+        "observed": {
+          "bf16": "BF16 baseline",
+          "rabit8": "8b META8g256 G128 R0",
+          "rabit4": "4b META8g64 SYM G128 R0",
+          "rabit3": "3b META8g64 SYM G32 R2",
+          "rabit2": "2b META8g64 K3V2 G32 R4"
+        },
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh: all five method rows present",
+        "observed": [
+          "bf16",
+          "rabit2",
+          "rabit3",
+          "rabit4",
+          "rabit8"
+        ],
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh.bf16.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh.rabit8.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh.rabit4.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh.rabit3.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh.rabit2.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh.bf16.ppl",
+        "canonical": 10.1176,
+        "observed": 10.1176,
+        "abs_diff": 0.0,
+        "tolerance": 0.050588,
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh.bf16.avg_kv_mb",
+        "canonical": 128.0,
+        "observed": 128.0,
+        "abs_diff": 0.0,
+        "tolerance": 0.128,
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh.rabit2.ppl",
+        "canonical": 10.3308,
+        "observed": 10.3308,
+        "abs_diff": 0.0,
+        "tolerance": 0.051654,
+        "within_tolerance": true
+      },
+      {
+        "metric": "zh.rabit2.avg_kv_mb",
+        "canonical": 24.71,
+        "observed": 24.71,
+        "abs_diff": 0.0,
+        "tolerance": 0.024710000000000003,
+        "within_tolerance": true
+      },
+      {
+        "metric": "es: all five method rows present",
+        "observed": [
+          "bf16",
+          "rabit2",
+          "rabit3",
+          "rabit4",
+          "rabit8"
+        ],
+        "within_tolerance": true
+      },
+      {
+        "metric": "es.bf16.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "es.rabit8.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "es.rabit4.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "es.rabit3.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "es.rabit2.tokens == 1024",
+        "observed": 1024,
+        "within_tolerance": true
+      },
+      {
+        "metric": "es.bf16.ppl",
+        "canonical": 5.0035,
+        "observed": 5.0035,
+        "abs_diff": 0.0,
+        "tolerance": 0.025017499999999998,
+        "within_tolerance": true
+      },
+      {
+        "metric": "es.bf16.avg_kv_mb",
+        "canonical": 128.0,
+        "observed": 128.0,
+        "abs_diff": 0.0,
+        "tolerance": 0.128,
+        "within_tolerance": true
+      },
+      {
+        "metric": "es.rabit2.ppl",
+        "canonical": 5.1139,
+        "observed": 5.1139,
+        "abs_diff": 0.0,
+        "tolerance": 0.025569500000000002,
+        "within_tolerance": true
+      },
+      {
+        "metric": "es.rabit2.avg_kv_mb",
+        "canonical": 24.71,
+        "observed": 24.71,
+        "abs_diff": 0.0,
+        "tolerance": 0.024710000000000003,
+        "within_tolerance": true
+      }
+    ],
+    "all_within_tolerance": true
+  },
+  "all_within_tolerance": true
+}

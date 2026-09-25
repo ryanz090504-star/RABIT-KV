@@ -1,0 +1,875 @@
+{
+  "experiment": "MLSys 2027 Experiment 2 -- multilingual operating-point quality-compression sweep",
+  "description": "Chinese/Spanish Wikipedia teacher-forced continuation perplexity across the bf16 baseline and the rabit8/rabit4/rabit3/rabit2 presets on Llama-3.1-8B-Instruct. This is an operating-point sweep, NOT a pure bit-width ablation: the presets differ in more than bit width (see presets_as_logged).",
+  "derivation": "All rerun values are parsed ONLY from the raw log recorded in raw_log; each aggregate row carries its source line and verbatim text, and each per-sample value its line number. logical_compression_vs_bf16 = bf16 logical KV MB / method logical KV MB (3 dp). ppl_delta_pct_vs_bf16_computed = (PPL / bf16 PPL - 1) x 100 (2 dp) from the rounded logged PPLs; the *_logged values are the script's own figures from unrounded internals. Cross-language mean/worst are computed from the per-language logged deltas and checked against the log's summary table. canonical_reference is the only non-rerun data.",
+  "generated_by": "benchmarks/mlsys2027/build_exp2_summary.py",
+  "validated_by": "benchmarks/mlsys2027/validate_exp2_summary.py",
+  "kv_memory_label": "LOGICAL fake-quant KV storage; not physical vLLM allocator capacity",
+  "raw_log": {
+    "path": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+    "sha256": "b81f9637d4c0f6a010747f695b748c378ef5e0c69a9fe7739bb695b1a83c9a29",
+    "sha256_basis": "SHA-256 of LF-normalized bytes (CRLF -> LF): equals the SHA-256 of the committed git content and is stable across core.autocrlf checkouts"
+  },
+  "run_reference": {
+    "note": "Run metadata only (not used for any number); see manifest.json.",
+    "manifest": "results/mlsys2027/multilingual_frontier/manifest.json",
+    "regression_check": "results/mlsys2027/multilingual_frontier/regression_check.json"
+  },
+  "settings": {
+    "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+    "languages": [
+      "zh",
+      "es"
+    ],
+    "dataset": "wikimedia/wikipedia 20231101.{zh,es}",
+    "dataset_revision": "cf584d1dc131caa92a5cb910f41a8b7591b12732",
+    "shuffle_seed": 20260804,
+    "shuffle_buffer": 1000,
+    "context_tokens": 1024,
+    "eval_tokens_per_sample": 128,
+    "samples_per_language": 8,
+    "scored_tokens_per_language_method": 1024,
+    "note": "Settings as passed by the Experiment 2 runner; see manifest.json."
+  },
+  "presets_as_logged": {
+    "bf16": "BF16 baseline",
+    "rabit8": "8b META8g256 G128 R0",
+    "rabit4": "4b META8g64 SYM G128 R0",
+    "rabit3": "3b META8g64 SYM G32 R2",
+    "rabit2": "2b META8g64 K3V2 G32 R4"
+  },
+  "languages": {
+    "zh": {
+      "language": "Chinese",
+      "methods": {
+        "bf16": {
+          "ppl": 10.1176,
+          "ppl_delta_pct_vs_bf16_logged": 0.0,
+          "ppl_delta_pct_vs_bf16_computed": 0.0,
+          "median_sample_ppl": 10.0736,
+          "logical_kv_mb": 128.0,
+          "logical_compression_vs_bf16": 1.0,
+          "logged_compression": 1.0,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 8.2417,
+              "logical_kv_mb": 128.0,
+              "line": 73
+            },
+            {
+              "sample": 2,
+              "ppl": 13.4707,
+              "logical_kv_mb": 128.0,
+              "line": 74
+            },
+            {
+              "sample": 3,
+              "ppl": 7.4606,
+              "logical_kv_mb": 128.0,
+              "line": 75
+            },
+            {
+              "sample": 4,
+              "ppl": 8.314,
+              "logical_kv_mb": 128.0,
+              "line": 76
+            },
+            {
+              "sample": 5,
+              "ppl": 13.8108,
+              "logical_kv_mb": 128.0,
+              "line": 77
+            },
+            {
+              "sample": 6,
+              "ppl": 14.3303,
+              "logical_kv_mb": 128.0,
+              "line": 78
+            },
+            {
+              "sample": 7,
+              "ppl": 6.8084,
+              "logical_kv_mb": 128.0,
+              "line": 79
+            },
+            {
+              "sample": 8,
+              "ppl": 11.8332,
+              "logical_kv_mb": 128.0,
+              "line": 80
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 127,
+            "row": "bf16        10.1176       0.00          10.0736               128.000         1.000           1024"
+          }
+        },
+        "rabit8": {
+          "ppl": 10.1232,
+          "ppl_delta_pct_vs_bf16_logged": 0.06,
+          "ppl_delta_pct_vs_bf16_computed": 0.06,
+          "median_sample_ppl": 10.1137,
+          "logical_kv_mb": 64.508,
+          "logical_compression_vs_bf16": 1.984,
+          "logged_compression": 1.984,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 8.1962,
+              "logical_kv_mb": 64.508,
+              "line": 83
+            },
+            {
+              "sample": 2,
+              "ppl": 13.5302,
+              "logical_kv_mb": 64.508,
+              "line": 84
+            },
+            {
+              "sample": 3,
+              "ppl": 7.4312,
+              "logical_kv_mb": 64.508,
+              "line": 85
+            },
+            {
+              "sample": 4,
+              "ppl": 8.3385,
+              "logical_kv_mb": 64.508,
+              "line": 86
+            },
+            {
+              "sample": 5,
+              "ppl": 13.7639,
+              "logical_kv_mb": 64.508,
+              "line": 87
+            },
+            {
+              "sample": 6,
+              "ppl": 14.333,
+              "logical_kv_mb": 64.508,
+              "line": 88
+            },
+            {
+              "sample": 7,
+              "ppl": 6.843,
+              "logical_kv_mb": 64.508,
+              "line": 89
+            },
+            {
+              "sample": 8,
+              "ppl": 11.889,
+              "logical_kv_mb": 64.508,
+              "line": 90
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 128,
+            "row": "rabit8      10.1232       0.06          10.1137               64.508          1.984           1024"
+          }
+        },
+        "rabit4": {
+          "ppl": 10.4528,
+          "ppl_delta_pct_vs_bf16_logged": 3.31,
+          "ppl_delta_pct_vs_bf16_computed": 3.31,
+          "median_sample_ppl": 10.4719,
+          "logical_kv_mb": 32.531,
+          "logical_compression_vs_bf16": 3.935,
+          "logged_compression": 3.935,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 8.3829,
+              "logical_kv_mb": 32.531,
+              "line": 93
+            },
+            {
+              "sample": 2,
+              "ppl": 13.939,
+              "logical_kv_mb": 32.531,
+              "line": 94
+            },
+            {
+              "sample": 3,
+              "ppl": 7.4406,
+              "logical_kv_mb": 32.531,
+              "line": 95
+            },
+            {
+              "sample": 4,
+              "ppl": 8.4279,
+              "logical_kv_mb": 32.531,
+              "line": 96
+            },
+            {
+              "sample": 5,
+              "ppl": 14.6484,
+              "logical_kv_mb": 32.531,
+              "line": 97
+            },
+            {
+              "sample": 6,
+              "ppl": 15.3015,
+              "logical_kv_mb": 32.531,
+              "line": 98
+            },
+            {
+              "sample": 7,
+              "ppl": 6.9332,
+              "logical_kv_mb": 32.531,
+              "line": 99
+            },
+            {
+              "sample": 8,
+              "ppl": 12.5159,
+              "logical_kv_mb": 32.531,
+              "line": 100
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 129,
+            "row": "rabit4      10.4528       3.31          10.4719               32.531          3.935           1024"
+          }
+        },
+        "rabit3": {
+          "ppl": 10.8824,
+          "ppl_delta_pct_vs_bf16_logged": 7.56,
+          "ppl_delta_pct_vs_bf16_computed": 7.56,
+          "median_sample_ppl": 10.7392,
+          "logical_kv_mb": 26.324,
+          "logical_compression_vs_bf16": 4.862,
+          "logged_compression": 4.862,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 8.7453,
+              "logical_kv_mb": 26.324,
+              "line": 103
+            },
+            {
+              "sample": 2,
+              "ppl": 14.7315,
+              "logical_kv_mb": 26.324,
+              "line": 104
+            },
+            {
+              "sample": 3,
+              "ppl": 7.8578,
+              "logical_kv_mb": 26.324,
+              "line": 105
+            },
+            {
+              "sample": 4,
+              "ppl": 9.1046,
+              "logical_kv_mb": 26.324,
+              "line": 106
+            },
+            {
+              "sample": 5,
+              "ppl": 15.4117,
+              "logical_kv_mb": 26.324,
+              "line": 107
+            },
+            {
+              "sample": 6,
+              "ppl": 15.7721,
+              "logical_kv_mb": 26.324,
+              "line": 108
+            },
+            {
+              "sample": 7,
+              "ppl": 7.0955,
+              "logical_kv_mb": 26.324,
+              "line": 109
+            },
+            {
+              "sample": 8,
+              "ppl": 12.3738,
+              "logical_kv_mb": 26.324,
+              "line": 110
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 130,
+            "row": "rabit3      10.8824       7.56          10.7392               26.324          4.862           1024"
+          }
+        },
+        "rabit2": {
+          "ppl": 10.3308,
+          "ppl_delta_pct_vs_bf16_logged": 2.11,
+          "ppl_delta_pct_vs_bf16_computed": 2.11,
+          "median_sample_ppl": 10.2241,
+          "logical_kv_mb": 24.71,
+          "logical_compression_vs_bf16": 5.18,
+          "logged_compression": 5.18,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 8.3243,
+              "logical_kv_mb": 24.71,
+              "line": 113
+            },
+            {
+              "sample": 2,
+              "ppl": 14.5232,
+              "logical_kv_mb": 24.71,
+              "line": 114
+            },
+            {
+              "sample": 3,
+              "ppl": 7.7108,
+              "logical_kv_mb": 24.71,
+              "line": 115
+            },
+            {
+              "sample": 4,
+              "ppl": 8.1743,
+              "logical_kv_mb": 24.71,
+              "line": 116
+            },
+            {
+              "sample": 5,
+              "ppl": 13.9091,
+              "logical_kv_mb": 24.71,
+              "line": 117
+            },
+            {
+              "sample": 6,
+              "ppl": 14.6199,
+              "logical_kv_mb": 24.71,
+              "line": 118
+            },
+            {
+              "sample": 7,
+              "ppl": 6.9058,
+              "logical_kv_mb": 24.71,
+              "line": 119
+            },
+            {
+              "sample": 8,
+              "ppl": 12.124,
+              "logical_kv_mb": 24.71,
+              "line": 120
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 131,
+            "row": "rabit2      10.3308       2.11          10.2241               24.710          5.180           1024"
+          }
+        }
+      }
+    },
+    "es": {
+      "language": "Spanish",
+      "methods": {
+        "bf16": {
+          "ppl": 5.0035,
+          "ppl_delta_pct_vs_bf16_logged": 0.0,
+          "ppl_delta_pct_vs_bf16_computed": 0.0,
+          "median_sample_ppl": 4.4927,
+          "logical_kv_mb": 128.0,
+          "logical_compression_vs_bf16": 1.0,
+          "logged_compression": 1.0,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 3.5996,
+              "logical_kv_mb": 128.0,
+              "line": 137
+            },
+            {
+              "sample": 2,
+              "ppl": 2.5965,
+              "logical_kv_mb": 128.0,
+              "line": 138
+            },
+            {
+              "sample": 3,
+              "ppl": 4.616,
+              "logical_kv_mb": 128.0,
+              "line": 139
+            },
+            {
+              "sample": 4,
+              "ppl": 7.8358,
+              "logical_kv_mb": 128.0,
+              "line": 140
+            },
+            {
+              "sample": 5,
+              "ppl": 9.3837,
+              "logical_kv_mb": 128.0,
+              "line": 141
+            },
+            {
+              "sample": 6,
+              "ppl": 7.8596,
+              "logical_kv_mb": 128.0,
+              "line": 142
+            },
+            {
+              "sample": 7,
+              "ppl": 3.6055,
+              "logical_kv_mb": 128.0,
+              "line": 143
+            },
+            {
+              "sample": 8,
+              "ppl": 4.3694,
+              "logical_kv_mb": 128.0,
+              "line": 144
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 192,
+            "row": "bf16        5.0035        0.00          4.4927                128.000         1.000           1024"
+          }
+        },
+        "rabit8": {
+          "ppl": 5.0127,
+          "ppl_delta_pct_vs_bf16_logged": 0.18,
+          "ppl_delta_pct_vs_bf16_computed": 0.18,
+          "median_sample_ppl": 4.4874,
+          "logical_kv_mb": 64.508,
+          "logical_compression_vs_bf16": 1.984,
+          "logged_compression": 1.984,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 3.6103,
+              "logical_kv_mb": 64.508,
+              "line": 147
+            },
+            {
+              "sample": 2,
+              "ppl": 2.5943,
+              "logical_kv_mb": 64.508,
+              "line": 148
+            },
+            {
+              "sample": 3,
+              "ppl": 4.6214,
+              "logical_kv_mb": 64.508,
+              "line": 149
+            },
+            {
+              "sample": 4,
+              "ppl": 7.872,
+              "logical_kv_mb": 64.508,
+              "line": 150
+            },
+            {
+              "sample": 5,
+              "ppl": 9.4205,
+              "logical_kv_mb": 64.508,
+              "line": 151
+            },
+            {
+              "sample": 6,
+              "ppl": 7.8887,
+              "logical_kv_mb": 64.508,
+              "line": 152
+            },
+            {
+              "sample": 7,
+              "ppl": 3.616,
+              "logical_kv_mb": 64.508,
+              "line": 153
+            },
+            {
+              "sample": 8,
+              "ppl": 4.3534,
+              "logical_kv_mb": 64.508,
+              "line": 154
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 193,
+            "row": "rabit8      5.0127        0.18          4.4874                64.508          1.984           1024"
+          }
+        },
+        "rabit4": {
+          "ppl": 5.1041,
+          "ppl_delta_pct_vs_bf16_logged": 2.01,
+          "ppl_delta_pct_vs_bf16_computed": 2.01,
+          "median_sample_ppl": 4.6406,
+          "logical_kv_mb": 32.531,
+          "logical_compression_vs_bf16": 3.935,
+          "logged_compression": 3.935,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 3.7238,
+              "logical_kv_mb": 32.531,
+              "line": 157
+            },
+            {
+              "sample": 2,
+              "ppl": 2.5853,
+              "logical_kv_mb": 32.531,
+              "line": 158
+            },
+            {
+              "sample": 3,
+              "ppl": 4.7402,
+              "logical_kv_mb": 32.531,
+              "line": 159
+            },
+            {
+              "sample": 4,
+              "ppl": 7.7873,
+              "logical_kv_mb": 32.531,
+              "line": 160
+            },
+            {
+              "sample": 5,
+              "ppl": 9.3695,
+              "logical_kv_mb": 32.531,
+              "line": 161
+            },
+            {
+              "sample": 6,
+              "ppl": 7.9749,
+              "logical_kv_mb": 32.531,
+              "line": 162
+            },
+            {
+              "sample": 7,
+              "ppl": 3.8202,
+              "logical_kv_mb": 32.531,
+              "line": 163
+            },
+            {
+              "sample": 8,
+              "ppl": 4.541,
+              "logical_kv_mb": 32.531,
+              "line": 164
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 194,
+            "row": "rabit4      5.1041        2.01          4.6406                32.531          3.935           1024"
+          }
+        },
+        "rabit3": {
+          "ppl": 5.2096,
+          "ppl_delta_pct_vs_bf16_logged": 4.12,
+          "ppl_delta_pct_vs_bf16_computed": 4.12,
+          "median_sample_ppl": 4.6062,
+          "logical_kv_mb": 26.324,
+          "logical_compression_vs_bf16": 4.862,
+          "logged_compression": 4.862,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 3.9423,
+              "logical_kv_mb": 26.324,
+              "line": 167
+            },
+            {
+              "sample": 2,
+              "ppl": 2.6256,
+              "logical_kv_mb": 26.324,
+              "line": 168
+            },
+            {
+              "sample": 3,
+              "ppl": 4.7253,
+              "logical_kv_mb": 26.324,
+              "line": 169
+            },
+            {
+              "sample": 4,
+              "ppl": 8.1617,
+              "logical_kv_mb": 26.324,
+              "line": 170
+            },
+            {
+              "sample": 5,
+              "ppl": 9.6294,
+              "logical_kv_mb": 26.324,
+              "line": 171
+            },
+            {
+              "sample": 6,
+              "ppl": 8.4023,
+              "logical_kv_mb": 26.324,
+              "line": 172
+            },
+            {
+              "sample": 7,
+              "ppl": 3.7438,
+              "logical_kv_mb": 26.324,
+              "line": 173
+            },
+            {
+              "sample": 8,
+              "ppl": 4.4871,
+              "logical_kv_mb": 26.324,
+              "line": 174
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 195,
+            "row": "rabit3      5.2096        4.12          4.6062                26.324          4.862           1024"
+          }
+        },
+        "rabit2": {
+          "ppl": 5.1139,
+          "ppl_delta_pct_vs_bf16_logged": 2.21,
+          "ppl_delta_pct_vs_bf16_computed": 2.21,
+          "median_sample_ppl": 4.5324,
+          "logical_kv_mb": 24.71,
+          "logical_compression_vs_bf16": 5.18,
+          "logged_compression": 5.18,
+          "scored_tokens": 1024,
+          "samples": [
+            {
+              "sample": 1,
+              "ppl": 3.9604,
+              "logical_kv_mb": 24.71,
+              "line": 177
+            },
+            {
+              "sample": 2,
+              "ppl": 2.5822,
+              "logical_kv_mb": 24.71,
+              "line": 178
+            },
+            {
+              "sample": 3,
+              "ppl": 4.6537,
+              "logical_kv_mb": 24.71,
+              "line": 179
+            },
+            {
+              "sample": 4,
+              "ppl": 8.2724,
+              "logical_kv_mb": 24.71,
+              "line": 180
+            },
+            {
+              "sample": 5,
+              "ppl": 9.497,
+              "logical_kv_mb": 24.71,
+              "line": 181
+            },
+            {
+              "sample": 6,
+              "ppl": 8.0867,
+              "logical_kv_mb": 24.71,
+              "line": 182
+            },
+            {
+              "sample": 7,
+              "ppl": 3.507,
+              "logical_kv_mb": 24.71,
+              "line": 183
+            },
+            {
+              "sample": 8,
+              "ppl": 4.4112,
+              "logical_kv_mb": 24.71,
+              "line": 184
+            }
+          ],
+          "source": {
+            "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+            "line": 196,
+            "row": "rabit2      5.1139        2.21          4.5324                24.710          5.180           1024"
+          }
+        }
+      }
+    }
+  },
+  "cross_language": {
+    "rabit8": {
+      "mean_ppl_delta_pct_logged": 0.12,
+      "worst_ppl_delta_pct_logged": 0.18,
+      "mean_ppl_delta_pct_computed": 0.12,
+      "worst_ppl_delta_pct_computed": 0.18,
+      "worst_language": "es",
+      "source": {
+        "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+        "line": 204,
+        "row": "rabit8      0.06              0.18              0.12          0.18          1.984"
+      }
+    },
+    "rabit4": {
+      "mean_ppl_delta_pct_logged": 2.66,
+      "worst_ppl_delta_pct_logged": 3.31,
+      "mean_ppl_delta_pct_computed": 2.66,
+      "worst_ppl_delta_pct_computed": 3.31,
+      "worst_language": "zh",
+      "source": {
+        "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+        "line": 205,
+        "row": "rabit4      3.31              2.01              2.66          3.31          3.935"
+      }
+    },
+    "rabit3": {
+      "mean_ppl_delta_pct_logged": 5.84,
+      "worst_ppl_delta_pct_logged": 7.56,
+      "mean_ppl_delta_pct_computed": 5.84,
+      "worst_ppl_delta_pct_computed": 7.56,
+      "worst_language": "zh",
+      "source": {
+        "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+        "line": 206,
+        "row": "rabit3      7.56              4.12              5.84          7.56          4.862"
+      }
+    },
+    "rabit2": {
+      "mean_ppl_delta_pct_logged": 2.16,
+      "worst_ppl_delta_pct_logged": 2.21,
+      "mean_ppl_delta_pct_computed": 2.16,
+      "worst_ppl_delta_pct_computed": 2.21,
+      "worst_language": "es",
+      "source": {
+        "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+        "line": 207,
+        "row": "rabit2      2.11              2.21              2.16          2.21          5.180"
+      }
+    }
+  },
+  "canonical_reference": {
+    "note": "CANONICAL REFERENCE -- frozen bf16/rabit2 values quoted read-only from the canonical multilingual run. NOT newly generated data and NOT part of this rerun.",
+    "source": "results/quality/multilingual_ppl.log",
+    "source_sha256": "c45758ee2cea0cf486567d2b08eef551a8e3f044e1322b2898e97f8aebe08336",
+    "sha256_basis": "SHA-256 of LF-normalized bytes (CRLF -> LF): equals the SHA-256 of the committed git content and is stable across core.autocrlf checkouts",
+    "methods_in_canonical_run": [
+      "bf16",
+      "rabit2"
+    ],
+    "languages": {
+      "zh": {
+        "bf16": {
+          "ppl": 10.1176,
+          "ppl_delta_pct_vs_bf16": 0.0,
+          "median_sample_ppl": 10.0736,
+          "logical_kv_mb": 128.0,
+          "logged_compression": 1.0,
+          "scored_tokens": 1024,
+          "sample_ppls": [
+            8.2417,
+            13.4707,
+            7.4606,
+            8.314,
+            13.8108,
+            14.3303,
+            6.8084,
+            11.8332
+          ],
+          "source": {
+            "log": "results/quality/multilingual_ppl.log",
+            "line": 91,
+            "row": "bf16        10.1176       0.00          10.0736               128.000         1.000           1024"
+          },
+          "rerun_exactly_identical": true
+        },
+        "rabit2": {
+          "ppl": 10.3308,
+          "ppl_delta_pct_vs_bf16": 2.11,
+          "median_sample_ppl": 10.2241,
+          "logical_kv_mb": 24.71,
+          "logged_compression": 5.18,
+          "scored_tokens": 1024,
+          "sample_ppls": [
+            8.3243,
+            14.5232,
+            7.7108,
+            8.1743,
+            13.9091,
+            14.6199,
+            6.9058,
+            12.124
+          ],
+          "source": {
+            "log": "results/quality/multilingual_ppl.log",
+            "line": 92,
+            "row": "rabit2      10.3308       2.11          10.2241               24.710          5.180           1024"
+          },
+          "rerun_exactly_identical": true
+        }
+      },
+      "es": {
+        "bf16": {
+          "ppl": 5.0035,
+          "ppl_delta_pct_vs_bf16": 0.0,
+          "median_sample_ppl": 4.4927,
+          "logical_kv_mb": 128.0,
+          "logged_compression": 1.0,
+          "scored_tokens": 1024,
+          "sample_ppls": [
+            3.5996,
+            2.5965,
+            4.616,
+            7.8358,
+            9.3837,
+            7.8596,
+            3.6055,
+            4.3694
+          ],
+          "source": {
+            "log": "results/quality/multilingual_ppl.log",
+            "line": 122,
+            "row": "bf16        5.0035        0.00          4.4927                128.000         1.000           1024"
+          },
+          "rerun_exactly_identical": true
+        },
+        "rabit2": {
+          "ppl": 5.1139,
+          "ppl_delta_pct_vs_bf16": 2.21,
+          "median_sample_ppl": 4.5324,
+          "logical_kv_mb": 24.71,
+          "logged_compression": 5.18,
+          "scored_tokens": 1024,
+          "sample_ppls": [
+            3.9604,
+            2.5822,
+            4.6537,
+            8.2724,
+            9.497,
+            8.0867,
+            3.507,
+            4.4112
+          ],
+          "source": {
+            "log": "results/quality/multilingual_ppl.log",
+            "line": 123,
+            "row": "rabit2      5.1139        2.21          4.5324                24.710          5.180           1024"
+          },
+          "rerun_exactly_identical": true
+        }
+      }
+    },
+    "rerun_bf16_rabit2_exactly_identical": true
+  },
+  "notes": [
+    "This is an operating-point quality-compression sweep, NOT a pure bit-width ablation: rabit8/rabit4/rabit3/rabit2 differ in more than bit width (see presets_as_logged).",
+    "rabit8, rabit4 and rabit3 are new MLSys 2027 multilingual evidence; the canonical multilingual run contained only bf16 and rabit2.",
+    "bf16 and rabit2 are the only canonical regression baselines; the rerun reproduces them exactly (see canonical_reference).",
+    "rabit3 is worse than rabit2 in both languages (zh +7.56% vs +2.11%; es +4.12% vs +2.21%) while also compressing less (4.862x vs 5.180x). This is observational and must not be causally attributed before the K/V/G/R/META ablations.",
+    "Chinese has the larger delta at rabit4 (zh +3.31% vs es +2.01%) and rabit3 (zh +7.56% vs es +4.12%), while Spanish is slightly larger at rabit2 (es +2.21% vs zh +2.11%).",
+    "Small sample count (8 articles per language): sample-level and median differences, and small aggregate differences, should not be interpreted as statistically significant.",
+    "All KV figures: LOGICAL fake-quant KV storage; not physical vLLM allocator capacity."
+  ]
+}
