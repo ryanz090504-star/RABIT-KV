@@ -420,15 +420,42 @@ def build_commands() -> list[dict]:
     return commands
 
 
+def make_console_encoding_safe() -> None:
+    """Make local console echo unable to crash the runner on characters the
+    terminal encoding cannot represent (e.g. Modal's U+2713 under a GBK
+    Windows console). Affects ONLY the local console display; the .log files
+    are written separately as UTF-8 with the original text unchanged."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(errors="replace")
+            except (ValueError, OSError):
+                pass
+
+
+def console_write(text: str) -> None:
+    """Echo `text` to the local console, never raising on encoding errors.
+    Fallback for streams where reconfigure() was unavailable."""
+    try:
+        sys.stdout.write(text)
+    except UnicodeEncodeError:
+        encoding = getattr(sys.stdout, "encoding", None) or "ascii"
+        sys.stdout.write(
+            text.encode(encoding, errors="replace").decode(encoding, errors="replace")
+        )
+    sys.stdout.flush()
+
+
 def stream_command(cmd: list[str], log_path: Path) -> int:
     env = os.environ.copy()
     env["PYTHONUTF8"] = "1"
     env["PYTHONIOENCODING"] = "utf-8"
 
-    print("\n" + "=" * 118)
-    print("RUNNING:", " ".join(cmd))
-    print("LOG:", log_path)
-    print("=" * 118)
+    console_write("\n" + "=" * 118 + "\n")
+    console_write(f"RUNNING: {' '.join(cmd)}\n")
+    console_write(f"LOG: {log_path}\n")
+    console_write("=" * 118 + "\n")
 
     with log_path.open("w", encoding="utf-8") as log:
         p = subprocess.Popen(
@@ -443,10 +470,19 @@ def stream_command(cmd: list[str], log_path: Path) -> int:
             bufsize=1,
         )
         assert p.stdout is not None
-        for line in p.stdout:
-            print(line, end="")
-            log.write(line)
-            log.flush()
+        try:
+            for line in p.stdout:
+                # Log first (UTF-8, unchanged), then echo; a console problem
+                # can never cost a log line.
+                log.write(line)
+                log.flush()
+                console_write(line)
+        except BaseException:
+            # Local runner failure: do not leave an orphaned `modal run`
+            # client (and its H100 app) running behind us. No retry.
+            p.kill()
+            p.wait()
+            raise
         return p.wait()
 
 
@@ -574,7 +610,38 @@ def write_regression_check(results: list[dict]) -> None:
     )
 
 
+def record_runner_failure(manifest: dict, row: dict | None, exc: BaseException) -> None:
+    """Exception path: mark the in-flight run (if any) as runner_failed,
+    fail the manifest, re-run the protected-path check, and persist the
+    manifest before the runner exits. Partial logs are left in place.
+    Never retries."""
+    now = dt.datetime.now(dt.timezone.utc).isoformat()
+    error = {"type": type(exc).__name__, "message": str(exc)}
+    if row is not None:
+        row["status"] = "runner_failed"
+        row["completed_utc"] = now
+        row["error"] = error
+    manifest["runner_error"] = {"run": row["name"] if row is not None else None, **error}
+    manifest["status"] = "failed"
+    manifest["completed_utc"] = now
+    # The protected-path check really runs here; "clean" is recorded only if
+    # it returns normally. A check failure is recorded in its own field and
+    # never overwrites runner_error.
+    try:
+        assert_protected_paths_clean("runner exception path")
+    except Exception as check_exc:
+        manifest["protected_paths_post_run_status"] = "check_failed"
+        manifest["protected_paths_check_error"] = {
+            "type": type(check_exc).__name__,
+            "message": str(check_exc),
+        }
+    else:
+        manifest["protected_paths_post_run_status"] = "clean"
+    write_manifest(manifest)
+
+
 def main(argv: list[str] | None = None) -> int:
+    make_console_encoding_safe()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--dry-run",
@@ -640,6 +707,34 @@ def main(argv: list[str] | None = None) -> int:
     }
     write_manifest(manifest)
 
+    # Controlled stops (benchmark exit != 0, regression failure) raise
+    # SystemExit after writing the manifest themselves and are not caught
+    # here. Any other exception is a local runner failure and must never
+    # leave the manifest in "running".
+    try:
+        return run_all(manifest, commands)
+    except (Exception, KeyboardInterrupt) as exc:
+        # The in-flight run, if any, is the last row still marked "running".
+        current_row = manifest["runs"][-1] if manifest["runs"] else None
+        if current_row is not None and current_row.get("status") != "running":
+            current_row = None
+        record_runner_failure(manifest, current_row, exc)
+        where = f" during '{current_row['name']}'" if current_row else ""
+        check_error = manifest.get("protected_paths_check_error")
+        protected = (
+            f"\nPROTECTED-PATH CHECK ALSO FAILED: {check_error['type']}: {check_error['message']}"
+            if check_error
+            else ""
+        )
+        raise SystemExit(
+            f"\nEXPERIMENT 1 RUNNER FAILED{where}: {type(exc).__name__}: {exc}"
+            f"{protected}\n"
+            "Manifest marked failed; partial logs preserved under "
+            "results/mlsys2027/quality_frontier/. Not retried."
+        ) from exc
+
+
+def run_all(manifest: dict, commands: list[dict]) -> int:
     regression_results = []
     for spec, c in zip(RUNS, commands):
         log_path = OUT_DIR / f"{spec['name']}.log"
