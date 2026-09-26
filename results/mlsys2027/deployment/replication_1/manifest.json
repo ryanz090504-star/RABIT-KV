@@ -1,0 +1,488 @@
+{
+  "experiment": "Experiment 3 -- matched BF16 vs RABIT-KV physical capacity and latency (ABBA)",
+  "plan_reference": "docs/MLSYS_EXPERIMENT_PLAN.md",
+  "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+  "gpu": "NVIDIA H100 80GB (Modal)",
+  "legs": [
+    {
+      "index": 1,
+      "leg": "A1",
+      "kv_cache_dtype": "bfloat16"
+    },
+    {
+      "index": 2,
+      "leg": "B1",
+      "kv_cache_dtype": "rabit_kv2"
+    },
+    {
+      "index": 3,
+      "leg": "B2",
+      "kv_cache_dtype": "rabit_kv2"
+    },
+    {
+      "index": 4,
+      "leg": "A2",
+      "kv_cache_dtype": "bfloat16"
+    }
+  ],
+  "protocol": {
+    "warmups_per_leg_excluded": 5,
+    "measured_reps_per_leg": 15,
+    "measured_reps_per_dtype": 30,
+    "context_tokens": 2048,
+    "output_tokens": 32,
+    "same_container_same_gpu": true,
+    "fresh_process_per_leg": true,
+    "dtype_induced_allowlist": [
+      "requested.kv_cache_dtype",
+      "kv_dtype.requested_kv_cache_dtype",
+      "kv_dtype.engine_cache_dtype",
+      "kv_dtype.resolved_kv_torch_dtype"
+    ],
+    "gpu_clean_tolerance_mib": 256,
+    "gpu_clean_max_wait_s": 60,
+    "gate_timeout_s": 600,
+    "leg_timeout_s": 900
+  },
+  "capacity_label": "PHYSICAL vLLM allocator KV capacity (num_gpu_blocks x block_size) from the real engine",
+  "latency_label": "Real-engine single-request latency: TTFT = frontend first_token_latency; TPOT = (last_token_ts - first_token_ts)/(n-1) from engine-core timestamps; wall = perf_counter around llm.generate. p90 = statistics.quantiles(n=10, method='inclusive')[8]. Headline statistics are over the pooled 30 samples per dtype.",
+  "started_utc": "2026-09-26T02:35:13.597359+00:00",
+  "completed_utc": "2026-09-26T02:43:38.212528+00:00",
+  "status": "passed",
+  "protected_paths_post_run_status": "clean",
+  "provenance": {
+    "git_branch": "",
+    "git_head": "73edb0d1d6d4330d962495b26470bf996af2576e",
+    "vllm_kvquant_tree": "433d38b6b83af09581239bc379a115cac189a9af",
+    "rabit_kv2_sha256": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+    "runner_script_sha256": "dcbee7c0c08266d2be1d514cfaaa21b2158fbecd83b29175b230dc87269c2acb",
+    "modal_app_sha256": "4d669d0910b51270aca2df5d04e2cdb6fa7769c94b8f2325497ce4b34787541b",
+    "worker_sha256": "9e62da4d923151fdb818a320240868c015b32db6c5cfe510f4394153fe077856",
+    "correctness_gate_sha256": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce",
+    "watchdog_sha256": "05e6472e8172a0b7e264ecf7509752bb9a70818f08ba67da476c69db38164d21",
+    "canonical_benchmark_deployment_sha256": "95217571f4c7c16b98f3160bb6e385f35444f2a12cb47dfc6c947d59a1264c60",
+    "sha256_basis": "LF-normalized bytes (CRLF -> LF); equals committed git content",
+    "canonical_equivalence": {
+      "canonical_source": "benchmarks/performance/benchmark_deployment.py#RUNNER_Z (zlib+base64, decoded in memory)",
+      "canonical_runner_sha256": "3706fe1cc51014830ebf28741cff6ff2cd638cde9869269b6d60657347d527c2",
+      "canonical_llm_kwargs": {
+        "model": "<model>",
+        "dtype": "bfloat16",
+        "kv_cache_dtype": "rabit_kv2",
+        "block_size": 32,
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 16384,
+        "max_num_seqs": 32,
+        "enable_prefix_caching": false,
+        "enable_chunked_prefill": true,
+        "gpu_memory_utilization": 0.82,
+        "enforce_eager": true,
+        "trust_remote_code": true,
+        "disable_log_stats": false,
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        }
+      },
+      "worker_base_engine_kwargs": {
+        "dtype": "bfloat16",
+        "block_size": 32,
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 16384,
+        "max_num_seqs": 32,
+        "enable_prefix_caching": false,
+        "enable_chunked_prefill": true,
+        "gpu_memory_utilization": 0.82,
+        "enforce_eager": true,
+        "trust_remote_code": true,
+        "disable_log_stats": false,
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        }
+      },
+      "llm_kwargs_equal_except_kv_cache_dtype_and_model_path": true,
+      "modal_image_expression_ast_equal": true,
+      "model_and_base_commit_equal": true,
+      "correctness_gate_regression_ast_equal_to_canonical": true,
+      "worker_has_no_engine_rpc": true,
+      "timing_definitions_shared": true
+    },
+    "protected_paths_baseline_status": "clean",
+    "archived_attempts_sha256": {
+      "failed_attempt_1/bf16_deployment.log": "2f32ac5d697219ed3ee626882112e889d09f9e90bdeb11031c9c14b03788a20a",
+      "failed_attempt_1/correctness_gate.log": "75c4e5844d64d036cad659a6b620c3c1d142ca3d76d1c7e723b1fcc66639295b",
+      "failed_attempt_1/failure_summary.json": "4e16074b82a1c33488d37138e7ec153301a840d747df4c9dcc4f961351bc6f08",
+      "failed_attempt_1/integrity_check.json": "8d2923a4eebb9bf9dda908126126bee0e274d8e26feaa3c68d611891bf8e1a63",
+      "failed_attempt_1/manifest.json": "60887fceb9dd44cf26272e6b51f695f27d068ed3308aac515fd76da01909757c",
+      "failed_attempt_1/matched_config_diff.json": "928448ded360f7123362b72eead43211e58babe49c4afdba85dc43b1e129c1d1",
+      "failed_attempt_1/modal_session.log": "0a30c1c4f48532669eb66725994eb1d3d0103e2cd3571fbdc8e1a1126dadcc50",
+      "failed_attempt_1/rabit_kv2_deployment.log": "1691634ed4adbfc97c8b9aac14002402c48813e59d202d34a2abc5df27cdbf8b"
+    },
+    "existing_top_level_output_files": null,
+    "uncommitted_experiment_files": null
+  },
+  "runs": [
+    {
+      "name": "abba",
+      "command": [
+        "C:\\Users\\ryanz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "-m",
+        "modal",
+        "run",
+        "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RKV-exp3-rep\\benchmarks\\mlsys2027\\exp3_deployment_modal.py",
+        "--legs",
+        "bfloat16,rabit_kv2,rabit_kv2,bfloat16",
+        "--warmups",
+        "5",
+        "--reps-per-leg",
+        "15"
+      ],
+      "log": "results/mlsys2027/deployment/modal_session.log",
+      "gate_command": [
+        "python",
+        "/opt/exp3/exp3_correctness_gate.py"
+      ],
+      "worker_commands": {
+        "A1": [
+          "python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A1"
+        ],
+        "B1": [
+          "python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B1"
+        ],
+        "B2": [
+          "python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B2"
+        ],
+        "A2": [
+          "python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A2"
+        ]
+      },
+      "started_utc": "2026-09-26T02:35:15.779900+00:00",
+      "completed_utc": "2026-09-26T02:43:38.197134+00:00",
+      "returncode": 0,
+      "status": "passed",
+      "integrity_counts": {
+        "passed": 94,
+        "failed": 0,
+        "not_run": 0,
+        "not_evaluated": 0
+      }
+    }
+  ],
+  "vllm_kvquant_snapshot": {
+    "path": "C:\\Users\\ryanz\\AppData\\Local\\Temp\\exp3_vllm_snapshot_af11tzzr\\vllm_kvquant_snapshot.zip",
+    "sha256": "1302aa25b39cff92c5f609cd25d7ac5a5d44bd6427316b9c323b32f9bb0c0d44",
+    "bytes": 41004341,
+    "source": "git archive --format=zip HEAD:vllm-kvquant (core.autocrlf=false)"
+  },
+  "gpu_clean_state": {
+    "baseline": {
+      "compute_apps": [],
+      "max_wait_s": 60,
+      "memory_used_mib": [
+        4
+      ],
+      "t": 1790390310.945765,
+      "tolerance_mib": 256
+    },
+    "tolerance_mib": 256,
+    "max_wait_s": 60,
+    "pre_leg": {
+      "A1": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A1",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790390392.453895
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B1": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B1",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790390502.9861336
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B2": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B2",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790390546.7171047
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "A2": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A2",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790390583.6665418
+          }
+        ],
+        "tolerance_mib": 256
+      }
+    }
+  },
+  "correctness_gate": {
+    "line_count": 22,
+    "begin": {
+      "pytest_command": [
+        "/usr/local/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "--tb=short",
+        "--confcutdir=/root/vllm-kvquant/tests/quantization",
+        "/root/vllm-kvquant/tests/quantization/test_kvquant_k3.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_layout.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_physical.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b1.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b2.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_fixed.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py"
+      ],
+      "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+    },
+    "result": {
+      "passed": true
+    },
+    "pytest_passed": 105,
+    "pytest_warnings": 14,
+    "pytest_seconds": 30.19,
+    "pytest_exit": 0,
+    "regression_passed_line": true
+  },
+  "processes": {
+    "exits": {
+      "gate": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_correctness_gate.py"
+        ],
+        "elapsed_s": 49.773,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "gate",
+        "own_session": true,
+        "pgid": 32,
+        "pid": 32,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 600
+      },
+      "A1": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A1"
+        ],
+        "elapsed_s": 110.414,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A1",
+        "own_session": true,
+        "pgid": 328,
+        "pid": 328,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B1": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B1"
+        ],
+        "elapsed_s": 43.669,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B1",
+        "own_session": true,
+        "pgid": 635,
+        "pid": 635,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B2": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B2"
+        ],
+        "elapsed_s": 36.885,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B2",
+        "own_session": true,
+        "pgid": 786,
+        "pid": 786,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "A2": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A2"
+        ],
+        "elapsed_s": 30.585,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A2",
+        "own_session": true,
+        "pgid": 884,
+        "pid": 884,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      }
+    },
+    "watchdog_timeouts": []
+  },
+  "integrity_counts": {
+    "passed": 94,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "config_diff_status": "passed",
+  "archived_attempts_unchanged": true
+}
