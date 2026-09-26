@@ -1,0 +1,662 @@
+{
+  "schema": "exp5_failure_analysis/v1",
+  "accepted_scientific_summary": false,
+  "run_status": "failed",
+  "failure_stage": "watchdog_timeout",
+  "failed_cell": "B32768",
+  "reason": "RABIT-KV 32K chunked-prefill path exceeded the pre-registered 900 s watchdog",
+  "wording": "The current RABIT-KV implementation exhibits a severe performance cliff when the workload crosses max_num_batched_tokens and activates its non-initial chunked-prefill path.",
+  "not_claimed": [
+    "an algorithmic limitation of low-bit KV quantization",
+    "a maximum feasible / supported context or memory ceiling",
+    "final Experiment 5 results for the 512-16K cells"
+  ],
+  "generated_by": "benchmarks/mlsys2027/build_exp5_failure_analysis.py",
+  "derived_from": [
+    "modal_session.log",
+    "correctness_gate.log",
+    "manifest.json",
+    "integrity_check.json"
+  ],
+  "raw_files_sha256": {
+    "bf16_ctx16384.log": "5d19006b5d74b4bc0ce7a0ccbc39016c552bd64841e25274aad4eb76a7b73942",
+    "bf16_ctx2048.log": "cd9de877086eabc887e8b2c7030d914167f2c9bac146b5b698f1c02763e92b0d",
+    "bf16_ctx32768.log": "b5534d13e9afa11f4bdd27a5e69a37261098ddcd909de05f8a5ab96fc4a0e7d6",
+    "bf16_ctx4096.log": "0fdba38cc72ef4c65e95ea8b7bff945ecbb4544eeeed89cc3ab53833e4ed3674",
+    "bf16_ctx512.log": "f672241f0e10466f355ab0055da7919b16cffc433f7b666792eb7d9490a016e8",
+    "bf16_ctx8192.log": "cb2d8b79153cb71aefe7cd2dc35314c00f443325cb6521300ddc3070b7a67f72",
+    "conditioning_bf16_ctx512.log": "a311f9bf5c17a7e27f0ed04bb23d03c8a6cb3fa20a973885f68c6a58eeea4f36",
+    "conditioning_rabit_kv2_ctx512.log": "1515c9252c57cb68fb122e018f451c42131c0ecd24078f188f567d17128bbcf8",
+    "correctness_gate.log": "52ea89cc3572074da441015731ede4254ebb280855f530a2c0210bca6c3cd133",
+    "integrity_check.json": "17e58df013265e9d3edd6087689f7851a7d55077683e5e9a0e7f8c8aaa72d0f5",
+    "manifest.json": "ac0d420973621d2ebfa0c89e3ccf03ba47f76be8f8c72f1c4d25516c88a1dbb2",
+    "matched_config_diff.json": "1e3036ef39759bd37f46e8a19e73dc025b39ec091f4438fefd46eeafac0ed46d",
+    "modal_session.log": "e5627de0f01c185bc607cc3479b0777db263dc279cdf86808f139fe584e06fed",
+    "rabit_kv2_ctx16384.log": "93231b886fdc6c0f814b40eb89ce83dfff201c8dce80a7eea7d3829f667e959f",
+    "rabit_kv2_ctx2048.log": "a3a5dfc3d2bf77b0cc3710aed42e63bfe4e65c308706e80b88b05533c5f25e97",
+    "rabit_kv2_ctx32768.log": "a1729cd3de942f8074047bd328647d64df96b6b5eb08084773b78fad3b874bbd",
+    "rabit_kv2_ctx4096.log": "3122f664e8bb4703c0b5558a195a5cfebe86d4ed89c36df0dffe5c0761c32654",
+    "rabit_kv2_ctx512.log": "012135c0c0ceea042077c0728b238b69ad7ae5ee7a19c7aa281b4b495219a007",
+    "rabit_kv2_ctx8192.log": "91141054fe264048ceee46b1341b30cb3cbb5d3693bf43895128b828730753af"
+  },
+  "cell_counts": {
+    "official_measured_cells_planned": 12,
+    "official_measured_cells_completed_before_B32768": 10,
+    "official_measured_cells_completed": [
+      "A512",
+      "B512",
+      "B2048",
+      "A2048",
+      "A4096",
+      "B4096",
+      "B8192",
+      "A8192",
+      "A16384",
+      "B16384"
+    ],
+    "B32768": "partial only - 3/5 warmups completed, 0 measured reps",
+    "A32768": "not run",
+    "conditioning_cells_completed_not_official": [
+      "conditioning_A512",
+      "conditioning_B512"
+    ],
+    "note": "The two conditioning cells are unmeasured and are never counted as official measured cells."
+  },
+  "correctness_gate": {
+    "passed": true,
+    "pytest": "105 passed, 14 warnings",
+    "dispatch_preflight_passed": true,
+    "prep_exactness": "62/62",
+    "full_attention_exactness_passed": true,
+    "decode_append_steps": 202
+  },
+  "integrity_counts": {
+    "passed": 297,
+    "failed": 5,
+    "not_run": 25,
+    "not_evaluated": 11
+  },
+  "protected_paths_post_run_status": "clean",
+  "prior_evidence_unchanged": true,
+  "b16384": {
+    "kv_cache_dtype": "rabit_kv2",
+    "context_point": 16384,
+    "actual_prompt_tokens": 16384,
+    "output_tokens_setting": 32,
+    "prompt_tokens_seen_by_engine": [
+      16384
+    ],
+    "output_tokens_produced": [
+      32
+    ],
+    "prompt_token_ids_sha256": "55e489614c430cec99437352f5fbe9575121eee976ece2582eaff31b4d2f4863",
+    "engine_initialized": true,
+    "capacity": {
+      "block_size": 32,
+      "capacity_tokens": 2074592,
+      "num_gpu_blocks": 64831
+    },
+    "stage3c_chunked_prefill_marker": false,
+    "chunked_prefill_markers": [],
+    "warmups_completed": 5,
+    "warmups_planned": 5,
+    "measured_reps_completed": 15,
+    "measured_reps_planned": 15,
+    "oom_detected": false,
+    "jit_lines_by_phase": {
+      "warmup_or_init": 8
+    },
+    "process": {
+      "elapsed_s": 51.317,
+      "returncode": 0,
+      "timed_out": false,
+      "timeout_s": 900,
+      "signals_sent": [],
+      "group_processes_after_leader_exit": [],
+      "group_processes_remaining": []
+    },
+    "gpu_clean_before": true,
+    "completed_successfully": true,
+    "ttft_ms_median": 695.3246593475342
+  },
+  "b32768": {
+    "kv_cache_dtype": "rabit_kv2",
+    "context_point": 32768,
+    "actual_prompt_tokens": 32736,
+    "output_tokens_setting": 32,
+    "prompt_tokens_seen_by_engine": [
+      32736
+    ],
+    "output_tokens_produced": [
+      32
+    ],
+    "prompt_token_ids_sha256": "dbc5bd884143e25fc9b417b9a9af888aaf92092e6556e4b8fdd1d6ca7d63b969",
+    "engine_initialized": true,
+    "capacity": {
+      "block_size": 32,
+      "capacity_tokens": 2074592,
+      "num_gpu_blocks": 64831
+    },
+    "stage3c_chunked_prefill_marker": true,
+    "chunked_prefill_markers": [
+      {
+        "time": "09-26 21:02:17",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:02:28",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:02:37",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:02:46",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:02:55",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:03:04",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:03:13",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:03:22",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:03:31",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:03:40",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:03:49",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:03:58",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:04:07",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:04:16",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:04:25",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:04:34",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:04:43",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:04:52",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:05:01",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:05:10",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:05:19",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:05:28",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:05:37",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:05:46",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:05:55",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:06:04",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:06:13",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:06:22",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:06:31",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:06:40",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:06:49",
+        "q_len": 16352,
+        "context_len": 16384
+      },
+      {
+        "time": "09-26 21:06:58",
+        "q_len": 16352,
+        "context_len": 16384
+      }
+    ],
+    "warmups_completed": 3,
+    "warmups_planned": 5,
+    "measured_reps_completed": 0,
+    "measured_reps_planned": 15,
+    "oom_detected": false,
+    "jit_lines_by_phase": {
+      "warmup_or_init": 9
+    },
+    "process": {
+      "elapsed_s": 900.071,
+      "returncode": -15,
+      "timed_out": true,
+      "timeout_s": 900,
+      "signals_sent": [
+        "SIGTERM",
+        "SIGKILL"
+      ],
+      "group_processes_after_leader_exit": [],
+      "group_processes_remaining": []
+    },
+    "gpu_clean_before": true,
+    "warmups": [
+      {
+        "rep": 0,
+        "ttft_ms": 290778.1910896301,
+        "tpot_ms": 29.13525858064663,
+        "wall_ms": 291681.435125,
+        "prompt_tokens": 32736,
+        "output_tokens": 32
+      },
+      {
+        "rep": 1,
+        "ttft_ms": 288631.8075656891,
+        "tpot_ms": 29.58573974193578,
+        "wall_ms": 289549.0665530001,
+        "prompt_tokens": 32736,
+        "output_tokens": 32
+      },
+      {
+        "rep": 2,
+        "ttft_ms": 288773.175239563,
+        "tpot_ms": 29.494051709676686,
+        "wall_ms": 289687.6257519998,
+        "prompt_tokens": 32736,
+        "output_tokens": 32
+      }
+    ],
+    "chunk_marker_count": 32,
+    "chunk_marker_interval_s_median": 9.0,
+    "chunk_marker_note": "The marker is logged once per attention-layer implementation (first request only), so consecutive markers bracket one layer's non-initial chunk; the median interval is a per-layer duration estimate at log-timestamp (1 s) resolution.",
+    "watchdog": {
+      "timed_out": true,
+      "timeout_s": 900,
+      "elapsed_s": 900.071,
+      "signals_sent": [
+        "SIGTERM",
+        "SIGKILL"
+      ]
+    },
+    "full_process_group_cleanup": true
+  },
+  "a32768": {
+    "run": false,
+    "reason": "sweep stopped by the B32768 watchdog timeout"
+  },
+  "discontinuity": {
+    "b16384_prompt_tokens": 16384,
+    "b32768_prompt_tokens": 32736,
+    "prompt_ratio": 1.998046875,
+    "b16384_ttft_ms_median_measured": 695.3246593475342,
+    "b32768_ttft_ms_median_over_completed_warmups": 288773.175239563,
+    "ttft_ratio_b32768_warmup_over_b16384": 415.3069668355162,
+    "b32768_tpot_ms_median_over_completed_warmups": 29.494051709676686,
+    "b16384_tpot_ms_median_measured": 19.645018870967817,
+    "note": "Descriptive only. B32768 values are unmeasured warmups (not official samples); B16384 values are measured reps from the same failed session."
+  },
+  "descriptive_evidence_from_failed_run": {
+    "note": "NOT Experiment 5 results. Measured reps of the official cells that completed before the stop, kept only as descriptive evidence of a failed run.",
+    "cells": {
+      "A512": {
+        "kv_cache_dtype": "bfloat16",
+        "context_point": 512,
+        "actual_prompt_tokens": 512,
+        "n": 15,
+        "tpot_ms_median": 13.236162322579231,
+        "tpot_ms_p90": 13.935346741935415,
+        "ttft_ms_median": 28.110742568969727,
+        "wall_ms_median": 438.61873700001297,
+        "tpot_ms_samples": [
+          13.537855032257452,
+          13.114956290322763,
+          13.295543903226307,
+          13.691269935484048,
+          13.10218399999947,
+          13.03354538709762,
+          14.098064612902993,
+          13.236162322579231,
+          13.069214967741104,
+          13.587743612903992,
+          13.102665290322449,
+          13.174149290322138,
+          12.961981064515912,
+          14.309110032256958,
+          13.292221709676713
+        ]
+      },
+      "B512": {
+        "kv_cache_dtype": "rabit_kv2",
+        "context_point": 512,
+        "actual_prompt_tokens": 512,
+        "n": 15,
+        "tpot_ms_median": 18.544468645161267,
+        "tpot_ms_p90": 20.16188410967743,
+        "ttft_ms_median": 87.75520324707031,
+        "wall_ms_median": 656.6260580000289,
+        "tpot_ms_samples": [
+          19.755202903224337,
+          20.17372629032274,
+          20.144120838709465,
+          20.280821645162778,
+          19.94488183871021,
+          18.625236612902633,
+          18.544468645161267,
+          17.77515941935345,
+          18.394556903226732,
+          17.834750935484806,
+          17.96487967741937,
+          19.249752870967814,
+          18.22552196774319,
+          18.02117816128928,
+          18.3428699677411
+        ]
+      },
+      "B2048": {
+        "kv_cache_dtype": "rabit_kv2",
+        "context_point": 2048,
+        "actual_prompt_tokens": 2048,
+        "n": 15,
+        "tpot_ms_median": 17.557126774192966,
+        "tpot_ms_p90": 18.119702348386575,
+        "ttft_ms_median": 108.92081260681152,
+        "wall_ms_median": 653.5172089999719,
+        "tpot_ms_samples": [
+          17.557126774192966,
+          18.01494074193545,
+          17.676747870967255,
+          17.38795090322524,
+          17.393121322580527,
+          17.48103832258149,
+          18.189543419353985,
+          17.65066780645032,
+          17.62490658064515,
+          17.38418612903329,
+          17.353526741935127,
+          18.58480032258065,
+          17.78341070967731,
+          17.401322225806883,
+          17.391954806452848
+        ]
+      },
+      "A2048": {
+        "kv_cache_dtype": "bfloat16",
+        "context_point": 2048,
+        "actual_prompt_tokens": 2048,
+        "n": 15,
+        "tpot_ms_median": 13.273202935483969,
+        "tpot_ms_p90": 14.205766845161486,
+        "ttft_ms_median": 60.40191650390625,
+        "wall_ms_median": 471.4408849999927,
+        "tpot_ms_samples": [
+          13.004479032258219,
+          12.963604225805534,
+          13.831546516129375,
+          13.273202935483969,
+          13.33583390322518,
+          13.580970967741596,
+          13.709410451612726,
+          13.285232064515272,
+          12.974715419353112,
+          13.0823033548385,
+          15.227955258065748,
+          14.455247064516229,
+          13.058459225806386,
+          13.099418741935478,
+          13.038053903226082
+        ]
+      },
+      "A4096": {
+        "kv_cache_dtype": "bfloat16",
+        "context_point": 4096,
+        "actual_prompt_tokens": 4096,
+        "n": 15,
+        "tpot_ms_median": 13.245082903225583,
+        "tpot_ms_p90": 14.440665129033306,
+        "ttft_ms_median": 146.13652229309082,
+        "wall_ms_median": 555.7631519999973,
+        "tpot_ms_samples": [
+          15.166382451613368,
+          14.852562290323316,
+          13.245082903225583,
+          13.822819387098294,
+          13.55163429032348,
+          13.269850967742146,
+          13.068599387096466,
+          13.802949354838333,
+          13.275268193548262,
+          13.013018548387972,
+          12.892310000000311,
+          12.738499677419851,
+          12.970423225806003,
+          12.887355838710933,
+          12.998769064517267
+        ]
+      },
+      "B4096": {
+        "kv_cache_dtype": "rabit_kv2",
+        "context_point": 4096,
+        "actual_prompt_tokens": 4096,
+        "n": 15,
+        "tpot_ms_median": 17.955828838710794,
+        "tpot_ms_p90": 18.559899425806197,
+        "ttft_ms_median": 162.16635704040527,
+        "wall_ms_median": 720.2120599999944,
+        "tpot_ms_samples": [
+          17.804455419355147,
+          18.125920258065037,
+          18.632235580645148,
+          17.7007460322586,
+          17.469662677419528,
+          17.73696506451518,
+          18.825581064515607,
+          17.955828838710794,
+          17.979986806452533,
+          17.43641677419492,
+          18.451395193547768,
+          18.062502322579583,
+          17.84005832258029,
+          18.34050883870979,
+          17.506270870967455
+        ]
+      },
+      "B8192": {
+        "kv_cache_dtype": "rabit_kv2",
+        "context_point": 8192,
+        "actual_prompt_tokens": 8192,
+        "n": 15,
+        "tpot_ms_median": 18.333016161290608,
+        "tpot_ms_p90": 19.344190832259024,
+        "ttft_ms_median": 303.65920066833496,
+        "wall_ms_median": 871.4893380000035,
+        "tpot_ms_samples": [
+          18.145481225806105,
+          17.323759064516533,
+          18.66384064516069,
+          19.185387129033234,
+          19.45005996774288,
+          19.970965870967458,
+          18.282372806450645,
+          18.167471225806803,
+          18.966337774193033,
+          18.333016161290608,
+          18.408284967741167,
+          18.384135612903247,
+          17.962238838711,
+          17.90831996774225,
+          17.603045967742645
+        ]
+      },
+      "A8192": {
+        "kv_cache_dtype": "bfloat16",
+        "context_point": 8192,
+        "actual_prompt_tokens": 8192,
+        "n": 15,
+        "tpot_ms_median": 14.718710451611809,
+        "tpot_ms_p90": 16.135583129033467,
+        "ttft_ms_median": 414.31117057800293,
+        "wall_ms_median": 868.9013519999662,
+        "tpot_ms_samples": [
+          16.256377064517057,
+          16.385828806450736,
+          14.857667322580197,
+          15.195319516129574,
+          15.641257741934519,
+          15.778495193550894,
+          15.954392225808078,
+          14.718710451611809,
+          14.161566290322153,
+          13.525030870966711,
+          13.203175645160979,
+          13.771677451612254,
+          13.897970774194382,
+          13.473939096775945,
+          13.224480903226498
+        ]
+      },
+      "A16384": {
+        "kv_cache_dtype": "bfloat16",
+        "context_point": 16384,
+        "actual_prompt_tokens": 16384,
+        "n": 15,
+        "tpot_ms_median": 13.327060129031011,
+        "tpot_ms_p90": 13.917559199999673,
+        "ttft_ms_median": 1292.0665740966797,
+        "wall_ms_median": 1705.076632999976,
+        "tpot_ms_samples": [
+          12.929861483870251,
+          13.983058258062439,
+          13.620912193547861,
+          13.446074387095377,
+          13.569069483871258,
+          13.195597225809076,
+          13.274923225807353,
+          13.327060129031011,
+          13.793652516131173,
+          12.815059838709614,
+          14.151558161287422,
+          12.817730516127495,
+          12.91258138709758,
+          13.23636403225787,
+          13.819310612905523
+        ]
+      },
+      "B16384": {
+        "kv_cache_dtype": "rabit_kv2",
+        "context_point": 16384,
+        "actual_prompt_tokens": 16384,
+        "n": 15,
+        "tpot_ms_median": 19.645018870967817,
+        "tpot_ms_p90": 19.93616252258004,
+        "ttft_ms_median": 695.3246593475342,
+        "wall_ms_median": 1304.1148160000375,
+        "tpot_ms_samples": [
+          19.541088741935972,
+          19.58934990322573,
+          19.56010567742015,
+          19.645018870967817,
+          19.709273903224073,
+          19.56385851612976,
+          20.019830806452244,
+          19.6040367419381,
+          19.738299516127938,
+          20.491190806454494,
+          19.810660096771745,
+          19.65593312903483,
+          19.703424838711168,
+          19.61926267741884,
+          19.55265641935321
+        ]
+      }
+    }
+  },
+  "provenance": {
+    "git_head": "91cc8c7a50d58ceeb60623c9926fb62933718aee",
+    "vllm_kvquant_tree": "433d38b6b83af09581239bc379a115cac189a9af",
+    "rabit_kv2_sha256": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+    "runner_script_sha256": "9107470f071370849b27816c04136ace37e4e1175f3e3fd52c5790b9b78d8ffe",
+    "modal_app_sha256": "39c956c13a829ae03b7116a5e87db1d75d3dbbf25935f8b092947e1aa19f944e",
+    "worker_sha256": "494977ace5044e197089d1a60030ab527b33f5be51b1d6affec10c563c7d6f7e"
+  }
+}
