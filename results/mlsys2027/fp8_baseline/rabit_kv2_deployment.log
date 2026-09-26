@@ -1,0 +1,264 @@
+===== EXP4 LEG C1 (index 3, rabit_kv2) =====
+EXP4_LEG={"kv_cache_dtype": "rabit_kv2", "leg": "C1"}
+EXP4_RABIT_MARKERS={"_RABIT2_FINAL_FAST_DECODE_APPEND": true, "_RABIT2_STAGE4D3_4_TRITON_TAILPREP": true, "stage4d3_4_dispatch_active": true}
+EXP4_REQUESTED_ENGINE_KWARGS={"attention_config": {"backend": "TRITON_ATTN"}, "block_size": 32, "disable_log_stats": false, "dtype": "bfloat16", "enable_chunked_prefill": true, "enable_prefix_caching": false, "enforce_eager": true, "gpu_memory_utilization": 0.82, "kv_cache_dtype": "rabit_kv2", "max_model_len": 32768, "max_num_batched_tokens": 16384, "max_num_seqs": 32, "model": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master", "trust_remote_code": true}
+INFO 09-26 17:00:20 [api_utils.py:273] non-default args: {'trust_remote_code': True, 'dtype': 'bfloat16', 'kv_cache_dtype': 'rabit_kv2', 'max_model_len': 32768, 'block_size': 32, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.82, 'max_num_batched_tokens': 16384, 'max_num_seqs': 32, 'enforce_eager': True, 'enable_chunked_prefill': True, 'attention_config': AttentionConfig(backend=<AttentionBackendEnum.TRITON_ATTN: 'vllm.v1.attention.backends.triton_attn.TritonAttentionBackend'>, flash_attn_version=None, use_prefill_decode_attention=False, flash_attn_max_num_splits_for_cuda_graph=32, tq_max_kv_splits_for_cuda_graph=32, use_trtllm_attention=None, disable_flashinfer_q_quantization=False, mla_prefill_backend=None, use_prefill_query_quantization=False, use_fp4_indexer_cache=False, indexer_kv_dtype='bf16', use_non_causal=False, flex_attn_block_m=None, flex_attn_block_n=None, flex_attn_q_block_size=None, flex_attn_kv_block_size=None), 'model': '/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master'}
+WARNING 09-26 17:00:20 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_PRECOMPILED_WHEEL_VARIANT
+WARNING 09-26 17:00:20 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_PRECOMPILED_WHEEL_COMMIT
+WARNING 09-26 17:00:20 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_USE_V1
+INFO 09-26 17:00:20 [model.py:606] Resolved architecture: LlamaForCausalLM
+INFO 09-26 17:00:20 [model.py:1736] Using max model len 32768
+INFO 09-26 17:00:20 [cache.py:297] Using rabit_kv2 data type to store kv cache. It reduces the GPU memory footprint and boosts the performance. Meanwhile, it may cause accuracy drop without a proper scaling factor
+INFO 09-26 17:00:20 [scheduler.py:252] Chunked prefill is enabled with max_num_batched_tokens=16384.
+INFO 09-26 17:00:20 [vllm.py:1042] Asynchronous scheduling is enabled.
+WARNING 09-26 17:00:20 [vllm.py:1096] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+WARNING 09-26 17:00:20 [vllm.py:1144] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 09-26 17:00:20 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+INFO 09-26 17:00:20 [vllm.py:1322] Cudagraph is disabled under eager mode
+INFO 09-26 17:00:20 [compilation.py:312] Enabled custom fusions: norm_quant, act_quant
+(EngineCore pid=756) INFO 09-26 17:00:23 [core.py:114] Initializing a V1 LLM engine (v0.10.0+kvquant) with config: model='/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master', speculative_config=None, tokenizer='/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=32768, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=rabit_kv2, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [16384], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=756) INFO 09-26 17:00:23 [parallel_state.py:1588] world_size=1 rank=0 local_rank=0 distributed_init_method=tcp://172.20.18.232:62578 backend=nccl
+(EngineCore pid=756) INFO 09-26 17:00:24 [parallel_state.py:1923] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(EngineCore pid=756) INFO 09-26 17:00:24 [gpu_worker.py:360] Using V2 Model Runner
+(EngineCore pid=756) INFO 09-26 17:00:24 [model_runner.py:293] Loading model from scratch...
+(EngineCore pid=756) INFO 09-26 17:00:24 [cuda.py:416] Using AttentionBackendEnum.TRITON_ATTN backend.
+(EngineCore pid=756) INFO 09-26 17:00:24 [weight_utils.py:849] Filesystem type for checkpoints: 9P. Checkpoint size: 14.96 GiB. Available RAM: 1018.36 GiB.
+(EngineCore pid=756) INFO 09-26 17:00:24 [weight_utils.py:872] Auto-prefetch is disabled because the filesystem (9P) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=756) 
+Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore pid=756) 
+Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:00<00:02,  1.01it/s]
+(EngineCore pid=756) 
+Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:02<00:02,  1.05s/it]
+(EngineCore pid=756) 
+Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:03<00:01,  1.08s/it]
+(EngineCore pid=756) 
+Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:03<00:00,  1.25it/s]
+(EngineCore pid=756) 
+Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:03<00:00,  1.12it/s]
+(EngineCore pid=756) 
+(EngineCore pid=756) INFO 09-26 17:00:28 [default_loader.py:430] Loading weights took 3.60 seconds
+(EngineCore pid=756) INFO 09-26 17:00:28 [model_runner.py:314] Model loading took 15.0 GiB and 4.455172 seconds
+(EngineCore pid=756) INFO 09-26 17:00:29 [topk_topp_sampler.py:55] Using FlashInfer for top-p & top-k sampling.
+(EngineCore pid=756) INFO 09-26 17:00:31 [gpu_worker.py:538] Available KV cache memory: 47.98 GiB
+(EngineCore pid=756) INFO 09-26 17:00:31 [kv_cache_utils.py:2146] GPU KV cache size: 2,074,592 tokens
+(EngineCore pid=756) INFO 09-26 17:00:31 [kv_cache_utils.py:2147] Maximum concurrency for 32,768 tokens per request: 63.31x
+(EngineCore pid=756) INFO 09-26 17:00:31 [deep_gemm.py:175] deep_gemm not found in site-packages, trying vendored vllm.third_party.deep_gemm
+(EngineCore pid=756) INFO 09-26 17:00:31 [deep_gemm.py:202] DeepGEMM PDL enabled on vllm.third_party.deep_gemm.
+(EngineCore pid=756) INFO 09-26 17:00:31 [kernel_warmup.py:177] Using FlashInfer autotune cache file: /root/.cache/vllm/flashinfer_autotune_cache/0.6.13/90a/4f3b8ed9b1bc067cc522158b1d7873f8c41cd271b7a9141a5eb4256611f0666d/autotune_configs.json
+(EngineCore pid=756) 2026-09-26 17:00:31,506 - INFO - autotuner.py:651 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore pid=756) INFO 09-26 17:00:31 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:32 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:32 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:32 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:32 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:32 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:33 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:34 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) INFO 09-26 17:00:35 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=756) 2026-09-26 17:00:35,103 - INFO - autotuner.py:674 - flashinfer.jit: [Autotuner]: Autotuning process ends
+(EngineCore pid=756) WARNING 09-26 17:00:35 [kernel_warmup.py:206] No FlashInfer autotune cache entries found.Falling back to default tactics.
+(EngineCore pid=756) INFO 09-26 17:00:35 [cutedsl_warmup.py:97] Skipping CuTeDSL warmup because no compile units were requested.
+(EngineCore pid=756) INFO 09-26 17:00:36 [jit_monitor.py:72] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=756) INFO 09-26 17:00:36 [core.py:344] init engine (profile, create kv cache, warmup model) took 7.05 s
+(EngineCore pid=756) WARNING 09-26 17:00:36 [vllm.py:1096] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+(EngineCore pid=756) WARNING 09-26 17:00:36 [vllm.py:1144] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore pid=756) INFO 09-26 17:00:36 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+(EngineCore pid=756) INFO 09-26 17:00:36 [vllm.py:1322] Cudagraph is disabled under eager mode
+EXP4_EFFECTIVE_ENGINE_CONFIG={"attention_backend": "AttentionBackendEnum.TRITON_ATTN", "block_size": 32, "calculate_kv_scales": false, "compilation_mode": "NONE", "compilation_mode_raw": {"repr": "<CompilationMode.NONE: 0>", "str": "0"}, "cudagraph_mode": "NONE", "cudagraph_mode_raw": {"repr": "<CUDAGraphMode.NONE: 0>", "str": "NONE"}, "enable_chunked_prefill": true, "enable_prefix_caching": false, "enforce_eager": true, "gpu_memory_utilization": 0.82, "hf_quantization_config": null, "kv_cache_dtype_skip_layers": [], "log_stats": true, "max_model_len": 32768, "max_num_batched_tokens": 16384, "max_num_seqs": 32, "model": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master", "model_dtype": "torch.bfloat16", "quantization": null, "seed": 0, "tensor_parallel_size": 1, "trust_remote_code": true}
+EXP4_KV_DTYPE={"engine_cache_dtype": "rabit_kv2", "fp8_storage_view_dtype": null, "kv_quant_mode": "RABIT_KV2", "requested_kv_cache_dtype": "rabit_kv2", "resolved_kv_torch_dtype": "torch.uint8"}
+EXP4_CAPACITY={"block_size": 32, "capacity_tokens": 2074592, "num_gpu_blocks": 64831}
+EXP4_WORKLOAD={"context_tokens": 2048, "ignore_eos": true, "max_tokens": 32, "output_tokens": 32, "prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58", "reps": 15, "temperature": 0.0, "warmups": 5}
+EXP4_WARMUP_BEGIN
+(EngineCore pid=756) WARNING 09-26 17:00:37 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_final_v2_age_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=756) WARNING 09-26 17:00:37 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_final_shift_recent_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=756) WARNING 09-26 17:00:37 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4b3_gqa4_closed_page_partial_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=756) WARNING 09-26 17:00:37 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4d3_4_k_stats_codes_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=756) WARNING 09-26 17:00:37 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4d3_4_pack_k3_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=756) WARNING 09-26 17:00:37 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4d3_4_meta64_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=756) WARNING 09-26 17:00:37 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4b1_exactmeta_tail_partial_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=756) WARNING 09-26 17:00:37 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_reduce_partials_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 0, "tpot_ms": 151.6997395806448, "ttft_ms": 1031.6898822784424, "wall_ms": 5734.988201999954}
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 1, "tpot_ms": 20.411400064517693, "ttft_ms": 116.7764663696289, "wall_ms": 749.5692539999936}
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 2, "tpot_ms": 20.384783709678157, "ttft_ms": 117.30575561523438, "wall_ms": 749.0524590000405}
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 3, "tpot_ms": 20.345920838710093, "ttft_ms": 116.65153503417969, "wall_ms": 747.0815249999987}
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 4, "tpot_ms": 20.53036232258005, "ttft_ms": 116.23144149780273, "wall_ms": 752.6280269999575}
+EXP4_WARMUP_END
+EXP4_MEASUREMENT_BEGIN
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 0, "tpot_ms": 20.486731806450337, "ttft_ms": 116.54877662658691, "wall_ms": 751.4136490000283}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 1, "tpot_ms": 20.307673419355773, "ttft_ms": 116.75167083740234, "wall_ms": 746.204984999963}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 2, "tpot_ms": 20.401327419354093, "ttft_ms": 116.17064476013184, "wall_ms": 748.6841909999953}
+INFO 09-26 17:00:47 [loggers.py:273] Engine 000: Avg prompt throughput: 1657.3 tokens/s, Avg generation throughput: 23.1 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.1%, Prefix cache hit rate: 0.0%
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 3, "tpot_ms": 20.27536490322562, "ttft_ms": 116.5323257446289, "wall_ms": 744.8595289999957}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 4, "tpot_ms": 20.374647354839773, "ttft_ms": 116.20092391967773, "wall_ms": 747.7160909999725}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 5, "tpot_ms": 20.363504612903178, "ttft_ms": 116.49155616760254, "wall_ms": 747.7679570000078}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 6, "tpot_ms": 20.37400270967649, "ttft_ms": 116.35923385620117, "wall_ms": 747.9846210000005}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 7, "tpot_ms": 20.327172064516997, "ttft_ms": 116.81485176086426, "wall_ms": 746.8554559999916}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 8, "tpot_ms": 20.339268709678453, "ttft_ms": 116.65606498718262, "wall_ms": 747.0451149999917}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 9, "tpot_ms": 20.26662916129072, "ttft_ms": 116.63699150085449, "wall_ms": 744.8247329999731}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 10, "tpot_ms": 20.285071870968032, "ttft_ms": 116.5313720703125, "wall_ms": 745.3851129999975}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 11, "tpot_ms": 20.2443605806461, "ttft_ms": 116.00112915039062, "wall_ms": 743.3595010000431}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 12, "tpot_ms": 20.385962096772726, "ttft_ms": 116.4083480834961, "wall_ms": 747.9582249999908}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 13, "tpot_ms": 20.336400322581802, "ttft_ms": 116.16992950439453, "wall_ms": 746.3800829999627}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 14, "tpot_ms": 20.32642787096686, "ttft_ms": 115.85497856140137, "wall_ms": 745.6397979999565}
+EXP4_MEASUREMENT_END
+EXP4_WORKER_COMPLETE
+(EngineCore pid=756) INFO 09-26 17:00:56 [core.py:1214] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=756) INFO 09-26 17:00:56 [core.py:1333] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=756) INFO 09-26 17:00:56 [core.py:1364] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=756) INFO 09-26 17:00:56 [core.py:1227] [shutdown] EngineCore: exiting busy loop
+===== EXP4 LEG C2 (index 4, rabit_kv2) =====
+EXP4_LEG={"kv_cache_dtype": "rabit_kv2", "leg": "C2"}
+EXP4_RABIT_MARKERS={"_RABIT2_FINAL_FAST_DECODE_APPEND": true, "_RABIT2_STAGE4D3_4_TRITON_TAILPREP": true, "stage4d3_4_dispatch_active": true}
+EXP4_REQUESTED_ENGINE_KWARGS={"attention_config": {"backend": "TRITON_ATTN"}, "block_size": 32, "disable_log_stats": false, "dtype": "bfloat16", "enable_chunked_prefill": true, "enable_prefix_caching": false, "enforce_eager": true, "gpu_memory_utilization": 0.82, "kv_cache_dtype": "rabit_kv2", "max_model_len": 32768, "max_num_batched_tokens": 16384, "max_num_seqs": 32, "model": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master", "trust_remote_code": true}
+INFO 09-26 17:01:07 [api_utils.py:273] non-default args: {'trust_remote_code': True, 'dtype': 'bfloat16', 'kv_cache_dtype': 'rabit_kv2', 'max_model_len': 32768, 'block_size': 32, 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.82, 'max_num_batched_tokens': 16384, 'max_num_seqs': 32, 'enforce_eager': True, 'enable_chunked_prefill': True, 'attention_config': AttentionConfig(backend=<AttentionBackendEnum.TRITON_ATTN: 'vllm.v1.attention.backends.triton_attn.TritonAttentionBackend'>, flash_attn_version=None, use_prefill_decode_attention=False, flash_attn_max_num_splits_for_cuda_graph=32, tq_max_kv_splits_for_cuda_graph=32, use_trtllm_attention=None, disable_flashinfer_q_quantization=False, mla_prefill_backend=None, use_prefill_query_quantization=False, use_fp4_indexer_cache=False, indexer_kv_dtype='bf16', use_non_causal=False, flex_attn_block_m=None, flex_attn_block_n=None, flex_attn_q_block_size=None, flex_attn_kv_block_size=None), 'model': '/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master'}
+WARNING 09-26 17:01:07 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_PRECOMPILED_WHEEL_VARIANT
+WARNING 09-26 17:01:07 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_PRECOMPILED_WHEEL_COMMIT
+WARNING 09-26 17:01:07 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_USE_V1
+INFO 09-26 17:01:07 [model.py:606] Resolved architecture: LlamaForCausalLM
+INFO 09-26 17:01:07 [model.py:1736] Using max model len 32768
+INFO 09-26 17:01:07 [cache.py:297] Using rabit_kv2 data type to store kv cache. It reduces the GPU memory footprint and boosts the performance. Meanwhile, it may cause accuracy drop without a proper scaling factor
+INFO 09-26 17:01:07 [scheduler.py:252] Chunked prefill is enabled with max_num_batched_tokens=16384.
+INFO 09-26 17:01:07 [vllm.py:1042] Asynchronous scheduling is enabled.
+WARNING 09-26 17:01:07 [vllm.py:1096] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+WARNING 09-26 17:01:07 [vllm.py:1144] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 09-26 17:01:07 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+INFO 09-26 17:01:07 [vllm.py:1322] Cudagraph is disabled under eager mode
+INFO 09-26 17:01:07 [compilation.py:312] Enabled custom fusions: norm_quant, act_quant
+(EngineCore pid=907) INFO 09-26 17:01:10 [core.py:114] Initializing a V1 LLM engine (v0.10.0+kvquant) with config: model='/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master', speculative_config=None, tokenizer='/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=32768, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=rabit_kv2, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master, enable_prefix_caching=False, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [16384], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=907) INFO 09-26 17:01:11 [parallel_state.py:1588] world_size=1 rank=0 local_rank=0 distributed_init_method=tcp://172.20.18.232:47320 backend=nccl
+(EngineCore pid=907) INFO 09-26 17:01:11 [parallel_state.py:1923] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(EngineCore pid=907) INFO 09-26 17:01:11 [gpu_worker.py:360] Using V2 Model Runner
+(EngineCore pid=907) INFO 09-26 17:01:11 [model_runner.py:293] Loading model from scratch...
+(EngineCore pid=907) INFO 09-26 17:01:12 [cuda.py:416] Using AttentionBackendEnum.TRITON_ATTN backend.
+(EngineCore pid=907) INFO 09-26 17:01:12 [weight_utils.py:849] Filesystem type for checkpoints: 9P. Checkpoint size: 14.96 GiB. Available RAM: 1018.39 GiB.
+(EngineCore pid=907) INFO 09-26 17:01:12 [weight_utils.py:872] Auto-prefetch is disabled because the filesystem (9P) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=907) 
+Loading safetensors checkpoint shards:   0% Completed | 0/4 [00:00<?, ?it/s]
+(EngineCore pid=907) 
+Loading safetensors checkpoint shards:  25% Completed | 1/4 [00:00<00:02,  1.07it/s]
+(EngineCore pid=907) 
+Loading safetensors checkpoint shards:  50% Completed | 2/4 [00:02<00:02,  1.03s/it]
+(EngineCore pid=907) 
+Loading safetensors checkpoint shards:  75% Completed | 3/4 [00:03<00:01,  1.06s/it]
+(EngineCore pid=907) 
+Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:03<00:00,  1.27it/s]
+(EngineCore pid=907) 
+Loading safetensors checkpoint shards: 100% Completed | 4/4 [00:03<00:00,  1.14it/s]
+(EngineCore pid=907) 
+(EngineCore pid=907) INFO 09-26 17:01:15 [default_loader.py:430] Loading weights took 3.54 seconds
+(EngineCore pid=907) INFO 09-26 17:01:16 [model_runner.py:314] Model loading took 15.0 GiB and 4.400889 seconds
+(EngineCore pid=907) INFO 09-26 17:01:16 [topk_topp_sampler.py:55] Using FlashInfer for top-p & top-k sampling.
+(EngineCore pid=907) INFO 09-26 17:01:18 [gpu_worker.py:538] Available KV cache memory: 47.98 GiB
+(EngineCore pid=907) INFO 09-26 17:01:18 [kv_cache_utils.py:2146] GPU KV cache size: 2,074,592 tokens
+(EngineCore pid=907) INFO 09-26 17:01:18 [kv_cache_utils.py:2147] Maximum concurrency for 32,768 tokens per request: 63.31x
+(EngineCore pid=907) INFO 09-26 17:01:18 [deep_gemm.py:175] deep_gemm not found in site-packages, trying vendored vllm.third_party.deep_gemm
+(EngineCore pid=907) INFO 09-26 17:01:18 [deep_gemm.py:202] DeepGEMM PDL enabled on vllm.third_party.deep_gemm.
+(EngineCore pid=907) INFO 09-26 17:01:18 [kernel_warmup.py:177] Using FlashInfer autotune cache file: /root/.cache/vllm/flashinfer_autotune_cache/0.6.13/90a/4f3b8ed9b1bc067cc522158b1d7873f8c41cd271b7a9141a5eb4256611f0666d/autotune_configs.json
+(EngineCore pid=907) 2026-09-26 17:01:18,677 - INFO - autotuner.py:651 - flashinfer.jit: [Autotuner]: Autotuning process starts ...
+(EngineCore pid=907) INFO 09-26 17:01:18 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:18 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:18 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:19 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:20 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:21 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:21 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:21 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) INFO 09-26 17:01:21 [triton_attn.py:811] RABIT2_STAGE3C_MULTI_SEQUENCE_ACTIVE num_seqs=32
+(EngineCore pid=907) 2026-09-26 17:01:21,363 - INFO - autotuner.py:674 - flashinfer.jit: [Autotuner]: Autotuning process ends
+(EngineCore pid=907) WARNING 09-26 17:01:21 [kernel_warmup.py:206] No FlashInfer autotune cache entries found.Falling back to default tactics.
+(EngineCore pid=907) INFO 09-26 17:01:21 [cutedsl_warmup.py:97] Skipping CuTeDSL warmup because no compile units were requested.
+(EngineCore pid=907) INFO 09-26 17:01:21 [jit_monitor.py:72] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=907) INFO 09-26 17:01:22 [core.py:344] init engine (profile, create kv cache, warmup model) took 5.52 s
+(EngineCore pid=907) WARNING 09-26 17:01:22 [vllm.py:1096] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+(EngineCore pid=907) WARNING 09-26 17:01:22 [vllm.py:1144] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore pid=907) INFO 09-26 17:01:22 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+(EngineCore pid=907) INFO 09-26 17:01:22 [vllm.py:1322] Cudagraph is disabled under eager mode
+EXP4_EFFECTIVE_ENGINE_CONFIG={"attention_backend": "AttentionBackendEnum.TRITON_ATTN", "block_size": 32, "calculate_kv_scales": false, "compilation_mode": "NONE", "compilation_mode_raw": {"repr": "<CompilationMode.NONE: 0>", "str": "0"}, "cudagraph_mode": "NONE", "cudagraph_mode_raw": {"repr": "<CUDAGraphMode.NONE: 0>", "str": "NONE"}, "enable_chunked_prefill": true, "enable_prefix_caching": false, "enforce_eager": true, "gpu_memory_utilization": 0.82, "hf_quantization_config": null, "kv_cache_dtype_skip_layers": [], "log_stats": true, "max_model_len": 32768, "max_num_batched_tokens": 16384, "max_num_seqs": 32, "model": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master", "model_dtype": "torch.bfloat16", "quantization": null, "seed": 0, "tensor_parallel_size": 1, "trust_remote_code": true}
+EXP4_KV_DTYPE={"engine_cache_dtype": "rabit_kv2", "fp8_storage_view_dtype": null, "kv_quant_mode": "RABIT_KV2", "requested_kv_cache_dtype": "rabit_kv2", "resolved_kv_torch_dtype": "torch.uint8"}
+EXP4_CAPACITY={"block_size": 32, "capacity_tokens": 2074592, "num_gpu_blocks": 64831}
+EXP4_WORKLOAD={"context_tokens": 2048, "ignore_eos": true, "max_tokens": 32, "output_tokens": 32, "prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58", "reps": 15, "temperature": 0.0, "warmups": 5}
+EXP4_WARMUP_BEGIN
+(EngineCore pid=907) WARNING 09-26 17:01:22 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_final_v2_age_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=907) WARNING 09-26 17:01:22 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_final_shift_recent_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=907) WARNING 09-26 17:01:22 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4b3_gqa4_closed_page_partial_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=907) WARNING 09-26 17:01:22 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4d3_4_k_stats_codes_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=907) WARNING 09-26 17:01:22 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4d3_4_pack_k3_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=907) WARNING 09-26 17:01:22 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4d3_4_meta64_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=907) WARNING 09-26 17:01:22 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_stage4b1_exactmeta_tail_partial_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+(EngineCore pid=907) WARNING 09-26 17:01:22 [jit_monitor.py:128] Triton kernel JIT compilation during inference: _rabit2_reduce_partials_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 0, "tpot_ms": 21.493880935483297, "ttft_ms": 256.92224502563477, "wall_ms": 923.6616019999815}
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 1, "tpot_ms": 20.504168161290828, "ttft_ms": 116.87064170837402, "wall_ms": 752.3950130000117}
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 2, "tpot_ms": 20.5255044193549, "ttft_ms": 116.2269115447998, "wall_ms": 752.4182509999946}
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 3, "tpot_ms": 20.438269419355127, "ttft_ms": 116.65201187133789, "wall_ms": 749.9771899999814}
+EXP4_WARMUP {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 4, "tpot_ms": 20.42390712903207, "ttft_ms": 116.40501022338867, "wall_ms": 749.2316240000036}
+EXP4_WARMUP_END
+EXP4_MEASUREMENT_BEGIN
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 0, "tpot_ms": 20.493145774192698, "ttft_ms": 116.88780784606934, "wall_ms": 751.8284760000142}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 1, "tpot_ms": 20.379829903225573, "ttft_ms": 116.39881134033203, "wall_ms": 748.0583480000291}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 2, "tpot_ms": 20.57928829032291, "ttft_ms": 116.6996955871582, "wall_ms": 754.4325259999596}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 3, "tpot_ms": 20.467720129031914, "ttft_ms": 116.52421951293945, "wall_ms": 751.0006109999949}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 4, "tpot_ms": 20.511108612903364, "ttft_ms": 116.46199226379395, "wall_ms": 752.0291270000143}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 5, "tpot_ms": 20.473265935483976, "ttft_ms": 116.3628101348877, "wall_ms": 750.8179459999837}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 6, "tpot_ms": 20.37565700000106, "ttft_ms": 118.19005012512207, "wall_ms": 749.351747999981}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 7, "tpot_ms": 20.48205567741991, "ttft_ms": 116.49847030639648, "wall_ms": 751.0965089999786}
+INFO 09-26 17:01:32 [loggers.py:273] Engine 000: Avg prompt throughput: 2786.5 tokens/s, Avg generation throughput: 41.4 tokens/s, Running: 1 reqs, Waiting: 0 reqs, GPU KV cache usage: 0.1%, Prefix cache hit rate: 0.0%
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 8, "tpot_ms": 20.481386290324252, "ttft_ms": 115.89264869689941, "wall_ms": 750.5603070000006}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 9, "tpot_ms": 20.391125483870972, "ttft_ms": 116.31417274475098, "wall_ms": 748.0788610000104}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 10, "tpot_ms": 20.434100129032306, "ttft_ms": 116.71829223632812, "wall_ms": 749.8481200000242}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 11, "tpot_ms": 20.477218032257746, "ttft_ms": 116.23549461364746, "wall_ms": 750.8828740000126}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 12, "tpot_ms": 20.564361516129967, "ttft_ms": 116.87970161437988, "wall_ms": 754.0723519999801}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 13, "tpot_ms": 20.237184548385986, "ttft_ms": 116.10293388366699, "wall_ms": 743.1934350000233}
+EXP4_SAMPLE {"output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26", "output_tokens": 32, "prompt_tokens": 2048, "rep": 14, "tpot_ms": 20.401120806450162, "ttft_ms": 116.74284934997559, "wall_ms": 749.0710309999713}
+EXP4_MEASUREMENT_END
+EXP4_WORKER_COMPLETE
+(EngineCore pid=907) INFO 09-26 17:01:37 [core.py:1214] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=907) INFO 09-26 17:01:37 [core.py:1333] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=907) INFO 09-26 17:01:37 [core.py:1364] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=907) INFO 09-26 17:01:37 [core.py:1227] [shutdown] EngineCore: exiting busy loop
