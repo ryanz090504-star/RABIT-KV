@@ -398,71 +398,146 @@ result.
 
 ### Experiment 5 — Context-length scaling
 
-- **Research question:** How do real decode latency (TPOT/TTFT/wall), actual KV cache
-  memory/pool usage, and the maximum feasible context length scale with prefill context
-  length for BF16 vs. RABIT-KV?
+- **Research question:** How do real decode latency (TPOT/TTFT/wall) and the request's live
+  KV-cache footprint scale with context length for BF16 vs. RABIT-KV on the real engine?
 - **Important scoping note (per audit correction):** the vLLM allocator's reported
-  *physical capacity* (the token count established at engine startup, per Experiment 3) is
-  a property of the fixed engine configuration and GPU memory budget — the engine does not
-  reallocate the KV cache pool per request or per context length. This experiment therefore
-  does **not** re-measure "capacity vs. context length" as if capacity varies with
-  workload; capacity is measured once per dtype as a single matched point measurement
-  (Experiment 3) and is not re-derived here. What genuinely varies with context length is
-  per-request latency and how much of the fixed pool a given request's context actually
-  occupies at runtime — that is what this experiment measures.
-- **Why MLSys reviewers would care:** The paper's only current deployment evidence is a
-  single 2048-token context point, despite `max_model_len=32768` being part of the
-  configuration. A systems paper claiming long-context benefit needs a latency curve and a
-  maximum-feasible-context result, not a single point — and needs to state the capacity
-  metric correctly rather than implying it changes with workload.
-- **Hypothesis:** RABIT-KV's per-token decode overhead relative to BF16 (from Experiment 3)
-  may grow, shrink, or stay flat as context grows — must be measured, not assumed.
-  Separately, RABIT-KV's smaller per-token memory footprint is expected to let it reach
-  materially longer maximum feasible context under the fixed `gpu_memory_utilization=0.82`
-  budget than BF16 before OOM — this is the correct way to express a "long-context benefit"
-  claim from this sweep (maximum feasible context length), not a re-measurement of
-  allocator capacity per point.
-- **Control:** `bf16` at each context length.
-- **Treatment:** `rabit_kv2` at each context length.
-- **Variables that must remain fixed:** all engine args from Experiment 3 except context
-  length; output tokens fixed at 32; ≥10 reps per (dtype, context-length) cell.
-- **Existing script to reuse:** `benchmarks/performance/benchmark_deployment.py`
-  (dtype-parameterized per Experiment 3).
-- **Exact code changes required:** add a `--context-tokens` CLI parameter to the embedded
-  runner (currently hardcoded to 2048); add a thin outer sweep driver (new script,
-  e.g. `benchmarks/performance/sweep_context_length.py`) that repeatedly invokes the
-  parameterized deployment benchmark across the context grid, and at each point records
-  TPOT/TTFT/wall plus the actual KV blocks/tokens consumed by the live request (from the
-  engine's runtime state/logs) — not a re-query of allocator capacity, which the driver
-  does not touch. No changes to the RABIT-KV implementation itself.
+  *physical capacity* (`num_gpu_blocks × block_size`, established at engine startup, per
+  Experiments 3/4) is a property of the fixed engine configuration and GPU memory budget —
+  the engine does not reallocate the KV cache pool per request or per context length.
+  **Context scaling is distinct from allocator capacity.** Capacity is recorded in every
+  cell only as a consistency check (it must be identical across all contexts of a dtype);
+  it is not re-derived per context and not presented as varying with workload.
+- **Why MLSys reviewers would care:** The paper's deployment evidence is a single
+  2048-token context point, despite `max_model_len=32768` being part of the configuration.
+  A systems paper claiming long-context behavior needs a latency curve across context
+  lengths, with the capacity metric stated correctly.
+- **Hypothesis:** RABIT-KV's per-token decode overhead relative to BF16 may grow, shrink, or
+  stay flat as context grows — measured, not assumed. RABIT-KV's live paged-KV footprint at
+  a matched context is expected to be smaller than BF16's (derived, see Metrics).
+- **Maximum context (audit correction):** with `max_model_len=32768` the longest request
+  either dtype can run is bounded by `max_model_len`, not by KV memory: one 32K request uses
+  about 1,024 blocks, far below either dtype's allocator capacity (Experiments 3/4). This
+  experiment therefore does **not** determine a maximum feasible context. **32768 is the
+  maximum TESTED context point, not a proven maximum feasible context or failure
+  boundary.** Probing beyond it would require a separate experiment with a larger
+  `max_model_len`.
+- **Control / treatment:** A = `bfloat16` (explicit), B = `rabit_kv2`. Native FP8 is not
+  part of this experiment; adding it (18 cells instead of 12) is an optional extension for
+  review, not part of this protocol.
+- **Context grid:** 512, 2048, 4096, 8192, 16384, 32768, with 32 generated tokens at every
+  point. Exact prompt length = context point, except at 32768: the audited engine rejects a
+  prompt equal to `max_model_len` and stops generation when prompt + output reaches
+  `max_model_len`, so the 32768 point uses a **32736-token prompt + 32 output = 32768
+  tokens**. **32768 is a nominal / model-limit context point, NOT a 32768-token prompt.**
+  Every table and JSON entry carries both `context_point` (32768) and `actual_prompt_tokens`
+  (32736); future plots/tables must either use the actual prompt tokens (32736) or label the
+  point "32K model-limit point (32736 input + 32 output)". Every request records the prompt
+  token count and prompt-token hash the engine actually saw and the output token count; any
+  deviation from the planned prompt length, prompt hash or 32 output tokens stops the sweep.
+- **Variables that must remain fixed:** all engine arguments from Experiments 3/4 (eager,
+  Triton attention, CUDA graphs and `torch.compile` disabled,
+  `gpu_memory_utilization=0.82`, `block_size=32`, `max_model_len=32768`,
+  `max_num_batched_tokens=16384`, `max_num_seqs=32`, prefix caching disabled, chunked
+  prefill enabled), model snapshot, image, H100, prompt construction (BOS + repeated
+  " the" token, as in Experiments 3/4, only the length varies), 32 output tokens, greedy
+  decoding, warmup protocol. Only `kv_cache_dtype` (comparison variable) and the context
+  point / prompt (swept variable) differ.
+- **Protocol:** one Modal container / one physical H100 / one image / one model snapshot.
+  (1) Idle GPU baseline. (2) Frozen RABIT-KV correctness gate (`exp3_correctness_gate.py`,
+  unchanged) once, before any cell. (3) Two **UNMEASURED conditioning cells** —
+  `conditioning_A512` (`bfloat16`) then `conditioning_B512` (`rabit_kv2`) — each a fresh engine
+  process with the exact 512-token workload, 5 full-shape warmups and **zero** measured reps.
+  They exist because Experiment 4 showed a first-engine/container effect, so no official cell
+  is the first engine process in the container. Their latency values are never part of any
+  Experiment 5 statistic (only status/provenance is recorded); the GPU must be clean after
+  them; any conditioning failure stops the experiment. (4) The official measured sweep,
+  exactly **12 cells**, each a fresh worker/engine process with **5 full-shape warmups**
+  (excluded) and **15 measured reps**, in ascending context order with the dtype order
+  alternating per context so neither dtype always runs first: A512, B512 | B2048, A2048 |
+  A4096, B4096 | B8192, A8192 | A16384, B16384 | B32768, A32768. The BF16/RABIT-KV
+  comparison at each context uses the two adjacent cells. No repeat cell is added at the end.
+- **No reuse:** no Experiment 3 or 4 latency (or any other) sample is read, reused or
+  pooled; all 12 cells are measured fresh in this session.
+- **Safety / robustness (as Experiments 3/4):** GPU clean state before every cell (no
+  compute process, `memory.used` within 256 MiB of idle; else the sweep stops);
+  process-group watchdog (gate 600 s; each of the 14 cell processes — 2 conditioning + 12
+  measured — 900 s; whole-group kill; a timeout stops the sweep). Total watchdog budget
+  600 + 14 × 900 = 13200 s; the outer Modal timeout is 14400 s and preflight verifies it
+  exceeds that budget. No automatic retries; no Triton JIT during measured reps;
+  protected-path and prior-evidence post-check on every terminal path; every integrity check
+  is `passed` / `failed` / `not_run` / `not_evaluated`, and a scientific summary exists only
+  if all pass. Every cell's per-cell feasibility is recorded (initialized, completed, OOM,
+  prompt tokens processed, output produced).
+- **Failed-cell policy (narrow):** after every cell an in-container verifier re-checks the
+  cell's own output. The sweep may continue to the next context **only** for a
+  workload-level failure of an official measured cell — a request OOM or request/context
+  execution failure raised after a successful engine initialization — and only after the
+  cell's whole process group was terminated and reaped with no child/orphan process left and
+  a fresh GPU clean-state check passes. The run is still marked failed and no scientific
+  summary is written. The sweep **stops immediately** for: correctness-gate failure, watchdog
+  timeout, engine initialization failure, dtype/config mismatch, prompt token-count mismatch,
+  prompt hash mismatch, JIT during measurement, GPU clean-state failure, protected-path
+  failure, parser/integrity failure, any conditioning failure, a request rejected by input
+  validation, and any other methodology/infrastructure failure. The context is never reduced
+  and nothing is retried; the runner re-verifies post hoc that every continuation respected
+  this policy.
+- **Matched-config enforcement:** requested kwargs, effective engine config, workload and
+  resolved KV dtype are compared across all 12 cells. Two explicit allowlist classes:
+  dtype-induced (`requested.kv_cache_dtype`, `kv_dtype.requested_kv_cache_dtype`,
+  `kv_dtype.engine_cache_dtype`, `kv_dtype.resolved_kv_torch_dtype`,
+  `kv_dtype.kv_quant_mode`) may differ only between dtypes and must be constant across all
+  contexts of a dtype; context-induced (`workload.context_point`, `workload.prompt_tokens`,
+  `workload.prompt_token_ids_sha256`) may differ only between context points and must be
+  identical for both dtypes at one context. Any other difference hard-fails.
+- **Code (new Experiment 5 files; Experiment 1–4 files are not modified):**
+  `benchmarks/mlsys2027/run_experiment5_context_scaling.py`, `exp5_deployment_modal.py`,
+  `exp5_engine_worker.py`. The runner proves by AST that the worker's engine kwargs, output
+  length, prompt construction (except its length) and timed region equal the frozen
+  Experiment 3 worker and the canonical runner, that the Modal image equals the canonical
+  one, and that the clean-state / watchdog helpers equal Experiment 3's. No engine RPC is
+  used (the Experiment 3 attempt-1 KV-spec RPC hang is not reintroduced).
 - **Model:** `LLM-Research/Meta-Llama-3.1-8B-Instruct`.
-- **Dataset/workload:** synthetic prefill at context lengths `{512, 2048, 4096, 8192,
-  16384, 32768}`, 32 generated tokens per point (methodology matches canonical).
 - **GPU:** NVIDIA H100 80GB HBM3.
-- **Metrics:** TPOT/TTFT/wall vs. context length (both dtypes); actual KV memory/blocks
-  consumed by the live request at each context point (distinct from, and clearly labeled
-  separately from, the Experiment 3 allocator-capacity measurement); maximum feasible
-  context length reached by each dtype under the fixed memory budget before OOM/rejection;
-  a live-usage compression ratio at matched context length (actual bytes/blocks used,
-  RABIT-KV vs. BF16) — labeled explicitly as distinct from Experiment 3's allocator-
-  capacity ratio.
-- **Repetitions/samples:** ≥10 reps per (dtype, context-length) cell (12 cells total).
-- **Raw output path:**
-  `results/mlsys2027/context_scaling/{bf16,rabit_kv2}_ctx{N}.log` + `summary.json`.
-- **Paper figure/table:** Figure — "Latency vs. context length" (two lines: BF16,
-  RABIT-KV); Table — "Maximum feasible context length, BF16 vs. RABIT-KV"; Figure — "Actual
-  KV memory usage vs. context length" (live usage, not allocator capacity).
-- **Completion criterion:** full sweep completes for both dtypes across all six context
-  points without OOM or error where feasible; summary table complete; each dtype's maximum
-  feasible context length under `gpu_memory_utilization=0.82` is identified and reported —
-  if BF16 cannot reach a given context length, that is reported explicitly as a BF16
-  ceiling (a finding, not an assumed magnitude), not silently skipped; allocator capacity
-  itself is not re-reported per point, only cross-referenced from Experiment 3.
-- **Estimated engineering difficulty:** Medium (parameterization plus sweep orchestration;
-  must handle possible BF16 OOM at the largest context points gracefully and report it as a
-  finding).
-- **Estimated GPU cost:** Medium–high. 6 context points × 2 dtypes × ≥10 reps, plus 12
-  separate engine boot-ups; largest context points (16K/32K) will dominate wall-clock cost.
+- **Metrics — latency (measured):** TPOT median/p90, TTFT median, wall-time median per
+  (dtype, context) cell; signed RABIT-KV − BF16 deltas per context, worded by measured sign.
+- **Metrics — memory, MEASURED (reported separately):** allocator capacity
+  (`num_gpu_blocks × block_size`) and engine-logged available KV memory and model-load
+  memory per cell (context-independent configuration properties); device-wide
+  `nvidia-smi memory.used` idle before each cell, after engine init and after the measured
+  reps (dominated by the `gpu_memory_utilization` pre-allocation, so not a per-request KV
+  measurement); the engine's periodic "GPU KV cache usage" log lines, kept only as sparse
+  snapshots (about one per 10 s at 0.1% resolution — not a robust per-request measurement).
+  Peak request-time GPU memory is not measured (no reliable probe without an engine RPC).
+- **Metrics — memory, DERIVED (never mixed with measured values):**
+  `derived_live_paged_kv_bytes` = `ceil((prompt_tokens + output_tokens − 1) / block_size)`
+  blocks × bytes/block, where bytes/block is derived from the physical allocator budget
+  (engine-logged available KV bytes / `num_gpu_blocks`); and the matched-context BF16/RABIT-KV
+  ratio of that quantity. It excludes RABIT-KV per-sequence state outside the paged pool
+  (and any other memory outside the paged KV pool), which is not observed. It is labeled
+  DERIVED everywhere, is never called directly measured live memory, and is distinct from the
+  allocator-capacity ratio of Experiments 3/4.
+- **Repetitions/samples:** 5 excluded warmups + 15 measured reps per cell (12 cells).
+- **Raw output path:** `results/mlsys2027/context_scaling/`: `modal_session.log`,
+  `correctness_gate.log`, one log per measured cell (`bf16_ctx{N}.log`,
+  `rabit_kv2_ctx{N}.log`), one per conditioning cell (`conditioning_bf16_ctx512.log`,
+  `conditioning_rabit_kv2_ctx512.log`), `manifest.json`, `matched_config_diff.json`,
+  `integrity_check.json`, `context_scaling_summary.json`.
+- **Paper figure/table:** Figure — "Latency vs. context length" (BF16, RABIT-KV); Figure or
+  table — "Live paged-KV footprint vs. context length (DERIVED)", clearly separated from the
+  allocator-capacity numbers of Experiments 3/4.
+- **Completion criterion:** correctness gate passes; both conditioning cells pass; all 12
+  measured cells complete; every integrity check passes (matched config per the two allowlist classes, GPU clean before every cell,
+  exact prompt/output token counts and prompt hashes on every request, allocator capacity
+  identical across contexts of a dtype, 5 warmups + 15 reps per cell, no Triton JIT during
+  measurement). If a measured cell fails at workload level it is reported as a failed cell
+  with its evidence — not skipped, not retried, and not turned into a maximum-feasible-context
+  claim.
+- **Estimated engineering difficulty:** Medium (verified reuse of the Experiment 3/4
+  machinery plus sweep orchestration).
+- **Estimated GPU cost:** Moderate. One correctness gate, 14 engine boot-ups (2 conditioning
+  + 12 measured) and 2 × 5 + 12 × 20 requests in one container; the 16K/32K cells dominate.
+  Roughly 16–37 min of H100 time (latency at 16K/32K is not yet measured). No automatic
+  retries; any rerun is an explicit decision.
 
 ### Experiment 6 — Concurrency / throughput scaling
 
