@@ -258,77 +258,139 @@ result.
 ### Experiment 4 — FP8 baseline: matched physical capacity and latency (real engine only)
 
 - **Research question:** How does RABIT-KV compare to the fork's native, real-engine FP8
-  KV-cache dtype (`fp8`/`fp8_e4m3`) in physical allocator capacity and real decode latency,
-  under an engine configuration matched to Experiment 3?
+  KV-cache dtype in physical allocator capacity and real decode latency, with BF16, FP8 and
+  RABIT-KV all measured fresh in the **same** matched session?
 - **Why MLSys reviewers would care:** FP8 KV cache is already a supported, well-understood
   baseline in vLLM itself. A paper claiming novel KV compression that never compares
   against the framework's own FP8 option invites an immediate "why not just use FP8"
   question — but that comparison must be a real measurement, not an approximation.
-- **Hypothesis:** FP8 gives ~2× capacity (1 byte/element vs. BF16's 2 bytes); RABIT-KV's
-  capacity gain over FP8 is expected to be smaller than its gain over BF16 but still
-  substantial — this is a hypothesis to test, not assumed. Latency direction for FP8 vs.
-  BF16 vs. RABIT-KV is not assumed either; report whatever is measured.
+- **Hypothesis:** FP8 stores 1 byte per KV element vs. BF16's 2, so a capacity gain over
+  BF16 is expected; RABIT-KV's gain over FP8 is expected to be smaller than its gain over
+  BF16. Neither ratio is hard-coded or assumed — both are measured. Latency direction for
+  FP8 vs. BF16 vs. RABIT-KV is not assumed either; report whatever is measured.
 - **Explicit rule (per audit correction):** Do **not** create a hand-written FP8 fake-quant
   quality baseline and present it as equivalent to vLLM's native FP8 path. This experiment
-  produces **capacity and latency only**. See "FP8 quality — status" below for why quality
-  is out of scope here.
-- **Control:** `bf16` (shared baseline with Experiment 3).
-- **Additional baseline:** `kv_cache_dtype=fp8` (`fp8_e4m3`, explicit) — a second baseline
-  alongside BF16, not a RABIT-KV treatment.
-- **Treatment (for comparison):** `rabit_kv2` (reused from Experiment 3's matched run, not
-  re-executed here).
-- **Variables that must remain fixed:** identical engine config to Experiment 3 — eager
-  execution, Triton attention backend, CUDA graphs disabled, `torch.compile` disabled,
+  produces **physical capacity and latency only**. See "FP8 quality — status" below.
+- **No reuse of Experiment 3 samples:** Experiment 3's run #1 and independent replication
+  showed substantial cross-session variation in absolute latency, so BF16 and RABIT-KV are
+  **freshly re-measured in this Experiment 4 matched session**, alongside FP8. No Experiment 3 latency or capacity sample is
+  read, reused or pooled; Experiment 3 results are not cross-referenced for any Experiment 4
+  number.
+- **Native FP8 audit (vllm-kvquant source, read-only):**
+  - Requested dtype: `kv_cache_dtype="fp8_e4m3"`. `fp8` is an exact alias on CUDA (same
+    `STR_DTYPE_TO_TORCH_DTYPE` entry, same `FP8_PER_TENSOR` quant mode, both accepted by the
+    query-quant assertion); `fp8_e4m3` is chosen because it names the format explicitly.
+    `fp8_e5m2` is excluded (on CUDA the FP8 query-quant path asserts `fp8`/`fp8_e4m3`);
+    `fp8_inc` (Gaudi), `fp8_ds_mla` (MLA) and `fp8_per_token_head` (a different, scaled
+    per-token-head mode) are not native per-tensor FP8 for this model.
+  - Resolution: engine `cache_dtype = "fp8_e4m3"`; storage `torch.uint8`; the Triton
+    backend views it as `current_platform.fp8_dtype() = torch.float8_e4m3fn`;
+    `get_kv_quant_mode → FP8_PER_TENSOR`.
+  - KV scales: the Llama-3.1-8B-Instruct checkpoint has no `quantization_config`, so no
+    `BaseKVCacheMethod` is attached and `set_default_quant_scales()` leaves k/v/q scales at
+    1.0; `calculate_kv_scales` stays `False` (deprecated option, not set).
+  - Checkpoint override: `resolve_kv_cache_dtype_string` and the attention layer only
+    rewrite `auto`; an explicit `fp8_e4m3` cannot be overridden by the checkpoint.
+  - Query: on CUDA, for `fp8`/`fp8_e4m3` KV caches the attention layer also quantizes the
+    query to FP8 (static per-tensor, scale 1.0) before the Triton kernel; this is part of the
+    native FP8 path being measured.
+  - Hardware: Triton FP8 KV requires SM89+ (checked in `TritonAttentionImpl` and
+    `triton_reshape_and_cache_flash`); H100 is SM90.
+  - Every leg records `calculate_kv_scales`, `kv_cache_dtype_skip_layers` and the checkpoint
+    `quantization_config`; each must be `False` / `[]` / `None` on all six legs.
+- **Baselines and treatment:** A = `bfloat16` (explicit, not `auto`), B = `fp8_e4m3`,
+  C = `rabit_kv2` — all three freshly re-measured in this Experiment 4 matched session.
+  The FP8 baseline is **native FP8 E4M3 on this checkpoint, using the engine's default
+  scale behavior (scale 1.0), with native query FP8 conversion as part of the measured
+  backend path.** It is a physical capacity/latency baseline only; no FP8
+  quality-equivalence claim is made.
+- **Protocol (mirrored A-B-C-C-B-A):** one Modal container / one physical H100 / one image /
+  one model snapshot. (1) Idle GPU baseline. (2) The frozen RABIT-KV correctness gate
+  (`exp3_correctness_gate.py`, unchanged) runs once and must pass before any measurement.
+  (3) Six legs in the order **A1, B1, C1, C2, B2, A2**, each a fresh worker/engine process
+  with **5 full-shape warmups** (excluded) and **15 measured reps** → **30 measured samples
+  per dtype** (BF16, FP8, RABIT-KV).
+- **Variables that must remain fixed:** identical to Experiment 3 — eager execution, Triton
+  attention backend, CUDA graphs disabled, `torch.compile` disabled,
   `gpu_memory_utilization=0.82`, `block_size=32`, `max_model_len=32768`,
   `max_num_batched_tokens=16384`, `max_num_seqs=32`, prefix caching disabled, chunked
-  prefill enabled, context tokens = 2048, output tokens = 32.
-- **Existing script to reuse:** `benchmarks/performance/benchmark_deployment.py`,
-  dtype-parameterized per Experiment 3 (extend the accepted `--kv-cache-dtype` values to
-  include `fp8`/`fp8_e4m3`).
-- **Exact code changes required:**
-  1. Reuse the `--kv-cache-dtype` parameterization from Experiment 3; extend it to accept
-     `fp8`/`fp8_e4m3` as a value (no new quantization logic — this is a real engine dtype
-     switch, identical in kind to the BF16/RABIT-KV switch in Experiment 3).
-  2. Add a pre-flight functional smoke test (short generation, sanity-checked output) for
-     `kv_cache_dtype=fp8` under this exact eager/Triton configuration before trusting any
-     performance number — functional status under this specific engine config has not been
-     verified anywhere in this repository, even though `fp8`/`fp8_e4m3`/`fp8_e5m2`/
-     `fp8_inc`/`fp8_ds_mla` are registered `CacheDType` values.
-  3. **No fake-quant quality code is written for FP8 under this experiment.** That entire
-     code path is explicitly out of scope for P0.
+  prefill enabled, model dtype `bfloat16`, context tokens = 2048, output tokens = 32, greedy
+  decoding, identical prompt token IDs on every leg. Only `kv_cache_dtype` differs.
+- **Code (new Experiment 4 files; Experiment 3 files are not modified):**
+  `benchmarks/mlsys2027/run_experiment4_fp8_baseline.py` (local runner),
+  `exp4_deployment_modal.py` (Modal app), `exp4_engine_worker.py` (one engine per leg). The
+  frozen Experiment 3 worker cannot run FP8 (its `--kv-cache-dtype` choices are
+  `bfloat16`/`rabit_kv2`), so a derived worker is used. Before any run the runner proves by
+  AST that the Experiment 4 worker's engine kwargs equal the canonical runner and the
+  Experiment 3 worker, that its workload constants, prompt construction and timed region are
+  identical to Experiment 3's, that the Modal image equals the canonical image, that the
+  Modal clean-state and watchdog helpers equal Experiment 3's, and that the gate's
+  `regression()` equals the canonical one. The gate and watchdog are the unchanged,
+  committed Experiment 3 files.
+- **Safety / robustness (as Experiment 3):** idle GPU baseline; before every leg no compute
+  process and `memory.used` within 256 MiB of baseline; process-group watchdog (gate 600 s,
+  each leg 900 s; whole group killed on timeout; a timeout aborts the run); no automatic
+  retries; protected-path post-check on every terminal path; every integrity check is
+  `passed` / `failed` / `not_run` / `not_evaluated`, and a summary exists only if all pass.
+  Protected: canonical results, `vllm-kvquant`, Experiment 1 and 2 outputs, all Experiment 3
+  evidence (run #1, `failed_attempt_1`, `replication_1`, `replication_comparison.json`) and
+  Experiment 1–3 code.
+- **Matched-config enforcement:** requested kwargs, effective engine config, workload
+  (including a hash of the prompt token IDs) and resolved KV dtype are flattened per leg and
+  compared across all six legs. Only the dtype-induced allowlist
+  (`requested.kv_cache_dtype`, `kv_dtype.requested_kv_cache_dtype`,
+  `kv_dtype.engine_cache_dtype`, `kv_dtype.resolved_kv_torch_dtype`,
+  `kv_dtype.kv_quant_mode`, `kv_dtype.fp8_storage_view_dtype`) may differ, and only between
+  dtypes, never between the two legs of one dtype. Any other difference hard-fails.
+- **Capacity:** per leg: requested/resolved KV dtype, `num_gpu_blocks`, `block_size`,
+  physical capacity tokens, logged available KV memory and implied bytes/token. Duplicate
+  capacities must be identical (A1 = A2, B1 = B2, C1 = C2), else hard fail. Implied
+  bytes/token is cross-checked against 2-byte (BF16) and 1-byte (FP8) KV elements within 1%
+  (an element-size check, not a capacity-ratio expectation); RABIT-KV bytes/token is
+  reported only. Reported ratios: FP8/BF16, RABIT/BF16, RABIT/FP8.
+- **Latency:** raw samples kept for every leg; per leg TPOT median/p90, TTFT median, wall
+  median; pooled within each dtype only (30 samples each). Pairwise signed deltas
+  FP8 − BF16, RABIT − BF16, RABIT − FP8 for TPOT median, TPOT p90, TTFT median and wall
+  median, worded slower/faster only according to the measured sign.
+- **Order effects:** A1 vs A2, B1 vs B2, C1 vs C2 — median drift %, raw sample ranges and
+  range overlap for TPOT, TTFT and wall. Drift is reported, never hidden.
+- **FP8 functional check:** FP8 must initialize and complete the measured workload (2048
+  prompt / 32 output tokens on every request, SHA-256 of generated token IDs recorded per
+  request). Within-dtype determinism of those hashes is reported as functional evidence
+  only; it is not a quality metric and hashes are not compared across dtypes.
 - **FP8 quality — status:** Not attempted in P0. The existing quality scripts
   (`benchmarks/quality/*.py`) are HF-side fake-quant only, with no real-engine code path;
   producing a genuine FP8 quality number requires a real-engine quality harness (prefill +
-  generate through the actual vLLM engine with `kv_cache_dtype=fp8`, scored the same way as
+  generate through the actual vLLM engine with the FP8 KV cache, scored the same way as
   the canonical benchmarks), which does not exist today and is nontrivial new
   infrastructure. Until that harness is built, FP8 quality is reported in the paper as
   **"not evaluated — requires real-engine harness,"** not approximated with a hand-written
   fake-quant stand-in. If pursued, this becomes new P1 work, and may share infrastructure
-  with Experiment 16 (full TurboQuant quality integration), since both require the same
-  real-engine quality harness.
+  with Experiment 16 (full TurboQuant quality integration).
 - **Model:** `LLM-Research/Meta-Llama-3.1-8B-Instruct`.
 - **Dataset/workload:** same synthetic single-request decode microbenchmark as
   Experiment 3 (2048-token prefill, 32 generated tokens).
 - **GPU:** NVIDIA H100 80GB HBM3.
-- **Metrics:** capacity tokens and ratio (FP8 vs. BF16, FP8 vs. RABIT-KV); TPOT median,
-  TTFT median, wall-time median; signed latency deltas vs. BF16 and vs. RABIT-KV.
-- **Repetitions/samples:** capacity read once per dtype (deterministic given fixed config);
-  ≥20 decode reps for FP8, matching Experiment 3's protocol (BF16/RABIT-KV reps reused from
-  Experiment 3, not re-run).
-- **Raw output path:** `results/mlsys2027/fp8_baseline/fp8_deployment.log` +
-  `results/mlsys2027/fp8_baseline/summary.json` (cross-references Experiment 3's BF16/
-  RABIT-KV numbers rather than duplicating them).
-- **Paper figure/table:** adds an FP8 row to the Experiment 3 deployment table (capacity +
-  latency columns only; the quality column for this row is explicitly marked "not
-  evaluated," never left blank or silently omitted).
-- **Completion criterion:** FP8 smoke test passes; capacity and latency measured under
-  matched conditions alongside the Experiment 3 BF16/RABIT-KV numbers; no FP8 quality
-  number appears anywhere in P0 output.
-- **Estimated engineering difficulty:** Medium (the functional-status risk of FP8 under
-  this specific fork/backend combination is the main unknown; no fake-quant work is
-  required, which removes the highest-risk item from the original scope).
-- **Estimated GPU cost:** Low. One additional dtype leg on top of Experiment 3's existing
-  protocol (no quality-suite cost, since the quality leg is removed from P0).
+- **Raw output path:** `results/mlsys2027/fp8_baseline/`: `modal_session.log`,
+  `correctness_gate.log`, `bf16_deployment.log`, `fp8_e4m3_deployment.log`,
+  `rabit_kv2_deployment.log`, `manifest.json`, `matched_config_diff.json`,
+  `integrity_check.json`, `matched_capacity_latency_summary.json`.
+- **Paper figure/table:** a three-row matched deployment table (BF16, FP8, RABIT-KV) from this
+  single session: capacity tokens and pairwise ratios, TPOT/TTFT/wall absolute + signed
+  deltas. The quality column for the FP8 row is explicitly marked "not evaluated," never
+  left blank or silently omitted.
+- **Completion criterion:** correctness gate passes; all six legs complete; every integrity
+  check passes (matched config per the allowlist rule, GPU clean before every leg, duplicate
+  capacities identical, resolved KV dtypes as expected, 5 warmups + 15 reps per leg with
+  2048/32 tokens, no Triton JIT during measurement); the summary contains the three capacity
+  ratios, the pairwise signed latency deltas and the order effects from this session only;
+  no FP8 quality number appears anywhere in P0 output.
+- **Estimated engineering difficulty:** Medium (verified reuse of the Experiment 3 machinery;
+  FP8's functional status under this eager/Triton configuration is confirmed only by the
+  run itself).
+- **Estimated GPU cost:** Low–moderate. One correctness gate plus six engine boot-ups and
+  6 × 20 short requests in one container; roughly 1.5× Experiment 3. No automatic retries;
+  any rerun is an explicit decision.
 
 ---
 
