@@ -1,0 +1,1050 @@
+{
+  "state_semantics": "passed / failed / not_run (leg never started) / not_evaluated (required data or legs missing); only 'passed' counts as passed",
+  "checks": [
+    {
+      "check": "ABBA completed",
+      "category": "completion",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "no watchdog timeout",
+      "category": "watchdog",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "exactly one GPU, H100",
+      "category": "environment",
+      "state": "passed",
+      "observed": [
+        "NVIDIA H100 80GB HBM3"
+      ]
+    },
+    {
+      "check": "leg order is ABBA",
+      "category": "environment",
+      "state": "passed",
+      "observed": [
+        "bfloat16",
+        "rabit_kv2",
+        "rabit_kv2",
+        "bfloat16"
+      ]
+    },
+    {
+      "check": "rabit_kv2.py in image is frozen source",
+      "category": "environment",
+      "state": "passed",
+      "observed": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+    },
+    {
+      "check": "idle baseline recorded with no compute process",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": [
+        4
+      ]
+    },
+    {
+      "check": "gate: process exit 0",
+      "category": "gate",
+      "state": "passed",
+      "observed": {
+        "returncode": 0
+      }
+    },
+    {
+      "check": "gate: result passed",
+      "category": "gate",
+      "state": "passed",
+      "observed": {
+        "passed": true
+      }
+    },
+    {
+      "check": "gate: pytest exit 0",
+      "category": "gate",
+      "state": "passed",
+      "observed": 0
+    },
+    {
+      "check": "gate: pytest passed count parsed",
+      "category": "gate",
+      "state": "passed",
+      "observed": 105
+    },
+    {
+      "check": "gate: canonical 'REGRESSION PASSED' line",
+      "category": "gate",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "gate: ran against frozen rabit_kv2.py",
+      "category": "gate",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "gate completed before first leg",
+      "category": "gate",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "model snapshot hashed",
+      "category": "model",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A1: GPU clean before leg (no compute process, within 256 MiB of baseline)",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": {
+        "compute_apps": [],
+        "memory_used_mib": [
+          4
+        ],
+        "t": 1790380261.022159
+      }
+    },
+    {
+      "check": "A1: worker exit 0",
+      "category": "leg",
+      "state": "passed",
+      "observed": {
+        "index": 1,
+        "kv_cache_dtype": "bfloat16",
+        "leg": "A1",
+        "returncode": 0
+      }
+    },
+    {
+      "check": "A1: worker reports leg/dtype",
+      "category": "leg",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "leg": "A1"
+      }
+    },
+    {
+      "check": "A1: RABIT frozen-source markers",
+      "category": "leg",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A1: requested kwargs as planned",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A1: model path is the hashed snapshot",
+      "category": "model",
+      "state": "passed",
+      "observed": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master"
+    },
+    {
+      "check": "A1: effective engine config as planned (eager, Triton, block/len/batch limits, ...)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A1: compilation mode = NONE (torch.compile off)",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "name": "NONE",
+        "raw": "NONE"
+      }
+    },
+    {
+      "check": "A1: CUDA graph mode = NONE",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "name": "NONE",
+        "raw": "NONE"
+      }
+    },
+    {
+      "check": "A1: workload as planned",
+      "category": "workload",
+      "state": "passed",
+      "observed": {
+        "context_tokens": 2048,
+        "ignore_eos": true,
+        "max_tokens": 32,
+        "output_tokens": 32,
+        "prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+        "reps": 15,
+        "temperature": 0.0,
+        "warmups": 5
+      }
+    },
+    {
+      "check": "A1: resolved KV dtype",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": {
+        "engine_cache_dtype": "bfloat16",
+        "requested_kv_cache_dtype": "bfloat16",
+        "resolved_kv_torch_dtype": "torch.bfloat16"
+      }
+    },
+    {
+      "check": "A1: capacity = num_gpu_blocks x block_size",
+      "category": "capacity",
+      "state": "passed",
+      "observed": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      }
+    },
+    {
+      "check": "A1: capacity matches engine log 'GPU KV cache size'",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "A1: physical bytes/token consistent with 2-byte BF16 KV",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": 131081.4
+    },
+    {
+      "check": "A1: warmups == 5",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 5
+    },
+    {
+      "check": "A1: measured reps == 15",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 15
+    },
+    {
+      "check": "A1: every request 2048 prompt / 32 output tokens",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A1: marker order",
+      "category": "leg",
+      "state": "passed",
+      "observed": [
+        "EXP3_WARMUP_BEGIN",
+        "EXP3_WARMUP_END",
+        "EXP3_MEASUREMENT_BEGIN",
+        "EXP3_MEASUREMENT_END",
+        "EXP3_WORKER_COMPLETE"
+      ]
+    },
+    {
+      "check": "A1: no Triton JIT compilation during measurement",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B1: GPU clean before leg (no compute process, within 256 MiB of baseline)",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": {
+        "compute_apps": [],
+        "memory_used_mib": [
+          4
+        ],
+        "t": 1790380414.3971655
+      }
+    },
+    {
+      "check": "B1: worker exit 0",
+      "category": "leg",
+      "state": "passed",
+      "observed": {
+        "index": 2,
+        "kv_cache_dtype": "rabit_kv2",
+        "leg": "B1",
+        "returncode": 0
+      }
+    },
+    {
+      "check": "B1: worker reports leg/dtype",
+      "category": "leg",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "leg": "B1"
+      }
+    },
+    {
+      "check": "B1: RABIT frozen-source markers",
+      "category": "leg",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B1: requested kwargs as planned",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B1: model path is the hashed snapshot",
+      "category": "model",
+      "state": "passed",
+      "observed": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master"
+    },
+    {
+      "check": "B1: effective engine config as planned (eager, Triton, block/len/batch limits, ...)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B1: compilation mode = NONE (torch.compile off)",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "name": "NONE",
+        "raw": "NONE"
+      }
+    },
+    {
+      "check": "B1: CUDA graph mode = NONE",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "name": "NONE",
+        "raw": "NONE"
+      }
+    },
+    {
+      "check": "B1: workload as planned",
+      "category": "workload",
+      "state": "passed",
+      "observed": {
+        "context_tokens": 2048,
+        "ignore_eos": true,
+        "max_tokens": 32,
+        "output_tokens": 32,
+        "prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+        "reps": 15,
+        "temperature": 0.0,
+        "warmups": 5
+      }
+    },
+    {
+      "check": "B1: resolved KV dtype",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": {
+        "engine_cache_dtype": "rabit_kv2",
+        "requested_kv_cache_dtype": "rabit_kv2",
+        "resolved_kv_torch_dtype": "torch.uint8"
+      }
+    },
+    {
+      "check": "B1: capacity = num_gpu_blocks x block_size",
+      "category": "capacity",
+      "state": "passed",
+      "observed": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      }
+    },
+    {
+      "check": "B1: capacity matches engine log 'GPU KV cache size'",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "B1: warmups == 5",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 5
+    },
+    {
+      "check": "B1: measured reps == 15",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 15
+    },
+    {
+      "check": "B1: every request 2048 prompt / 32 output tokens",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B1: marker order",
+      "category": "leg",
+      "state": "passed",
+      "observed": [
+        "EXP3_WARMUP_BEGIN",
+        "EXP3_WARMUP_END",
+        "EXP3_MEASUREMENT_BEGIN",
+        "EXP3_MEASUREMENT_END",
+        "EXP3_WORKER_COMPLETE"
+      ]
+    },
+    {
+      "check": "B1: no Triton JIT compilation during measurement",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B2: GPU clean before leg (no compute process, within 256 MiB of baseline)",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": {
+        "compute_apps": [],
+        "memory_used_mib": [
+          4
+        ],
+        "t": 1790380478.6141746
+      }
+    },
+    {
+      "check": "B2: worker exit 0",
+      "category": "leg",
+      "state": "passed",
+      "observed": {
+        "index": 3,
+        "kv_cache_dtype": "rabit_kv2",
+        "leg": "B2",
+        "returncode": 0
+      }
+    },
+    {
+      "check": "B2: worker reports leg/dtype",
+      "category": "leg",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "leg": "B2"
+      }
+    },
+    {
+      "check": "B2: RABIT frozen-source markers",
+      "category": "leg",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B2: requested kwargs as planned",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B2: model path is the hashed snapshot",
+      "category": "model",
+      "state": "passed",
+      "observed": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master"
+    },
+    {
+      "check": "B2: effective engine config as planned (eager, Triton, block/len/batch limits, ...)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B2: compilation mode = NONE (torch.compile off)",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "name": "NONE",
+        "raw": "NONE"
+      }
+    },
+    {
+      "check": "B2: CUDA graph mode = NONE",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "name": "NONE",
+        "raw": "NONE"
+      }
+    },
+    {
+      "check": "B2: workload as planned",
+      "category": "workload",
+      "state": "passed",
+      "observed": {
+        "context_tokens": 2048,
+        "ignore_eos": true,
+        "max_tokens": 32,
+        "output_tokens": 32,
+        "prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+        "reps": 15,
+        "temperature": 0.0,
+        "warmups": 5
+      }
+    },
+    {
+      "check": "B2: resolved KV dtype",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": {
+        "engine_cache_dtype": "rabit_kv2",
+        "requested_kv_cache_dtype": "rabit_kv2",
+        "resolved_kv_torch_dtype": "torch.uint8"
+      }
+    },
+    {
+      "check": "B2: capacity = num_gpu_blocks x block_size",
+      "category": "capacity",
+      "state": "passed",
+      "observed": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      }
+    },
+    {
+      "check": "B2: capacity matches engine log 'GPU KV cache size'",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "B2: warmups == 5",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 5
+    },
+    {
+      "check": "B2: measured reps == 15",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 15
+    },
+    {
+      "check": "B2: every request 2048 prompt / 32 output tokens",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "B2: marker order",
+      "category": "leg",
+      "state": "passed",
+      "observed": [
+        "EXP3_WARMUP_BEGIN",
+        "EXP3_WARMUP_END",
+        "EXP3_MEASUREMENT_BEGIN",
+        "EXP3_MEASUREMENT_END",
+        "EXP3_WORKER_COMPLETE"
+      ]
+    },
+    {
+      "check": "B2: no Triton JIT compilation during measurement",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A2: GPU clean before leg (no compute process, within 256 MiB of baseline)",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": {
+        "compute_apps": [],
+        "memory_used_mib": [
+          4
+        ],
+        "t": 1790380534.6237032
+      }
+    },
+    {
+      "check": "A2: worker exit 0",
+      "category": "leg",
+      "state": "passed",
+      "observed": {
+        "index": 4,
+        "kv_cache_dtype": "bfloat16",
+        "leg": "A2",
+        "returncode": 0
+      }
+    },
+    {
+      "check": "A2: worker reports leg/dtype",
+      "category": "leg",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "leg": "A2"
+      }
+    },
+    {
+      "check": "A2: RABIT frozen-source markers",
+      "category": "leg",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A2: requested kwargs as planned",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A2: model path is the hashed snapshot",
+      "category": "model",
+      "state": "passed",
+      "observed": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master"
+    },
+    {
+      "check": "A2: effective engine config as planned (eager, Triton, block/len/batch limits, ...)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A2: compilation mode = NONE (torch.compile off)",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "name": "NONE",
+        "raw": "NONE"
+      }
+    },
+    {
+      "check": "A2: CUDA graph mode = NONE",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "name": "NONE",
+        "raw": "NONE"
+      }
+    },
+    {
+      "check": "A2: workload as planned",
+      "category": "workload",
+      "state": "passed",
+      "observed": {
+        "context_tokens": 2048,
+        "ignore_eos": true,
+        "max_tokens": 32,
+        "output_tokens": 32,
+        "prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+        "reps": 15,
+        "temperature": 0.0,
+        "warmups": 5
+      }
+    },
+    {
+      "check": "A2: resolved KV dtype",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": {
+        "engine_cache_dtype": "bfloat16",
+        "requested_kv_cache_dtype": "bfloat16",
+        "resolved_kv_torch_dtype": "torch.bfloat16"
+      }
+    },
+    {
+      "check": "A2: capacity = num_gpu_blocks x block_size",
+      "category": "capacity",
+      "state": "passed",
+      "observed": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      }
+    },
+    {
+      "check": "A2: capacity matches engine log 'GPU KV cache size'",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "A2: physical bytes/token consistent with 2-byte BF16 KV",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": 131081.4
+    },
+    {
+      "check": "A2: warmups == 5",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 5
+    },
+    {
+      "check": "A2: measured reps == 15",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 15
+    },
+    {
+      "check": "A2: every request 2048 prompt / 32 output tokens",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "A2: marker order",
+      "category": "leg",
+      "state": "passed",
+      "observed": [
+        "EXP3_WARMUP_BEGIN",
+        "EXP3_WARMUP_END",
+        "EXP3_MEASUREMENT_BEGIN",
+        "EXP3_MEASUREMENT_END",
+        "EXP3_WORKER_COMPLETE"
+      ]
+    },
+    {
+      "check": "A2: no Triton JIT compilation during measurement",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "config: all non-dtype fields identical across ABBA legs",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "prompt token hash identical across all legs",
+      "category": "workload",
+      "state": "passed",
+      "observed": {
+        "A1": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+        "B1": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+        "B2": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+        "A2": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58"
+      }
+    },
+    {
+      "check": "bfloat16: duplicate capacity measurements identical",
+      "category": "capacity",
+      "state": "passed",
+      "observed": {
+        "A1": {
+          "block_size": 32,
+          "capacity_tokens": 393024,
+          "num_gpu_blocks": 12282
+        },
+        "A2": {
+          "block_size": 32,
+          "capacity_tokens": 393024,
+          "num_gpu_blocks": 12282
+        }
+      }
+    },
+    {
+      "check": "bfloat16: pooled measured samples == 30",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 30
+    },
+    {
+      "check": "rabit_kv2: duplicate capacity measurements identical",
+      "category": "capacity",
+      "state": "passed",
+      "observed": {
+        "B1": {
+          "block_size": 32,
+          "capacity_tokens": 2074592,
+          "num_gpu_blocks": 64831
+        },
+        "B2": {
+          "block_size": 32,
+          "capacity_tokens": 2074592,
+          "num_gpu_blocks": 64831
+        }
+      }
+    },
+    {
+      "check": "rabit_kv2: pooled measured samples == 30",
+      "category": "measurement",
+      "state": "passed",
+      "observed": 30
+    }
+  ],
+  "counts": {
+    "passed": 94,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "all_ok": true,
+  "failed_categories": [],
+  "non_passed_categories": [],
+  "correctness_gate": {
+    "line_count": 22,
+    "begin": {
+      "pytest_command": [
+        "/usr/local/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "--tb=short",
+        "--confcutdir=/root/vllm-kvquant/tests/quantization",
+        "/root/vllm-kvquant/tests/quantization/test_kvquant_k3.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_layout.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_physical.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b1.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b2.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_fixed.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py"
+      ],
+      "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+    },
+    "result": {
+      "passed": true
+    },
+    "pytest_passed": 105,
+    "pytest_warnings": 14,
+    "pytest_seconds": 42.43,
+    "pytest_exit": 0,
+    "regression_passed_line": true
+  },
+  "gpu_clean_state": {
+    "baseline": {
+      "compute_apps": [],
+      "max_wait_s": 60,
+      "memory_used_mib": [
+        4
+      ],
+      "t": 1790380148.7885633,
+      "tolerance_mib": 256
+    },
+    "tolerance_mib": 256,
+    "max_wait_s": 60,
+    "pre_leg": {
+      "A1": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A1",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790380261.022159
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B1": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B1",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790380414.3971655
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B2": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B2",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790380478.6141746
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "A2": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A2",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790380534.6237032
+          }
+        ],
+        "tolerance_mib": 256
+      }
+    }
+  },
+  "processes": {
+    "exits": {
+      "gate": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_correctness_gate.py"
+        ],
+        "elapsed_s": 71.454,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "gate",
+        "own_session": true,
+        "pgid": 32,
+        "pid": 32,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 600
+      },
+      "A1": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A1"
+        ],
+        "elapsed_s": 153.297,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A1",
+        "own_session": true,
+        "pgid": 328,
+        "pid": 328,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B1": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B1"
+        ],
+        "elapsed_s": 64.146,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B1",
+        "own_session": true,
+        "pgid": 635,
+        "pid": 635,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B2": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B2"
+        ],
+        "elapsed_s": 55.924,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B2",
+        "own_session": true,
+        "pgid": 786,
+        "pid": 786,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "A2": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp3/exp3_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A2"
+        ],
+        "elapsed_s": 45.084,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A2",
+        "own_session": true,
+        "pgid": 884,
+        "pid": 884,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      }
+    },
+    "watchdog_timeouts": []
+  }
+}
