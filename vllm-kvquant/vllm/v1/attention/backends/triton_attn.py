@@ -49,9 +49,12 @@ from vllm.v1.attention.ops.rabit_kv2 import (
     rabit2_online_decode_attention_triton,
     rabit2_register_attention_impl,
 )
+from vllm.v1.attention.ops.rabit_kv2_stage3c_shared_decode import (
+    rabit2_stage3c_forward_shared_decode,
+    rabit2_stage3c_impl,
+)
 from vllm.v1.attention.ops.rabit_kv2_stage3c_tile32 import (
     rabit2_stage3c_forward_tile32,
-    rabit2_stage3c_impl,
 )
 from vllm.v1.attention.ops.rabit_kv2_stage3c_profile import (
     rabit2_stage3c_profile_scope,
@@ -903,6 +906,22 @@ class TritonAttentionImpl(AttentionImpl):
                     q_len > 1
                     and rabit2_stage3c_impl() == "tile32"
                     and rabit2_stage3c_forward_tile32(
+                        runtime,
+                        q_seq,
+                        k_seq,
+                        v_seq,
+                        kv_cache,
+                        block_table_row,
+                        output[q0:q1],
+                        self.scale,
+                    )
+                ):
+                    continue
+                # Opt-in shared_decode: one closed-page decode per query block.
+                if (
+                    q_len > 1
+                    and rabit2_stage3c_impl() == "shared_decode"
+                    and rabit2_stage3c_forward_shared_decode(
                         runtime,
                         q_seq,
                         k_seq,

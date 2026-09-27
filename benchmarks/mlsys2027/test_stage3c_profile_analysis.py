@@ -595,7 +595,9 @@ def test_triton_attn_equals_benchmarked_version_modulo_scope():
 
     base_ref = json.loads(rp.BENCH_MANIFEST.read_text(encoding="utf-8"))["provenance"]["git_head"]
     base = rp._git_show(base_ref, rp.TRITON_ATTN)
-    cur = rp.TRITON_ATTN.read_text(encoding="utf-8")
+    # The profile was measured at MEASUREMENT_CODE_COMMIT; later commits may extend triton_attn.py (the
+    # profiling harness preflight then refuses a new run, see test_equivalence_and_protected_paths).
+    cur = rp._git_show(rp.MEASUREMENT_CODE_COMMIT, rp.TRITON_ATTN)
     assert rp.triton_attn_unwrapped_equals(base, cur)
     assert not rp.triton_attn_unwrapped_equals(base, cur.replace("softmax_scale=self.scale,\n",
                                                                  "softmax_scale=1.0,\n", 1)
@@ -619,8 +621,18 @@ def test_frozen_sources_and_tile32_unchanged():
 def test_equivalence_and_protected_paths():
     import run_stage3c_profile_diagnostic as rp
 
-    eq = rp.verify_equivalence(json.loads(rp.BENCH_MANIFEST.read_text(encoding="utf-8")))
-    assert eq["triton_attn_equal_benchmarked_modulo_profile_scope"] and eq["tile32_module_and_tests_unchanged"]
+    manifest = json.loads(rp.BENCH_MANIFEST.read_text(encoding="utf-8"))
+    measured = rp._git_show(rp.MEASUREMENT_CODE_COMMIT, rp.TRITON_ATTN)
+    if rp.TRITON_ATTN.read_text(encoding="utf-8").splitlines() == measured.splitlines():
+        eq = rp.verify_equivalence(manifest)
+        assert eq["triton_attn_equal_benchmarked_modulo_profile_scope"] and eq["tile32_module_and_tests_unchanged"]
+    else:  # triton_attn.py changed after the measured profile: the harness must refuse to profile it
+        try:
+            rp.verify_equivalence(manifest)
+        except RuntimeError as e:
+            assert "triton_attn.py differs" in str(e)
+        else:
+            raise AssertionError("profiling preflight accepted a triton_attn.py it never validated")
     rp.assert_protected_paths_clean("offline test")
     real = rp.run_git
     try:
