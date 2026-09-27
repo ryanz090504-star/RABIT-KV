@@ -36,6 +36,7 @@ import ast
 import json
 import math
 import re
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -71,6 +72,7 @@ PROFILED_COMMIT = rp.MEASUREMENT_CODE_COMMIT  # triton_attn.py baseline = the pr
 BENCH_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_benchmark"
 CORRECTNESS_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_correctness"
 QB_TUNING_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_qb_tuning"
+QB_TIEBREAK_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_qb_tiebreak"
 
 
 def set_out_dir(d: Path) -> None:
@@ -130,6 +132,69 @@ def select_query_block(ttft_ms: dict[int, dict[int, float]]) -> dict:
     return {"rule": QB_SELECTION_RULE, "geomean_ttft_ms": {str(k): score[k] for k in QUERY_BLOCKS},
             "selected_query_block": chosen,
             "geomean_relative_to_selected": {str(k): score[k] / best for k in QUERY_BLOCKS}}
+
+
+# --qb-tiebreak: activated ONLY because the valid Stage-1 winner / runner-up gap was <= 1%.
+# Fixed ABBA order of four fresh-engine series (fixed before the run); q_len 512 and 2048 only.
+STAGE1_SELECTED_QUERY_BLOCK = 32
+TIEBREAK_CANDIDATES = (16, 32)
+TIEBREAK_GAP = 0.01
+TIEBREAK_FALLBACK_QB = 16
+TIEBREAK_SERIES = [("rabit_shared_qb16_A1", "rabit_kv2", "shared_decode", 16),
+                   ("rabit_shared_qb32_B1", "rabit_kv2", "shared_decode", 32),
+                   ("rabit_shared_qb32_B2", "rabit_kv2", "shared_decode", 32),
+                   ("rabit_shared_qb16_A2", "rabit_kv2", "shared_decode", 16)]
+TIEBREAK_RULE = ("per QB16/QB32 and q_len 512/2048: median TTFT over its two ABBA series; score = sqrt(median_512 * "
+                 "median_2048); relative_gap = |score16 - score32| / min(score16, score32); if relative_gap > 0.01 "
+                 "choose the lower score, else choose QB16")
+TIEBREAK_NOTE_IF_16 = ("Stage 1's pre-registered single-sample rule selected QB32 by 0.07%; because the margin was "
+                       "<=1%, the pre-registered replication stage was activated, and the final fixed configuration "
+                       "was selected by the replication rule.")
+
+
+def select_tiebreak(ttft_ms: dict[str, dict[int, float]]) -> dict:
+    """Apply TIEBREAK_RULE to {series_label: {q_len: ttft_ms}} for the four TIEBREAK_SERIES."""
+    if sorted(ttft_ms) != sorted(l for l, _, _, _ in TIEBREAK_SERIES):
+        raise ValueError(f"need exactly the tie-break series, got {sorted(ttft_ms)}")
+    qb_of = {l: qb for l, _, _, qb in TIEBREAK_SERIES}
+    med, score = {}, {}
+    for qb in TIEBREAK_CANDIDATES:
+        rows = [ttft_ms[l] for l in ttft_ms if qb_of[l] == qb]
+        for r in rows:
+            if sorted(r) != QB_TUNING_Q_LENS or any(not (v > 0) for v in r.values()):
+                raise ValueError(f"QB {qb}: need positive TTFT at q_len {QB_TUNING_Q_LENS}, got {r}")
+        med[qb] = {q: statistics.median([r[q] for r in rows]) for q in QB_TUNING_Q_LENS}
+        score[qb] = math.sqrt(med[qb][512] * med[qb][2048])
+    gap = abs(score[16] - score[32]) / min(score[16], score[32])
+    final = min(score, key=score.get) if gap > TIEBREAK_GAP else TIEBREAK_FALLBACK_QB
+    return {"rule": TIEBREAK_RULE, "median_ttft_ms": {str(qb): {str(q): v for q, v in m.items()} for qb, m in med.items()},
+            "score_ms": {str(k): v for k, v in score.items()}, "relative_gap": gap,
+            "gap_exceeds_threshold": gap > TIEBREAK_GAP,
+            "stage1_selected_query_block": STAGE1_SELECTED_QUERY_BLOCK,
+            "final_tiebreak_selected_query_block": final,
+            "note": TIEBREAK_NOTE_IF_16 if final == 16 else None}
+
+
+def stage1_precondition() -> dict:
+    """The tie-break is valid only for the committed Stage-1 evidence with a <= 1% winner / runner-up gap."""
+    a = json.loads((QB_TUNING_DIR / "benchmark_analysis.json").read_text(encoding="utf-8"))
+    sel = a["selection"]
+    g = sorted(sel["geomean_ttft_ms"].values())
+    gap = (g[1] - g[0]) / g[0]
+    if not (a["all_integrity_passed"] and sel["selected_query_block"] == STAGE1_SELECTED_QUERY_BLOCK
+            and gap <= TIEBREAK_GAP and run_git("status", "--short", "--", rel(QB_TUNING_DIR)) == ""
+            and run_git("ls-files", rel(QB_TUNING_DIR / "benchmark_analysis.json"))):
+        raise RuntimeError("tie-break precondition failed: committed valid Stage-1 evidence with a <=1% gap required")
+    runner_up = sorted(sel["geomean_ttft_ms"], key=sel["geomean_ttft_ms"].get)[1]
+    return {"stage1_selected_query_block": sel["selected_query_block"], "stage1_runner_up": int(runner_up),
+            "stage1_relative_gap": gap, "stage1_evidence": rel(QB_TUNING_DIR)}
+
+
+def set_mode_qb_tiebreak() -> None:
+    global SERIES, Q_LENS, POINTS
+    SERIES, Q_LENS = list(TIEBREAK_SERIES), list(QB_TUNING_Q_LENS)
+    POINTS = [FIRST_CHUNK + q for q in Q_LENS]
+    set_out_dir(QB_TIEBREAK_DIR)
 
 
 def set_mode_qb_tuning() -> None:
@@ -281,7 +346,7 @@ def expected_runtime(correctness_only: bool) -> dict:
     """Planning estimate only: reference / tile32 from the frozen tile32 benchmark; shared_decode bounded by tile32."""
     s = json.loads((rt.OUT_DIR / "summary.json").read_text(encoding="utf-8"))
     t = {p["second_chunk_q_len"]: p for p in s["points"]}
-    if OUT_DIR == QB_TUNING_DIR:
+    if OUT_DIR in (QB_TUNING_DIR, QB_TIEBREAK_DIR):
         fixed = {"image_rebuild_s": 600, "gate_s": 70, "tile32_tests_s": 50, "shared_decode_tests_s": 120,
                  "engine_init_s": 110 * len(SERIES)}
         per = sum(t[q]["tile32_ttft_ms"] for q in [32] + Q_LENS) / 1000.0
@@ -360,7 +425,12 @@ def parse_shared_tests(lines: list[str]) -> dict:
             "decode_counts": sorted(uniq.values(), key=lambda c: (c["prefix"], c["q_len"], c["query_block"]))}
 
 
-def integrity(series: dict, gate: dict, t32: dict, shared: dict, top: dict, correctness_only: bool) -> dict:
+PROFILE_MARKERS = ("VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE", "VLLM_RABIT2_STAGE3C_PROFILE",
+                   "RABIT2_STAGE3C_COMPONENT_PROFILE=", "RABIT2_STAGE3C_TILE32_PROFILE")
+
+
+def integrity(series: dict, gate: dict, t32: dict, shared: dict, top: dict, correctness_only: bool,
+              series_lines: dict | None = None) -> dict:
     checks = []
 
     def add(name, cat, state, observed=None):
@@ -430,6 +500,9 @@ def integrity(series: dict, gate: dict, t32: dict, shared: dict, top: dict, corr
                 for p in s["points"]))
             chk("no Triton JIT during measured requests", "jit", bool(meas) and all(p["jit"] == 0 for p in meas))
             chk("no OOM", "request", s["init"]["oom"] == 0 and all(p["oom"] == 0 for p in s["begins"]))
+            if series_lines is not None:
+                chk("profiling OFF (no profiling env var seen by the engine, no profile records)", "profiling",
+                    not any(mk in ln for ln in series_lines[label] for mk in PROFILE_MARKERS))
         rows = {l: {p["row"]["planned_prompt_tokens"]: p["row"] for p in series[l]["points"]
                     if p["begin"]["role"] == "measured"} for l, _, _, _ in SERIES}
         complete = all(len(v) == len(POINTS) for v in rows.values())
@@ -442,6 +515,10 @@ def integrity(series: dict, gate: dict, t32: dict, shared: dict, top: dict, corr
             "equivalence", all(rows[l][p]["output_token_ids_sha256"] == bench[p]["reference_output_token_ids_sha256"]
                                and rows[l][p]["prompt_token_ids_sha256"] == bench[p]["prompt_token_ids_sha256"]
                                for l, _, _, _ in SERIES for p in POINTS) if complete else NOT_EVALUATED)
+        post = top.get("S3C_POST_RUN_GPU_STATE")
+        add("GPU clean after run", "gpu_clean", NOT_RUN if not post else (
+            not post["compute_apps"] and all(u <= b + 256 for u, b in zip(post["memory_used_mib"],
+                                                                         base.get("memory_used_mib", [])))))
         cfg = {l: rd.series_config(series[l]) for l, _, _, _ in SERIES}
         add("engine configs identical across all series", "config",
             len({json.dumps(c, sort_keys=True, default=str) for c in cfg.values()}) == 1
@@ -449,6 +526,23 @@ def integrity(series: dict, gate: dict, t32: dict, shared: dict, top: dict, corr
     counts = {s: sum(1 for c in checks if c["state"] == s) for s in (PASSED, FAILED, NOT_RUN, NOT_EVALUATED)}
     return {"checks": checks, "counts": counts, "all_ok": counts[PASSED] == len(checks),
             "failed_categories": sorted({c["category"] for c in checks if c["state"] == FAILED})}
+
+
+def qb_tiebreak_analysis(series: dict, integ: dict) -> dict:
+    rows = {l: {p["row"]["planned_prompt_tokens"] - FIRST_CHUNK: p["row"] for p in series[l]["points"]
+                if p["begin"]["role"] == "measured"} for l, _, _, _ in SERIES}
+    out = {"scope": SCOPE + " QUERY_BLOCK tie-break (QB16 vs QB32, ABBA, q_len 512 and 2048).",
+           "experiment5_evidence": False, "all_integrity_passed": integ["all_ok"], "integrity_counts": integ["counts"],
+           "series_order": [l for l, _, _, _ in SERIES],
+           "per_series": [{"series": l, "query_block": qb, **{f"{k}_{q}": rows[l][q][k] for q in Q_LENS
+                                                              for k in ("ttft_ms", "wall_ms", "tpot_ms")}}
+                          for l, _, _, qb in SERIES if sorted(rows[l]) == Q_LENS]}
+    out["selection"] = select_tiebreak({l: {q: r["ttft_ms"] for q, r in rows[l].items()} for l in rows}) \
+        if integ["all_ok"] else None
+    out["stage1_selected_query_block"] = STAGE1_SELECTED_QUERY_BLOCK
+    out["not_claimed"] = ["speedup vs reference or tile32 (not run here)", "Experiment 5 results",
+                          "q_len 4096 / 8192 / 16352 behaviour"]
+    return out
 
 
 def qb_tuning_analysis(series: dict, integ: dict) -> dict:
@@ -508,9 +602,13 @@ def analyze(text: str, correctness_only: bool, write: bool):
     gate = r5.parse_gate(gate_lines)
     t32, shared = rt.parse_tests(t32_lines), parse_shared_tests(shared_lines)
     top = parse_top(top_lines)
-    integ = integrity(series, gate, t32, shared, top, correctness_only)
-    an = qb_tuning_analysis(series, integ) if (not correctness_only and OUT_DIR == QB_TUNING_DIR) \
-        else analysis(series, shared, integ, correctness_only)
+    integ = integrity(series, gate, t32, shared, top, correctness_only, ser_lines)
+    if not correctness_only and OUT_DIR == QB_TIEBREAK_DIR:
+        an = qb_tiebreak_analysis(series, integ)
+    elif not correctness_only and OUT_DIR == QB_TUNING_DIR:
+        an = qb_tuning_analysis(series, integ)
+    else:
+        an = analysis(series, shared, integ, correctness_only)
     if write:
         OUT_DIR.mkdir(parents=True, exist_ok=True)
         GATE_LOG.write_text("\n".join(gate_lines) + "\n", encoding="utf-8")
@@ -574,9 +672,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--correctness-only", action="store_true")
     ap.add_argument("--qb-tuning", action="store_true",
                     help="shared_decode QUERY_BLOCK 4/8/16/32 at q_len 512 and 2048 only")
+    ap.add_argument("--qb-tiebreak", action="store_true",
+                    help="QB16 vs QB32 ABBA tie-break at q_len 512 and 2048 only")
     a = ap.parse_args(argv)
-    if a.correctness_only and a.qb_tuning:
-        raise SystemExit("--correctness-only and --qb-tuning are exclusive")
+    if sum((a.correctness_only, a.qb_tuning, a.qb_tiebreak)) > 1:
+        raise SystemExit("--correctness-only, --qb-tuning and --qb-tiebreak are exclusive")
+    stage1 = None
+    if a.qb_tiebreak:
+        stage1 = stage1_precondition()
+        set_mode_qb_tiebreak()
+        print(f"QB tie-break (ABBA {[l for l, _, _, _ in SERIES]}); stage 1: {json.dumps(stage1)}")
+        print(f"Pre-registered tie-break rule: {TIEBREAK_RULE}")
     if a.correctness_only:
         set_out_dir(CORRECTNESS_DIR)
     if a.qb_tuning:
@@ -603,6 +709,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     m = {"benchmark": "Stage3C shared_decode kernel tuning", "scope": SCOPE, "correctness_only": a.correctness_only,
          "qb_tuning": a.qb_tuning, "qb_selection_rule": QB_SELECTION_RULE if a.qb_tuning else None,
+         "qb_tiebreak": a.qb_tiebreak, "tiebreak_rule": TIEBREAK_RULE if a.qb_tiebreak else None,
+         "stage1": stage1,
          "series": SERIES, "points": POINTS, "q_lens": Q_LENS, "conditioning_prompt_tokens": CONDITIONING_PROMPT,
          "request_guard_note": REQUEST_GUARD_NOTE, "started_utc": now(), "status": "running",
          "protected_paths_post_run_status": "pending", "provenance": prov}

@@ -167,6 +167,84 @@ def test_qb_tuning_mode_grid():
         importlib.reload(rs)
 
 
+def _tb(a1, b1, b2, a2):
+    return {"rabit_shared_qb16_A1": {512: a1[0], 2048: a1[1]}, "rabit_shared_qb32_B1": {512: b1[0], 2048: b1[1]},
+            "rabit_shared_qb32_B2": {512: b2[0], 2048: b2[1]}, "rabit_shared_qb16_A2": {512: a2[0], 2048: a2[1]}}
+
+
+def test_tiebreak_rule():
+    import math
+
+    # within 1% -> QB16 even though QB32 scores lower; the note is recorded
+    r = rs.select_tiebreak(_tb((3900, 13400), (3905, 13350), (3895, 13360), (3910, 13410)))
+    s16, s32 = math.sqrt(3905 * 13405), math.sqrt(3900 * 13355)  # medians of two = means
+    assert abs(r["score_ms"]["16"] - s16) < 1e-9 and abs(r["score_ms"]["32"] - s32) < 1e-9
+    assert abs(r["relative_gap"] - abs(s16 - s32) / min(s16, s32)) < 1e-15 and r["relative_gap"] <= 0.01
+    assert r["final_tiebreak_selected_query_block"] == 16 and r["stage1_selected_query_block"] == 32
+    assert r["note"] == rs.TIEBREAK_NOTE_IF_16 and "0.07%" in r["note"]
+    # > 1% -> lower score wins (QB32 here; no note)
+    r = rs.select_tiebreak(_tb((4000, 14000), (3800, 13000), (3810, 13020), (4010, 14050)))
+    assert r["gap_exceeds_threshold"] and r["final_tiebreak_selected_query_block"] == 32 and r["note"] is None
+    # > 1% the other way -> QB16
+    r = rs.select_tiebreak(_tb((3700, 12500), (3900, 13400), (3905, 13380), (3690, 12510)))
+    assert r["final_tiebreak_selected_query_block"] == 16 and r["gap_exceeds_threshold"]
+    # exactly-at-threshold is NOT > 1% -> QB16
+    base = 1000.0
+    r = rs.select_tiebreak(_tb((base * 1.01, base * 1.01), (base, base), (base, base), (base * 1.01, base * 1.01)))
+    assert abs(r["relative_gap"] - 0.01) < 1e-12 and r["final_tiebreak_selected_query_block"] == 16
+    for bad in ({k: v for k, v in list(_tb((1, 1), (1, 1), (1, 1), (1, 1)).items())[:3]},
+                {**_tb((1, 1), (1, 1), (1, 1), (1, 1)), "rabit_shared_qb16_A2": {512: 1.0}},
+                _tb((0, 1), (1, 1), (1, 1), (1, 1))):
+        try:
+            rs.select_tiebreak(bad)
+        except ValueError:
+            continue
+        raise AssertionError("invalid tie-break input accepted")
+
+
+def test_tiebreak_mode_grid_and_precondition():
+    import importlib
+
+    m = importlib.reload(rs)
+    try:
+        pre = m.stage1_precondition()
+        assert pre["stage1_selected_query_block"] == 32 and pre["stage1_runner_up"] == 16
+        assert pre["stage1_relative_gap"] <= 0.01
+        m.set_mode_qb_tiebreak()
+        assert [(s[0], s[3]) for s in m.SERIES] == [("rabit_shared_qb16_A1", 16), ("rabit_shared_qb32_B1", 32),
+                                                   ("rabit_shared_qb32_B2", 32), ("rabit_shared_qb16_A2", 16)]
+        assert all(s[2] == "shared_decode" for s in m.SERIES)
+        assert m.POINTS == [16896, 18432] and m.OUT_DIR == m.QB_TIEBREAK_DIR
+        cmd = " ".join(m.build_command(False))
+        assert ("--series rabit_shared_qb16_A1=rabit_kv2:shared_decode:16,rabit_shared_qb32_B1=rabit_kv2:shared_decode:32,"
+                "rabit_shared_qb32_B2=rabit_kv2:shared_decode:32,rabit_shared_qb16_A2=rabit_kv2:shared_decode:16 ") in cmd
+        assert "--points 16896,18432 " in cmd and "reference" not in cmd and "tile32" not in cmd
+        m.verify_equivalence(json.loads(m.BENCH_MANIFEST.read_text(encoding="utf-8")))
+    finally:
+        importlib.reload(rs)
+
+
+def test_profiling_off_check_detects_profile_markers():
+    import importlib
+
+    m = importlib.reload(rs)
+    try:
+        m.set_mode_qb_tiebreak()
+        empty = {"tags": {}, "points": [], "begins": [], "timeouts": [], "failures": [], "complete": False,
+                 "init": {"jit": 0, "stage3c": [], "oom": 0}}
+        top = m.parse_top(['S3C_SERIES_START={"series": "rabit_shared_qb16_A1"}'])
+        series = {l: dict(empty) for l, _, _, _ in m.SERIES}
+        lines = {l: [] for l, _, _, _ in m.SERIES}
+        lines["rabit_shared_qb16_A1"] = ["WARNING Unknown vLLM environment variable detected: "
+                                         "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE"]
+        integ = m.integrity(series, {}, {"passed": 0, "failed": 0, "errors": 0, "skipped": 0},
+                            m.parse_shared_tests([]), top, False, lines)
+        prof = [c for c in integ["checks"] if c["category"] == "profiling"]
+        assert prof and prof[0]["state"] == "failed"
+    finally:
+        importlib.reload(rs)
+
+
 if __name__ == "__main__":
     tests = [(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     failed = 0
