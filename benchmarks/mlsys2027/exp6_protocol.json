@@ -1109,6 +1109,14 @@
     "target_concurrency_not_reached",
     "sustained_target_concurrency"
   ],
+  "outcome_class_order": [
+    "oom_or_allocation_failure",
+    "engine_or_request_failure",
+    "completed_with_preemption",
+    "target_concurrency_not_reached",
+    "sustained_target_concurrency"
+  ],
+  "concurrency_terminology": "Concurrency derived from request [scheduled_ts, last_token_ts] intervals is OVERLAPPING IN-FLIGHT concurrency (requests that have been scheduled and not yet produced their last token). It is NOT strict GPU-resident or continuously-executing concurrency: a preempted request stays in flight while not resident. If preemption occurs (or its status is unavailable), the point's overlap statistics are reported but must not by themselves be used to claim sustained residency at target C.",
   "expected_capacity_tokens": {
     "bfloat16": 393024,
     "rabit_kv2": 2074592

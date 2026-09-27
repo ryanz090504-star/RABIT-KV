@@ -25,8 +25,9 @@ x trial. Every point is attempted independently.
 
 Per point: wall time, requests/s, output and total tokens/s, per-request
 end-to-end latency (median / p90 / p99), TTFT and TPOT (median / p90),
-target vs OBSERVED max active concurrency and the all-C-active window (from the
-engine-core scheduled / last-token timestamps), completion counts and
+target vs OBSERVED max IN-FLIGHT (overlapping) concurrency and the all-C in-flight
+overlap window (from the engine-core scheduled / last-token timestamps; see
+CONCURRENCY_TERMINOLOGY), completion counts and
 output-length validity, preemptions (vllm:num_preemptions delta; logged
 "Preemptions" fallback; else reported unavailable), allocator capacity,
 nvidia-smi GPU memory (not request KV memory), OOM / failure / timeout, and JIT
@@ -91,9 +92,19 @@ JIT = "Triton kernel JIT compilation during inference"
 OOM = ("CUDA out of memory", "OutOfMemoryError", "out of memory")
 CLASSES = ("engine_or_request_failure", "oom_or_allocation_failure", "completed_with_preemption",
            "target_concurrency_not_reached", "sustained_target_concurrency")
+# Classification precedence (unchanged): OOM -> engine/request failure -> completed with preemption ->
+# target not reached -> sustained target concurrency.
+CLASSES_ORDER = ("oom_or_allocation_failure", "engine_or_request_failure", "completed_with_preemption",
+                 "target_concurrency_not_reached", "sustained_target_concurrency")
 SCOPE = ("Experiment 6 concurrency / throughput scaling (closed-loop, fixed concurrency, 256 measured requests per "
          "point). Throughput numbers are from this harness only. Highest successfully tested concurrency is reported; "
          "no true maximum is claimed unless the sweep brackets the failure boundary.")
+CONCURRENCY_TERMINOLOGY = (
+    "Concurrency derived from request [scheduled_ts, last_token_ts] intervals is OVERLAPPING IN-FLIGHT concurrency "
+    "(requests that have been scheduled and not yet produced their last token). It is NOT strict GPU-resident or "
+    "continuously-executing concurrency: a preempted request stays in flight while not resident. If preemption occurs "
+    "(or its status is unavailable), the point's overlap statistics are reported but must not by themselves be used to "
+    "claim sustained residency at target C.")
 AMENDMENTS = {
     "execution_path": ("vllm bench throughput accepts kv_cache_dtype=rabit_kv2 but samples at temperature 1.0 and "
                        "exposes no per-request timestamps / token IDs required by the pre-registered metrics and audit; "
@@ -125,7 +136,8 @@ def build_protocol() -> dict:
         "prompt_sets": {str(L): {"measured": wl.set_digest(wl.measured_prompts(L)),
                                  "warmup": wl.set_digest(wl.warmup_prompts(L))} for L in wl.PROMPT_LENGTHS},
         "points": {str(L): wl.plan_points(L) for L in wl.PROMPT_LENGTHS},
-        "outcome_classes": list(CLASSES), "expected_capacity_tokens": EXPECTED_CAPACITY,
+        "outcome_classes": list(CLASSES), "outcome_class_order": list(CLASSES_ORDER),
+        "concurrency_terminology": CONCURRENCY_TERMINOLOGY, "expected_capacity_tokens": EXPECTED_CAPACITY,
         "watchdogs": {"gate_s": GATE_TIMEOUT_S, "point_s": POINT_TIMEOUT_S, "modal_backstop_s": MODAL_FUNCTION_TIMEOUT_S},
     }
 
@@ -297,30 +309,32 @@ def parse_point(lines: list[str]) -> dict:
     return out
 
 
-def active_concurrency(rows: list[dict], target: int) -> dict:
-    """Sweep-line over [scheduled_ts, last_token_ts] (engine-core clock)."""
+def inflight_concurrency(rows: list[dict], target: int) -> dict:
+    """Overlapping in-flight concurrency: sweep-line over [scheduled_ts, last_token_ts] (engine-core clock).
+    See CONCURRENCY_TERMINOLOGY -- not GPU residency."""
     iv = [(r.get("scheduled_ts"), r.get("last_token_ts")) for r in rows]
     if not iv or any(not (isinstance(a, (int, float)) and isinstance(b, (int, float)) and 0 < a <= b) for a, b in iv):
         return {"evaluable": False}
     events = sorted([(a, 1) for a, _ in iv] + [(b, -1) for _, b in iv], key=lambda e: (e[0], e[1]))
-    active, peak, t_prev, at_level, all_c, longest, run = 0, 0, events[0][0], {}, 0.0, 0.0, 0.0
+    inflight, peak, t_prev, at_level, all_c, longest, run = 0, 0, events[0][0], {}, 0.0, 0.0, 0.0
     for t, d in events:
         dt = t - t_prev
         if dt > 0:
-            at_level[active] = at_level.get(active, 0.0) + dt
-            if active >= target:
+            at_level[inflight] = at_level.get(inflight, 0.0) + dt
+            if inflight >= target:
                 all_c += dt
                 run += dt
                 longest = max(longest, run)
             else:
                 run = 0.0
-        active += d
-        peak = max(peak, active)
+        inflight += d
+        peak = max(peak, inflight)
         t_prev = t
     span = events[-1][0] - events[0][0]
-    return {"evaluable": True, "observed_max_active_concurrency": peak, "all_c_active_total_s": all_c,
-            "all_c_active_longest_s": longest, "measured_span_s": span,
-            "time_fraction_by_active_count": {str(k): v / span for k, v in sorted(at_level.items())} if span else {}}
+    return {"evaluable": True, "kind": "overlapping in-flight concurrency (not GPU residency)",
+            "observed_max_inflight_concurrency": peak, "all_c_inflight_overlap_total_s": all_c,
+            "all_c_inflight_overlap_longest_s": longest, "measured_span_s": span,
+            "time_fraction_by_inflight_count": {str(k): v / span for k, v in sorted(at_level.items())} if span else {}}
 
 
 def pct(values: list[float], q: int) -> float | None:
@@ -341,7 +355,7 @@ def point_metrics(p: dict, spec: dict, pinned_hashes: list[str]) -> dict:
     ttft = [r["first_token_ts"] - r["queued_ts"] for r in valid if r.get("queued_ts") and r.get("first_token_ts")]
     tpot = [(r["last_token_ts"] - r["first_token_ts"]) / (wl.OUTPUT_TOKENS - 1) for r in valid
             if r.get("first_token_ts") and r.get("last_token_ts")]
-    conc = active_concurrency(valid, C) if len(valid) == len(rows) and rows else {"evaluable": False}
+    conc = inflight_concurrency(valid, C) if len(valid) == len(rows) and rows else {"evaluable": False}
     if ms.get("preemption_counter_available"):
         preempt, source = ms["preemptions_after"] - ms["preemptions_before"], "vllm:num_preemptions counter delta"
     elif p["logged_preemption_lines"]:
@@ -360,7 +374,8 @@ def point_metrics(p: dict, spec: dict, pinned_hashes: list[str]) -> dict:
             "ttft_s": {"median": statistics.median(ttft) if ttft else None, "p90": pct(ttft, 90),
                        "definition": "first_token_ts - queued_ts"},
             "tpot_s": {"median": statistics.median(tpot) if tpot else None, "p90": pct(tpot, 90)},
-            "target_concurrency": C, "concurrency": conc, "preemptions": preempt, "preemption_source": source}
+            "target_concurrency": C, "concurrency": conc, "preemptions": preempt, "preemption_source": source,
+            "overlap_stats_are_not_residency_evidence": preempt is None or preempt > 0}
 
 
 def classify(p: dict, proc: dict | None, metrics: dict) -> str:
@@ -374,8 +389,8 @@ def classify(p: dict, proc: dict | None, metrics: dict) -> str:
     if metrics["preemptions"] is not None and metrics["preemptions"] > 0:
         return "completed_with_preemption"
     c = metrics["concurrency"]
-    if not c.get("evaluable") or c["observed_max_active_concurrency"] < metrics["target_concurrency"] \
-            or c["all_c_active_total_s"] <= 0:
+    if not c.get("evaluable") or c["observed_max_inflight_concurrency"] < metrics["target_concurrency"] \
+            or c["all_c_inflight_overlap_total_s"] <= 0:
         return "target_concurrency_not_reached"
     return "sustained_target_concurrency"
 
@@ -529,7 +544,8 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
                "outcome_class_counts": {c: sum(1 for p in points_out if p["outcome_class"] == c) for c in CLASSES},
                "highest_successfully_tested_concurrency": highest_successful(results),
                "rabit_only_extension": extension_eligibility(results),
-               "labels": {"gpu_memory": "device-wide nvidia-smi memory.used; NOT request KV memory",
+               "labels": {"concurrency": CONCURRENCY_TERMINOLOGY,
+                          "gpu_memory": "device-wide nvidia-smi memory.used; NOT request KV memory",
                           "capacity": "MEASURED allocator capacity (num_gpu_blocks x block_size)"}}
     return integ, summary
 

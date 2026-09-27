@@ -165,7 +165,7 @@ def test_valid_sweep_passes_and_classifies_success():
     assert s["outcome_class_counts"]["sustained_target_concurrency"] == 36
     p = _pt(s, "t1_rabit_L2048_c64")
     assert p["completed_requests"] == 256 and p["output_token_count_valid"]
-    assert p["concurrency"]["observed_max_active_concurrency"] == 64 and p["concurrency"]["all_c_active_total_s"] > 0
+    assert p["concurrency"]["observed_max_inflight_concurrency"] == 64 and p["concurrency"]["all_c_inflight_overlap_total_s"] > 0
     assert abs(p["requests_per_s"] - 2.56) < 1e-9 and abs(p["output_tokens_per_s"] - 2.56 * 32) < 1e-9
     assert abs(p["total_tokens_per_s"] - 2.56 * (2048 + 32)) < 1e-9
     assert p["latency_s"]["median"] is not None and p["latency_s"]["p99"] is not None
@@ -205,7 +205,7 @@ def test_prompt_set_and_capacity_checks():
 def test_serialized_run_is_not_concurrency():
     integ, s = _run(overrides={"t1_rabit_L2048_c16": {"serial": True}})
     p = _pt(s, "t1_rabit_L2048_c16")
-    assert p["concurrency"]["observed_max_active_concurrency"] == 1
+    assert p["concurrency"]["observed_max_inflight_concurrency"] == 1
     assert p["outcome_class"] == "target_concurrency_not_reached"
     assert s["highest_successfully_tested_concurrency"]["rabit_kv2"]["per_trial"]["1"] == 64  # other points fine
     h = s["highest_successfully_tested_concurrency"]["rabit_kv2"]
@@ -252,6 +252,14 @@ def test_preemption_sources():
     a, b = _pt(s, "t1_rabit_L2048_c4"), _pt(s, "t1_rabit_L2048_c8")
     assert a["preemptions"] == 2 and "lower bound" in a["preemption_source"] and a["outcome_class"] == "completed_with_preemption"
     assert b["preemptions"] is None and b["preemption_source"] == "unavailable"
+    assert a["overlap_stats_are_not_residency_evidence"] and b["overlap_stats_are_not_residency_evidence"]
+    _, s2 = _run()
+    assert not _pt(s2, "t1_rabit_L2048_c4")["overlap_stats_are_not_residency_evidence"]  # 0 preemptions, counter
+    p = protocol()
+    assert "OVERLAPPING IN-FLIGHT" in p["concurrency_terminology"] and "NOT strict GPU-resident" in p["concurrency_terminology"]
+    assert p["outcome_class_order"] == ["oom_or_allocation_failure", "engine_or_request_failure",
+                                        "completed_with_preemption", "target_concurrency_not_reached",
+                                        "sustained_target_concurrency"]
 
 
 def test_measured_jit_surfaced_and_not_interpretable():
@@ -270,13 +278,14 @@ def test_missing_point_is_not_run_and_fails_completion():
     assert any(c["state"] == "not_run" for c in _check(integ, "t3_rabit_L2048_c64"))
 
 
-def test_8192_sweep_and_active_concurrency_parser():
+def test_8192_sweep_and_inflight_concurrency_parser():
     integ, s = _run(L=8192)
     assert integ["all_ok"] and len(s["points"]) == 36
     rows = [{"scheduled_ts": 0.0 + i, "last_token_ts": 10.0 + i} for i in range(1, 5)]
-    c = r6.active_concurrency(rows, 4)
-    assert c["observed_max_active_concurrency"] == 4 and abs(c["all_c_active_total_s"] - 7.0) < 1e-9
-    assert r6.active_concurrency([{"scheduled_ts": None, "last_token_ts": 1.0}], 1) == {"evaluable": False}
+    c = r6.inflight_concurrency(rows, 4)
+    assert c["observed_max_inflight_concurrency"] == 4 and abs(c["all_c_inflight_overlap_total_s"] - 7.0) < 1e-9
+    assert "not GPU residency" in c["kind"]
+    assert r6.inflight_concurrency([{"scheduled_ts": None, "last_token_ts": 1.0}], 1) == {"evaluable": False}
 
 
 def test_extension_refused_and_protocol_not_overwritten():
