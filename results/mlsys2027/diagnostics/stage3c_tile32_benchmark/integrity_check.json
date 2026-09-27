@@ -1,0 +1,240 @@
+{
+  "checks": [
+    {
+      "check": "exactly one H100",
+      "category": "environment",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2.py in image is frozen",
+      "category": "environment",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "gate passed",
+      "category": "gate",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "tile32 correctness tests: exit 0, all passed, none skipped, no failure/error",
+      "category": "tile32_correctness",
+      "state": "passed",
+      "observed": {
+        "passed": 43,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "equality_failures": []
+      }
+    },
+    {
+      "check": "benchmark completed (all series)",
+      "category": "completion",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "no series watchdog timeout",
+      "category": "watchdog",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bf16_control: GPU clean before series",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bf16_control: exit 0, complete, no request timeout/failure",
+      "category": "series",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bf16_control: Stage3C implementation = reference (requested and reported by the selector)",
+      "category": "impl",
+      "state": "passed",
+      "observed": {
+        "requested": "reference",
+        "selector_reports": "reference",
+        "tile32_module_sha256": "3cfa5ce598fe47d099d5e47d7d47081604d6b3b4c826e2ea9ad2b83fbaebbd26"
+      }
+    },
+    {
+      "check": "bf16_control: effective engine config frozen",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bf16_control: resolved KV dtype",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bf16_control: one measured request per point, in order",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bf16_control: exact prompt tokens, 32 outputs, prompt hash == planned",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bf16_control: no Triton JIT during measured requests",
+      "category": "jit",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bf16_control: no OOM",
+      "category": "request",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_reference: GPU clean before series",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_reference: exit 0, complete, no request timeout/failure",
+      "category": "series",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_reference: Stage3C implementation = reference (requested and reported by the selector)",
+      "category": "impl",
+      "state": "passed",
+      "observed": {
+        "requested": "reference",
+        "selector_reports": "reference",
+        "tile32_module_sha256": "3cfa5ce598fe47d099d5e47d7d47081604d6b3b4c826e2ea9ad2b83fbaebbd26"
+      }
+    },
+    {
+      "check": "rabit_reference: effective engine config frozen",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_reference: resolved KV dtype",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_reference: one measured request per point, in order",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_reference: exact prompt tokens, 32 outputs, prompt hash == planned",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_reference: no Triton JIT during measured requests",
+      "category": "jit",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_reference: no OOM",
+      "category": "request",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_tile32: GPU clean before series",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_tile32: exit 0, complete, no request timeout/failure",
+      "category": "series",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_tile32: Stage3C implementation = tile32 (requested and reported by the selector)",
+      "category": "impl",
+      "state": "passed",
+      "observed": {
+        "requested": "tile32",
+        "selector_reports": "tile32",
+        "tile32_module_sha256": "3cfa5ce598fe47d099d5e47d7d47081604d6b3b4c826e2ea9ad2b83fbaebbd26"
+      }
+    },
+    {
+      "check": "rabit_tile32: effective engine config frozen",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_tile32: resolved KV dtype",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_tile32: one measured request per point, in order",
+      "category": "measurement",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_tile32: exact prompt tokens, 32 outputs, prompt hash == planned",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_tile32: no Triton JIT during measured requests",
+      "category": "jit",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_tile32: no OOM",
+      "category": "request",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "greedy output tokens identical, reference vs tile32, at every point",
+      "category": "tile32_equivalence",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_reference and rabit_tile32 engine configs identical",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    }
+  ],
+  "counts": {
+    "passed": 35,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "all_ok": true,
+  "failed_categories": []
+}

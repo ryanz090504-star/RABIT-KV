@@ -1,0 +1,261 @@
+{
+  "scope": "Stage3C tile32 before/after BENCHMARK evidence only; NOT Experiment 5 evidence; one measured request per point; descriptive only (no complexity law). The 32K (q_len 16352) point is not part of this run.",
+  "experiment5_evidence": false,
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 35,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "tile32_correctness_tests": {
+    "passed": 43,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "equality_failures": []
+  },
+  "request_guard_note": "600 s per-request SIGALRM guard, with the process-group watchdog and Modal function timeout as hard process-level backstops. Exit 76 on a delivered request-cap signal; no retries; partial evidence preserved; any failure stops the diagnostic; the watchdog kills and reaps the whole process group.",
+  "component_profiling_enabled": false,
+  "points": [
+    {
+      "prompt_tokens": 16386,
+      "second_chunk_q_len": 2,
+      "reference": {
+        "ttft_ms": 774.5919227600098,
+        "tpot_ms": 30.01530035483909,
+        "wall_ms": 1704.694724000035,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 771.899938583374,
+        "tpot_ms": 29.05082645161421,
+        "wall_ms": 1672.3258959999612,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "bf16_control": {
+        "ttft_ms": 1313.1756782531738,
+        "tpot_ms": 24.155352354840385,
+        "wall_ms": 2061.839952000014,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "ttft_speedup_reference_over_tile32": 1.0034874781588612,
+      "ttft_saved_ms": 2.691984176635742,
+      "output_tokens_identical": true,
+      "tile32_minus_bf16_ttft_ms": -541.2757396697998
+    },
+    {
+      "prompt_tokens": 16415,
+      "second_chunk_q_len": 31,
+      "reference": {
+        "ttft_ms": 1156.3913822174072,
+        "tpot_ms": 29.99708267742012,
+        "wall_ms": 2086.1878700000034,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 1116.0755157470703,
+        "tpot_ms": 29.08677058064768,
+        "wall_ms": 2017.7596679999397,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "bf16_control": {
+        "ttft_ms": 1324.5086669921875,
+        "tpot_ms": 24.295411483871202,
+        "wall_ms": 2076.9811779999827,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "ttft_speedup_reference_over_tile32": 1.0361228840714696,
+      "ttft_saved_ms": 40.315866470336914,
+      "output_tokens_identical": true,
+      "tile32_minus_bf16_ttft_ms": -208.4331512451172
+    },
+    {
+      "prompt_tokens": 16416,
+      "second_chunk_q_len": 32,
+      "reference": {
+        "ttft_ms": 1169.3089008331299,
+        "tpot_ms": 29.902409741935337,
+        "wall_ms": 2095.896883000023,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 1121.4540004730225,
+        "tpot_ms": 29.1785516129061,
+        "wall_ms": 2025.582610000015,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "bf16_control": {
+        "ttft_ms": 1317.9290294647217,
+        "tpot_ms": 24.237054129032238,
+        "wall_ms": 2068.9260440000226,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "ttft_speedup_reference_over_tile32": 1.0426721919400372,
+      "ttft_saved_ms": 47.85490036010742,
+      "output_tokens_identical": true,
+      "tile32_minus_bf16_ttft_ms": -196.47502899169922
+    },
+    {
+      "prompt_tokens": 16417,
+      "second_chunk_q_len": 33,
+      "reference": {
+        "ttft_ms": 1182.7054023742676,
+        "tpot_ms": 29.740317483871085,
+        "wall_ms": 2104.1773629999625,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 1140.2277946472168,
+        "tpot_ms": 29.627172193547647,
+        "wall_ms": 2058.2529729999806,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "bf16_control": {
+        "ttft_ms": 1344.0163135528564,
+        "tpot_ms": 24.24744009677456,
+        "wall_ms": 2095.47795200001,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "ttft_speedup_reference_over_tile32": 1.0372536153972578,
+      "ttft_saved_ms": 42.47760772705078,
+      "output_tokens_identical": true,
+      "tile32_minus_bf16_ttft_ms": -203.78851890563965
+    },
+    {
+      "prompt_tokens": 16896,
+      "second_chunk_q_len": 512,
+      "reference": {
+        "ttft_ms": 7595.336675643921,
+        "tpot_ms": 29.723694903227187,
+        "wall_ms": 8516.405204000022,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 7073.352575302124,
+        "tpot_ms": 28.799713354839785,
+        "wall_ms": 7966.0895979999395,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "bf16_control": {
+        "ttft_ms": 1370.5899715423584,
+        "tpot_ms": 24.702469129032753,
+        "wall_ms": 2132.2192149999637,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "ttft_speedup_reference_over_tile32": 1.073795854905409,
+      "ttft_saved_ms": 521.9841003417969,
+      "output_tokens_identical": true,
+      "tile32_minus_bf16_ttft_ms": 5702.762603759766
+    },
+    {
+      "prompt_tokens": 17408,
+      "second_chunk_q_len": 1024,
+      "reference": {
+        "ttft_ms": 14684.902429580688,
+        "tpot_ms": 30.116312516129035,
+        "wall_ms": 15618.114337999998,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 13500.459909439087,
+        "tpot_ms": 28.574985322580368,
+        "wall_ms": 14385.929863000001,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "bf16_control": {
+        "ttft_ms": 1434.7858428955078,
+        "tpot_ms": 24.597000548387694,
+        "wall_ms": 2196.8405650000022,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "ttft_speedup_reference_over_tile32": 1.0877334941244097,
+      "ttft_saved_ms": 1184.4425201416016,
+      "output_tokens_identical": true,
+      "tile32_minus_bf16_ttft_ms": 12065.67406654358
+    },
+    {
+      "prompt_tokens": 18432,
+      "second_chunk_q_len": 2048,
+      "reference": {
+        "ttft_ms": 29217.851877212524,
+        "tpot_ms": 29.868417774194295,
+        "wall_ms": 30143.347363000034,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 26876.755237579346,
+        "tpot_ms": 29.11681180645217,
+        "wall_ms": 27778.971740999965,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "bf16_control": {
+        "ttft_ms": 1583.0762386322021,
+        "tpot_ms": 24.447484032258846,
+        "wall_ms": 2340.5849629999693,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "ttft_speedup_reference_over_tile32": 1.0871048837160162,
+      "ttft_saved_ms": 2341.0966396331787,
+      "output_tokens_identical": true,
+      "tile32_minus_bf16_ttft_ms": 25293.678998947144
+    },
+    {
+      "prompt_tokens": 20480,
+      "second_chunk_q_len": 4096,
+      "reference": {
+        "ttft_ms": 60241.34635925293,
+        "tpot_ms": 30.020383451613036,
+        "wall_ms": 61171.94551,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 55436.00082397461,
+        "tpot_ms": 29.272516612903225,
+        "wall_ms": 56342.62372199998,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "bf16_control": {
+        "ttft_ms": 1915.076732635498,
+        "tpot_ms": 24.388944806450155,
+        "wall_ms": 2670.5034729999966,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "ttft_speedup_reference_over_tile32": 1.0866827596481334,
+      "ttft_saved_ms": 4805.34553527832,
+      "output_tokens_identical": true,
+      "tile32_minus_bf16_ttft_ms": 53520.92409133911
+    },
+    {
+      "prompt_tokens": 24576,
+      "second_chunk_q_len": 8192,
+      "reference": {
+        "ttft_ms": 129008.20589065552,
+        "tpot_ms": 30.13242209677599,
+        "wall_ms": 129941.90092400005,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 119005.5525302887,
+        "tpot_ms": 29.15857290322639,
+        "wall_ms": 119908.97117300006,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "bf16_control": {
+        "ttft_ms": 2639.1963958740234,
+        "tpot_ms": 24.302433612902977,
+        "wall_ms": 3391.7740689999505,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "ttft_speedup_reference_over_tile32": 1.084051988732383,
+      "ttft_saved_ms": 10002.653360366821,
+      "output_tokens_identical": true,
+      "tile32_minus_bf16_ttft_ms": 116366.35613441467
+    }
+  ],
+  "not_claimed": [
+    "Experiment 5 results",
+    "a complexity law",
+    "tile32 correctness beyond the executed tests"
+  ]
+}
