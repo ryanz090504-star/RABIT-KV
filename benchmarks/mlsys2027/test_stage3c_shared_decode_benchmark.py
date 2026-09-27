@@ -245,6 +245,31 @@ def test_profiling_off_check_detects_profile_markers():
         importlib.reload(rs)
 
 
+def test_final_mode_uses_tiebreak_query_block():
+    import importlib
+
+    m = importlib.reload(rs)
+    try:
+        if not (m.QB_TIEBREAK_DIR / "benchmark_analysis.json").is_file():
+            return  # tie-break evidence not present in this checkout
+        fin = m.final_query_block(require_committed=False)
+        assert fin["final_query_block"] in (16, 32) and fin["stage1_selected_query_block"] == 32
+        m.set_mode_final(fin["final_query_block"])
+        assert [s[2] for s in m.SERIES] == ["reference", "tile32", "shared_decode"]
+        assert m.SERIES[2][3] == fin["final_query_block"] and m.Q_LENS == [32, 512, 2048, 4096, 8192]
+        assert m.OUT_DIR == m.FINAL_DIR and 16384 + 16352 not in m.POINTS
+        m.verify_equivalence(json.loads(m.BENCH_MANIFEST.read_text(encoding="utf-8")))
+        if not fin["tiebreak_evidence_committed"]:
+            try:
+                m.final_query_block(require_committed=True)
+            except RuntimeError:
+                pass
+            else:
+                raise AssertionError("final run allowed without archived tie-break evidence")
+    finally:
+        importlib.reload(rs)
+
+
 if __name__ == "__main__":
     tests = [(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     failed = 0

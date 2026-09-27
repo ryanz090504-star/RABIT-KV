@@ -73,6 +73,7 @@ BENCH_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_dec
 CORRECTNESS_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_correctness"
 QB_TUNING_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_qb_tuning"
 QB_TIEBREAK_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_qb_tiebreak"
+FINAL_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_final_benchmark"
 
 
 def set_out_dir(d: Path) -> None:
@@ -195,6 +196,39 @@ def set_mode_qb_tiebreak() -> None:
     SERIES, Q_LENS = list(TIEBREAK_SERIES), list(QB_TUNING_Q_LENS)
     POINTS = [FIRST_CHUNK + q for q in Q_LENS]
     set_out_dir(QB_TIEBREAK_DIR)
+
+
+# Reviewed lock (after the accepted tie-break). The final benchmark still reads its QUERY_BLOCK from the committed
+# tie-break evidence; this constant only refuses a run if the evidence and the reviewed lock ever disagree.
+LOCKED_FINAL_QUERY_BLOCK = 32
+
+
+def final_query_block(require_committed: bool) -> dict:
+    """The final fixed QUERY_BLOCK is read from the tie-break evidence (never chosen by hand, never retuned)."""
+    a = json.loads((QB_TIEBREAK_DIR / "benchmark_analysis.json").read_text(encoding="utf-8"))
+    sel = a.get("selection") or {}
+    qb = sel.get("final_tiebreak_selected_query_block")
+    if not (a["all_integrity_passed"] and qb in TIEBREAK_CANDIDATES
+            and sel.get("stage1_selected_query_block") == STAGE1_SELECTED_QUERY_BLOCK):
+        raise RuntimeError("final benchmark precondition failed: no valid tie-break selection")
+    if qb != LOCKED_FINAL_QUERY_BLOCK:  # consistency guard only; the value used is the evidence's
+        raise RuntimeError(f"tie-break evidence selects QB{qb}, but the reviewed lock is QB{LOCKED_FINAL_QUERY_BLOCK}")
+    committed = (run_git("status", "--short", "--", rel(QB_TIEBREAK_DIR)) == ""
+                 and bool(run_git("ls-files", rel(QB_TIEBREAK_DIR / "benchmark_analysis.json"))))
+    if require_committed and not committed:
+        raise RuntimeError("final benchmark precondition failed: tie-break evidence must be archived (committed)")
+    return {"final_query_block": qb, "stage1_selected_query_block": sel["stage1_selected_query_block"],
+            "tiebreak_relative_gap": sel["relative_gap"], "tiebreak_evidence": rel(QB_TIEBREAK_DIR),
+            "tiebreak_evidence_committed": committed}
+
+
+def set_mode_final(qb: int) -> None:
+    global SERIES, Q_LENS, POINTS
+    SERIES = [("rabit_reference", "rabit_kv2", "reference", qb), ("rabit_tile32", "rabit_kv2", "tile32", qb),
+              (f"rabit_shared_qb{qb}", "rabit_kv2", "shared_decode", qb)]
+    Q_LENS = [32, 512, 2048, 4096, 8192]
+    POINTS = [FIRST_CHUNK + q for q in Q_LENS]
+    set_out_dir(FINAL_DIR)
 
 
 def set_mode_qb_tuning() -> None:
@@ -346,6 +380,14 @@ def expected_runtime(correctness_only: bool) -> dict:
     """Planning estimate only: reference / tile32 from the frozen tile32 benchmark; shared_decode bounded by tile32."""
     s = json.loads((rt.OUT_DIR / "summary.json").read_text(encoding="utf-8"))
     t = {p["second_chunk_q_len"]: p for p in s["points"]}
+    if OUT_DIR == FINAL_DIR:
+        ref = sum(t[q]["reference_ttft_ms"] for q in [32] + Q_LENS) / 1000.0
+        til = sum(t[q]["tile32_ttft_ms"] for q in [32] + Q_LENS) / 1000.0
+        fixed = {"image_rebuild_s": 600, "gate_s": 70, "tile32_tests_s": 50, "shared_decode_tests_s": 120,
+                 "engine_init_s": 110 * len(SERIES)}
+        req = {"reference_requests_s": round(ref), "tile32_requests_s": round(til),
+               "shared_decode_requests_s_upper_if_no_faster_than_tile32": round(til)}
+        return {**fixed, **req, "total_estimate_s": round(sum(fixed.values()) + sum(req.values()))}
     if OUT_DIR in (QB_TUNING_DIR, QB_TIEBREAK_DIR):
         fixed = {"image_rebuild_s": 600, "gate_s": 70, "tile32_tests_s": 50, "shared_decode_tests_s": 120,
                  "engine_init_s": 110 * len(SERIES)}
@@ -528,6 +570,31 @@ def integrity(series: dict, gate: dict, t32: dict, shared: dict, top: dict, corr
             "failed_categories": sorted({c["category"] for c in checks if c["state"] == FAILED})}
 
 
+def final_analysis(series: dict, integ: dict) -> dict:
+    rows = {impl: {p["row"]["planned_prompt_tokens"]: p["row"] for p in series[l]["points"]
+                   if p["begin"]["role"] == "measured"} for l, _, impl, _ in SERIES}
+    qb = SERIES[2][3]
+    pts = []
+    for p, q in zip(POINTS, Q_LENS):
+        r, t, s_ = rows["reference"].get(p), rows["tile32"].get(p), rows["shared_decode"].get(p)
+        row = {"prompt_tokens": p, "second_chunk_q_len": q}
+        for k, v in (("reference", r), ("tile32", t), ("shared_decode", s_)):
+            row[k] = None if v is None else {x: v[x] for x in ("ttft_ms", "tpot_ms", "wall_ms",
+                                                               "output_token_ids_sha256")}
+        if r and t and s_:
+            row["shared_decode_ttft_over_reference"] = s_["ttft_ms"] / r["ttft_ms"]
+            row["shared_decode_ttft_over_tile32"] = s_["ttft_ms"] / t["ttft_ms"]
+            row["reference_ttft_over_shared_decode"] = r["ttft_ms"] / s_["ttft_ms"]
+            row["shared_decode_wall_over_reference"] = s_["wall_ms"] / r["wall_ms"]
+            row["shared_decode_tpot_delta_ms_vs_reference"] = s_["tpot_ms"] - r["tpot_ms"]
+        pts.append(row)
+    return {"scope": SCOPE + f" Final benchmark: reference, tile32, shared_decode(QB{qb} fixed by the tie-break).",
+            "experiment5_evidence": False, "all_integrity_passed": integ["all_ok"],
+            "integrity_counts": integ["counts"], "fixed_query_block": qb, "points": pts,
+            "not_claimed": ["Experiment 5 results", "a complexity law", "q_len 16352 latency",
+                            "QUERY_BLOCK retuning at 4096 / 8192"]}
+
+
 def qb_tiebreak_analysis(series: dict, integ: dict) -> dict:
     rows = {l: {p["row"]["planned_prompt_tokens"] - FIRST_CHUNK: p["row"] for p in series[l]["points"]
                 if p["begin"]["role"] == "measured"} for l, _, _, _ in SERIES}
@@ -603,7 +670,9 @@ def analyze(text: str, correctness_only: bool, write: bool):
     t32, shared = rt.parse_tests(t32_lines), parse_shared_tests(shared_lines)
     top = parse_top(top_lines)
     integ = integrity(series, gate, t32, shared, top, correctness_only, ser_lines)
-    if not correctness_only and OUT_DIR == QB_TIEBREAK_DIR:
+    if not correctness_only and OUT_DIR == FINAL_DIR:
+        an = final_analysis(series, integ)
+    elif not correctness_only and OUT_DIR == QB_TIEBREAK_DIR:
         an = qb_tiebreak_analysis(series, integ)
     elif not correctness_only and OUT_DIR == QB_TUNING_DIR:
         an = qb_tuning_analysis(series, integ)
@@ -674,10 +743,18 @@ def main(argv: list[str] | None = None) -> int:
                     help="shared_decode QUERY_BLOCK 4/8/16/32 at q_len 512 and 2048 only")
     ap.add_argument("--qb-tiebreak", action="store_true",
                     help="QB16 vs QB32 ABBA tie-break at q_len 512 and 2048 only")
+    ap.add_argument("--final", action="store_true",
+                    help="final benchmark: reference, tile32, shared_decode(tie-break QB) at q_len 32..8192")
     a = ap.parse_args(argv)
-    if sum((a.correctness_only, a.qb_tuning, a.qb_tiebreak)) > 1:
-        raise SystemExit("--correctness-only, --qb-tuning and --qb-tiebreak are exclusive")
-    stage1 = None
+    if sum((a.correctness_only, a.qb_tuning, a.qb_tiebreak, a.final)) > 1:
+        raise SystemExit("--correctness-only, --qb-tuning, --qb-tiebreak and --final are exclusive")
+    stage1 = final = None
+    if a.final:
+        final = final_query_block(require_committed=not a.dry_run)
+        set_mode_final(final["final_query_block"])
+        print(f"FINAL benchmark with the tie-break QUERY_BLOCK: {json.dumps(final)}")
+        if not final["tiebreak_evidence_committed"]:
+            print("  WARNING (dry-run only): tie-break evidence is not archived yet; a real run refuses.")
     if a.qb_tiebreak:
         stage1 = stage1_precondition()
         set_mode_qb_tiebreak()
@@ -710,7 +787,7 @@ def main(argv: list[str] | None = None) -> int:
     m = {"benchmark": "Stage3C shared_decode kernel tuning", "scope": SCOPE, "correctness_only": a.correctness_only,
          "qb_tuning": a.qb_tuning, "qb_selection_rule": QB_SELECTION_RULE if a.qb_tuning else None,
          "qb_tiebreak": a.qb_tiebreak, "tiebreak_rule": TIEBREAK_RULE if a.qb_tiebreak else None,
-         "stage1": stage1,
+         "stage1": stage1, "final": final,
          "series": SERIES, "points": POINTS, "q_lens": Q_LENS, "conditioning_prompt_tokens": CONDITIONING_PROMPT,
          "request_guard_note": REQUEST_GUARD_NOTE, "started_utc": now(), "status": "running",
          "protected_paths_post_run_status": "pending", "provenance": prov}
