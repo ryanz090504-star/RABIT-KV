@@ -1,0 +1,198 @@
+{
+  "checks": [
+    {
+      "check": "exactly one H100",
+      "category": "environment",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2.py in image is frozen",
+      "category": "environment",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "gate passed",
+      "category": "gate",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "tile32 exact suite: exit 0, 43 passed, none skipped/failed",
+      "category": "tile32_regression",
+      "state": "passed",
+      "observed": {
+        "passed": 43,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "equality_failures": []
+      }
+    },
+    {
+      "check": "shared_decode exact suite: exit 0, 192 passed, none skipped/failed",
+      "category": "shared_decode",
+      "state": "passed",
+      "observed": {
+        "passed": 192,
+        "failed": 0,
+        "errors": 0,
+        "skipped": 0,
+        "passed_test_ids": 192
+      }
+    },
+    {
+      "check": "q_len 16352 model-limit chunk executed and exact for every QUERY_BLOCK",
+      "category": "shared_decode",
+      "state": "passed",
+      "observed": [
+        "test_shared_decode_32k_model_limit_chunk[4]",
+        "test_shared_decode_32k_model_limit_chunk[8]",
+        "test_shared_decode_32k_model_limit_chunk[16]",
+        "test_shared_decode_32k_model_limit_chunk[32]"
+      ]
+    },
+    {
+      "check": "kernel-side decode count == closed x qgroups x ceil(n / QUERY_BLOCK) (12 cases)",
+      "category": "decode_reuse",
+      "state": "passed",
+      "observed": [
+        {
+          "expected_shared_decode": 176,
+          "measured_shared_decode_page_decodes": 176,
+          "per_query_page_decodes_tile32_reference": 632,
+          "prefix": 79,
+          "q_len": 33,
+          "query_block": 4,
+          "reuse_factor": 3.590909090909091,
+          "tiles": 2
+        },
+        {
+          "expected_shared_decode": 96,
+          "measured_shared_decode_page_decodes": 96,
+          "per_query_page_decodes_tile32_reference": 632,
+          "prefix": 79,
+          "q_len": 33,
+          "query_block": 8,
+          "reuse_factor": 6.583333333333333,
+          "tiles": 2
+        },
+        {
+          "expected_shared_decode": 56,
+          "measured_shared_decode_page_decodes": 56,
+          "per_query_page_decodes_tile32_reference": 632,
+          "prefix": 79,
+          "q_len": 33,
+          "query_block": 16,
+          "reuse_factor": 11.285714285714286,
+          "tiles": 2
+        },
+        {
+          "expected_shared_decode": 40,
+          "measured_shared_decode_page_decodes": 40,
+          "per_query_page_decodes_tile32_reference": 632,
+          "prefix": 79,
+          "q_len": 33,
+          "query_block": 32,
+          "reuse_factor": 15.8,
+          "tiles": 2
+        },
+        {
+          "expected_shared_decode": 37632,
+          "measured_shared_decode_page_decodes": 37632,
+          "per_query_page_decodes_tile32_reference": 150528,
+          "prefix": 95,
+          "q_len": 1024,
+          "query_block": 4,
+          "reuse_factor": 4.0,
+          "tiles": 33
+        },
+        {
+          "expected_shared_decode": 18960,
+          "measured_shared_decode_page_decodes": 18960,
+          "per_query_page_decodes_tile32_reference": 150528,
+          "prefix": 95,
+          "q_len": 1024,
+          "query_block": 8,
+          "reuse_factor": 7.939240506329114,
+          "tiles": 33
+        },
+        {
+          "expected_shared_decode": 9488,
+          "measured_shared_decode_page_decodes": 9488,
+          "per_query_page_decodes_tile32_reference": 150528,
+          "prefix": 95,
+          "q_len": 1024,
+          "query_block": 16,
+          "reuse_factor": 15.865092748735245,
+          "tiles": 33
+        },
+        {
+          "expected_shared_decode": 4752,
+          "measured_shared_decode_page_decodes": 4752,
+          "per_query_page_decodes_tile32_reference": 150528,
+          "prefix": 95,
+          "q_len": 1024,
+          "query_block": 32,
+          "reuse_factor": 31.67676767676768,
+          "tiles": 33
+        },
+        {
+          "expected_shared_decode": 536056,
+          "measured_shared_decode_page_decodes": 536056,
+          "per_query_page_decodes_tile32_reference": 2127488,
+          "prefix": 16384,
+          "q_len": 512,
+          "query_block": 4,
+          "reuse_factor": 3.9687793812586745,
+          "tiles": 17
+        },
+        {
+          "expected_shared_decode": 270072,
+          "measured_shared_decode_page_decodes": 270072,
+          "per_query_page_decodes_tile32_reference": 2127488,
+          "prefix": 16384,
+          "q_len": 512,
+          "query_block": 8,
+          "reuse_factor": 7.877484522645813,
+          "tiles": 17
+        },
+        {
+          "expected_shared_decode": 137080,
+          "measured_shared_decode_page_decodes": 137080,
+          "per_query_page_decodes_tile32_reference": 2127488,
+          "prefix": 16384,
+          "q_len": 512,
+          "query_block": 16,
+          "reuse_factor": 15.520046688065364,
+          "tiles": 17
+        },
+        {
+          "expected_shared_decode": 70584,
+          "measured_shared_decode_page_decodes": 70584,
+          "per_query_page_decodes_tile32_reference": 2127488,
+          "prefix": 16384,
+          "q_len": 512,
+          "query_block": 32,
+          "reuse_factor": 30.14122180664173,
+          "tiles": 17
+        }
+      ]
+    },
+    {
+      "check": "correctness-only run completed",
+      "category": "completion",
+      "state": "passed",
+      "observed": null
+    }
+  ],
+  "counts": {
+    "passed": 8,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "all_ok": true,
+  "failed_categories": []
+}
