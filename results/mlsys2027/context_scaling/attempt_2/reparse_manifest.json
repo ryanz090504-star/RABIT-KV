@@ -1,0 +1,148 @@
+{
+  "reparsed_from_existing_raw": true,
+  "h100_rerun": false,
+  "measurement_code_commit": "6ac5567bd44529f0c175d31ba67dbb6949077ef7",
+  "analysis_parser_commit": "617927fb4363fc9b185c5ec5e8a7413983a35aca",
+  "measurement_modal_app": "ap-d0K1rXwIzyty6fvusW4ByL",
+  "raw_run_dir": "results/mlsys2027/context_scaling/attempt_2/raw_run_1",
+  "raw_modal_session_sha256": "efa66e861bbc7a912d5e8b1708f86f10e4614295348d0d38a52647ff69487f0d",
+  "raw_files_sha256_before": {
+    "bf16_ctx16384.log": "4f4e31d78db780f06ceea814b5e766c7e75c90c731f3f549f9974a7c060c9fb4",
+    "bf16_ctx2048.log": "68ff42e7afbc5bd08c1d0d74d03d7c31e0e8efb0e25f89cb98b4d20dc23dce52",
+    "bf16_ctx32768.log": "dbaada4a1d712952f95fc6fd308701bcd56a372fa432398942411595042319b4",
+    "bf16_ctx4096.log": "910796a821ab849cbe20c236a97e179db7979422bddc1d2a35268abc1f3b0ac4",
+    "bf16_ctx512.log": "6292c7fb25d7a5097486a7e3f9dba9a456995270ae70b712e249037b8d4861a8",
+    "bf16_ctx8192.log": "c1002e56753dbc66037bd6a96b8868623ca7aa843572c8d7ae85a36e7ced6952",
+    "conditioning_bf16_ctx512.log": "5fb11951915d8c624e1b58422585747269bc5786d2fbfc9151c92bebdc16dec8",
+    "conditioning_rabit_kv2_ctx512.log": "7b199f64a6ebb95a8c51f7d31d127c98d09c5ddef13e43a75620092c2fa04ef2",
+    "correctness_gate.log": "471cd1d583ea610f94e4d8631b1066849d2c62aa9ad79cdaee3d78b3ffcd6762",
+    "integrity_check.json": "f3033e9aa039359f59ed1843a794a822c260d28faeb5512d25381cfa0acba145",
+    "manifest.json": "cbd44f2081c1f76ae39c7316da1cb087df24d89b7493e1bd0e38129c1e4729ae",
+    "matched_config_diff.json": "f840010b2bb9fc23d87691f330d4a4b28a8ab485724e6b7318513a8da195a64e",
+    "modal_session.log": "efa66e861bbc7a912d5e8b1708f86f10e4614295348d0d38a52647ff69487f0d",
+    "rabit_kv2_ctx16384.log": "df0bbd93b38630c13be2f268e28e19034a3e016411da3f972bd15a874045c051",
+    "rabit_kv2_ctx2048.log": "d5da3df50b961f71d5104f096e81070bfb77f9d5b57b6b8cc46936ebb79c9218",
+    "rabit_kv2_ctx32768.log": "174b34dee3f4d2bab4418ca399e013fc42e8df113f72721989fbba38d9cefa53",
+    "rabit_kv2_ctx4096.log": "1f14f7e950202c66b87aafc5164fb622a9cb1df25bd9ff18afbaf107be53e9e8",
+    "rabit_kv2_ctx512.log": "894a6923444185ca4221129ed259fb87161e58061c5b8c7afd7b554bbe398471",
+    "rabit_kv2_ctx8192.log": "a89994a430bc46f9e73c9c834266c8a5d740ab824c8758b20ea0711b5933aa57"
+  },
+  "original_analysis_status": "failed",
+  "original_failure": {
+    "stage": "integrity",
+    "modal_returncode": 0,
+    "failed_categories": [
+      "stage3c"
+    ],
+    "non_passed_categories": [
+      "stage3c"
+    ],
+    "failed_cells": []
+  },
+  "original_failure_reason": "Stage3C records were emitted correctly but were not captured by the local Attempt-2 parser/check.",
+  "provenance_wording": "The H100 sweep completed successfully. Initial local post-processing marked the run failed because the Attempt-2 Stage3C validation tag was not captured by the reused parser. The immutable raw session was then re-parsed after a parser-only fix; no H100 measurement was repeated.",
+  "integrity_counts": {
+    "passed": 380,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "all_integrity_passed": true,
+  "non_passed_categories": [],
+  "post_gates": {
+    "failed_attempt_1_unchanged": true,
+    "prior_evidence_unchanged": true,
+    "protected_paths_clean": true
+  },
+  "b32768": {
+    "cell_process_elapsed_s": 2339.397,
+    "cell_watchdog_s": 3600,
+    "fraction_of_watchdog": 0.6498325,
+    "original_900_s_watchdog_would_terminate": true
+  },
+  "attempt_2": {
+    "attempt": 2,
+    "failed_attempt_1": "results/mlsys2027/context_scaling/failed_attempt_1 (historical diagnostic evidence; never pooled)",
+    "final_rabit_configuration": {
+      "kv_representation": "K3 / V2 / G32 / R4 / META8g64",
+      "impl": "shared_decode",
+      "query_block": 32,
+      "query_block_source": "results/mlsys2027/diagnostics/stage3c_shared_decode_qb_tiebreak",
+      "stage1_selected_query_block": 32,
+      "b32768_expected_prompt_sha256": "dbc5bd884143e25fc9b417b9a9af888aaf92092e6556e4b8fdd1d6ca7d63b969",
+      "b32768_expected_output_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26",
+      "expected_output_source": "results/mlsys2027/diagnostics/stage3c_shared_decode_q16352_feasibility/benchmark_analysis.json",
+      "feasibility_wall_s": 115.66866270399998
+    },
+    "original_cell_watchdog_s": 900,
+    "b32768_cell_watchdog_s": 3600,
+    "gate_timeout_s": 600,
+    "leg_timeouts_s": {
+      "conditioning_A512": 900,
+      "conditioning_B512": 900,
+      "A512": 900,
+      "B512": 900,
+      "B2048": 900,
+      "A2048": 900,
+      "A4096": 900,
+      "B4096": 900,
+      "B8192": 900,
+      "A8192": 900,
+      "A16384": 900,
+      "B16384": 900,
+      "B32768": 3600,
+      "A32768": 900
+    },
+    "watchdog_change_reason": "Pre-run canonical q16352 feasibility measured 115.6687 s wall; unchanged 20-request B32768 protocol projects to 2313.4 s before engine startup, so the historical 900 s watchdog would terminate a valid cell.",
+    "per_request_guard": "No per-request guard: inherited unchanged from the frozen Experiment 5 protocol (gate 600 s and cell watchdog only). The B32768 cell-watchdog extension (900 s -> 3600 s) is the sole runtime-safety change, justified by the canonical 115.6687 s q_len 16352 feasibility measurement.",
+    "total_watchdog_budget_s": 15900,
+    "modal_function_backstop_timeout_s": 17100,
+    "infrastructure_only_changes": [
+      "B32768 cell watchdog 900 s -> 3600 s",
+      "Modal function backstop 14400 s -> 17100 s"
+    ],
+    "unchanged": [
+      "workload",
+      "context grid",
+      "cell order",
+      "warmups (5)",
+      "measured reps (15)",
+      "model",
+      "prompts",
+      "output length",
+      "engine settings",
+      "metrics",
+      "failed-cell policy",
+      "gate timeout (600 s)",
+      "all other cell watchdogs (900 s)"
+    ],
+    "frozen_runner_sha256": "9107470f071370849b27816c04136ace37e4e1175f3e3fd52c5790b9b78d8ffe",
+    "frozen_modal_app_sha256": "39c956c13a829ae03b7116a5e87db1d75d3dbbf25935f8b092947e1aa19f944e",
+    "frozen_worker_sha256": "494977ace5044e197089d1a60030ab527b33f5be51b1d6affec10c563c7d6f7e"
+  },
+  "reparsed_utc": "2026-09-27T22:09:11.282487+00:00",
+  "summary_written": true,
+  "raw_files_sha256_after": {
+    "bf16_ctx16384.log": "4f4e31d78db780f06ceea814b5e766c7e75c90c731f3f549f9974a7c060c9fb4",
+    "bf16_ctx2048.log": "68ff42e7afbc5bd08c1d0d74d03d7c31e0e8efb0e25f89cb98b4d20dc23dce52",
+    "bf16_ctx32768.log": "dbaada4a1d712952f95fc6fd308701bcd56a372fa432398942411595042319b4",
+    "bf16_ctx4096.log": "910796a821ab849cbe20c236a97e179db7979422bddc1d2a35268abc1f3b0ac4",
+    "bf16_ctx512.log": "6292c7fb25d7a5097486a7e3f9dba9a456995270ae70b712e249037b8d4861a8",
+    "bf16_ctx8192.log": "c1002e56753dbc66037bd6a96b8868623ca7aa843572c8d7ae85a36e7ced6952",
+    "conditioning_bf16_ctx512.log": "5fb11951915d8c624e1b58422585747269bc5786d2fbfc9151c92bebdc16dec8",
+    "conditioning_rabit_kv2_ctx512.log": "7b199f64a6ebb95a8c51f7d31d127c98d09c5ddef13e43a75620092c2fa04ef2",
+    "correctness_gate.log": "471cd1d583ea610f94e4d8631b1066849d2c62aa9ad79cdaee3d78b3ffcd6762",
+    "integrity_check.json": "f3033e9aa039359f59ed1843a794a822c260d28faeb5512d25381cfa0acba145",
+    "manifest.json": "cbd44f2081c1f76ae39c7316da1cb087df24d89b7493e1bd0e38129c1e4729ae",
+    "matched_config_diff.json": "f840010b2bb9fc23d87691f330d4a4b28a8ab485724e6b7318513a8da195a64e",
+    "modal_session.log": "efa66e861bbc7a912d5e8b1708f86f10e4614295348d0d38a52647ff69487f0d",
+    "rabit_kv2_ctx16384.log": "df0bbd93b38630c13be2f268e28e19034a3e016411da3f972bd15a874045c051",
+    "rabit_kv2_ctx2048.log": "d5da3df50b961f71d5104f096e81070bfb77f9d5b57b6b8cc46936ebb79c9218",
+    "rabit_kv2_ctx32768.log": "174b34dee3f4d2bab4418ca399e013fc42e8df113f72721989fbba38d9cefa53",
+    "rabit_kv2_ctx4096.log": "1f14f7e950202c66b87aafc5164fb622a9cb1df25bd9ff18afbaf107be53e9e8",
+    "rabit_kv2_ctx512.log": "894a6923444185ca4221129ed259fb87161e58061c5b8c7afd7b554bbe398471",
+    "rabit_kv2_ctx8192.log": "a89994a430bc46f9e73c9c834266c8a5d740ab824c8758b20ea0711b5933aa57"
+  },
+  "raw_unchanged": true,
+  "status": "completed"
+}

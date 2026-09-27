@@ -1,0 +1,1975 @@
+{
+  "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+  "gpu": "NVIDIA H100 80GB (Modal)",
+  "plan_reference": "docs/MLSYS_EXPERIMENT_PLAN.md",
+  "scope": "Context-length scaling of BF16 vs RABIT-KV on the real engine. 32768 is a nominal / model-limit context point (= max_model_len), NOT a 32768-token prompt: its actual prompt is 32736 tokens + 32 output tokens. It is the maximum TESTED context point, not a demonstrated maximum feasible context. Context scaling is distinct from allocator capacity. No Experiment 3/4 samples are reused. Two unmeasured conditioning cells run first and contribute no statistics. Measured and derived memory quantities are reported separately and labeled.",
+  "cells": [
+    {
+      "index": 1,
+      "cell": "conditioning_A512",
+      "role": "conditioning",
+      "kv_cache_dtype": "bfloat16",
+      "context_point": 512,
+      "actual_prompt_tokens": 512,
+      "output_tokens": 32
+    },
+    {
+      "index": 2,
+      "cell": "conditioning_B512",
+      "role": "conditioning",
+      "kv_cache_dtype": "rabit_kv2",
+      "context_point": 512,
+      "actual_prompt_tokens": 512,
+      "output_tokens": 32
+    },
+    {
+      "index": 3,
+      "cell": "A512",
+      "role": "measured",
+      "kv_cache_dtype": "bfloat16",
+      "context_point": 512,
+      "actual_prompt_tokens": 512,
+      "output_tokens": 32
+    },
+    {
+      "index": 4,
+      "cell": "B512",
+      "role": "measured",
+      "kv_cache_dtype": "rabit_kv2",
+      "context_point": 512,
+      "actual_prompt_tokens": 512,
+      "output_tokens": 32
+    },
+    {
+      "index": 5,
+      "cell": "B2048",
+      "role": "measured",
+      "kv_cache_dtype": "rabit_kv2",
+      "context_point": 2048,
+      "actual_prompt_tokens": 2048,
+      "output_tokens": 32
+    },
+    {
+      "index": 6,
+      "cell": "A2048",
+      "role": "measured",
+      "kv_cache_dtype": "bfloat16",
+      "context_point": 2048,
+      "actual_prompt_tokens": 2048,
+      "output_tokens": 32
+    },
+    {
+      "index": 7,
+      "cell": "A4096",
+      "role": "measured",
+      "kv_cache_dtype": "bfloat16",
+      "context_point": 4096,
+      "actual_prompt_tokens": 4096,
+      "output_tokens": 32
+    },
+    {
+      "index": 8,
+      "cell": "B4096",
+      "role": "measured",
+      "kv_cache_dtype": "rabit_kv2",
+      "context_point": 4096,
+      "actual_prompt_tokens": 4096,
+      "output_tokens": 32
+    },
+    {
+      "index": 9,
+      "cell": "B8192",
+      "role": "measured",
+      "kv_cache_dtype": "rabit_kv2",
+      "context_point": 8192,
+      "actual_prompt_tokens": 8192,
+      "output_tokens": 32
+    },
+    {
+      "index": 10,
+      "cell": "A8192",
+      "role": "measured",
+      "kv_cache_dtype": "bfloat16",
+      "context_point": 8192,
+      "actual_prompt_tokens": 8192,
+      "output_tokens": 32
+    },
+    {
+      "index": 11,
+      "cell": "A16384",
+      "role": "measured",
+      "kv_cache_dtype": "bfloat16",
+      "context_point": 16384,
+      "actual_prompt_tokens": 16384,
+      "output_tokens": 32
+    },
+    {
+      "index": 12,
+      "cell": "B16384",
+      "role": "measured",
+      "kv_cache_dtype": "rabit_kv2",
+      "context_point": 16384,
+      "actual_prompt_tokens": 16384,
+      "output_tokens": 32
+    },
+    {
+      "index": 13,
+      "cell": "B32768",
+      "role": "measured",
+      "kv_cache_dtype": "rabit_kv2",
+      "context_point": 32768,
+      "actual_prompt_tokens": 32736,
+      "output_tokens": 32
+    },
+    {
+      "index": 14,
+      "cell": "A32768",
+      "role": "measured",
+      "kv_cache_dtype": "bfloat16",
+      "context_point": 32768,
+      "actual_prompt_tokens": 32736,
+      "output_tokens": 32
+    }
+  ],
+  "protocol": {
+    "warmups_per_cell_excluded": 5,
+    "measured_reps_per_cell": 15,
+    "context_grid": [
+      512,
+      2048,
+      4096,
+      8192,
+      16384,
+      32768
+    ],
+    "output_tokens": 32,
+    "max_model_len": 32768,
+    "same_container_same_gpu": true,
+    "fresh_process_per_cell": true,
+    "dtype_induced_allowlist": [
+      "requested.kv_cache_dtype",
+      "kv_dtype.requested_kv_cache_dtype",
+      "kv_dtype.engine_cache_dtype",
+      "kv_dtype.resolved_kv_torch_dtype",
+      "kv_dtype.kv_quant_mode"
+    ],
+    "context_induced_allowlist": [
+      "workload.context_point",
+      "workload.prompt_tokens",
+      "workload.prompt_token_ids_sha256"
+    ],
+    "gpu_clean_tolerance_mib": 256,
+    "gpu_clean_max_wait_s": 60,
+    "gate_timeout_s": 600,
+    "conditioning_cells": [
+      "conditioning_A512",
+      "conditioning_B512"
+    ],
+    "retries": 0,
+    "failed_cell_policy": "continue past a failed measured cell ONLY for a workload-level failure (request OOM / request execution failure after successful engine init) after full process-group reaping, no orphan, and a fresh GPU clean-state check; stop immediately for everything else; the run is still marked failed and no summary is written",
+    "cell_timeout_s": {
+      "conditioning_A512": 900,
+      "conditioning_B512": 900,
+      "A512": 900,
+      "B512": 900,
+      "B2048": 900,
+      "A2048": 900,
+      "A4096": 900,
+      "B4096": 900,
+      "B8192": 900,
+      "A8192": 900,
+      "A16384": 900,
+      "B16384": 900,
+      "B32768": 3600,
+      "A32768": 900
+    },
+    "total_watchdog_budget_s": 15900,
+    "modal_function_backstop_timeout_s": 17100
+  },
+  "labels": {
+    "capacity": "MEASURED allocator capacity (num_gpu_blocks x block_size) at engine start; a property of the fixed engine configuration, NOT of the request context",
+    "live_kv": "derived_live_paged_kv_bytes is DERIVED, never directly measured live memory: ceil((prompt_tokens + output_tokens - 1) / block_size) blocks x bytes/block, where bytes/block is derived from the physical allocator budget (engine-logged available KV bytes / num_gpu_blocks). It excludes RABIT-KV per-sequence state outside the paged pool (and any other memory outside the paged KV pool), which is not observed.",
+    "gpu_memory": "MEASURED device-wide nvidia-smi memory.used (idle before the cell, after engine init, after the measured reps); dominated by the gpu_memory_utilization pre-allocation, so it is not a per-request KV measurement",
+    "latency": "Real-engine single-request latency: TTFT = frontend first_token_latency; TPOT = (last_token_ts - first_token_ts)/(n-1) from engine-core timestamps; wall = perf_counter around llm.generate. p90 = statistics.quantiles(n=10, method='inclusive')[8]. 15 measured samples per (dtype, context) cell, this session only."
+  },
+  "started_utc": "2026-09-27T21:05:07.583819+00:00",
+  "completed_utc": "2026-09-27T22:01:34.399063+00:00",
+  "status": "failed",
+  "protected_paths_post_run_status": "clean",
+  "provenance": {
+    "git_branch": "research/mlsys-2027",
+    "git_head": "6ac5567bd44529f0c175d31ba67dbb6949077ef7",
+    "vllm_kvquant_tree": "79d0bec70fa0ff1eb9f6df99a977c8feccc20e94",
+    "rabit_kv2_sha256": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+    "runner_script_sha256": "be8977c010541d1eddd487b40795ba02bdbf64a91fa519eba41bb7f5242480e8",
+    "modal_app_sha256": "8748ba13e0150033e805084d2ef2242c25899fa473e1270c0bd3c8dc5d2cb27f",
+    "worker_sha256": "f0f7cb959f8a5b5f65e70dbcf98d3feaa0b153438f8d6bfbe7f80f929593bac4",
+    "correctness_gate_sha256": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce",
+    "watchdog_sha256": "05e6472e8172a0b7e264ecf7509752bb9a70818f08ba67da476c69db38164d21",
+    "exp3_worker_sha256": "9e62da4d923151fdb818a320240868c015b32db6c5cfe510f4394153fe077856",
+    "exp3_modal_app_sha256": "4d669d0910b51270aca2df5d04e2cdb6fa7769c94b8f2325497ce4b34787541b",
+    "exp3_runner_sha256": "dcbee7c0c08266d2be1d514cfaaa21b2158fbecd83b29175b230dc87269c2acb",
+    "canonical_benchmark_deployment_sha256": "95217571f4c7c16b98f3160bb6e385f35444f2a12cb47dfc6c947d59a1264c60",
+    "sha256_basis": "LF-normalized bytes (CRLF -> LF); equals committed git content",
+    "equivalence": {
+      "canonical_source": "benchmarks/performance/benchmark_deployment.py#RUNNER_Z (zlib+base64, decoded in memory)",
+      "canonical_runner_sha256": "3706fe1cc51014830ebf28741cff6ff2cd638cde9869269b6d60657347d527c2",
+      "worker_base_engine_kwargs": {
+        "dtype": "bfloat16",
+        "block_size": 32,
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 16384,
+        "max_num_seqs": 32,
+        "enable_prefix_caching": false,
+        "enable_chunked_prefill": true,
+        "gpu_memory_utilization": 0.82,
+        "enforce_eager": true,
+        "trust_remote_code": true,
+        "disable_log_stats": false,
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        }
+      },
+      "engine_kwargs_equal_canonical_exp3_exp5_except_kv_cache_dtype_and_model_path": true,
+      "output_tokens_and_protocol_constants_equal_exp3": true,
+      "prompt_construction_equal_exp3_except_length": true,
+      "timed_region_and_sample_fields_ast_equal_exp3": true,
+      "extra_sample_fields": [
+        "prompt_token_ids_sha256",
+        "output_token_ids_sha256"
+      ],
+      "worker_has_no_engine_rpc": true,
+      "modal_image_expression_ast_equal_canonical": true,
+      "modal_clean_state_and_watchdog_helpers_ast_equal_exp3": [
+        "_emit",
+        "_sha256_file",
+        "_gpu_query",
+        "_compute_apps",
+        "_gpu_state",
+        "_require_clean",
+        "_run_guarded"
+      ],
+      "modal_function_backstop_timeout_s": 17100,
+      "total_watchdog_budget_s": 15900,
+      "workload_failure_exit_and_continuable_kinds_equal": true,
+      "correctness_gate_regression_ast_equal_to_canonical": true,
+      "gate_and_watchdog_are_unchanged_exp3_files": [
+        "benchmarks/mlsys2027/exp3_correctness_gate.py",
+        "benchmarks/mlsys2027/exp3_watchdog.py"
+      ],
+      "attempt2_modal_equal_frozen_exp5_except_reviewed_additions": true,
+      "attempt2_worker_equal_frozen_exp5_except_stage3c_selection": true,
+      "per_cell_watchdog_rule": "return B32768_LEG_TIMEOUT_S if label == 'B32768' else LEG_TIMEOUT_S",
+      "frozen_budget_check_note": "the frozen proof's backstop check ran with the frozen uniform budget 600 + 14 x 900; the attempt-2 budget 15900 s is checked here"
+    },
+    "protected_paths": [
+      "results/quality",
+      "results/performance",
+      "results/summary.json",
+      "vllm-kvquant",
+      "benchmarks/performance",
+      "results/mlsys2027/quality_frontier",
+      "results/mlsys2027/multilingual_frontier",
+      "results/mlsys2027/deployment",
+      "results/mlsys2027/fp8_baseline",
+      "benchmarks/mlsys2027/build_exp1_summary.py",
+      "benchmarks/mlsys2027/validate_exp1_summary.py",
+      "benchmarks/mlsys2027/build_exp2_summary.py",
+      "benchmarks/mlsys2027/validate_exp2_summary.py",
+      "benchmarks/mlsys2027/build_exp3_session_summary.py",
+      "benchmarks/mlsys2027/build_exp3_summary.py",
+      "benchmarks/mlsys2027/compare_exp3_sessions.py",
+      "benchmarks/mlsys2027/exp3_correctness_gate.py",
+      "benchmarks/mlsys2027/exp3_deployment_modal.py",
+      "benchmarks/mlsys2027/exp3_engine_worker.py",
+      "benchmarks/mlsys2027/exp3_watchdog.py",
+      "benchmarks/mlsys2027/validate_exp3_session_summary.py",
+      "benchmarks/mlsys2027/validate_exp3_summary.py",
+      "benchmarks/mlsys2027/build_exp4_summary.py",
+      "benchmarks/mlsys2027/exp4_deployment_modal.py",
+      "benchmarks/mlsys2027/exp4_engine_worker.py",
+      "benchmarks/mlsys2027/validate_exp4_summary.py",
+      "benchmarks/mlsys2027/run_experiment1_quality_frontier.py",
+      "benchmarks/mlsys2027/run_experiment2_multilingual_frontier.py",
+      "benchmarks/mlsys2027/run_experiment3_deployment.py",
+      "benchmarks/mlsys2027/run_experiment4_fp8_baseline.py",
+      "results/mlsys2027/context_scaling/failed_attempt_1",
+      "benchmarks/mlsys2027/run_experiment5_context_scaling.py",
+      "benchmarks/mlsys2027/exp5_deployment_modal.py",
+      "benchmarks/mlsys2027/exp5_engine_worker.py",
+      "benchmarks/mlsys2027/build_exp5_failure_analysis.py",
+      "benchmarks/mlsys2027/validate_exp5_failure_analysis.py",
+      "results/mlsys2027/diagnostics/stage3c_cliff",
+      "results/mlsys2027/diagnostics/stage3c_tile32_correctness",
+      "results/mlsys2027/diagnostics/stage3c_tile32_benchmark",
+      "results/mlsys2027/diagnostics/stage3c_component_profile_correctness",
+      "results/mlsys2027/diagnostics/stage3c_component_profile",
+      "results/mlsys2027/diagnostics/stage3c_shared_decode_correctness",
+      "results/mlsys2027/diagnostics/stage3c_shared_decode_qb_tuning",
+      "results/mlsys2027/diagnostics/stage3c_shared_decode_qb_tiebreak",
+      "results/mlsys2027/diagnostics/stage3c_shared_decode_final_benchmark",
+      "results/mlsys2027/diagnostics/stage3c_shared_decode_q16352_feasibility"
+    ],
+    "protected_paths_baseline_status": "clean",
+    "archived_attempts_sha256": {
+      "failed_attempt_1/bf16_ctx16384.log": "5d19006b5d74b4bc0ce7a0ccbc39016c552bd64841e25274aad4eb76a7b73942",
+      "failed_attempt_1/bf16_ctx2048.log": "cd9de877086eabc887e8b2c7030d914167f2c9bac146b5b698f1c02763e92b0d",
+      "failed_attempt_1/bf16_ctx32768.log": "b5534d13e9afa11f4bdd27a5e69a37261098ddcd909de05f8a5ab96fc4a0e7d6",
+      "failed_attempt_1/bf16_ctx4096.log": "0fdba38cc72ef4c65e95ea8b7bff945ecbb4544eeeed89cc3ab53833e4ed3674",
+      "failed_attempt_1/bf16_ctx512.log": "f672241f0e10466f355ab0055da7919b16cffc433f7b666792eb7d9490a016e8",
+      "failed_attempt_1/bf16_ctx8192.log": "cb2d8b79153cb71aefe7cd2dc35314c00f443325cb6521300ddc3070b7a67f72",
+      "failed_attempt_1/conditioning_bf16_ctx512.log": "a311f9bf5c17a7e27f0ed04bb23d03c8a6cb3fa20a973885f68c6a58eeea4f36",
+      "failed_attempt_1/conditioning_rabit_kv2_ctx512.log": "1515c9252c57cb68fb122e018f451c42131c0ecd24078f188f567d17128bbcf8",
+      "failed_attempt_1/correctness_gate.log": "52ea89cc3572074da441015731ede4254ebb280855f530a2c0210bca6c3cd133",
+      "failed_attempt_1/failure_analysis.json": "369258f34c60d9d95ce3e01700d03ba28eceb2d6cb63d8a85048f61cdd41c65a",
+      "failed_attempt_1/integrity_check.json": "17e58df013265e9d3edd6087689f7851a7d55077683e5e9a0e7f8c8aaa72d0f5",
+      "failed_attempt_1/manifest.json": "ac0d420973621d2ebfa0c89e3ccf03ba47f76be8f8c72f1c4d25516c88a1dbb2",
+      "failed_attempt_1/matched_config_diff.json": "1e3036ef39759bd37f46e8a19e73dc025b39ec091f4438fefd46eeafac0ed46d",
+      "failed_attempt_1/modal_session.log": "e5627de0f01c185bc607cc3479b0777db263dc279cdf86808f139fe584e06fed",
+      "failed_attempt_1/rabit_kv2_ctx16384.log": "93231b886fdc6c0f814b40eb89ce83dfff201c8dce80a7eea7d3829f667e959f",
+      "failed_attempt_1/rabit_kv2_ctx2048.log": "a3a5dfc3d2bf77b0cc3710aed42e63bfe4e65c308706e80b88b05533c5f25e97",
+      "failed_attempt_1/rabit_kv2_ctx32768.log": "a1729cd3de942f8074047bd328647d64df96b6b5eb08084773b78fad3b874bbd",
+      "failed_attempt_1/rabit_kv2_ctx4096.log": "3122f664e8bb4703c0b5558a195a5cfebe86d4ed89c36df0dffe5c0761c32654",
+      "failed_attempt_1/rabit_kv2_ctx512.log": "012135c0c0ceea042077c0728b238b69ad7ae5ee7a19c7aa281b4b495219a007",
+      "failed_attempt_1/rabit_kv2_ctx8192.log": "91141054fe264048ceee46b1341b30cb3cbb5d3693bf43895128b828730753af"
+    },
+    "prior_evidence_sha256_raw": {
+      "deployment/bf16_deployment.log": "fc74d72011ec12457b0d83cecd68bf90ff8b98528ffeb6c762a7518e0ec7c842",
+      "deployment/correctness_gate.log": "b9aabc4a5308e060f81cf79c7341ce7df04591bc0853fc579cda97176c5863d3",
+      "deployment/failed_attempt_1/bf16_deployment.log": "2f32ac5d697219ed3ee626882112e889d09f9e90bdeb11031c9c14b03788a20a",
+      "deployment/failed_attempt_1/correctness_gate.log": "75c4e5844d64d036cad659a6b620c3c1d142ca3d76d1c7e723b1fcc66639295b",
+      "deployment/failed_attempt_1/failure_summary.json": "4e16074b82a1c33488d37138e7ec153301a840d747df4c9dcc4f961351bc6f08",
+      "deployment/failed_attempt_1/integrity_check.json": "8d2923a4eebb9bf9dda908126126bee0e274d8e26feaa3c68d611891bf8e1a63",
+      "deployment/failed_attempt_1/manifest.json": "60887fceb9dd44cf26272e6b51f695f27d068ed3308aac515fd76da01909757c",
+      "deployment/failed_attempt_1/matched_config_diff.json": "928448ded360f7123362b72eead43211e58babe49c4afdba85dc43b1e129c1d1",
+      "deployment/failed_attempt_1/modal_session.log": "0a30c1c4f48532669eb66725994eb1d3d0103e2cd3571fbdc8e1a1126dadcc50",
+      "deployment/failed_attempt_1/rabit_kv2_deployment.log": "1691634ed4adbfc97c8b9aac14002402c48813e59d202d34a2abc5df27cdbf8b",
+      "deployment/integrity_check.json": "26a8aeca162f76c9f5643c9ab184feb8340c79c55d1274c583766255b5e4c1fd",
+      "deployment/manifest.json": "43a2fa32ac2442d0632148e66157df9feec53c5f3bce1e6b49ff5c5b5eb44a56",
+      "deployment/matched_capacity_latency_summary.json": "947ac568e2301d861776e682255c6093d77ee7f3a30a814d696474afc0589210",
+      "deployment/matched_config_diff.json": "2fccff38201ad53f9e4719d29a4d8997d378f0fff8bcd69c887d624c4234466f",
+      "deployment/modal_session.log": "c90f66ac6db958fbeb99527124d78e9b2e054f03ccc7d17e80086c63fd46a20f",
+      "deployment/rabit_kv2_deployment.log": "c5a4c7b2d455d5c4b28fa4414877f7b810579be7ef4821bf05939fadb9c272cb",
+      "deployment/replication_1/bf16_deployment.log": "9a473ae7236797a6243449cf5fb4ac8a036464b37a8b83e9f12570ae63fdbd98",
+      "deployment/replication_1/correctness_gate.log": "9941e09c1246b199a7b32b27c9afe6eef3593d6410c9833d969011dedc62f145",
+      "deployment/replication_1/integrity_check.json": "06a53ad2a4f4948cb8cd6aeb5c60f14dcaa92e917b9dac23a418e7c231751c2a",
+      "deployment/replication_1/manifest.json": "48ade89fe6e1faf78cd92cbe43628e5acdeb521cdd46438d91105e45b0347d68",
+      "deployment/replication_1/matched_capacity_latency_summary.json": "f9c7e01fa9d2b67a73a810c33e6239e7bf3d8ba7e24af0c357e2a903bd219ebf",
+      "deployment/replication_1/matched_config_diff.json": "2fccff38201ad53f9e4719d29a4d8997d378f0fff8bcd69c887d624c4234466f",
+      "deployment/replication_1/modal_session.log": "9bcdd1cbda2c86416519b72f5791ac9d70e1f39fb41dce4dbee6b092b53911d2",
+      "deployment/replication_1/rabit_kv2_deployment.log": "eef4a898da92ac6fe0d9ff7d5971ff2013510bd9649ae66a6dfaff4ed24e70c3",
+      "deployment/replication_1/summary.json": "583467ab0f2bdc56802c8c592fc5069445ce622bd5095ccd2cf76ddf326f1dd0",
+      "deployment/replication_comparison.json": "ad61a15c6942b204b682360beea0c72bcea5c4bb9db23559d58413bd5f8204cb",
+      "deployment/summary.json": "bb80fd5be4dec4cb196d872070399cce7f61c93a6086220b532c03101b5d1f8b",
+      "fp8_baseline/bf16_deployment.log": "80c2555fb55462523e315b20d7e2b7c2f15c705910c35c4a73da2439e17c0bb7",
+      "fp8_baseline/correctness_gate.log": "5c63fe5912134596c27faef22217d4b1151eb7a031ad5c47220a8419a2e39d41",
+      "fp8_baseline/fp8_e4m3_deployment.log": "aed1bdf8e45a95286df07212ebf8590a526f821b3451872ae72dbe6919dc324b",
+      "fp8_baseline/integrity_check.json": "a21859b9697b47fc8cf16ab58ef730949f7c3585d99cda413f5456c551fba480",
+      "fp8_baseline/manifest.json": "a6f30625eac21d74e55111cd4d7eeb6280c4240672738d358e72caf7aac72ad5",
+      "fp8_baseline/matched_capacity_latency_summary.json": "a0426de1b60eb3460d57e82afe205c0c4691fcabd560578aef4be0f3bd511dd7",
+      "fp8_baseline/matched_config_diff.json": "f0aa5247f723737f26a8c24fdf81138e5d711e251a74bcc4de952b177a94bdc6",
+      "fp8_baseline/modal_session.log": "0e45d9c22203f2827c94cfc8ae7601c13273b76923ae5c7ed28a42916b8da5ec",
+      "fp8_baseline/rabit_kv2_deployment.log": "4401c4351c9abb191ec431ff89be102498ba393686a6eb94cb6e7e8ec5db7273",
+      "fp8_baseline/summary.json": "b0f5b54bfc8040c30ee50dac5e99b4a59e85d7872b565af8a4cb1dc3d111900b",
+      "stage3c_cliff/bf16_series.log": "b222b2a2c6baf44bbe23c4147060d4265e4859be819e0b061ced43ca6e1b7c5f",
+      "stage3c_cliff/correctness_gate.log": "de3cd8e7ff5c3c0f43e62b39c89f190fb96f208e9ae7db1aa25700a4f31ed0e4",
+      "stage3c_cliff/diagnostic_analysis.json": "882beeabb5f64d74cfecf93f27f5d51e853cb9c7c8b045ed0a125977a073a519",
+      "stage3c_cliff/integrity_check.json": "1866a59bf0880036bd46016179922a67e5f39bf00bfa9d7f496037cdab298ec1",
+      "stage3c_cliff/manifest.json": "3462ea1a5ec6d1be719463fa43b6c0c62a93422c53539b028396c22c6bfa58e6",
+      "stage3c_cliff/modal_session.log": "db8acb71065532d6d9a342591fb2f40ea1d618a74dfb7891105c3d96fb6c93a7",
+      "stage3c_cliff/rabit_kv2_series.log": "015ff9f986a5046639d328571408a90ad22e6bf506dd04ee182fab4276c4043a",
+      "stage3c_cliff/summary.json": "170fa4e1d403211ee06757c3db03abf613c70a79a38a0d12e006ee58ea78ed7f",
+      "stage3c_tile32_correctness/benchmark_analysis.json": "0fecea58496e1dc4f1bee6d7a70ae8ee319c80638fbbfcd91ad0bf608bbcc627",
+      "stage3c_tile32_correctness/correctness_gate.log": "4f08ebe30fc2c621a54506efa10f54053b35d7d033626e4ab8a32d974e6c373a",
+      "stage3c_tile32_correctness/integrity_check.json": "652671153ffa18b3938146a4253e0f8cc92a86c0066eaed7bdb1fc85118ca591",
+      "stage3c_tile32_correctness/manifest.json": "980e94338804aae345a20450c132875f7156f8b5d1a80727afd29ebb1fdc808d",
+      "stage3c_tile32_correctness/modal_session.log": "6c7b20e6589358a5eebe9c3dcb9f1ebcfdbbd8a4d412bfd15207c8ee7d7c3e60",
+      "stage3c_tile32_correctness/tile32_correctness_tests.log": "828da8b83c61198652304cc542b43916282017b79fd9e9d8da0028e2a316595c",
+      "stage3c_tile32_benchmark/benchmark_analysis.json": "116449dc05e4294624e773360f738a7e20af64fc8e5f945871f2f64f2eef1dc9",
+      "stage3c_tile32_benchmark/bf16_control_series.log": "e1074afe35d23a6ac5e10f12e5160f30a95b4d65f2b018a853da0e57c2839fd0",
+      "stage3c_tile32_benchmark/correctness_gate.log": "7c79c57f81cb6cf1847fa45797137e6b3f24526c49917b9eb8358660c8437574",
+      "stage3c_tile32_benchmark/integrity_check.json": "79d584d6e08cc20238a1af7c131e00ea5ffe02b582a0e75e0ff14a050dca25fb",
+      "stage3c_tile32_benchmark/manifest.json": "79a38080f3d758a5a46630d0ebb3b5fb7c1b28335d1a50f02eb2e7a0a04f53ab",
+      "stage3c_tile32_benchmark/modal_session.log": "d39ae2a50b0d6195f163306c9871637273d84f9d85fa5b346a35e189b53c2142",
+      "stage3c_tile32_benchmark/rabit_reference_series.log": "3a6d854a905a91ae6e90c8e9e6e62cbd18edf9f901f073ef8e907b78520a7bc8",
+      "stage3c_tile32_benchmark/rabit_tile32_series.log": "0e8eccc16f78bc37024962fd00db230ed465ce05ed70d2074a9da062a961c1d1",
+      "stage3c_tile32_benchmark/summary.json": "1b9d0e3071ae092cbefc2a7ed5aa0f6b5fff162d769679fa73a974df548b4269",
+      "stage3c_tile32_benchmark/tile32_correctness_tests.log": "d1efa534ed1675f728f761fef972e9b00fb71ad81295323480d6d617f24cef5c",
+      "stage3c_component_profile_correctness/correctness_gate.log": "254b802b99f2d94399e1a726600d63d87513b8b58c5ad3c20597039ee23b2dad",
+      "stage3c_component_profile_correctness/integrity_check.json": "3d27746f4003f230e888b2e9f563c05f413a9ff8134adca523ebf910ab71b140",
+      "stage3c_component_profile_correctness/manifest.json": "57b9ba6e4f497a598d091f86323e74193d3af1956dd439964fd185509cad472f",
+      "stage3c_component_profile_correctness/modal_session.log": "4702394aa4bace79a0a15580eff2c29abf23ba16e012eec3dc8de7f961c17827",
+      "stage3c_component_profile_correctness/profile_tests.log": "e1eef8eb19c81957a5b450aacedd1b8f8b91cf8801de38c235dd38b3588489dc",
+      "stage3c_component_profile_correctness/tile32_correctness_tests.log": "a6747f78b621597860abd0f97af2b91eeadd6884b87a07893b68ad1d1c8f2826",
+      "stage3c_component_profile/correctness_gate.log": "e4ab2e3679945411bd2af3ee5f3aa430c3ee9ad093b5a75fb3b442feef53a137",
+      "stage3c_component_profile/integrity_check.json": "fb96dc2cb06abb3d9e02b70e1d41d89361fc6e079b6ee95600163039fe35d1c4",
+      "stage3c_component_profile/profile_analysis.json": "d38fe06dcb56966c10dd24e20e7caaba6c883d3bcb6d58d632c68544f143def8",
+      "stage3c_component_profile/profile_tests.log": "8d04c9c6c6875ef27071c1ef7d33e2ea3c794660776f10ee858e8512d5c315ae",
+      "stage3c_component_profile/rabit_reference_profile_series.log": "0a238c41e20ef7f45d2dd45848f7f582ada757648a73745e02f4320888210a49",
+      "stage3c_component_profile/rabit_tile32_profile_series.log": "2459c25459b7270ef8a78e9c35a3d833c3ecfa82cdb13da434bb9b875d2285e7",
+      "stage3c_component_profile/raw_run_1/manifest.json": "f2e08e98bc147ac007aca491806510faaaf7099bd6e95fe6b5552ef44ef08187",
+      "stage3c_component_profile/raw_run_1/modal_session.log": "d9f02ceaaec2465651463b3b619c4a4e63b8b53bb2dd497dc1a4a733a1f44df2",
+      "stage3c_component_profile/reparse_manifest.json": "14d4465d7e67f0e9ac19b3536b52ecc15ea4aaff969e9e6d4047da180c3456bd",
+      "stage3c_component_profile/tile32_correctness_tests.log": "5c23bdc6973fa4f46835710cf888257687860334f8e427ffb90e0c0261fe6539",
+      "stage3c_shared_decode_correctness/benchmark_analysis.json": "ba89d177831044a1e657c277c45354f2e1c3d48d2ebeb6fc596f6badfcf3a883",
+      "stage3c_shared_decode_correctness/correctness_gate.log": "93d53d676a9d5ce1354f11c83f152ee7fff47c10d56d6f5a693bfecb1f592760",
+      "stage3c_shared_decode_correctness/integrity_check.json": "fcfe545b8c49bdb337d9f5e923b9f9f053d90b02991dd921bb542cccf5992ff1",
+      "stage3c_shared_decode_correctness/manifest.json": "593293f4069802f64be7710b94b44c52f44608ba38e4394febcfba6051a41569",
+      "stage3c_shared_decode_correctness/modal_session.log": "d65d1626e4574a05b4a5c5c9b6ab3e657185ca65f96f8da73ac5fa18ff3edc2a",
+      "stage3c_shared_decode_correctness/shared_decode_tests.log": "3c277e90395110849021ecb241f45a571f6af3d884af391db05c5b846c3be7cd",
+      "stage3c_shared_decode_correctness/tile32_correctness_tests.log": "cef1c9122dc34ebf7946f70e13caab53df94bfa58fda631b8efec8b0ed18b2b0",
+      "stage3c_shared_decode_qb_tuning/benchmark_analysis.json": "74af75dbdc01eb893d86690b3ae93c508d7357687fe440e39436c999b0fd7122",
+      "stage3c_shared_decode_qb_tuning/correctness_gate.log": "5ccbd4c9b05a1e44e044b1a6c92fe1d911e661fd6d4a4f01c65164434b958dee",
+      "stage3c_shared_decode_qb_tuning/integrity_check.json": "00b183468f4a9c5aae97076c75be4effc3d5b21c716fb8df3cfeba53d424933f",
+      "stage3c_shared_decode_qb_tuning/manifest.json": "f6a6f5c4e1a6c9b557b7673f260709c6b4f1c504d4cbf3313e40abfad26131c7",
+      "stage3c_shared_decode_qb_tuning/modal_session.log": "8b31d928dbcbf891d6175374bc0b11fbf501b23a10b178aaf6fa370f6a7f3274",
+      "stage3c_shared_decode_qb_tuning/rabit_shared_qb16_series.log": "ac4257d00e55d0f258b1a6a3df3032b790486d2da02de34233d792b88956e36e",
+      "stage3c_shared_decode_qb_tuning/rabit_shared_qb32_series.log": "64f304dd881be76d2de21419758f3f68738aa14f3fd081984025e2ea6b069958",
+      "stage3c_shared_decode_qb_tuning/rabit_shared_qb4_series.log": "ade2e07dda7b67e18ee386a93a90f9cc4aa74ce2e06c513543cd313b2b99af22",
+      "stage3c_shared_decode_qb_tuning/rabit_shared_qb8_series.log": "16abbefd4fc1d1a2282a1691a1e784091325944e3e3220d25972bbc81371968a",
+      "stage3c_shared_decode_qb_tuning/shared_decode_tests.log": "59bfd5a6e8fb67747f24fba43d1f44587794b250980b394fc0b82521f872401b",
+      "stage3c_shared_decode_qb_tuning/tile32_correctness_tests.log": "a7bf78e90bd38fc9ec4614ba66e098eac90aea77e879ab8065a8b2d74ef48f39",
+      "stage3c_shared_decode_qb_tiebreak/benchmark_analysis.json": "ac96540217f2d71442437f78dec02c59d23af689508d836287ab3ef051fbfdb6",
+      "stage3c_shared_decode_qb_tiebreak/correctness_gate.log": "3371af040eaf8280fce07cda01992adcd5b5a94ae11c9c5316fc15a92ec615a3",
+      "stage3c_shared_decode_qb_tiebreak/integrity_check.json": "d38e9ec875a98362aea5b48a6d328442f3ad4cd85c7413a2d54f4d4575a12cd4",
+      "stage3c_shared_decode_qb_tiebreak/manifest.json": "35e0ca88b527e2b1147382164fd985d73a47e19414c1223d2acef2cf1c188d23",
+      "stage3c_shared_decode_qb_tiebreak/modal_session.log": "addd576109c54a7ba35144cc8f692544ca00adcd59fab2e822ec63826f941ac6",
+      "stage3c_shared_decode_qb_tiebreak/rabit_shared_qb16_A1_series.log": "00655c73ab1277e09ba92b1e8ff68c9379dd380fa77f716492c58e960660bccc",
+      "stage3c_shared_decode_qb_tiebreak/rabit_shared_qb16_A2_series.log": "5c5147c565b976d0890951caf190e539fde104ff08945df6354815f582507a9d",
+      "stage3c_shared_decode_qb_tiebreak/rabit_shared_qb32_B1_series.log": "88891371b0693a6e23622923cdd6422b3bffb682cd447520da8a566ba8baee21",
+      "stage3c_shared_decode_qb_tiebreak/rabit_shared_qb32_B2_series.log": "d00f0887ff7a79d92da3fc65435f9791893a21410008f284856c26b68bf8d23b",
+      "stage3c_shared_decode_qb_tiebreak/shared_decode_tests.log": "6d5de3d18f867a9fee301998d8e73c6007581ffe1f391c8cddbb24ffa510038b",
+      "stage3c_shared_decode_qb_tiebreak/tile32_correctness_tests.log": "4b8bfb3340f17b86c8216fef58fe6f6aecaf5fa50d19c75b3984da95e5b76552",
+      "stage3c_shared_decode_final_benchmark/benchmark_analysis.json": "88ef126f0034cf8ad0681e9594506f918ed815293548d963969022a1d92b2353",
+      "stage3c_shared_decode_final_benchmark/correctness_gate.log": "bdf5c4b5c07e4aff4fed2781ef65bdc613a7b9162cddfd85efce9cd0ad7ab5fa",
+      "stage3c_shared_decode_final_benchmark/integrity_check.json": "6254f965639e49925ff5de6f9459357baf092b74e9e182905d354ce64f6fced9",
+      "stage3c_shared_decode_final_benchmark/manifest.json": "ccb9503d0bb674bb9dcd51759f483b939e677b9715cc862b21eb9b0784c25cba",
+      "stage3c_shared_decode_final_benchmark/modal_session.log": "3915f907adec8b704429bf5c236fd81b3dacea163e519607fa2d00cd94dea925",
+      "stage3c_shared_decode_final_benchmark/rabit_reference_series.log": "b2a66fdfa0fb18581386273f2b64566ff29b4751c0a4231d7ea55d92a0a2f52c",
+      "stage3c_shared_decode_final_benchmark/rabit_shared_qb32_series.log": "a653c64afd3966e49a54c533c8a209d05e8660535e2b5689c0e608b0d1341434",
+      "stage3c_shared_decode_final_benchmark/rabit_tile32_series.log": "597881b7bc217806a997d05a77c1364876cf3a46d803811113b9763aa43c05a1",
+      "stage3c_shared_decode_final_benchmark/shared_decode_tests.log": "4f1823abda793806f9827336c69530abbc29ef60f65ec055d972740abb07751d",
+      "stage3c_shared_decode_final_benchmark/tile32_correctness_tests.log": "c2d4d49d2f76b30c041edec255d7611f3dc916b3ceee7f94d6798786a46d0612",
+      "stage3c_shared_decode_q16352_feasibility/benchmark_analysis.json": "50811955c54e4197eb9fabf8855a234b0eb65cf5fc66dd79eeab98b773933a49",
+      "stage3c_shared_decode_q16352_feasibility/correctness_gate.log": "7c8cf3b49a43670e79ac64c8171ebb49f379f799c87ab62d20f7519d9ccc1041",
+      "stage3c_shared_decode_q16352_feasibility/integrity_check.json": "08c9f46da037e432a5bbca1e2f918c0b9c5617e05701dc60c0fe0be347d43583",
+      "stage3c_shared_decode_q16352_feasibility/manifest.json": "d2ffb5210a6cd64bbc89b4b5a8c42f3ce76256abb1c13dc19e54f4eef613efc6",
+      "stage3c_shared_decode_q16352_feasibility/modal_session.log": "39df717d151d038dc5f3edf7893b76c08d0ae4e0c184a9fb26794b4ef7d04a0c",
+      "stage3c_shared_decode_q16352_feasibility/rabit_shared_qb32_q16352_series.log": "81895af35aee7cbae3eab5cbb2f91b4d5de71e2f2432d1377947ea9162da3850",
+      "stage3c_shared_decode_q16352_feasibility/shared_decode_tests.log": "e4b0dc540f8acb0b05d05c010b4ac70724a9c7b9acbe857af123513715b2dc74",
+      "stage3c_shared_decode_q16352_feasibility/tile32_correctness_tests.log": "e2aec489377ed73e49d68160047e3e2c6b89f49da49f693e12bc43778adb5986"
+    },
+    "existing_top_level_output_files": null,
+    "uncommitted_experiment_files": null
+  },
+  "runs": [
+    {
+      "name": "context_sweep",
+      "command": [
+        "C:\\Users\\ryanz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "-m",
+        "modal",
+        "run",
+        "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RABIT-KV-upload\\benchmarks\\mlsys2027\\exp5_attempt2_modal.py",
+        "--legs",
+        "conditioning_A512=bfloat16:512:512:conditioning,conditioning_B512=rabit_kv2:512:512:conditioning,A512=bfloat16:512:512:measured,B512=rabit_kv2:512:512:measured,B2048=rabit_kv2:2048:2048:measured,A2048=bfloat16:2048:2048:measured,A4096=bfloat16:4096:4096:measured,B4096=rabit_kv2:4096:4096:measured,B8192=rabit_kv2:8192:8192:measured,A8192=bfloat16:8192:8192:measured,A16384=bfloat16:16384:16384:measured,B16384=rabit_kv2:16384:16384:measured,B32768=rabit_kv2:32768:32736:measured,A32768=bfloat16:32768:32736:measured",
+        "--warmups",
+        "5",
+        "--reps-per-leg",
+        "15",
+        "--stage3c-impl",
+        "shared_decode",
+        "--query-block",
+        "32",
+        "--b32768-expected-output-sha",
+        "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      ],
+      "log": "results/mlsys2027/context_scaling/attempt_2/modal_session.log",
+      "gate_command": [
+        "python",
+        "/opt/exp5/exp3_correctness_gate.py"
+      ],
+      "worker_commands": {
+        "conditioning_A512": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "512",
+          "--prompt-tokens",
+          "512",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "0",
+          "--leg",
+          "conditioning_A512",
+          "--conditioning"
+        ],
+        "conditioning_B512": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "512",
+          "--prompt-tokens",
+          "512",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "0",
+          "--leg",
+          "conditioning_B512",
+          "--conditioning",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "A512": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "512",
+          "--prompt-tokens",
+          "512",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A512"
+        ],
+        "B512": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "512",
+          "--prompt-tokens",
+          "512",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B512",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "B2048": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "2048",
+          "--prompt-tokens",
+          "2048",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B2048",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "A2048": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "2048",
+          "--prompt-tokens",
+          "2048",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A2048"
+        ],
+        "A4096": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "4096",
+          "--prompt-tokens",
+          "4096",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A4096"
+        ],
+        "B4096": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "4096",
+          "--prompt-tokens",
+          "4096",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B4096",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "B8192": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "8192",
+          "--prompt-tokens",
+          "8192",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B8192",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "A8192": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "8192",
+          "--prompt-tokens",
+          "8192",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A8192"
+        ],
+        "A16384": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "16384",
+          "--prompt-tokens",
+          "16384",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A16384"
+        ],
+        "B16384": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "16384",
+          "--prompt-tokens",
+          "16384",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B16384",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "B32768": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "32768",
+          "--prompt-tokens",
+          "32736",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B32768",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "A32768": [
+          "python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "32768",
+          "--prompt-tokens",
+          "32736",
+          "--model-dir",
+          "<modelscope snapshot dir>",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A32768"
+        ]
+      },
+      "started_utc": "2026-09-27T21:05:10.109959+00:00",
+      "completed_utc": "2026-09-27T22:01:34.335928+00:00",
+      "returncode": 0,
+      "status": "integrity",
+      "integrity_counts": {
+        "passed": 366,
+        "failed": 14,
+        "not_run": 0,
+        "not_evaluated": 0
+      }
+    }
+  ],
+  "experiment": "Experiment 5 ATTEMPT 2 -- BF16 vs RABIT-KV context-length scaling (finalized Stage3C)",
+  "attempt_2": {
+    "attempt": 2,
+    "failed_attempt_1": "results/mlsys2027/context_scaling/failed_attempt_1 (historical diagnostic evidence; never pooled)",
+    "final_rabit_configuration": {
+      "kv_representation": "K3 / V2 / G32 / R4 / META8g64",
+      "impl": "shared_decode",
+      "query_block": 32,
+      "query_block_source": "results/mlsys2027/diagnostics/stage3c_shared_decode_qb_tiebreak",
+      "stage1_selected_query_block": 32,
+      "b32768_expected_prompt_sha256": "dbc5bd884143e25fc9b417b9a9af888aaf92092e6556e4b8fdd1d6ca7d63b969",
+      "b32768_expected_output_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26",
+      "expected_output_source": "results/mlsys2027/diagnostics/stage3c_shared_decode_q16352_feasibility/benchmark_analysis.json",
+      "feasibility_wall_s": 115.66866270399998
+    },
+    "original_cell_watchdog_s": 900,
+    "b32768_cell_watchdog_s": 3600,
+    "gate_timeout_s": 600,
+    "leg_timeouts_s": {
+      "conditioning_A512": 900,
+      "conditioning_B512": 900,
+      "A512": 900,
+      "B512": 900,
+      "B2048": 900,
+      "A2048": 900,
+      "A4096": 900,
+      "B4096": 900,
+      "B8192": 900,
+      "A8192": 900,
+      "A16384": 900,
+      "B16384": 900,
+      "B32768": 3600,
+      "A32768": 900
+    },
+    "watchdog_change_reason": "Pre-run canonical q16352 feasibility measured 115.6687 s wall; unchanged 20-request B32768 protocol projects to 2313.4 s before engine startup, so the historical 900 s watchdog would terminate a valid cell.",
+    "per_request_guard": "No per-request guard: inherited unchanged from the frozen Experiment 5 protocol (gate 600 s and cell watchdog only). The B32768 cell-watchdog extension (900 s -> 3600 s) is the sole runtime-safety change, justified by the canonical 115.6687 s q_len 16352 feasibility measurement.",
+    "total_watchdog_budget_s": 15900,
+    "modal_function_backstop_timeout_s": 17100,
+    "infrastructure_only_changes": [
+      "B32768 cell watchdog 900 s -> 3600 s",
+      "Modal function backstop 14400 s -> 17100 s"
+    ],
+    "unchanged": [
+      "workload",
+      "context grid",
+      "cell order",
+      "warmups (5)",
+      "measured reps (15)",
+      "model",
+      "prompts",
+      "output length",
+      "engine settings",
+      "metrics",
+      "failed-cell policy",
+      "gate timeout (600 s)",
+      "all other cell watchdogs (900 s)"
+    ],
+    "frozen_runner_sha256": "9107470f071370849b27816c04136ace37e4e1175f3e3fd52c5790b9b78d8ffe",
+    "frozen_modal_app_sha256": "39c956c13a829ae03b7116a5e87db1d75d3dbbf25935f8b092947e1aa19f944e",
+    "frozen_worker_sha256": "494977ace5044e197089d1a60030ab527b33f5be51b1d6affec10c563c7d6f7e"
+  },
+  "vllm_kvquant_snapshot": {
+    "path": "C:\\Users\\ryanz\\AppData\\Local\\Temp\\exp5_vllm_snapshot_pg6v4pof\\vllm_kvquant_snapshot.zip",
+    "sha256": "35f33ca14109ca9285dd28b7dea62b667fb76c686be4665e6493ac13443ef0d2",
+    "bytes": 41028478,
+    "source": "git archive --format=zip HEAD:vllm-kvquant (core.autocrlf=false)"
+  },
+  "gpu_clean_state": {
+    "baseline": {
+      "compute_apps": [],
+      "max_wait_s": 60,
+      "memory_used_mib": [
+        4
+      ],
+      "t": 1790543327.5247216,
+      "tolerance_mib": 256
+    },
+    "tolerance_mib": 256,
+    "max_wait_s": 60,
+    "pre_leg": {
+      "conditioning_A512": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "conditioning_A512",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543432.0550342
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "conditioning_B512": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "conditioning_B512",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543554.6797912
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "A512": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A512",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543591.5371392
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B512": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B512",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543625.2324429
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B2048": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B2048",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543667.2248147
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "A2048": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A2048",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543711.6705081
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "A4096": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A4096",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543746.2854228
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B4096": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B4096",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543782.3855672
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B8192": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B8192",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543826.452131
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "A8192": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A8192",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543872.9259727
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "A16384": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A16384",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543914.379353
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B16384": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B16384",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790543972.9511974
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "B32768": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "B32768",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790544027.7232523
+          }
+        ],
+        "tolerance_mib": 256
+      },
+      "A32768": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A32768",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790546367.1923797
+          }
+        ],
+        "tolerance_mib": 256
+      }
+    }
+  },
+  "correctness_gate": {
+    "line_count": 22,
+    "begin": {
+      "pytest_command": [
+        "/usr/local/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "--tb=short",
+        "--confcutdir=/root/vllm-kvquant/tests/quantization",
+        "/root/vllm-kvquant/tests/quantization/test_kvquant_k3.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_layout.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_physical.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b1.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b2.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_fixed.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py"
+      ],
+      "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+    },
+    "result": {
+      "passed": true
+    },
+    "pytest_passed": 105,
+    "pytest_warnings": 14,
+    "pytest_seconds": 35.16,
+    "pytest_exit": 0,
+    "regression_passed_line": true
+  },
+  "processes": {
+    "exits": {
+      "gate": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp3_correctness_gate.py"
+        ],
+        "elapsed_s": 58.702,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "gate",
+        "own_session": true,
+        "pgid": 32,
+        "pid": 32,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 600
+      },
+      "conditioning_A512": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "512",
+          "--prompt-tokens",
+          "512",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "0",
+          "--leg",
+          "conditioning_A512",
+          "--conditioning"
+        ],
+        "elapsed_s": 122.529,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "conditioning_A512",
+        "own_session": true,
+        "pgid": 328,
+        "pid": 328,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "conditioning_B512": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "512",
+          "--prompt-tokens",
+          "512",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "0",
+          "--leg",
+          "conditioning_B512",
+          "--conditioning",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 36.789,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "conditioning_B512",
+        "own_session": true,
+        "pgid": 639,
+        "pid": 639,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "A512": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "512",
+          "--prompt-tokens",
+          "512",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A512"
+        ],
+        "elapsed_s": 33.621,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A512",
+        "own_session": true,
+        "pgid": 795,
+        "pid": 795,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B512": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "512",
+          "--prompt-tokens",
+          "512",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B512",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 41.934,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B512",
+        "own_session": true,
+        "pgid": 897,
+        "pid": 897,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B2048": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "2048",
+          "--prompt-tokens",
+          "2048",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B2048",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 44.383,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B2048",
+        "own_session": true,
+        "pgid": 999,
+        "pid": 999,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "A2048": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "2048",
+          "--prompt-tokens",
+          "2048",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A2048"
+        ],
+        "elapsed_s": 34.535,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A2048",
+        "own_session": true,
+        "pgid": 1102,
+        "pid": 1102,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "A4096": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "4096",
+          "--prompt-tokens",
+          "4096",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A4096"
+        ],
+        "elapsed_s": 36.033,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A4096",
+        "own_session": true,
+        "pgid": 1204,
+        "pid": 1204,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B4096": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "4096",
+          "--prompt-tokens",
+          "4096",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B4096",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 44.006,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B4096",
+        "own_session": true,
+        "pgid": 1306,
+        "pid": 1306,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B8192": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "8192",
+          "--prompt-tokens",
+          "8192",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B8192",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 46.398,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B8192",
+        "own_session": true,
+        "pgid": 1410,
+        "pid": 1410,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "A8192": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "8192",
+          "--prompt-tokens",
+          "8192",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A8192"
+        ],
+        "elapsed_s": 41.293,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A8192",
+        "own_session": true,
+        "pgid": 1514,
+        "pid": 1514,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "A16384": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "16384",
+          "--prompt-tokens",
+          "16384",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A16384"
+        ],
+        "elapsed_s": 58.514,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A16384",
+        "own_session": true,
+        "pgid": 1616,
+        "pid": 1616,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B16384": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "16384",
+          "--prompt-tokens",
+          "16384",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B16384",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 54.622,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B16384",
+        "own_session": true,
+        "pgid": 1718,
+        "pid": 1718,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      },
+      "B32768": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--context-point",
+          "32768",
+          "--prompt-tokens",
+          "32736",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "B32768",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 2339.397,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "B32768",
+        "own_session": true,
+        "pgid": 1822,
+        "pid": 1822,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 3600
+      },
+      "A32768": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp5/exp5_attempt2_engine_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--context-point",
+          "32768",
+          "--prompt-tokens",
+          "32736",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--warmups",
+          "5",
+          "--reps",
+          "15",
+          "--leg",
+          "A32768"
+        ],
+        "elapsed_s": 121.189,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "A32768",
+        "own_session": true,
+        "pgid": 1946,
+        "pid": 1946,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 900
+      }
+    },
+    "watchdog_timeouts": [],
+    "failed_cells": {},
+    "verdicts": {
+      "conditioning_A512": {
+        "index": 1,
+        "leg": "conditioning_A512",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "conditioning_B512": {
+        "index": 2,
+        "leg": "conditioning_B512",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "A512": {
+        "index": 3,
+        "leg": "A512",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "B512": {
+        "index": 4,
+        "leg": "B512",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "B2048": {
+        "index": 5,
+        "leg": "B2048",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "A2048": {
+        "index": 6,
+        "leg": "A2048",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "A4096": {
+        "index": 7,
+        "leg": "A4096",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "B4096": {
+        "index": 8,
+        "leg": "B4096",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "B8192": {
+        "index": 9,
+        "leg": "B8192",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "A8192": {
+        "index": 10,
+        "leg": "A8192",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "A16384": {
+        "index": 11,
+        "leg": "A16384",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "B16384": {
+        "index": 12,
+        "leg": "B16384",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "B32768": {
+        "index": 13,
+        "leg": "B32768",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      },
+      "A32768": {
+        "index": 14,
+        "leg": "A32768",
+        "reasons": [],
+        "verdict": "ok",
+        "workload_failure": null
+      }
+    },
+    "sweep_stopped": null
+  },
+  "feasibility": {
+    "A512": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        512
+      ],
+      "prompt_tokens_intended": 512,
+      "output_produced": true
+    },
+    "B512": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        512
+      ],
+      "prompt_tokens_intended": 512,
+      "output_produced": true
+    },
+    "B2048": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        2048
+      ],
+      "prompt_tokens_intended": 2048,
+      "output_produced": true
+    },
+    "A2048": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        2048
+      ],
+      "prompt_tokens_intended": 2048,
+      "output_produced": true
+    },
+    "A4096": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        4096
+      ],
+      "prompt_tokens_intended": 4096,
+      "output_produced": true
+    },
+    "B4096": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        4096
+      ],
+      "prompt_tokens_intended": 4096,
+      "output_produced": true
+    },
+    "B8192": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        8192
+      ],
+      "prompt_tokens_intended": 8192,
+      "output_produced": true
+    },
+    "A8192": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        8192
+      ],
+      "prompt_tokens_intended": 8192,
+      "output_produced": true
+    },
+    "A16384": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        16384
+      ],
+      "prompt_tokens_intended": 16384,
+      "output_produced": true
+    },
+    "B16384": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        16384
+      ],
+      "prompt_tokens_intended": 16384,
+      "output_produced": true
+    },
+    "B32768": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        32736
+      ],
+      "prompt_tokens_intended": 32736,
+      "output_produced": true
+    },
+    "A32768": {
+      "cell_started": true,
+      "in_container_verdict": "ok",
+      "workload_failure": null,
+      "engine_initialized": true,
+      "oom_detected": false,
+      "oom_lines": [],
+      "worker_returncode": 0,
+      "all_requests_completed": true,
+      "prompt_tokens_processed": [
+        32736
+      ],
+      "prompt_tokens_intended": 32736,
+      "output_produced": true
+    }
+  },
+  "integrity_counts": {
+    "passed": 366,
+    "failed": 14,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "config_diff_status": "passed",
+  "failure": {
+    "stage": "integrity",
+    "modal_returncode": 0,
+    "failed_categories": [
+      "stage3c"
+    ],
+    "non_passed_categories": [
+      "stage3c"
+    ],
+    "failed_cells": []
+  },
+  "archived_attempts_unchanged": true,
+  "prior_evidence_unchanged": true
+}
