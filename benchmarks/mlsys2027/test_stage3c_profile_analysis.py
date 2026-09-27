@@ -211,7 +211,8 @@ def test_find_records_rejects_trailing_garbage_and_truncation():
     line = f"(EngineCore pid=1) INFO 09-27 00:00:00 [rabit_kv2_stage3c_profile.py:1] {pa.TAG}={good}"
     assert pa.find_records([line, "unrelated"]) == [good]
     assert pa.find_records([line + "\r\n"]) == [good]
-    for bad in (line + " extra", line[:-40], f"{pa.TAG} {good}"):
+    assert pa.find_records([f"{pa.TAG} {good}"]) == []  # no exact "TAG=" marker: not a record candidate
+    for bad in (line + " extra", line[:-40]):
         try:
             recs = pa.find_records([bad])
             pa.parse_record(recs[0])
@@ -341,6 +342,156 @@ def test_profile_lines_attributed_to_open_request():
         pass
     else:
         raise AssertionError("malformed profile line accepted")
+
+
+# ------------------------------------------------------------------ record detector regression (raw run 1 defect)
+VLLM_WARNING = ("WARNING 09-27 13:26:31 [envs.py:2035] Unknown vLLM environment variable detected: "
+                "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE")
+PREFIX = "(EngineCore pid=906) INFO 09-27 13:26:40 [rabit_kv2_stage3c_profile.py:219] "
+
+
+def _rejects(lines):
+    try:
+        for p in pa.find_records(lines):
+            pa.parse_record(p)
+    except pa.ProfileError:
+        return True
+    return False
+
+
+def test_A_real_vllm_warning_is_not_a_record():
+    assert not pa.is_record_candidate(VLLM_WARNING)
+    assert pa.find_records([VLLM_WARNING]) == []
+    assert pa.find_records(["[series1:rabit_reference_profile] " + VLLM_WARNING]) == []
+
+
+def test_C_logger_prefixed_record_parses():
+    good = dumps(make_record("tile32", 512))
+    recs = pa.find_records([PREFIX + f"{pa.TAG}={good}", "INFO " + f"{pa.TAG}={good}\r\n"])
+    assert recs == [good, good] and pa.parse_record(recs[0])["q_len"] == 512
+
+
+def test_D_E_exact_tag_with_bad_payload_fails():
+    for payload in ("", "garbage", "{bad json", '{"schema":"wrong"}', "[1,2]", "{}"):
+        assert pa.is_record_candidate(PREFIX + f"{pa.TAG}={payload}"), payload
+        assert _rejects([PREFIX + f"{pa.TAG}={payload}"]), payload
+
+
+def test_F_vllm_prefixed_assignment_is_not_the_record_tag():
+    for line in (f"VLLM_{pa.TAG}=1", f"export VLLM_{pa.TAG}={{}}", f"X{pa.TAG}={{}}", f"_{pa.TAG}=garbage",
+                 f"{pa.TAG} = 1", f"{pa.TAG}"):
+        assert not pa.is_record_candidate(line), line
+        assert pa.find_records([line]) == []
+    assert pa.is_record_candidate(f"x {pa.TAG}={{}}") and pa.is_record_candidate(f"[{pa.TAG}={{}}")
+
+
+def test_G_real_record_right_after_warning():
+    good = dumps(make_record("reference", 32))
+    recs = pa.find_records([VLLM_WARNING, PREFIX + f"{pa.TAG}={good}"])
+    assert recs == [good] and pa.parse_record(recs[0])["impl"] == "reference"
+
+
+def _synthetic_session(mutate=None, warning=True):
+    import run_stage3c_profile_diagnostic as rp
+
+    bench = {p["prompt_tokens"]: p for p in json.loads(rp.BENCH_SUMMARY.read_text(encoding="utf-8"))["points"]}
+    bsess = (rp.BENCH_DIR / "modal_session.log").read_text(encoding="utf-8").splitlines()
+    env = next(ln for ln in bsess if ln.startswith("S3C_ENVIRONMENT="))
+    base = next(ln for ln in bsess if ln.startswith("S3C_GPU_BASELINE="))
+    gate = [ln for ln in bsess if ln.startswith("[gate] ")]
+    t32 = [ln for ln in bsess if ln.startswith("[tile32-tests] ")]
+    ptest = [ln.replace("[tile32-tests] ", "[profile-tests] ") for ln in t32]
+    ref = (rp.BENCH_DIR / "rabit_reference_series.log").read_text(encoding="utf-8").splitlines()
+    tags = [next(ln for ln in ref if ln.startswith(t + "=")) for t in (
+        "S3C_REQUESTED_ENGINE_KWARGS", "S3C_EFFECTIVE_ENGINE_CONFIG", "S3C_KV_DTYPE", "S3C_CAPACITY")]
+
+    def series(impl):
+        mode = {"component_profiling": True, "legacy_tile32_profile": False, "schema": pa.SCHEMA,
+                "profile_module_sha256": rp.sha256(rp.PROFILE_MODULE)}
+        out = ([VLLM_WARNING] if warning else []) + [
+            f'S3C_STAGE_IMPL={json.dumps({"requested": impl, "selector_reports": impl})}',
+            f"S3C_PROFILE_MODE={json.dumps(mode)}", *tags, 'S3C_MODEL_LAYERS={"num_hidden_layers": 32}']
+        plan = [("conditioning", 16416)] + [("measured", p) for p in rp.points(False)]
+        for i, (role, p) in enumerate(plan):
+            h = bench[p]["prompt_token_ids_sha256"]
+            out.append(f'S3C_POINT_BEGIN={json.dumps({"i": i, "role": role, "prompt_tokens": p, "planned_prompt_token_ids_sha256": h})}')  # noqa: E501
+            for layer in range(32):
+                rec = make_record(impl, p - 16384)
+                if mutate and impl == "tile32" and i == 2 and layer == 5:
+                    mutate(rec)
+                out.append(PREFIX + f"{pa.TAG}={dumps(rec)}")
+            row = {"i": i, "role": role, "prompt_tokens": p, "planned_prompt_tokens": p, "output_tokens": 32,
+                   "prompt_token_ids_sha256": h, "planned_prompt_token_ids_sha256": h, "ttft_ms": 1.0,
+                   "tpot_ms": 1.0, "wall_ms": 2.0, "output_token_ids_sha256": bench[p][f"{impl}_output_token_ids_sha256"]}
+            out.append(f"S3C_POINT={json.dumps(row)}")
+        return out + ["S3C_SERIES_COMPLETE"]
+
+    b = json.loads(base.split("=", 1)[1])
+    lines = [base, env, 'S3C_GATE_START={"cmd": []}', *gate, 'S3C_GATE_EXIT={"returncode": 0}',
+             'S3C_TILE_TESTS_START={"cmd": []}', *t32, 'S3C_TILE_TESTS_EXIT={"returncode": 0}',
+             'S3C_PROFILE_TESTS_START={"cmd": []}', *ptest, 'S3C_PROFILE_TESTS_EXIT={"returncode": 0}']
+    for k, (label, _, impl) in enumerate(rp.SERIES, start=1):
+        pre = {"leg": label, "clean": True, "tolerance_mib": 256, "baseline_memory_used_mib": b["memory_used_mib"],
+               "readings": [{"compute_apps": [], "memory_used_mib": b["memory_used_mib"]}]}
+        lines += [f"S3C_PRE_LEG_GPU_STATE={json.dumps(pre)}", f'S3C_SERIES_START={json.dumps({"series": label})}']
+        lines += [f"[series{k}:{label}] {ln}" for ln in series(impl)]
+        lines += [f'S3C_SERIES_EXIT={json.dumps({"series": label, "returncode": 0})}']
+    return "\n".join(lines + ["S3C_PROFILE_COMPLETE"]) + "\n"
+
+
+def test_B_synthetic_end_to_end_with_vllm_warning_passes():
+    import run_stage3c_profile_diagnostic as rp
+
+    text = _synthetic_session()
+    assert VLLM_WARNING in text
+    integ, an = rp.analyze(text, False, False, write=False)
+    assert integ["all_ok"], [c["check"] for c in integ["checks"] if c["state"] != "passed"]
+    assert [p["second_chunk_q_len"] for p in an["points"]] == [32, 512, 2048]
+    counts = rp.record_counts(text)
+    assert counts == {"profiler_tests": 0, "top_level": 0, "reference_conditioning": 32, "reference_measured": 96,
+                      "reference_outside_requests": 0, "tile32_conditioning": 32, "tile32_measured": 96,
+                      "tile32_outside_requests": 0}
+
+
+def test_synthetic_end_to_end_rejects_bad_records():
+    import run_stage3c_profile_diagnostic as rp
+
+    def neg(r):
+        w = r["host"]["windows"]["tail"]
+        w["children_window_ms"] = w["inclusive_ms"] + 1.0
+        w["exclusive_ms"] = -1.0
+
+    for m in (lambda r: r["gpu"]["leaves"]["reduce"].__setitem__("gpu_ms", -5.0),
+              lambda r: r["host"]["windows"].pop("closed_page"), neg):
+        integ, _ = rp.analyze(_synthetic_session(m), False, False, write=False)
+        assert not integ["all_ok"]
+    # a malformed exact-tag line anywhere in a series is never silently ignored
+    bad = _synthetic_session().replace(VLLM_WARNING, PREFIX + f"{pa.TAG}=garbage", 1)
+    try:
+        rp.analyze(bad, False, False, write=False)
+    except pa.ProfileError:
+        pass
+    else:
+        raise AssertionError("malformed exact-tag line accepted")
+
+
+def test_reparse_path_is_offline_only():
+    import run_stage3c_profile_diagnostic as rp
+
+    fn = _fn(_tree(Path(rp.__file__)), "reparse")
+    src = ast.unparse(fn)
+    called = {ast.unparse(n.func) for n in ast.walk(fn) if isinstance(n, ast.Call)}
+    assert not any(isinstance(n, (ast.Import, ast.ImportFrom)) for n in ast.walk(fn))
+    assert not called & {"stream_command", "build_snapshot", "build_command", "preflight", "run", "write_manifest",
+                         "finalize", "subprocess.run"}
+    assert not [c for c in called if c.split(".")[0] in ("modal", "torch", "vllm", "subprocess")]
+    assert "analyze" in called and "RAW_SESSION_SHA256" in src and "raise SystemExit" in src
+    # the whole runner module never imports modal / torch / vllm (the reparse path cannot reach them)
+    mod = _tree(Path(rp.__file__))
+    imported = {a.name for n in ast.walk(mod) if isinstance(n, ast.Import) for a in n.names} | {
+        n.module for n in ast.walk(mod) if isinstance(n, ast.ImportFrom)}
+    assert not [m for m in imported if m and m.split(".")[0] in ("modal", "torch", "vllm")]
+    assert rp.RAW_SESSION.parent == rp.RAW_RUN_DIR and rp.MEASUREMENT_CODE_COMMIT.startswith("e88cdaa")
 
 
 # ------------------------------------------------------------------ static engine-side checks

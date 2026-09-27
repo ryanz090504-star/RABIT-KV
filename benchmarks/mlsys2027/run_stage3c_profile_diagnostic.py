@@ -311,7 +311,7 @@ def profile_by_request(lines: list[str]) -> dict:
             out[cur] = []
         elif s.startswith("S3C_POINT="):
             cur = None
-        elif pa.TAG in s:
+        elif pa.is_record_candidate(s):
             out["outside" if cur is None else cur].extend(pa.find_records([s]))
     return out
 
@@ -566,13 +566,114 @@ def run(m: dict, correctness_only: bool, include_8192: bool) -> int:
     return 0
 
 
+# ------------------------------------------------------------------ offline reparse (no Modal / vLLM / CUDA)
+# Raw run 1: the H100 run completed; only the local parser failed (vLLM's unknown-env-var warning contains the
+# profile tag as a substring). Its bytes are pinned here and must never change.
+RAW_RUN_DIR = PROFILE_DIR / "raw_run_1"
+RAW_SESSION = RAW_RUN_DIR / "modal_session.log"
+RAW_MANIFEST = RAW_RUN_DIR / "manifest.json"
+RAW_SESSION_SHA256 = "d9f02ceaaec2465651463b3b619c4a4e63b8b53bb2dd497dc1a4a733a1f44df2"
+RAW_MANIFEST_SHA256 = "f2e08e98bc147ac007aca491806510faaaf7099bd6e95fe6b5552ef44ef08187"
+MEASUREMENT_CODE_COMMIT = "e88cdaa416d794dfa1969cd01330e6c3c86c6d2d"
+MEASUREMENT_MODAL_APP = "ap-mVshZt9jTXIBH0KY2fZC5s"
+REPARSE_MANIFEST = PROFILE_DIR / "reparse_manifest.json"
+
+
+def record_counts(text: str) -> dict:
+    """Profile records separated by origin (profiler tests / conditioning / measured per series)."""
+    ser_lines, _, _, prof_lines, top = demux(text)
+    out = {"profiler_tests": len(pa.find_records(prof_lines)), "top_level": len(pa.find_records(top))}
+    for label, _, impl in SERIES:
+        roles = {}
+        for line in ser_lines[label]:
+            if line.startswith("S3C_POINT_BEGIN="):
+                b = json.loads(line.split("=", 1)[1])
+                roles[b["i"]] = b["role"]
+        by = profile_by_request(ser_lines[label])
+        out[f"{impl}_conditioning"] = sum(len(v) for i, v in by.items() if i != "outside" and roles[i] != "measured")
+        out[f"{impl}_measured"] = sum(len(v) for i, v in by.items() if i != "outside" and roles[i] == "measured")
+        out[f"{impl}_outside_requests"] = len(by["outside"])
+    return out
+
+
+def reparse(dry_run: bool) -> int:
+    """Re-derive integrity / analysis of raw run 1 from its preserved modal_session.log (read-only)."""
+    for path, want in ((RAW_SESSION, RAW_SESSION_SHA256), (RAW_MANIFEST, RAW_MANIFEST_SHA256)):
+        got = sha256_raw(path) if path.is_file() else None
+        if got != want:
+            raise SystemExit(f"Refusing to reparse: {rel(path)} SHA-256 {got} != pinned {want}")
+    orig = json.loads(RAW_MANIFEST.read_text(encoding="utf-8"))
+    if not (orig["status"] == "failed" and orig["failure"]["stage"] == "parser_failure"
+            and orig["correctness_only"] is False and orig["include_8192"] is False
+            and orig["q_lens"] == q_lens(False) and orig.get("modal_returncode") == 0):
+        raise SystemExit("Refusing to reparse: raw run 1 manifest is not the expected parser-failure run")
+    tree = run_git("rev-parse", f"{MEASUREMENT_CODE_COMMIT}:vllm-kvquant")
+    if orig["provenance"]["vllm_kvquant_tree"] != tree:
+        raise SystemExit("Refusing to reparse: measured vllm-kvquant tree != measurement code commit tree")
+    if MEASUREMENT_MODAL_APP not in RAW_SESSION.read_text(encoding="utf-8"):
+        raise SystemExit("Refusing to reparse: Modal app id not found in the raw session")
+    outputs = [INTEGRITY, ANALYSIS, REPARSE_MANIFEST, SESSION_LOG, MANIFEST]
+    if not dry_run:
+        present = [rel(p) for p in outputs if p.exists()]
+        if present:
+            raise SystemExit(f"Refusing to reparse: derived outputs already exist {present}")
+        if run_git("status", "--short", "--", rel(ANALYSIS_MODULE), rel(RUNNER_SCRIPT)):
+            raise SystemExit("Refusing to reparse: parser / runner has uncommitted changes")
+    print(f"Reparse of {rel(RAW_SESSION)} (sha256 {RAW_SESSION_SHA256}); measurement commit "
+          f"{MEASUREMENT_CODE_COMMIT}; Modal {MEASUREMENT_MODAL_APP}; no Modal / vLLM / CUDA.")
+    if dry_run:
+        print("--reparse --dry-run: raw run verified; nothing written.")
+        return 0
+    text = RAW_SESSION.read_text(encoding="utf-8", errors="replace")
+    rm = {"reparsed_from_existing_raw": True, "h100_rerun": False,
+          "raw_run_dir": rel(RAW_RUN_DIR), "raw_modal_session_sha256": RAW_SESSION_SHA256,
+          "raw_failed_manifest_sha256": RAW_MANIFEST_SHA256,
+          "original_analysis_status": orig["status"], "original_failure_stage": orig["failure"]["stage"],
+          "original_failure_message": orig["failure"].get("message"),
+          "measurement_code_commit": MEASUREMENT_CODE_COMMIT,
+          "measurement_run_git_head": orig["provenance"]["git_head"],
+          "measurement_vllm_kvquant_tree": orig["provenance"]["vllm_kvquant_tree"],
+          "measurement_snapshot_sha256": orig["vllm_kvquant_snapshot"]["sha256"],
+          "measurement_modal_app": MEASUREMENT_MODAL_APP,
+          "analysis_parser_commit": run_git("rev-parse", "HEAD"),
+          "analysis_module_sha256": sha256(ANALYSIS_MODULE), "runner_script_sha256": sha256(RUNNER_SCRIPT),
+          "reparsed_utc": now(), "scope": SCOPE}
+    try:
+        integ, an = analyze(text, False, False, write=True)
+        rm["record_counts"] = record_counts(text)
+        rm["integrity_counts"], rm["all_integrity_passed"] = integ["counts"], integ["all_ok"]
+        an["provenance"] = {k: rm[k] for k in ("reparsed_from_existing_raw", "h100_rerun", "raw_modal_session_sha256",
+                                                "measurement_code_commit", "analysis_parser_commit",
+                                                "original_analysis_status", "original_failure_stage",
+                                                "measurement_modal_app")}
+        an["record_counts"] = rm["record_counts"]
+        ANALYSIS.write_text(json.dumps(an, indent=2, default=str) + "\n", encoding="utf-8")
+        rm["status"] = "completed" if integ["all_ok"] else "failed"
+    except Exception as exc:  # noqa: BLE001 (recorded, never hidden)
+        rm["status"], rm["failure"] = "failed", {"type": type(exc).__name__, "message": str(exc)}
+    rm["raw_modal_session_sha256_after"] = sha256_raw(RAW_SESSION)
+    rm["raw_unchanged"] = rm["raw_modal_session_sha256_after"] == RAW_SESSION_SHA256 \
+        and sha256_raw(RAW_MANIFEST) == RAW_MANIFEST_SHA256
+    if not rm["raw_unchanged"]:
+        rm["status"] = "failed"
+    REPARSE_MANIFEST.write_text(json.dumps(rm, indent=2, default=str) + "\n", encoding="utf-8")
+    print(f"REPARSE {rm['status'].upper()}: {json.dumps(rm.get('integrity_counts') or rm.get('failure'))}")
+    return 0 if rm["status"] == "completed" else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     make_console_encoding_safe()
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--correctness-only", action="store_true")
     ap.add_argument("--include-8192", action="store_true", help="optional q_len 8192 confirmation point")
+    ap.add_argument("--reparse", action="store_true",
+                    help="offline re-analysis of the preserved raw run 1 session log (no Modal / vLLM / CUDA)")
     a = ap.parse_args(argv)
+    if a.reparse:
+        if a.correctness_only or a.include_8192:
+            raise SystemExit("--reparse takes no run options")
+        return reparse(a.dry_run)
     if a.correctness_only:
         set_out_dir(CORRECTNESS_DIR)
     print("RABIT-KV Stage3C COMPONENT PROFILE diagnostic (not latency, not Experiment 5 evidence)")

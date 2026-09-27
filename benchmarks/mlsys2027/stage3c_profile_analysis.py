@@ -42,7 +42,11 @@ import re
 
 TAG = "RABIT2_STAGE3C_COMPONENT_PROFILE"
 SCHEMA = "rabit2_stage3c_component_profile/v2"
-LINE = re.compile(re.escape(TAG) + r"=(\{.*\})\s*$")
+# A record candidate is the exact marker "TAG=" with an identifier boundary before it, so e.g. vLLM's
+# "Unknown vLLM environment variable detected: VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE" is not a candidate.
+# Once the marker is present the payload is strict: exactly one JSON object to the end of the line.
+MARKER = re.compile(r"(?<![A-Za-z0-9_])" + re.escape(TAG) + "=")
+LINE = re.compile(r"(?<![A-Za-z0-9_])" + re.escape(TAG) + r"=(\{.*\})\s*$")
 IMPLS = ("reference", "tile32")
 TOL = 1e-4  # ms per record; records are rounded to 1e-6 ms
 
@@ -126,11 +130,15 @@ def _int(x, name, minimum=0):
     return x
 
 
+def is_record_candidate(line: str) -> bool:
+    return MARKER.search(line) is not None
+
+
 def find_records(lines) -> list[str]:
-    """JSON payloads of every profile line (anything after the tag must be one JSON object)."""
+    """JSON payloads of every profile record line (anything after the marker must be one JSON object)."""
     out = []
     for ln in lines:
-        if TAG in ln:
+        if is_record_candidate(ln):
             m = LINE.search(ln.rstrip("\r\n"))
             if not m:
                 raise ProfileError(f"malformed profile line: {ln[:200]!r}")
