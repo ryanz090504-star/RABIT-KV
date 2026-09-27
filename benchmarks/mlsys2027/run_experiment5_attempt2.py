@@ -35,6 +35,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -209,6 +210,96 @@ def verify_equivalence() -> dict:
 r5.verify_equivalence = verify_equivalence
 
 
+# ------------------------------------------------------------------ strict EXP5_STAGE3C parsing (attempt-2 only)
+# The frozen Experiment-5 parser only captures tags matching EXP5_[A-Z_]+ (no digits), so the worker's
+# EXP5_STAGE3C record is invisible to it. Attempt 2 therefore parses that record itself from each cell's own raw
+# lines: exact marker with an identifier boundary, exactly one record per cell, strict JSON and schema.
+STAGE3C_MARKER = re.compile(r"(?<![A-Za-z0-9_])EXP5_STAGE3C=")
+STAGE3C_LINE = re.compile(r"(?<![A-Za-z0-9_])EXP5_STAGE3C=(\{.*\})\s*$")
+STAGE3C_ENV_KEYS = ("VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK", "VLLM_RABIT2_STAGE3C_IMPL")
+PROFILE_ENV_KEYS = ("VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE", "VLLM_RABIT2_STAGE3C_PROFILE")
+RABIT_STAGE3C_KEYS = {"applicable", "requested_impl", "effective_impl", "requested_query_block",
+                      "effective_query_block", "env", "profiling_env", "shared_decode_module_sha256"}
+BF16_STAGE3C_KEYS = {"applicable", "env", "profiling_env"}
+ACCEPTED_SHARED_DECODE_MANIFEST = rsd.FINAL_DIR / "manifest.json"  # the accepted final held-out benchmark
+
+
+def accepted_shared_decode_sha256() -> str:
+    return json.loads(ACCEPTED_SHARED_DECODE_MANIFEST.read_text(encoding="utf-8"))["provenance"][
+        "shared_decode_module_sha256"]
+
+
+def parse_stage3c_records(lines: list[str]) -> list[dict]:
+    """Every exact-marker EXP5_STAGE3C record in one cell's lines; a malformed exact-marker line raises."""
+    out = []
+    for ln in lines:
+        if STAGE3C_MARKER.search(ln):
+            m = STAGE3C_LINE.search(ln.rstrip("\r\n"))
+            if not m:
+                raise ValueError(f"malformed EXP5_STAGE3C line: {ln[:200]!r}")
+            try:
+                rec = json.loads(m.group(1))
+            except json.JSONDecodeError as e:
+                raise ValueError(f"EXP5_STAGE3C payload is not JSON: {e}") from e
+            if not isinstance(rec, dict):
+                raise ValueError("EXP5_STAGE3C payload is not an object")
+            out.append(rec)
+    return out
+
+
+def validate_stage3c(dtype: str, records: list[dict] | None, error: str | None, cfg: dict,
+                     accepted_sha: str) -> tuple[bool, str]:
+    """(ok, reason) for one cell's EXP5_STAGE3C records, by the cell's own dtype."""
+    if error is not None:
+        return False, error
+    if len(records) != 1:
+        return False, f"expected exactly one EXP5_STAGE3C record, found {len(records)}"
+    s = records[0]
+    off = lambda d: isinstance(d, dict) and set(d) == set(PROFILE_ENV_KEYS) and all(  # noqa: E731
+        v in (None, "0") for v in d.values())
+    if dtype == r5.B:
+        if set(s) != RABIT_STAGE3C_KEYS:
+            return False, f"unexpected RABIT record fields {sorted(set(s) ^ RABIT_STAGE3C_KEYS)}"
+        if not (s["applicable"] is True and s["requested_impl"] == s["effective_impl"] == cfg["impl"]):
+            return False, f"implementation {s['requested_impl']!r} -> {s['effective_impl']!r} != {cfg['impl']!r}"
+        if not (s["requested_query_block"] == s["effective_query_block"] == cfg["query_block"]):
+            return False, f"QUERY_BLOCK {s['requested_query_block']} -> {s['effective_query_block']}"
+        if s["env"] != {"VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": str(cfg["query_block"]),
+                        "VLLM_RABIT2_STAGE3C_IMPL": cfg["impl"]}:
+            return False, f"selector environment {s['env']}"
+        if not off(s["profiling_env"]):
+            return False, f"profiling environment {s['profiling_env']}"
+        if s["shared_decode_module_sha256"] != accepted_sha:
+            return False, "shared_decode module SHA differs from the accepted implementation"
+        return True, "ok"
+    if set(s) != BF16_STAGE3C_KEYS:
+        return False, f"unexpected BF16 record fields {sorted(set(s) ^ BF16_STAGE3C_KEYS)}"
+    if s["applicable"] is not False:
+        return False, "bfloat16 record claims a Stage3C selection"
+    if not (isinstance(s["env"], dict) and set(s["env"]) == set(STAGE3C_ENV_KEYS)
+            and all(v is None for v in s["env"].values())):
+        return False, f"bfloat16 cell has a Stage3C / QUERY_BLOCK selector active: {s['env']}"
+    if not off(s["profiling_env"]):
+        return False, f"profiling environment {s['profiling_env']}"
+    return True, "ok"
+
+
+_frozen_parse_worker = r5.parse_worker
+
+
+def parse_worker(lines: list[str]) -> dict:
+    """Frozen per-cell parser, plus this cell's own strictly parsed EXP5_STAGE3C records."""
+    out = _frozen_parse_worker(lines)
+    try:
+        out["stage3c_records"], out["stage3c_parse_error"] = parse_stage3c_records(lines), None
+    except ValueError as e:
+        out["stage3c_records"], out["stage3c_parse_error"] = None, str(e)
+    return out
+
+
+r5.parse_worker = parse_worker
+
+
 def integrity(parsed: dict, gate: dict, top: dict, diff: dict) -> dict:
     integ = _frozen_integrity(parsed, gate, top, diff)
     checks = integ["checks"]
@@ -219,6 +310,7 @@ def integrity(parsed: dict, gate: dict, top: dict, diff: dict) -> dict:
         checks.append({"check": name, "category": category, "state": state, "observed": observed})
 
     s3cfg = _STAGE3C or final_stage3c()
+    accepted_sha = accepted_shared_decode_sha256()
     env = top.get("EXP5_ENVIRONMENT", {})
     add("attempt 2: per-cell watchdogs recorded in-container = 900 s everywhere except B32768 = 3600 s",
         "watchdog", bool(env) and env.get("leg_timeouts_s") == {l: leg_timeout(l) for _, l, *_ in r5.ALL_CELLS},
@@ -226,20 +318,18 @@ def integrity(parsed: dict, gate: dict, top: dict, diff: dict) -> dict:
     for k, label, d, c, p in r5.ALL_CELLS:
         started = label in top["leg_start"]
         t = parsed[k]["tags"]
-        s3 = t.get("EXP5_STAGE3C") or {}
         ls = top["leg_start"].get(label) or {}
         state = lambda ok: ok if started else "not_run"  # noqa: E731
         add(f"{label}: enforced watchdog = {leg_timeout(label)} s", "watchdog",
             state(ls.get("timeout_s") == leg_timeout(label)), ls.get("timeout_s"))
-        if d == r5.B:
-            ok = (s3.get("applicable") is True and s3.get("requested_impl") == s3.get("effective_impl")
-                  == s3cfg["impl"] and s3.get("requested_query_block") == s3.get("effective_query_block")
-                  == s3cfg["query_block"] and not any(v not in (None, "0") for v in s3.get("profiling_env", {}).values()))
-            add(f"{label}: Stage3C requested == effective == {s3cfg['impl']}, QUERY_BLOCK {s3cfg['query_block']}; "
-                "profiling off", "stage3c", state(ok), s3 or None)
-        else:
-            ok = s3.get("applicable") is False and not any(s3.get("env", {}).values())
-            add(f"{label}: bfloat16 cell carries no Stage3C selection", "stage3c", state(ok), s3 or None)
+        recs, err = parsed[k].get("stage3c_records"), parsed[k].get("stage3c_parse_error")
+        if "stage3c_records" not in parsed[k] and err is None:
+            recs, err = None, "cell was not parsed by the attempt-2 Stage3C parser"
+        ok, why = validate_stage3c(d, recs, err, s3cfg, accepted_sha)
+        what = (f"exactly one EXP5_STAGE3C record: {s3cfg['impl']} requested == effective, QUERY_BLOCK "
+                f"{s3cfg['query_block']}, selector env set, profiling off, accepted shared_decode SHA"
+                if d == r5.B else "exactly one EXP5_STAGE3C record: not applicable, no selector, profiling off")
+        add(f"{label} ({d}): {what}", "stage3c", state(ok), {"reason": why, "records": recs})
         if label in {l for _, l, *_ in r5.LEGS}:
             cap = (t.get("EXP5_CAPACITY") or {}).get("capacity_tokens")
             add(f"{label}: allocator capacity = expected {EXPECTED_CAPACITY[d]} tokens", "capacity",
@@ -325,11 +415,105 @@ r5.build_command = build_command
 r5.worker_command = worker_command
 
 
+# ------------------------------------------------------------------ offline reparse of the immutable raw run
+# The H100 sweep (raw run 1) completed; only the first local analysis failed, because the attempt-2 EXP5_STAGE3C
+# tag was not captured by the reused frozen parser. Raw bytes are pinned here and must never change.
+RAW_RUN_DIR = ATTEMPT_DIR / "raw_run_1"
+RAW_PINNED_SHA256 = {
+    "modal_session.log": "efa66e861bbc7a912d5e8b1708f86f10e4614295348d0d38a52647ff69487f0d",
+    "manifest.json": "cbd44f2081c1f76ae39c7316da1cb087df24d89b7493e1bd0e38129c1e4729ae",
+    "integrity_check.json": "f3033e9aa039359f59ed1843a794a822c260d28faeb5512d25381cfa0acba145",
+}
+MEASUREMENT_CODE_COMMIT = "6ac5567bd44529f0c175d31ba67dbb6949077ef7"
+MEASUREMENT_MODAL_APP = "ap-d0K1rXwIzyty6fvusW4ByL"
+REPARSE_MANIFEST = ATTEMPT_DIR / "reparse_manifest.json"
+ORIGINAL_FAILURE_REASON = ("Stage3C records were emitted correctly but were not captured by the local Attempt-2 "
+                           "parser/check.")
+PROVENANCE_WORDING = ("The H100 sweep completed successfully. Initial local post-processing marked the run failed "
+                      "because the Attempt-2 Stage3C validation tag was not captured by the reused parser. The "
+                      "immutable raw session was then re-parsed after a parser-only fix; no H100 measurement was "
+                      "repeated.")
+
+
+def _raw_digest() -> dict:
+    return {f.name: r5.sha256_raw(f) for f in sorted(RAW_RUN_DIR.iterdir()) if f.is_file()}
+
+
+def reparse(dry_run: bool) -> int:
+    """Re-derive integrity / summary of raw run 1 from its preserved modal_session.log. Parsing only: no Modal,
+    no vLLM, no CUDA, no workers; raw_run_1/ is only read."""
+    for name, want in RAW_PINNED_SHA256.items():
+        got = r5.sha256_raw(RAW_RUN_DIR / name) if (RAW_RUN_DIR / name).is_file() else None
+        if got != want:
+            raise SystemExit(f"Refusing to reparse: raw_run_1/{name} SHA-256 {got} != pinned {want}")
+    raw_before = _raw_digest()
+    orig = json.loads((RAW_RUN_DIR / "manifest.json").read_text(encoding="utf-8"))
+    if not (orig["status"] == "failed" and orig["failure"]["stage"] == "integrity"
+            and orig["failure"]["failed_categories"] == ["stage3c"] and orig["failure"]["failed_cells"] == []
+            and orig["failure"]["modal_returncode"] == 0
+            and orig["provenance"]["git_head"] == MEASUREMENT_CODE_COMMIT):
+        raise SystemExit("Refusing to reparse: raw run 1 is not the expected Stage3C-check-only failure")
+    session = (RAW_RUN_DIR / "modal_session.log").read_text(encoding="utf-8", errors="replace")
+    if MEASUREMENT_MODAL_APP not in session:
+        raise SystemExit("Refusing to reparse: Modal app id not found in the raw session")
+    derived = sorted(p.name for p in ATTEMPT_DIR.iterdir() if p.is_file()) if ATTEMPT_DIR.is_dir() else []
+    if not dry_run:
+        if derived:
+            raise SystemExit(f"Refusing to reparse: derived outputs already exist in {rel(ATTEMPT_DIR)}: {derived}")
+        if run_git("status", "--short", "--", rel(RUNNER_SCRIPT), rel(OFFLINE_TESTS)):
+            raise SystemExit("Refusing to reparse: the attempt-2 runner / tests have uncommitted changes")
+    print(f"Reparse of {rel(RAW_RUN_DIR)}/modal_session.log (sha256 {RAW_PINNED_SHA256['modal_session.log']}); "
+          f"measurement commit {MEASUREMENT_CODE_COMMIT}; Modal {MEASUREMENT_MODAL_APP}; parsing only.")
+    if dry_run:
+        print("--reparse --dry-run: raw run verified; nothing written.")
+        return 0
+    _STAGE3C.update(final_stage3c())
+    diff, integ, summary = r5.analyze(session, write=True)
+    prov = orig["provenance"]
+    gates = {
+        "failed_attempt_1_unchanged": archived_attempts_digest() == prov["archived_attempts_sha256"],
+        "prior_evidence_unchanged": r5.prior_evidence_digest() == prov["prior_evidence_sha256_raw"],
+        "protected_paths_clean": run_git("status", "--short", "--", *[rel(p) for p in r5.PROTECTED_PATHS]) == "",
+    }
+    b32768 = (integ["processes"]["exits"].get(B32768_LABEL) or {})
+    rm = {
+        "reparsed_from_existing_raw": True, "h100_rerun": False,
+        "measurement_code_commit": MEASUREMENT_CODE_COMMIT, "analysis_parser_commit": run_git("rev-parse", "HEAD"),
+        "measurement_modal_app": MEASUREMENT_MODAL_APP, "raw_run_dir": rel(RAW_RUN_DIR),
+        "raw_modal_session_sha256": RAW_PINNED_SHA256["modal_session.log"], "raw_files_sha256_before": raw_before,
+        "original_analysis_status": orig["status"], "original_failure": orig["failure"],
+        "original_failure_reason": ORIGINAL_FAILURE_REASON, "provenance_wording": PROVENANCE_WORDING,
+        "integrity_counts": integ["counts"], "all_integrity_passed": integ["all_ok"],
+        "non_passed_categories": integ["non_passed_categories"], "post_gates": gates,
+        "b32768": {"cell_process_elapsed_s": b32768.get("elapsed_s"), "cell_watchdog_s": B32768_LEG_TIMEOUT_S,
+                   "fraction_of_watchdog": (b32768.get("elapsed_s") or 0) / B32768_LEG_TIMEOUT_S,
+                   "original_900_s_watchdog_would_terminate": (b32768.get("elapsed_s") or 0) > r5.LEG_TIMEOUT_S},
+        "attempt_2": attempt2_block(), "reparsed_utc": now(), "summary_written": summary is not None,
+    }
+    if summary is not None:
+        summary["reparse_provenance"] = {k: rm[k] for k in (
+            "reparsed_from_existing_raw", "h100_rerun", "measurement_code_commit", "analysis_parser_commit",
+            "measurement_modal_app", "raw_modal_session_sha256", "original_analysis_status",
+            "original_failure_reason", "provenance_wording")}
+        r5.SUMMARY.write_text(json.dumps(summary, indent=2, default=str) + "\n", encoding="utf-8")
+    rm["raw_files_sha256_after"] = _raw_digest()
+    rm["raw_unchanged"] = rm["raw_files_sha256_after"] == raw_before
+    rm["status"] = "completed" if (integ["all_ok"] and all(gates.values()) and rm["raw_unchanged"]) else "failed"
+    REPARSE_MANIFEST.write_text(json.dumps(rm, indent=2, default=str) + "\n", encoding="utf-8")
+    print(f"REPARSE {rm['status'].upper()}: integrity {integ['counts']}; gates {gates}; raw unchanged "
+          f"{rm['raw_unchanged']}")
+    return 0 if rm["status"] == "completed" else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     make_console_encoding_safe()
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dry-run", action="store_true", help="Preflight + proofs + planned commands. No Modal/GPU.")
+    ap.add_argument("--reparse", action="store_true",
+                    help="offline re-analysis of the immutable raw_run_1 session (no Modal / vLLM / CUDA)")
     args = ap.parse_args(argv)
+    if args.reparse:
+        return reparse(args.dry_run)
     _STAGE3C.update(final_stage3c())
     print("RABIT-KV MLSys 2027 -- Experiment 5 ATTEMPT 2 (finalized Stage3C); failed_attempt_1 is never pooled")
     print(f"Final RABIT configuration: {json.dumps({k: _STAGE3C[k] for k in ('impl', 'query_block', 'query_block_source')})}")

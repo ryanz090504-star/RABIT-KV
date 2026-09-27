@@ -131,17 +131,187 @@ def test_in_container_verdict_enforces_selection_and_b32768_hash():
     assert m._leg_timeout("B32768") == 3600 and m._leg_timeout("A32768") == 900 and m._leg_timeout("B16384") == 900
 
 
+def _stage3c_states(integ):
+    return {c["check"].split(" ")[0]: (c["state"], c["observed"]["reason"]) for c in integ["checks"]
+            if c["category"] == "stage3c"}
+
+
 def test_integrity_additions_fail_on_failed_attempt_1():
     """The frozen failed attempt has no Stage3C record and only 3 B32768 warmups: the added checks must fail."""
     text = (a2.FAILED_ATTEMPT_1 / "modal_session.log").read_text(encoding="utf-8")
     _, integ, summary = r5.analyze(text, write=False)
     assert summary is None and not integ["all_ok"]
     names = {c["check"]: c["state"] for c in integ["checks"]}
-    assert names["B512: Stage3C requested == effective == shared_decode, QUERY_BLOCK 32; profiling off"] == "failed"
+    st = _stage3c_states(integ)
+    assert st["B512"] == ("failed", "expected exactly one EXP5_STAGE3C record, found 0")
+    assert st["A512"] == ("failed", "expected exactly one EXP5_STAGE3C record, found 0")
     assert [s for n, s in names.items() if n.startswith("B32768: all 20 output-token hashes")] == ["failed"]
-    assert names["A512: bfloat16 cell carries no Stage3C selection"] == "failed"  # no record -> not proven
     assert names["A512: allocator capacity = expected 393024 tokens"] == "passed"
     assert names["B512: allocator capacity = expected 2074592 tokens"] == "passed"
+
+
+# ------------------------------------------------------------------ strict EXP5_STAGE3C regression tests
+RAW_SESSION = a2.RAW_RUN_DIR / "modal_session.log"
+
+
+def _raw_lines():
+    return RAW_SESSION.read_text(encoding="utf-8").splitlines()
+
+
+def _real(dtype):
+    """A real EXP5_STAGE3C line (with its leg prefix) emitted by the H100 run."""
+    tag = "[leg4:rabit_kv2] " if dtype == r5.B else "[leg3:bfloat16] "
+    return next(ln for ln in _raw_lines() if ln.startswith(tag + "EXP5_STAGE3C="))[len(tag):]
+
+
+def _cfg():
+    return {"impl": "shared_decode", "query_block": 32}
+
+
+def _check(dtype, lines):
+    try:
+        recs, err = a2.parse_stage3c_records(lines), None
+    except ValueError as e:
+        recs, err = None, str(e)
+    return a2.validate_stage3c(dtype, recs, err, _cfg(), a2.accepted_shared_decode_sha256())
+
+
+def _mut(line, fn):
+    head, payload = line.split("EXP5_STAGE3C=", 1)
+    rec = json.loads(payload)
+    fn(rec)
+    return f"{head}EXP5_STAGE3C={json.dumps(rec, sort_keys=True)}"
+
+
+def test_01_02_real_records_pass():
+    assert _check(r5.B, ["INFO something", _real(r5.B)]) == (True, "ok")
+    assert _check(r5.A, [_real(r5.A), "EXP5_CAPACITY={}"]) == (True, "ok")
+
+
+def test_03_real_raw_session_all_14_cells_pass():
+    if not RAW_SESSION.is_file():
+        return
+    _, integ, _ = r5.analyze(RAW_SESSION.read_text(encoding="utf-8"), write=False)
+    st = _stage3c_states(integ)
+    assert len(st) == 14 and all(v == ("passed", "ok") for v in st.values()), st
+    dtypes = {label: d for _, label, d, *_ in r5.ALL_CELLS}
+    assert sum(dtypes[l] == r5.A for l in st) == 7 and sum(dtypes[l] == r5.B for l in st) == 7
+
+
+def _session_without(pred, extra=None):
+    out = []
+    for ln in _raw_lines():
+        if pred(ln):
+            if extra is not None:
+                out.append(extra(ln))
+            continue
+        out.append(ln)
+    return "\n".join(out) + "\n"
+
+
+def test_04_05_12_session_level_missing_duplicate_wrong_cell():
+    if not RAW_SESSION.is_file():
+        return
+    miss = _session_without(lambda ln: ln.startswith("[leg9:rabit_kv2] EXP5_STAGE3C="))
+    st = _stage3c_states(r5.analyze(miss, write=False)[1])
+    assert st["B8192"] == ("failed", "expected exactly one EXP5_STAGE3C record, found 0")
+    assert sum(v[0] == "passed" for v in st.values()) == 13
+    lines = _raw_lines()
+    i = next(n for n, ln in enumerate(lines) if ln.startswith("[leg6:bfloat16] EXP5_STAGE3C="))
+    dup = "\n".join(lines[:i + 1] + [lines[i]] + lines[i + 1:]) + "\n"
+    assert _stage3c_states(r5.analyze(dup, write=False)[1])["A2048"] == (
+        "failed", "expected exactly one EXP5_STAGE3C record, found 2")
+    rabit_payload = _real(r5.B).split("EXP5_STAGE3C=", 1)[1]
+    wrong = _session_without(lambda ln: ln.startswith("[leg6:bfloat16] EXP5_STAGE3C="),
+                             lambda ln: "[leg6:bfloat16] EXP5_STAGE3C=" + rabit_payload)
+    state, why = _stage3c_states(r5.analyze(wrong, write=False)[1])["A2048"]
+    assert state == "failed" and "unexpected BF16 record fields" in why
+
+
+def test_06_malformed_json_and_payloads_fail():
+    for bad in ("EXP5_STAGE3C={bad json", "EXP5_STAGE3C=", "EXP5_STAGE3C=garbage", "EXP5_STAGE3C=[1, 2]",
+                "EXP5_STAGE3C={} trailing"):
+        ok, why = _check(r5.B, [bad])
+        assert not ok, bad
+
+
+def test_07_08_09_rabit_field_violations_fail():
+    real = _real(r5.B)
+    for fn, frag in ((lambda r: r.__setitem__("effective_impl", "tile32"), "implementation"),
+                     (lambda r: r.__setitem__("effective_impl", "reference"), "implementation"),
+                     (lambda r: r.__setitem__("effective_query_block", 16), "QUERY_BLOCK"),
+                     (lambda r: r.__setitem__("requested_query_block", 8), "QUERY_BLOCK"),
+                     (lambda r: r["env"].__setitem__("VLLM_RABIT2_STAGE3C_IMPL", None), "selector environment"),
+                     (lambda r: r["env"].__setitem__("VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK", None),
+                      "selector environment"),
+                     (lambda r: r["env"].pop("VLLM_RABIT2_STAGE3C_IMPL"), "selector environment"),
+                     (lambda r: r.__setitem__("applicable", False), "implementation"),
+                     (lambda r: r.__setitem__("extra_field", 1), "unexpected RABIT record fields"),
+                     (lambda r: r.pop("profiling_env"), "unexpected RABIT record fields")):
+        ok, why = _check(r5.B, [_mut(real, fn)])
+        assert not ok and frag in why, (frag, why)
+
+
+def test_10_bf16_with_rabit_selector_fails():
+    real = _real(r5.A)
+    for fn in (lambda r: r["env"].__setitem__("VLLM_RABIT2_STAGE3C_IMPL", "shared_decode"),
+               lambda r: r["env"].__setitem__("VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK", "32"),
+               lambda r: r.__setitem__("applicable", True)):
+        ok, why = _check(r5.A, [_mut(real, fn)])
+        assert not ok, why
+
+
+def test_11_profiling_enabled_fails():
+    for dtype in (r5.A, r5.B):
+        for flag in ("VLLM_RABIT2_STAGE3C_PROFILE", "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE"):
+            ok, why = _check(dtype, [_mut(_real(dtype), lambda r, f=flag: r["profiling_env"].__setitem__(f, "1"))])
+            assert not ok and "profiling" in why, why
+        ok, _ = _check(dtype, [_mut(_real(dtype), lambda r: r["profiling_env"].__setitem__(
+            "VLLM_RABIT2_STAGE3C_PROFILE", "0"))])
+        assert ok  # explicit "0" is off
+
+
+def test_12_record_validated_against_its_own_cell_type():
+    ok, why = _check(r5.A, [_real(r5.B)])  # a RABIT record inside a BF16 cell
+    assert not ok and "unexpected BF16 record fields" in why
+    ok, why = _check(r5.B, [_real(r5.A)])  # a BF16 record inside a RABIT cell
+    assert not ok and "unexpected RABIT record fields" in why
+
+
+def test_13_shared_decode_sha_mismatch_fails():
+    ok, why = _check(r5.B, [_mut(_real(r5.B), lambda r: r.__setitem__("shared_decode_module_sha256", "0" * 64))])
+    assert not ok and "shared_decode module SHA" in why
+    assert a2.accepted_shared_decode_sha256().startswith("ace859940728")
+
+
+def test_14_logger_prefix_parses():
+    line = "(EngineCore pid=7) INFO 09-27 12:00:00 [worker.py:1] " + _real(r5.B)
+    assert _check(r5.B, [line]) == (True, "ok")
+    assert _check(r5.B, [_real(r5.B) + "   \r\n"]) == (True, "ok")
+
+
+def test_15_identifier_prefixed_lookalike_is_not_the_tag():
+    payload = _real(r5.B).split("EXP5_STAGE3C=", 1)[1]
+    for fake in (f"XEXP5_STAGE3C={payload}", f"_EXP5_STAGE3C={payload}", f"MY_EXP5_STAGE3C={payload}",
+                 f"EXP5_STAGE3C_X={payload}", f"EXP5_STAGE3CX={payload}"):
+        assert a2.parse_stage3c_records([fake]) == [], fake
+    assert _check(r5.B, [f"XEXP5_STAGE3C={payload}"])[1] == "expected exactly one EXP5_STAGE3C record, found 0"
+    assert _check(r5.B, [f"XEXP5_STAGE3C={payload}", _real(r5.B)]) == (True, "ok")
+
+
+def test_reparse_is_offline_and_pinned():
+    import ast as _ast
+    src = Path(a2.__file__).read_text(encoding="utf-8")
+    fn = next(n for n in _ast.parse(src).body if isinstance(n, _ast.FunctionDef) and n.name == "reparse")
+    called = {_ast.unparse(n.func) for n in _ast.walk(fn) if isinstance(n, _ast.Call)}
+    assert not called & {"r5.execute", "r5.run", "r5.build_snapshot", "r5.stream_command", "stream_command",
+                         "r5.preflight", "r5.finalize", "r5.write_manifest", "subprocess.run"}
+    assert "r5.analyze" in called and not any(isinstance(n, (_ast.Import, _ast.ImportFrom)) for n in _ast.walk(fn))
+    assert a2.RAW_PINNED_SHA256["modal_session.log"] == "efa66e861bbc7a912d5e8b1708f86f10e4614295348d0d38a52647ff69487f0d"
+    assert a2.MEASUREMENT_CODE_COMMIT.startswith("6ac5567") and a2.MEASUREMENT_MODAL_APP == "ap-d0K1rXwIzyty6fvusW4ByL"
+    if RAW_SESSION.is_file():
+        for name, want in a2.RAW_PINNED_SHA256.items():
+            assert r5.sha256_raw(a2.RAW_RUN_DIR / name) == want, name
 
 
 if __name__ == "__main__":
