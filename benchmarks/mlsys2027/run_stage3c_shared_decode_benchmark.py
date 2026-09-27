@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import math
 import re
 import subprocess
 import sys
@@ -69,6 +70,7 @@ PROFILED_COMMIT = rp.MEASUREMENT_CODE_COMMIT  # triton_attn.py baseline = the pr
 
 BENCH_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_benchmark"
 CORRECTNESS_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_correctness"
+QB_TUNING_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_qb_tuning"
 
 
 def set_out_dir(d: Path) -> None:
@@ -105,6 +107,38 @@ MODAL_FUNCTION_TIMEOUT_S = 32400
 EXPECTED_SHARED_TESTS = 7 * 4 * 4 + 3 * 5 * 4 + 4 + 3 * 4 + 1 + 2 + 1  # = 192
 EXPECTED_32K_TESTS = [f"test_shared_decode_32k_model_limit_chunk[{qb}]" for qb in QUERY_BLOCKS]
 REQUEST_GUARD_NOTE = rd.REQUEST_GUARD_NOTE
+# --qb-tuning: shared_decode only, QUERY_BLOCK 4/8/16/32, q_len 512 and 2048 (no reference / tile32 series).
+QB_TUNING_Q_LENS = [512, 2048]
+QB_TUNING_SERIES = [s for s in SERIES if s[2] == "shared_decode"]
+# Pre-registered selection rule (registered in code before the tuning run): the fixed QUERY_BLOCK is the one
+# with the lowest geometric mean of measured TTFT over QB_TUNING_Q_LENS; an exact tie goes to the smaller block.
+QB_SELECTION_RULE = ("argmin over QUERY_BLOCK of geomean(TTFT_ms at q_len " + " and ".join(map(str, QB_TUNING_Q_LENS))
+                     + "); exact tie -> smaller QUERY_BLOCK; one measured request per point")
+
+
+def select_query_block(ttft_ms: dict[int, dict[int, float]]) -> dict:
+    """Apply QB_SELECTION_RULE to {query_block: {q_len: ttft_ms}} (every block must have every q_len)."""
+    if sorted(ttft_ms) != QUERY_BLOCKS:
+        raise ValueError(f"need every QUERY_BLOCK {QUERY_BLOCKS}, got {sorted(ttft_ms)}")
+    score = {}
+    for qb, row in ttft_ms.items():
+        if sorted(row) != QB_TUNING_Q_LENS or any(not (v > 0) for v in row.values()):
+            raise ValueError(f"QUERY_BLOCK {qb}: need positive TTFT at q_len {QB_TUNING_Q_LENS}, got {row}")
+        score[qb] = math.exp(sum(math.log(row[q]) for q in QB_TUNING_Q_LENS) / len(QB_TUNING_Q_LENS))
+    best = min(score.values())
+    chosen = min(qb for qb, v in score.items() if v == best)
+    return {"rule": QB_SELECTION_RULE, "geomean_ttft_ms": {str(k): score[k] for k in QUERY_BLOCKS},
+            "selected_query_block": chosen,
+            "geomean_relative_to_selected": {str(k): score[k] / best for k in QUERY_BLOCKS}}
+
+
+def set_mode_qb_tuning() -> None:
+    global SERIES, Q_LENS, POINTS
+    SERIES, Q_LENS = list(QB_TUNING_SERIES), list(QB_TUNING_Q_LENS)
+    POINTS = [FIRST_CHUNK + q for q in Q_LENS]
+    set_out_dir(QB_TUNING_DIR)
+
+
 SCOPE = ("Stage3C shared_decode kernel-tuning BENCHMARK evidence only; NOT Experiment 5 evidence; one measured "
          "request per point; descriptive only. QUERY_BLOCK comparison is kernel tuning, not an ablation. The 32K "
          "(q_len 16352) point is not part of this run.")
@@ -247,6 +281,13 @@ def expected_runtime(correctness_only: bool) -> dict:
     """Planning estimate only: reference / tile32 from the frozen tile32 benchmark; shared_decode bounded by tile32."""
     s = json.loads((rt.OUT_DIR / "summary.json").read_text(encoding="utf-8"))
     t = {p["second_chunk_q_len"]: p for p in s["points"]}
+    if OUT_DIR == QB_TUNING_DIR:
+        fixed = {"image_rebuild_s": 600, "gate_s": 70, "tile32_tests_s": 50, "shared_decode_tests_s": 120,
+                 "engine_init_s": 110 * len(SERIES)}
+        per = sum(t[q]["tile32_ttft_ms"] for q in [32] + Q_LENS) / 1000.0
+        req = round(per * len(SERIES))
+        return {**fixed, "shared_decode_requests_s_upper_if_no_faster_than_tile32": req,
+                "total_estimate_s": round(sum(fixed.values()) + req)}
     ref = sum(t[q]["reference_ttft_ms"] for q in [32] + Q_LENS) / 1000.0
     til = sum(t[q]["tile32_ttft_ms"] for q in [32] + Q_LENS) / 1000.0
     fixed = {"image_rebuild_s": 600, "gate_s": 70, "tile32_tests_s": 50, "shared_decode_tests_s": 300}
@@ -392,9 +433,15 @@ def integrity(series: dict, gate: dict, t32: dict, shared: dict, top: dict, corr
         rows = {l: {p["row"]["planned_prompt_tokens"]: p["row"] for p in series[l]["points"]
                     if p["begin"]["role"] == "measured"} for l, _, _, _ in SERIES}
         complete = all(len(v) == len(POINTS) for v in rows.values())
-        add("greedy output tokens identical across all six series at every point", "equivalence",
+        add(f"greedy output tokens identical across all {len(SERIES)} series at every point", "equivalence",
             all(len({rows[l][p]["output_token_ids_sha256"] for l, _, _, _ in SERIES}) == 1 for p in POINTS)
             if complete else NOT_EVALUATED)
+        bench = {p["prompt_tokens"]: p for p in json.loads((rt.OUT_DIR / "summary.json").read_text(
+            encoding="utf-8"))["points"]}
+        add("output tokens identical to the frozen tile32-benchmark reference output at every point",
+            "equivalence", all(rows[l][p]["output_token_ids_sha256"] == bench[p]["reference_output_token_ids_sha256"]
+                               and rows[l][p]["prompt_token_ids_sha256"] == bench[p]["prompt_token_ids_sha256"]
+                               for l, _, _, _ in SERIES for p in POINTS) if complete else NOT_EVALUATED)
         cfg = {l: rd.series_config(series[l]) for l, _, _, _ in SERIES}
         add("engine configs identical across all series", "config",
             len({json.dumps(c, sort_keys=True, default=str) for c in cfg.values()}) == 1
@@ -402,6 +449,21 @@ def integrity(series: dict, gate: dict, t32: dict, shared: dict, top: dict, corr
     counts = {s: sum(1 for c in checks if c["state"] == s) for s in (PASSED, FAILED, NOT_RUN, NOT_EVALUATED)}
     return {"checks": checks, "counts": counts, "all_ok": counts[PASSED] == len(checks),
             "failed_categories": sorted({c["category"] for c in checks if c["state"] == FAILED})}
+
+
+def qb_tuning_analysis(series: dict, integ: dict) -> dict:
+    rows = {qb: {p["row"]["planned_prompt_tokens"] - FIRST_CHUNK: p["row"] for p in series[l]["points"]
+                 if p["begin"]["role"] == "measured"} for l, _, _, qb in SERIES}
+    out = {"scope": SCOPE + " QUERY_BLOCK tuning subset: shared_decode only, q_len 512 and 2048.",
+           "experiment5_evidence": False, "all_integrity_passed": integ["all_ok"], "integrity_counts": integ["counts"],
+           "per_query_block": {str(qb): {str(q): {k: r[k] for k in ("ttft_ms", "tpot_ms", "wall_ms",
+                                                                  "output_token_ids_sha256")}
+                                         for q, r in sorted(rows[qb].items())} for qb in sorted(rows)}}
+    out["selection"] = select_query_block({qb: {q: r["ttft_ms"] for q, r in rows[qb].items()} for qb in rows}) \
+        if integ["all_ok"] else None
+    out["not_claimed"] = ["speedup vs reference or tile32 (not run here)", "Experiment 5 results",
+                          "q_len 4096 / 8192 / 16352 behaviour"]
+    return out
 
 
 def analysis(series: dict, shared: dict, integ: dict, correctness_only: bool) -> dict:
@@ -447,7 +509,8 @@ def analyze(text: str, correctness_only: bool, write: bool):
     t32, shared = rt.parse_tests(t32_lines), parse_shared_tests(shared_lines)
     top = parse_top(top_lines)
     integ = integrity(series, gate, t32, shared, top, correctness_only)
-    an = analysis(series, shared, integ, correctness_only)
+    an = qb_tuning_analysis(series, integ) if (not correctness_only and OUT_DIR == QB_TUNING_DIR) \
+        else analysis(series, shared, integ, correctness_only)
     if write:
         OUT_DIR.mkdir(parents=True, exist_ok=True)
         GATE_LOG.write_text("\n".join(gate_lines) + "\n", encoding="utf-8")
@@ -509,9 +572,16 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--correctness-only", action="store_true")
+    ap.add_argument("--qb-tuning", action="store_true",
+                    help="shared_decode QUERY_BLOCK 4/8/16/32 at q_len 512 and 2048 only")
     a = ap.parse_args(argv)
+    if a.correctness_only and a.qb_tuning:
+        raise SystemExit("--correctness-only and --qb-tuning are exclusive")
     if a.correctness_only:
         set_out_dir(CORRECTNESS_DIR)
+    if a.qb_tuning:
+        set_mode_qb_tuning()
+        print(f"QB tuning; pre-registered selection rule: {QB_SELECTION_RULE}")
     print("RABIT-KV Stage3C shared_decode kernel-tuning BENCHMARK (not Experiment 5 evidence)")
     print(f"Mode: {'correctness-only (gate + tile32 + shared_decode exact suites, no timing)' if a.correctness_only else 'full'}")
     print(f"Series: {SERIES}; conditioning {CONDITIONING_PROMPT} (unmeasured)")
@@ -532,6 +602,7 @@ def main(argv: list[str] | None = None) -> int:
         print("\n--dry-run: nothing executed, no files written.")
         return 0
     m = {"benchmark": "Stage3C shared_decode kernel tuning", "scope": SCOPE, "correctness_only": a.correctness_only,
+         "qb_tuning": a.qb_tuning, "qb_selection_rule": QB_SELECTION_RULE if a.qb_tuning else None,
          "series": SERIES, "points": POINTS, "q_lens": Q_LENS, "conditioning_prompt_tokens": CONDITIONING_PROMPT,
          "request_guard_note": REQUEST_GUARD_NOTE, "started_utc": now(), "status": "running",
          "protected_paths_post_run_status": "pending", "provenance": prov}

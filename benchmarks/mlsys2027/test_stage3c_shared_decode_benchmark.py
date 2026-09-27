@@ -125,6 +125,48 @@ def test_analysis_ratios_and_fastest_block():
     assert p["series"]["rabit_reference"]["query_block"] is None and p["series"]["rabit_shared_qb16"]["query_block"] == 16
 
 
+def test_qb_selection_rule_geomean():
+    import math
+
+    t = {4: {512: 100.0, 2048: 400.0}, 8: {512: 90.0, 2048: 420.0}, 16: {512: 120.0, 2048: 300.0},
+         32: {512: 200.0, 2048: 290.0}}
+    sel = rs.select_query_block(t)
+    gm = {qb: math.sqrt(r[512] * r[2048]) for qb, r in t.items()}
+    assert sel["selected_query_block"] == min(gm, key=gm.get) == 16
+    assert all(abs(sel["geomean_ttft_ms"][str(k)] - gm[k]) < 1e-9 for k in gm)
+    assert abs(sel["geomean_relative_to_selected"]["16"] - 1.0) < 1e-12
+    # geometric mean, not arithmetic: qb 8 wins arithmetically? (100+400=500 vs 90+420=510) -> no; check a case
+    t2 = {4: {512: 10.0, 2048: 1000.0}, 8: {512: 200.0, 2048: 200.0}, 16: {512: 300.0, 2048: 300.0},
+          32: {512: 400.0, 2048: 400.0}}
+    assert rs.select_query_block(t2)["selected_query_block"] == 4  # geomean 100 < 200 (arithmetic would pick 8)
+    # exact tie -> smaller block
+    t3 = {qb: {512: 100.0, 2048: 400.0} for qb in (4, 8, 16, 32)}
+    assert rs.select_query_block(t3)["selected_query_block"] == 4
+    for bad in ({4: t[4], 8: t[8], 16: t[16]}, {**t, 32: {512: 1.0}}, {**t, 32: {512: 0.0, 2048: 1.0}}):
+        try:
+            rs.select_query_block(bad)
+        except ValueError:
+            continue
+        raise AssertionError("invalid tuning input accepted")
+
+
+def test_qb_tuning_mode_grid():
+    import importlib
+
+    m = importlib.reload(rs)
+    try:
+        m.set_mode_qb_tuning()
+        assert [s[2] for s in m.SERIES] == ["shared_decode"] * 4 and [s[3] for s in m.SERIES] == [4, 8, 16, 32]
+        assert m.Q_LENS == [512, 2048] and m.POINTS == [16896, 18432] and m.OUT_DIR == m.QB_TUNING_DIR
+        cmd = " ".join(m.build_command(False))
+        assert "rabit_reference" not in cmd and "rabit_tile32" not in cmd and "--points 16896,18432 " in cmd
+        assert "--correctness-only" not in cmd
+        eq = m.verify_equivalence(json.loads(m.BENCH_MANIFEST.read_text(encoding="utf-8")))
+        assert eq["modal_backstop_s"] > eq["watchdog_budget_s"]
+    finally:
+        importlib.reload(rs)
+
+
 if __name__ == "__main__":
     tests = [(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     failed = 0
