@@ -74,6 +74,7 @@ CORRECTNESS_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shar
 QB_TUNING_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_qb_tuning"
 QB_TIEBREAK_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_qb_tiebreak"
 FINAL_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_final_benchmark"
+FEASIBILITY_DIR = ROOT / "results" / "mlsys2027" / "diagnostics" / "stage3c_shared_decode_q16352_feasibility"
 
 
 def set_out_dir(d: Path) -> None:
@@ -220,6 +221,68 @@ def final_query_block(require_committed: bool) -> dict:
     return {"final_query_block": qb, "stage1_selected_query_block": sel["stage1_selected_query_block"],
             "tiebreak_relative_gap": sel["relative_gap"], "tiebreak_evidence": rel(QB_TIEBREAK_DIR),
             "tiebreak_evidence_committed": committed}
+
+
+# --q16352-feasibility: ONE shared_decode(QB from the committed tie-break) request with the exact Experiment-5
+# B32768 prompt (first chunk 16384 + second chunk 16352 = 32736 prompt tokens, 32 outputs, model limit 32768),
+# after the normal 16416-token conditioning request. NOT Experiment 5 evidence; NOT a paper latency claim.
+EXP5_FAILED_ATTEMPT = ROOT / "results" / "mlsys2027" / "context_scaling" / "failed_attempt_1"
+FEASIBILITY_PROMPT_TOKENS = 32736
+EXP5_CELL_REQUESTS = 5 + 15  # original Experiment-5 cell: 5 warmups + 15 measured
+EXP5_CELL_WATCHDOG_S = 900
+WATCHDOG_STATEMENT = ("The original 900 s cell watchdog is operationally insufficient for the unchanged 5-warmup + "
+                      "15-measurement protocol even though individual requests succeed.")
+
+
+def exp5_b32768_expectations() -> dict:
+    """Expected prompt / output hashes for the exact B32768 prompt, read from the frozen failed Experiment-5 attempt."""
+    lines = (EXP5_FAILED_ATTEMPT / "rabit_kv2_ctx32768.log").read_text(encoding="utf-8").splitlines()
+    wl = json.loads(next(ln for ln in lines if ln.startswith("EXP5_WORKLOAD=")).split("=", 1)[1])
+    warm = [json.loads(ln[len("EXP5_WARMUP "):]) for ln in lines if ln.startswith("EXP5_WARMUP {")]
+    outs = {w["output_token_ids_sha256"] for w in warm}
+    if not (wl["prompt_tokens"] == FEASIBILITY_PROMPT_TOKENS and wl["context_point"] == 32768
+            and wl["output_tokens"] == 32 and warm and len(outs) == 1
+            and all(w["prompt_token_ids_sha256"] == wl["prompt_token_ids_sha256"] for w in warm)):
+        raise RuntimeError("frozen Experiment-5 B32768 evidence does not define a unique expected prompt / output")
+    return {"source": rel(EXP5_FAILED_ATTEMPT / "rabit_kv2_ctx32768.log"), "prompt_tokens": wl["prompt_tokens"],
+            "prompt_token_ids_sha256": wl["prompt_token_ids_sha256"], "output_token_ids_sha256": outs.pop(),
+            "recorded_by": f"{len(warm)} completed reference-Stage3C warmups of the failed attempt"}
+
+
+def set_mode_feasibility(qb: int) -> None:
+    global SERIES, Q_LENS, POINTS
+    SERIES = [(f"rabit_shared_qb{qb}_q16352", "rabit_kv2", "shared_decode", qb)]
+    Q_LENS = [FEASIBILITY_PROMPT_TOKENS - FIRST_CHUNK]
+    POINTS = [FEASIBILITY_PROMPT_TOKENS]
+    set_out_dir(FEASIBILITY_DIR)
+
+
+def feasibility_analysis(series: dict, integ: dict, exp5: dict) -> dict:
+    (label, _, _, qb), = SERIES
+    meas = [p for p in series[label]["points"] if p["begin"]["role"] == "measured"]
+    row = meas[0]["row"] if meas else None
+    out = {"scope": "q_len 16352 FEASIBILITY request only (shared_decode fixed QB); NOT Experiment 5 evidence; NOT a "
+                    "paper latency claim; one request.",
+           "all_integrity_passed": integ["all_ok"], "integrity_counts": integ["counts"], "query_block": qb,
+           "expected_from_frozen_exp5": exp5, "request": None}
+    if row is None:
+        return out
+    wall_s = row["wall_ms"] / 1000.0
+    projected = EXP5_CELL_REQUESTS * wall_s
+    out["request"] = {k: row[k] for k in ("prompt_tokens", "output_tokens", "ttft_ms", "wall_ms", "tpot_ms",
+                                          "prompt_token_ids_sha256", "output_token_ids_sha256",
+                                          "gpu_memory_used_mib_after")}
+    out["request"]["jit_lines"] = meas[0]["jit"]
+    out["request"]["timing_jit_contaminated"] = meas[0]["jit"] > 0
+    out["request"]["prompt_hash_matches_frozen_exp5"] = row["prompt_token_ids_sha256"] == exp5["prompt_token_ids_sha256"]
+    out["request"]["output_hash_matches_frozen_exp5"] = row["output_token_ids_sha256"] == exp5["output_token_ids_sha256"]
+    out["exp5_watchdog_projection"] = {
+        "cell_requests": EXP5_CELL_REQUESTS, "observed_wall_s": wall_s,
+        "projected_cell_request_time_s": projected, "original_cell_watchdog_s": EXP5_CELL_WATCHDOG_S,
+        "watchdog_over_projected": EXP5_CELL_WATCHDOG_S / projected,
+        "statement": WATCHDOG_STATEMENT if projected > EXP5_CELL_WATCHDOG_S else None,
+        "note": "request time only (excludes engine start and conditioning); not an algorithm failure criterion"}
+    return out
 
 
 def set_mode_final(qb: int) -> None:
@@ -380,6 +443,11 @@ def expected_runtime(correctness_only: bool) -> dict:
     """Planning estimate only: reference / tile32 from the frozen tile32 benchmark; shared_decode bounded by tile32."""
     s = json.loads((rt.OUT_DIR / "summary.json").read_text(encoding="utf-8"))
     t = {p["second_chunk_q_len"]: p for p in s["points"]}
+    if OUT_DIR == FEASIBILITY_DIR:
+        fixed = {"image_rebuild_s": 600, "gate_s": 70, "tile32_tests_s": 50, "shared_decode_tests_s": 120,
+                 "engine_init_s": 110, "conditioning_s": 5}
+        guess = 120  # rough extrapolation from the final benchmark (NOT evidence); cap 600 s
+        return {**fixed, "q16352_request_s_rough_guess": guess, "total_estimate_s": sum(fixed.values()) + guess}
     if OUT_DIR == FINAL_DIR:
         ref = sum(t[q]["reference_ttft_ms"] for q in [32] + Q_LENS) / 1000.0
         til = sum(t[q]["tile32_ttft_ms"] for q in [32] + Q_LENS) / 1000.0
@@ -553,10 +621,18 @@ def integrity(series: dict, gate: dict, t32: dict, shared: dict, top: dict, corr
             if complete else NOT_EVALUATED)
         bench = {p["prompt_tokens"]: p for p in json.loads((rt.OUT_DIR / "summary.json").read_text(
             encoding="utf-8"))["points"]}
-        add("output tokens identical to the frozen tile32-benchmark reference output at every point",
-            "equivalence", all(rows[l][p]["output_token_ids_sha256"] == bench[p]["reference_output_token_ids_sha256"]
-                               and rows[l][p]["prompt_token_ids_sha256"] == bench[p]["prompt_token_ids_sha256"]
-                               for l, _, _, _ in SERIES for p in POINTS) if complete else NOT_EVALUATED)
+        if OUT_DIR == FEASIBILITY_DIR:
+            exp5 = exp5_b32768_expectations()
+            add("prompt tokens / prompt hash / output hash equal the frozen Experiment-5 B32768 expectation",
+                "equivalence", all(rows[l][p]["prompt_tokens"] == exp5["prompt_tokens"]
+                                   and rows[l][p]["prompt_token_ids_sha256"] == exp5["prompt_token_ids_sha256"]
+                                   and rows[l][p]["output_token_ids_sha256"] == exp5["output_token_ids_sha256"]
+                                   for l, _, _, _ in SERIES for p in POINTS) if complete else NOT_EVALUATED, exp5)
+        else:
+            add("output tokens identical to the frozen tile32-benchmark reference output at every point",
+                "equivalence", all(rows[l][p]["output_token_ids_sha256"] == bench[p]["reference_output_token_ids_sha256"]
+                                   and rows[l][p]["prompt_token_ids_sha256"] == bench[p]["prompt_token_ids_sha256"]
+                                   for l, _, _, _ in SERIES for p in POINTS) if complete else NOT_EVALUATED)
         post = top.get("S3C_POST_RUN_GPU_STATE")
         add("GPU clean after run", "gpu_clean", NOT_RUN if not post else (
             not post["compute_apps"] and all(u <= b + 256 for u, b in zip(post["memory_used_mib"],
@@ -670,7 +746,9 @@ def analyze(text: str, correctness_only: bool, write: bool):
     t32, shared = rt.parse_tests(t32_lines), parse_shared_tests(shared_lines)
     top = parse_top(top_lines)
     integ = integrity(series, gate, t32, shared, top, correctness_only, ser_lines)
-    if not correctness_only and OUT_DIR == FINAL_DIR:
+    if not correctness_only and OUT_DIR == FEASIBILITY_DIR:
+        an = feasibility_analysis(series, integ, exp5_b32768_expectations())
+    elif not correctness_only and OUT_DIR == FINAL_DIR:
         an = final_analysis(series, integ)
     elif not correctness_only and OUT_DIR == QB_TIEBREAK_DIR:
         an = qb_tiebreak_analysis(series, integ)
@@ -745,10 +823,21 @@ def main(argv: list[str] | None = None) -> int:
                     help="QB16 vs QB32 ABBA tie-break at q_len 512 and 2048 only")
     ap.add_argument("--final", action="store_true",
                     help="final benchmark: reference, tile32, shared_decode(tie-break QB) at q_len 32..8192")
+    ap.add_argument("--q16352-feasibility", action="store_true",
+                    help="ONE shared_decode(tie-break QB) request with the exact Experiment-5 B32768 prompt")
     a = ap.parse_args(argv)
-    if sum((a.correctness_only, a.qb_tuning, a.qb_tiebreak, a.final)) > 1:
-        raise SystemExit("--correctness-only, --qb-tuning, --qb-tiebreak and --final are exclusive")
+    if sum((a.correctness_only, a.qb_tuning, a.qb_tiebreak, a.final, a.q16352_feasibility)) > 1:
+        raise SystemExit("run modes are exclusive")
     stage1 = final = None
+    if a.q16352_feasibility:
+        final = final_query_block(require_committed=True)
+        if not run_git("ls-files", rel(FINAL_DIR / "benchmark_analysis.json")) \
+                or run_git("status", "--short", "--", rel(FINAL_DIR)):
+            raise SystemExit("feasibility precondition: the final held-out benchmark evidence must be archived")
+        exp5 = exp5_b32768_expectations()
+        set_mode_feasibility(final["final_query_block"])
+        print(f"q16352 FEASIBILITY (not Experiment 5): QB{final['final_query_block']} from committed tie-break; "
+              f"expected from frozen Exp5: {json.dumps(exp5)}")
     if a.final:
         final = final_query_block(require_committed=not a.dry_run)
         set_mode_final(final["final_query_block"])
@@ -768,7 +857,8 @@ def main(argv: list[str] | None = None) -> int:
     print("RABIT-KV Stage3C shared_decode kernel-tuning BENCHMARK (not Experiment 5 evidence)")
     print(f"Mode: {'correctness-only (gate + tile32 + shared_decode exact suites, no timing)' if a.correctness_only else 'full'}")
     print(f"Series: {SERIES}; conditioning {CONDITIONING_PROMPT} (unmeasured)")
-    print("Points (prompt -> q_len): " + ", ".join(f"{p}->{q}" for p, q in zip(POINTS, Q_LENS)) + "; no 16352 point")
+    print("Points (prompt -> q_len): " + ", ".join(f"{p}->{q}" for p, q in zip(POINTS, Q_LENS))
+          + ("; single q_len 16352 feasibility request" if OUT_DIR == FEASIBILITY_DIR else "; no 16352 point"))
     print(f"Request guard: {REQUEST_GUARD_NOTE}")
     print(f"  (series watchdog {SERIES_TIMEOUT_S}s; watchdog budget {WATCHDOG_BUDGET_S}s; "
           f"Modal function timeout {MODAL_FUNCTION_TIMEOUT_S}s)")
@@ -787,7 +877,7 @@ def main(argv: list[str] | None = None) -> int:
     m = {"benchmark": "Stage3C shared_decode kernel tuning", "scope": SCOPE, "correctness_only": a.correctness_only,
          "qb_tuning": a.qb_tuning, "qb_selection_rule": QB_SELECTION_RULE if a.qb_tuning else None,
          "qb_tiebreak": a.qb_tiebreak, "tiebreak_rule": TIEBREAK_RULE if a.qb_tiebreak else None,
-         "stage1": stage1, "final": final,
+         "stage1": stage1, "final": final, "q16352_feasibility": a.q16352_feasibility,
          "series": SERIES, "points": POINTS, "q_lens": Q_LENS, "conditioning_prompt_tokens": CONDITIONING_PROMPT,
          "request_guard_note": REQUEST_GUARD_NOTE, "started_utc": now(), "status": "running",
          "protected_paths_post_run_status": "pending", "provenance": prov}

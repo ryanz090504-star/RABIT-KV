@@ -270,6 +270,38 @@ def test_final_mode_uses_tiebreak_query_block():
         importlib.reload(rs)
 
 
+def test_q16352_feasibility_mode():
+    import importlib
+
+    m = importlib.reload(rs)
+    try:
+        exp5 = m.exp5_b32768_expectations()
+        assert exp5["prompt_tokens"] == 32736
+        assert exp5["prompt_token_ids_sha256"] == "dbc5bd884143e25fc9b417b9a9af888aaf92092e6556e4b8fdd1d6ca7d63b969"
+        assert exp5["output_token_ids_sha256"] == "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+        m.set_mode_feasibility(32)
+        assert m.SERIES == [("rabit_shared_qb32_q16352", "rabit_kv2", "shared_decode", 32)]
+        assert m.POINTS == [32736] and m.Q_LENS == [16352] and m.OUT_DIR == m.FEASIBILITY_DIR
+        cmd = " ".join(m.build_command(False))
+        assert "--points 32736 " in cmd and "reference" not in cmd and "tile32" not in cmd
+        assert m.REQUEST_CAP_S == 600  # per-request guard unchanged
+        row = {"prompt_tokens": 32736, "output_tokens": 32, "ttft_ms": 110000.0, "wall_ms": 111000.0, "tpot_ms": 25.0,
+               "prompt_token_ids_sha256": exp5["prompt_token_ids_sha256"],
+               "output_token_ids_sha256": exp5["output_token_ids_sha256"], "gpu_memory_used_mib_after": [72911],
+               "planned_prompt_tokens": 32736}
+        series = {"rabit_shared_qb32_q16352": {"points": [{"begin": {"role": "measured"}, "row": row, "jit": 0}]}}
+        an = m.feasibility_analysis(series, {"all_ok": True, "counts": {}}, exp5)
+        w = an["exp5_watchdog_projection"]
+        assert abs(w["projected_cell_request_time_s"] - 20 * 111.0) < 1e-9
+        assert abs(w["watchdog_over_projected"] - 900 / 2220.0) < 1e-12 and w["statement"] == m.WATCHDOG_STATEMENT
+        assert an["request"]["prompt_hash_matches_frozen_exp5"] and an["request"]["output_hash_matches_frozen_exp5"]
+        row["wall_ms"] = 40000.0
+        assert m.feasibility_analysis(series, {"all_ok": True, "counts": {}}, exp5)["exp5_watchdog_projection"][
+            "statement"] is None  # 20 x 40 s = 800 s <= 900 s
+    finally:
+        importlib.reload(rs)
+
+
 if __name__ == "__main__":
     tests = [(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     failed = 0
