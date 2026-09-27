@@ -49,6 +49,10 @@ from vllm.v1.attention.ops.rabit_kv2 import (
     rabit2_online_decode_attention_triton,
     rabit2_register_attention_impl,
 )
+from vllm.v1.attention.ops.rabit_kv2_stage3c_tile32 import (
+    rabit2_stage3c_forward_tile32,
+    rabit2_stage3c_impl,
+)
 from vllm.v1.kv_cache_interface import (
     AttentionSpec,
     KVQuantMode,
@@ -886,6 +890,24 @@ class TritonAttentionImpl(AttentionImpl):
                     context_len,
                 )
                 self._rabit2_logged_chunked = True
+
+            # Opt-in tile32 for non-initial chunks (VLLM_RABIT2_STAGE3C_IMPL);
+            # the reference path below stays the default and the oracle.
+            if (
+                q_len > 1
+                and rabit2_stage3c_impl() == "tile32"
+                and rabit2_stage3c_forward_tile32(
+                    runtime,
+                    q_seq,
+                    k_seq,
+                    v_seq,
+                    kv_cache,
+                    block_table_row,
+                    output[q0:q1],
+                    self.scale,
+                )
+            ):
+                continue
 
             # Stage4B4: decode stays on the exact one-token append path. For a
             # non-initial chunk, precompute exact future sidecar representation
