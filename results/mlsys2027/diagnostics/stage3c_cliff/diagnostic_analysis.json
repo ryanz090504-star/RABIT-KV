@@ -1,0 +1,459 @@
+{
+  "scope": "DIAGNOSTIC evidence only (pre-fix Stage3C cliff characterization); NOT Experiment 5 evidence. One measured request per point; descriptive only, no complexity law fitted.",
+  "accepted_as_experiment5_evidence": false,
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 39,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "q_len_note": "second_chunk_q_len and context_len are DERIVED from the chunking rule (first chunk = max_num_batched_tokens = 16384 tokens, second chunk = prompt - 16384). Stage3C is entered only for context_len > 0 and q_len > 1 (triton_attn.py _forward_rabit_kv2).",
+  "measured_point_layer_markers_available": false,
+  "marker_note": "Stage3C per-layer markers are once-per-layer-per-engine. They are consumed by the unmeasured conditioning request and are therefore unavailable for the measured diagnostic points.",
+  "request_guard_note": "600 s per-request SIGALRM guard, with the process-group watchdog and Modal function timeout as hard process-level backstops. Exit 76 on a delivered request-cap signal; no retries; partial evidence preserved; any failure stops the diagnostic; the watchdog kills and reaps the whole process group.",
+  "primary_outputs": [
+    "RABIT TTFT vs second_chunk_q_len",
+    "BF16 TTFT vs prompt length",
+    "RABIT - BF16 TTFT difference",
+    "per-chunk-token descriptive cost",
+    "Stage3C onset between q_len 1 and 2",
+    "behavior around q_len 31 / 32 / 33"
+  ],
+  "points": [
+    {
+      "prompt_tokens": 16384,
+      "second_chunk_q_len_derived": null,
+      "context_len_derived": null,
+      "stage3c_expected_by_source": false,
+      "prompt_token_ids_sha256": "55e489614c430cec99437352f5fbe9575121eee976ece2582eaff31b4d2f4863",
+      "bf16": {
+        "ttft_ms": 1284.0819358825684,
+        "tpot_ms": 15.521369064515511,
+        "wall_ms": 1764.9712230000034,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16384,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 679.563045501709,
+        "tpot_ms": 20.418832709677396,
+        "wall_ms": 1312.0201419999944,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16384,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": -604.5188903808594,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": null
+    },
+    {
+      "prompt_tokens": 16385,
+      "second_chunk_q_len_derived": 1,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": false,
+      "prompt_token_ids_sha256": "79d8725c1b37313b5ff49b4fba573fe5084972f9a8f169e54eddb919dd7cb386",
+      "bf16": {
+        "ttft_ms": 1307.1889877319336,
+        "tpot_ms": 15.591094548387131,
+        "wall_ms": 1790.4429200000038,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16385,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 695.5153942108154,
+        "tpot_ms": 20.33540135483881,
+        "wall_ms": 1325.6611450000264,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16385,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": -611.6735935211182,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": null
+    },
+    {
+      "prompt_tokens": 16386,
+      "second_chunk_q_len_derived": 2,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": true,
+      "prompt_token_ids_sha256": "c0a1e5236269074c02f8def1714c0fc5004f02dc7d76f1fa1b8a7a21adb7585b",
+      "bf16": {
+        "ttft_ms": 1316.373348236084,
+        "tpot_ms": 15.738606999999291,
+        "wall_ms": 1803.84948599999,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16386,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 739.0954494476318,
+        "tpot_ms": 20.13039158064459,
+        "wall_ms": 1362.8252600000224,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16386,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": -577.2778987884521,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": -288.6389493942261
+    },
+    {
+      "prompt_tokens": 16415,
+      "second_chunk_q_len_derived": 31,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": true,
+      "prompt_token_ids_sha256": "d79dbbc975e9a1fc1bad5ca1e655e582407478caf876e1f2927dd9a927c208de",
+      "bf16": {
+        "ttft_ms": 1304.4359683990479,
+        "tpot_ms": 15.352284677419448,
+        "wall_ms": 1780.1455370000099,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16415,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 1114.8388385772705,
+        "tpot_ms": 20.057842935483997,
+        "wall_ms": 1736.3577039999996,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16415,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": -189.59712982177734,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": -6.116036445863785
+    },
+    {
+      "prompt_tokens": 16416,
+      "second_chunk_q_len_derived": 32,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": true,
+      "prompt_token_ids_sha256": "80b3c16950ef7ab27734fd7f30d6f10a1817837ec9ea4346899ff7a62f093e91",
+      "bf16": {
+        "ttft_ms": 1311.5639686584473,
+        "tpot_ms": 15.369485096774651,
+        "wall_ms": 1787.5448880000135,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16416,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 1125.201940536499,
+        "tpot_ms": 20.35478625806454,
+        "wall_ms": 1755.7856739999806,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16416,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": -186.36202812194824,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": -5.823813378810883
+    },
+    {
+      "prompt_tokens": 16417,
+      "second_chunk_q_len_derived": 33,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": true,
+      "prompt_token_ids_sha256": "0ac459798d2d69464aecc3c31eb1233dbfe513abdca048d2c932b3cb5c160de0",
+      "bf16": {
+        "ttft_ms": 1320.2970027923584,
+        "tpot_ms": 15.376302032257906,
+        "wall_ms": 1796.6213360000154,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16417,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 1137.2907161712646,
+        "tpot_ms": 20.17584083870911,
+        "wall_ms": 1762.5990829999978,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16417,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": -183.00628662109375,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": -5.545645049124053
+    },
+    {
+      "prompt_tokens": 16896,
+      "second_chunk_q_len_derived": 512,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": true,
+      "prompt_token_ids_sha256": "f099526bae8d6432fcaa99d353ba6f84b08c763006caacf0496d8a357d4c4cb6",
+      "bf16": {
+        "ttft_ms": 1357.4554920196533,
+        "tpot_ms": 15.562794580644425,
+        "wall_ms": 1839.6848510000154,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16896,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 7893.051862716675,
+        "tpot_ms": 20.803157967742617,
+        "wall_ms": 8537.543842000048,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 16896,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": 6535.5963706970215,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": 12.76483666151762
+    },
+    {
+      "prompt_tokens": 17408,
+      "second_chunk_q_len_derived": 1024,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": true,
+      "prompt_token_ids_sha256": "355b1a5ed250132b34024c50f6fe2a12824a036af0ca16d9f52c21caaf8e230a",
+      "bf16": {
+        "ttft_ms": 1438.0230903625488,
+        "tpot_ms": 15.411873870967215,
+        "wall_ms": 1915.5083070000103,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 17408,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 14088.16385269165,
+        "tpot_ms": 20.803131741934802,
+        "wall_ms": 14732.526640000004,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 17408,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": 12650.140762329102,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": 12.353653088212013
+    },
+    {
+      "prompt_tokens": 18432,
+      "second_chunk_q_len_derived": 2048,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": true,
+      "prompt_token_ids_sha256": "a21cc61d10b3c29634f56061e8d9f6b15f1e4afa9dfd563daae396a0d4207fc0",
+      "bf16": {
+        "ttft_ms": 1586.437463760376,
+        "tpot_ms": 15.5836293548389,
+        "wall_ms": 2068.9585930000194,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 18432,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 28115.504503250122,
+        "tpot_ms": 20.86090112903189,
+        "wall_ms": 28761.846089999948,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 18432,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": 26529.067039489746,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": 12.953646015375853
+    },
+    {
+      "prompt_tokens": 20480,
+      "second_chunk_q_len_derived": 4096,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": true,
+      "prompt_token_ids_sha256": "1f373a5f9cce8e185be46447fe7018793492694d24809c172c0f0e250ede3eaa",
+      "bf16": {
+        "ttft_ms": 1909.4109535217285,
+        "tpot_ms": 15.435805903225187,
+        "wall_ms": 2387.341912000011,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 20480,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 58102.17022895813,
+        "tpot_ms": 21.91593767742006,
+        "wall_ms": 58781.20301399997,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 20480,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": 56192.7592754364,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": 13.71893536997959
+    },
+    {
+      "prompt_tokens": 24576,
+      "second_chunk_q_len_derived": 8192,
+      "context_len_derived": 16384,
+      "stage3c_expected_by_source": true,
+      "prompt_token_ids_sha256": "6fd3a3731b93c94abcb38b7e1bafac32d61835457e53761f1b28decefc73d2ac",
+      "bf16": {
+        "ttft_ms": 2638.1027698516846,
+        "tpot_ms": 15.825648870968362,
+        "wall_ms": 3128.116230000018,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 24576,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          67429
+        ]
+      },
+      "rabit_kv2": {
+        "ttft_ms": 125012.73775100708,
+        "tpot_ms": 24.319643193547883,
+        "wall_ms": 125766.65261700003,
+        "output_tokens": 32,
+        "actual_prompt_tokens": 24576,
+        "jit_lines": 0,
+        "stage3c_markers_observed": [],
+        "gpu_memory_used_mib_after": [
+          72903
+        ]
+      },
+      "rabit_minus_bf16_ttft_ms": 122374.6349811554,
+      "rabit_minus_bf16_ttft_ms_per_second_chunk_token": 14.93830993422307
+    }
+  ],
+  "onset": {
+    "q_len_1_rabit_minus_bf16_ttft_ms": -611.6735935211182,
+    "q_len_2_rabit_minus_bf16_ttft_ms": -577.2778987884521,
+    "note": "Source predicts Stage3C only for q_len > 1 (q_len 1 takes the decode append path)."
+  },
+  "around_page_boundary": {
+    "31": -189.59712982177734,
+    "32": -186.36202812194824,
+    "33": -183.00628662109375
+  },
+  "conditioning_stage3c_path_verification": {
+    "purpose": "verification only: Stage3C path entered and all layers observed; NOT a latency distribution",
+    "q_len_context_len": [
+      [
+        32,
+        16384
+      ]
+    ],
+    "layer_markers_observed": 32,
+    "layer_markers_expected": 32,
+    "stage3c_path_entered": true,
+    "all_layers_observed": true,
+    "note": "Marker intervals of the q_len 32 conditioning request are below the 1 s log-timestamp resolution and are deliberately not reported as per-layer timing."
+  },
+  "external_frozen_reference_failed_attempt_1": {
+    "label": "EXTERNAL FROZEN REFERENCE evidence from results/mlsys2027/context_scaling/failed_attempt_1/ (q_len 16352, context_len 16384, 32K model-limit point). Not produced by this diagnostic and never pooled or merged with it.",
+    "source": "results/mlsys2027/context_scaling/failed_attempt_1/failure_analysis.json",
+    "layer_markers": 32,
+    "layer_intervals_s": [
+      11.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0
+    ],
+    "median_s": 9.0,
+    "min_s": 9.0,
+    "max_s": 11.0
+  },
+  "not_claimed": [
+    "a complexity law (one sample per point)",
+    "Experiment 5 results",
+    "an algorithmic limitation of low-bit KV quantization",
+    "per-layer timing of the measured diagnostic points"
+  ]
+}
