@@ -1,0 +1,38 @@
+{
+  "attempt": "L2048 attempt 4 (shadow_conditioned)",
+  "status": "ACCEPTED as the final L2048 Experiment 6 performance run",
+  "accepted_for_performance_interpretation": true,
+  "rerun_allowed": false,
+  "modal_app": "ap-PFckXF9Fc2yMiljv4ZRErl",
+  "run_id": "exp6-L2048-20260928T033048Z-2ccaa10",
+  "measurement_commit": "2ccaa10a35d9ead414a5a52d26e6161a9042ec2b",
+  "analysis_schema_fix_commit": "8a5f695",
+  "canonical_raw_evidence": {"file": "remote_session.log", "bytes": 8984334,
+                             "sha256": "19a6c7d951bc617c3b6230bff2cf2ac5f5ac8632c385d3be02b171a77b004a17"},
+  "derived_files": {
+    "summary.json": "schema v2, offline reparse of the canonical raw log (see reparse_provenance.json)",
+    "summary_pre_concurrency_keyfix.json": "historical schema-v1 summary produced at measurement time",
+    "integrity_check.json": "measurement-time analysis; reproduced exactly by the reparse",
+    "modal_session.log": "locally streamed client log (secondary record)"
+  },
+  "validity": {
+    "points": "36/36 completed", "integrity": "401/401 passed", "measured_phase_jit": "0 at every point",
+    "shadow_conditioning_valid": "36/36", "oom": 0, "request_failures": 0, "watchdog_timeouts": 0, "preemptions": 0,
+    "target_overlapping_inflight_concurrency": "reached at all 36 points"
+  },
+  "excluded_attempts_not_pooled": ["jit_contaminated_attempt_1", "jit_contaminated_attempt_2",
+                                   "infrastructure_aborted_attempt_3"],
+  "descriptive_result": {
+    "metric": "cross-trial median requests/s (3 trials)",
+    "rows": [
+      {"C": 1, "bf16": 1.458, "rabit": 1.022, "ratio_rabit_over_bf16": 0.701},
+      {"C": 4, "bf16": 4.592, "rabit": 1.612, "ratio_rabit_over_bf16": 0.351},
+      {"C": 8, "bf16": 7.218, "rabit": 1.844, "ratio_rabit_over_bf16": 0.256},
+      {"C": 16, "bf16": 10.042, "rabit": 2.015, "ratio_rabit_over_bf16": 0.201},
+      {"C": 32, "bf16": 12.911, "rabit": 2.083, "ratio_rabit_over_bf16": 0.161},
+      {"C": 64, "bf16": 14.361, "rabit": 1.776, "ratio_rabit_over_bf16": 0.124}
+    ],
+    "capacity_statement": "Both dtypes sustained every base-grid point (C up to 64) in all trials with no preemption; the grid does not bracket a failure boundary, so C=64 is NOT a maximum concurrency.",
+    "causal_claim": "none -- no causal explanation of RABIT's concurrent-throughput scaling is made at this stage (profiling deferred)"
+  }
+}
