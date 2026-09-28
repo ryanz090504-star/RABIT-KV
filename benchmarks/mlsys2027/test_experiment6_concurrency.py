@@ -101,12 +101,16 @@ def _point_lines(spec, *, serial=False, preempt=0, counter=True, logged=None, ji
     return lines + ["EXP6_WORKER_COMPLETE"]
 
 
-def _session(L=2048, overrides=None, proc_over=None, omit=()):
+def _session(L=2048, overrides=None, proc_over=None, omit=(), trial=None, env_over=None):
     overrides, proc_over = overrides or {}, proc_over or {}
-    plan = wl.plan_points(L)
+    plan = [q for q in wl.plan_points(L) if trial is None or q["trial"] == trial]
     bsess = (r6.rs6.rsd.rt.OUT_DIR / "modal_session.log").read_text(encoding="utf-8").splitlines()
     env = json.loads(next(ln for ln in bsess if ln.startswith("S3C_ENVIRONMENT=")).split("=", 1)[1])
     env["point_labels"] = [p["label"] for p in plan]
+    if trial is not None:
+        env.update(point_timeout_s=3600, expected_points=12, static_watchdog_budget_s=43800, modal_backstop_s=45000,
+                   gpus=[{"name": "NVIDIA H100 80GB HBM3", "uuid": f"GPU-trial{trial}"}])
+    env.update(env_over or {})
     base = next(ln for ln in bsess if ln.startswith("S3C_GPU_BASELINE="))
     b = json.loads(base.split("=", 1)[1])
     gate = [ln for ln in bsess if ln.startswith("[gate] ")]
@@ -127,7 +131,7 @@ def _session(L=2048, overrides=None, proc_over=None, omit=()):
         lines += [f"S3C_PROCESS_EXIT={json.dumps(proc)}",
                   f"S3C_SERIES_EXIT={json.dumps({'series': spec['label'], 'returncode': proc['returncode']})}"]
     lines += [f"S3C_PRE_LEG_GPU_STATE={json.dumps(clean('post_run'))}",
-              f"S3C_SWEEP_COMPLETE={json.dumps({'points': 36, 'failed_points': []})}"]
+              f"S3C_SWEEP_COMPLETE={json.dumps({'points': len(plan), 'failed_points': []})}"]
     return "\n".join(lines) + "\n"
 
 
@@ -544,6 +548,146 @@ def test_accepted_l2048_reparse_reproduces_integrity_and_values():
         assert cur == old
 
 
+# ------------------------------------------------------------------ L8192 execution amendment (infrastructure only)
+def test_l8192_three_trial_runs_of_twelve_points():
+    assert r6.EXECUTION[8192]["runs"] == (1, 2, 3) and r6.EXECUTION[2048]["runs"] == (None,)
+    plans = {t: r6.run_plan(8192, t) for t in (1, 2, 3)}
+    assert all(len(v) == 12 for v in plans.values())
+    assert [q for t in (1, 2, 3) for q in plans[t]] == wl.plan_points(8192)  # same pre-registered points and order
+    for t, v in plans.items():
+        order = wl.TRIAL_DTYPE_ORDER[t]
+        assert [q["dtype"] for q in v] == [order[0]] * 6 + [order[1]] * 6 and all(q["trial"] == t for q in v)
+        assert [q["concurrency"] for q in v] == [1, 4, 8, 16, 32, 64] * 2
+    assert wl.TRIAL_DTYPE_ORDER == {1: ("bfloat16", "rabit_kv2"), 2: ("rabit_kv2", "bfloat16"),
+                                    3: ("bfloat16", "rabit_kv2")}
+    for bad in (None, 4):
+        try:
+            r6.run_plan(8192, bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(bad)
+    assert len(r6.run_plan(2048)) == 36
+
+
+def test_l8192_watchdog_budget_and_l2048_historical():
+    assert r6.EXECUTION[8192]["point_timeout_s"] == 3600 and r6.EXECUTION[2048]["point_timeout_s"] == 1200
+    assert r6.static_watchdog_budget(8192) == 600 + 12 * 3600 == 43800 and r6.static_watchdog_budget(2048) == 43800
+    assert r6.MODAL_FUNCTION_TIMEOUT_S == 45000 and 45000 - r6.static_watchdog_budget(8192) == 1200
+    assert protocol()["watchdogs"] == {"gate_s": 600, "point_s": 1200, "modal_backstop_s": 45000}  # frozen, unchanged
+    raw = (r6.ACCEPTED_RUNS[2048]["dir"] / "remote_session.log").read_text(encoding="utf-8")
+    env = json.loads(next(ln for ln in raw.splitlines() if ln.startswith("S3C_ENVIRONMENT=")).split("=", 1)[1])
+    assert env["point_timeout_s"] == 1200  # accepted L2048 keeps its historical watchdog
+    am = r6.load_l8192_amendment()
+    ex = am["amended_l8192_execution"]
+    assert am["scientific_protocol_unchanged"] and ex["point_watchdog_s"] == {"L2048": 1200, "L8192": 3600}
+    assert ex["static_budget_per_trial_run_s"]["value"] == 43800 and ex["backstop_margin_s"] == 1200
+    assert "C >= 4 exceeds" in am["preflight_wording_correction"]
+    import ast
+    tree = ast.parse(r6.MODAL_APP.read_text(encoding="utf-8"))
+    assert r6.rd._const(tree, "L8192_POINT_TIMEOUT_S") == 3600 and r6.rd._const(tree, "TRIAL_POINTS") == 12
+    assert r6.rd._const(tree, "POINT_TIMEOUT_S") == 1200 and r6.rd._const(tree, "MODAL_BACKSTOP_S") == 45000
+    body = ast.unparse(r6._function(tree, "_sweep_body"))
+    assert "ALLOWED_EXECUTIONS" in body and "] \", point_timeout_s, p['label'])" in body
+    eq = r6.verify_equivalence(cfg())
+    assert eq["static_watchdog_budget_per_run_s"] == {"2048": 43800, "8192": 43800}
+
+
+def test_l8192_trial_command_and_sequential_preflight():
+    cmd = r6.build_command(8192, "x" * 64, cfg(), "exp6-L8192-t2-x", 2)
+    pts = cmd[cmd.index("--points") + 1].split(",")
+    assert len(pts) == 12 and all(x.startswith("t2_") for x in pts)
+    assert cmd[cmd.index("--point-timeout-s") + 1] == "3600" and cmd[cmd.index("--expected-points") + 1] == "12"
+    assert r6.make_run_id(8192, "abcdef0123", 2).startswith("exp6-L8192-t2-")
+    c2 = r6.build_command(2048, "x" * 64, cfg(), "r")
+    assert c2[c2.index("--point-timeout-s") + 1] == "1200" and c2[c2.index("--expected-points") + 1] == "36"
+    for args, msg in (((8192, True, None), "executed as runs"), ((2048, True, 1), "executed as runs")):
+        try:
+            r6.preflight(*args)
+        except RuntimeError as e:
+            assert msg in str(e)
+        else:
+            raise AssertionError(args)
+    if not (r6.run_dir(8192, 1) / "manifest.json").is_file():  # trial 2 may not start before trial 1 is terminal
+        try:
+            r6.preflight(8192, True, 2)
+        except RuntimeError as e:
+            assert "has not reached a terminal remote state" in str(e)
+        else:
+            raise AssertionError("trial 2 preflight passed without trial 1")
+
+
+def _trial(t):
+    integ, s = r6.analyze(_session(8192, trial=t), 8192, cfg(), protocol(), t)
+    return integ, s
+
+
+def test_one_trial_is_never_a_complete_result():
+    integ, s = _trial(1)
+    assert integ["all_ok"] and len(s["points"]) == 12 and s["trial"] == 1
+    assert s["complete_three_trial_result"] is False and s["highest_successfully_tested_concurrency"] is None
+    assert s["rabit_only_extension"] is None
+    assert [c["state"] for c in integ["checks"] if c["check"].startswith("execution: trial 1")] == ["passed"]
+    try:  # a one-trial log can never be analyzed as the whole sweep
+        r6.analyze(_session(8192, trial=1), 8192, cfg(), protocol())
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("one-trial log analyzed as a whole L8192 sweep")
+    integ3, _ = r6.analyze(_session(8192, trial=1, env_over={"point_timeout_s": 1200}), 8192, cfg(), protocol(), 1)
+    assert not integ3["all_ok"] and "environment" in integ3["failed_categories"]
+    integ4, _ = r6.analyze(_session(8192, trial=1), 8192, cfg(), protocol(), 2)  # wrong trial identity
+    assert not integ4["all_ok"]
+
+
+def _three():
+    out = {}
+    for t, wall in ((1, 100.0), (2, 80.0), (3, 160.0)):
+        integ, s = _trial(t)
+        for p in s["points"]:  # trial-level statistic differs per trial
+            p["wall_s"] = wall
+            p["requests_per_s"] = 256 / wall
+        out[t] = {"summary": s, "integrity": integ, "provenance": {"gpu_uuid": [f"GPU-trial{t}"]}}
+    return out
+
+
+def test_combine_requires_all_trial_identities():
+    tr = _three()
+    for bad in ({1: tr[1], 2: tr[2]}, {1: tr[1], 2: tr[2], 3: tr[2]}, {1: tr[1], 2: tr[3], 3: tr[2]}):
+        try:
+            r6.combine_trials(8192, bad)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("incomplete / mislabeled trials accepted")
+    try:
+        r6.combine_trials(2048, {None: tr[1]})
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("L2048 has no per-trial runs")
+
+
+def test_combine_uses_trial_level_medians_without_pooling():
+    tr = _three()
+    assert all("requests" not in p for t in tr for p in tr[t]["summary"]["points"])  # no raw rows reach combine
+    c = r6.combine_trials(8192, tr)
+    row = c["cross_trial"]["rabit_kv2|16"]["requests_per_s"]
+    assert row["per_trial"] == {"1": 2.56, "2": 3.2, "3": 1.6} and row["cross_trial_median"] == 2.56
+    assert c["cross_trial"]["bfloat16|4"]["wall_s"]["cross_trial_median"] == 100.0
+    assert "never concatenated" in c["sample_pooling"] and c["complete_three_trial_result"]
+    assert c["per_trial_validity"]["2"]["gpu_uuid"] == ["GPU-trial2"] and c["all_trials_integrity_passed"]
+    hs = c["highest_successfully_tested_concurrency"]["rabit_kv2"]
+    assert hs["per_trial"] == {"1": 64, "2": 64, "3": 64} and not hs["failure_boundary_bracketed_by_grid"]
+    assert c["rabit_over_bf16_cross_trial_median_ratio"]["64"]["requests_per_s"] == 1.0
+
+
+def test_scientific_protocol_unchanged_by_l8192_amendment():
+    assert r6.run_git("show", "5028eb2:benchmarks/mlsys2027/exp6_protocol.json") == \
+        r6.PROTOCOL.read_text(encoding="utf-8").rstrip("\n")
+    assert r6.load_protocol()["points"]["8192"] == wl.plan_points(8192)
+
+
 def test_missing_point_is_not_run_and_fails_completion():
     integ, s = _run(omit=("t3_rabit_L2048_c64",))
     assert _pt(s, "t3_rabit_L2048_c64")["outcome_class"] is None
@@ -551,8 +695,15 @@ def test_missing_point_is_not_run_and_fails_completion():
 
 
 def test_8192_sweep_and_inflight_concurrency_parser():
-    integ, s = _run(L=8192)
-    assert integ["all_ok"] and len(s["points"]) == 36
+    for t in (1, 2, 3):  # L8192 is analyzed per trial (execution amendment)
+        integ, s = r6.analyze(_session(8192, trial=t), 8192, cfg(), protocol(), t)
+        assert integ["all_ok"] and len(s["points"]) == 12
+    try:
+        _run(L=8192)  # a whole-sweep L8192 analysis is refused
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("whole-sweep L8192 analysis accepted")
     rows = [{"scheduled_ts": 0.0 + i, "last_token_ts": 10.0 + i} for i in range(1, 5)]
     c = r6.inflight_concurrency(rows, 4)
     assert c["observed_max_inflight_concurrency"] == 4 and abs(c["all_c_inflight_overlap_total_s"] - 7.0) < 1e-9

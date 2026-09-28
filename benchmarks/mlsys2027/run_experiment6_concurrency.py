@@ -37,6 +37,15 @@ the in-flight statistics dict (key collision). Points now carry
 `concurrency` key. Metric definitions are unchanged. `--reparse` re-analyzes
 ONLY a pinned, immutable remote_session.log offline (no Modal / CUDA / H100).
 
+L8192 EXECUTION AMENDMENT (infrastructure only; pinned in
+exp6_l8192_execution_amendment.json before any L8192 launch): L8192 runs as THREE
+sequential detached Modal runs, one pre-registered trial (12 points) each, with a
+3600 s point watchdog (static budget 600 + 12 x 3600 = 43800 s < 45000 s
+backstop). The scientific protocol (exp6_protocol.json) is unchanged; L2048 keeps
+its historical execution (one 36-point run, 1200 s). Each trial is analyzed on its
+own (`--trial N`); `--combine` builds the cross-trial result ONLY from the three
+trial-level statistics (raw per-request samples are never pooled across trials).
+
 Frozen workload (exp6_workload.py; hashes frozen in exp6_protocol.json): prompt
 lengths 2048 and 8192 (separate sweeps / separate Modal runs); concurrency
 {1,4,8,16,32,64}; per point 2 warmup requests (discarded) + 256 measured
@@ -98,6 +107,7 @@ MODAL_APP = HERE / "exp6_modal.py"
 WORKER = HERE / "exp6_worker.py"
 WORKLOAD = HERE / "exp6_workload.py"
 PROTOCOL = HERE / "exp6_protocol.json"
+L8192_AMENDMENT = HERE / "exp6_l8192_execution_amendment.json"
 OFFLINE_TESTS = HERE / "test_experiment6_concurrency.py"
 REF_MODAL_APP = rs6.MODAL_APP
 EXP5_WORKER = rs6.EXP5_WORKER
@@ -132,12 +142,25 @@ ACCEPTED_RUNS = {2048: {"dir": BASE_OUT / "L2048" / "shadow_conditioned",
                         "run_id": "exp6-L2048-20260928T033048Z-2ccaa10",
                         "pre_keyfix_summary_sha256": "b57effa457c8b1e9ee62ae8813537568cd72ef233c01733624537a40da9f54bf",
                         "integrity_check_sha256": "74ac28da35ed879c7525aeaa16fe4ddfddb3a06237d16160403045e0ccaeac2e"}}
+EVIDENCE_DIRS.append(ACCEPTED_RUNS[2048]["dir"])  # accepted, frozen L2048 evidence
+PROTECTED_PATHS.append(ACCEPTED_RUNS[2048]["dir"])
 REMOTE_POLL_S = 120
-MUST_BE_COMMITTED = [RUNNER_SCRIPT, MODAL_APP, WORKER, WORKLOAD, PROTOCOL, OFFLINE_TESTS, rs6.rsd.GATE,
+MUST_BE_COMMITTED = [RUNNER_SCRIPT, MODAL_APP, WORKER, WORKLOAD, PROTOCOL, L8192_AMENDMENT, OFFLINE_TESTS, rs6.rsd.GATE,
                      rs6.rsd.WATCHDOG]
 EXPECTED_CAPACITY = {"bfloat16": 393024, "rabit_kv2": 2074592}
 GATE_TIMEOUT_S, POINT_TIMEOUT_S, MODAL_FUNCTION_TIMEOUT_S, POINTS_PER_SWEEP = 600, 1200, 45000, 36
 WATCHDOG_BUDGET_S = GATE_TIMEOUT_S + POINTS_PER_SWEEP * POINT_TIMEOUT_S  # 43800
+L8192_POINT_TIMEOUT_S, TRIAL_POINTS = 3600, 12  # L8192 execution amendment (infrastructure only)
+# Per prompt length: how the pre-registered points are grouped into Modal runs. L2048 = historical (unchanged).
+EXECUTION = {2048: {"grouping": "one_sweep_per_modal_run", "runs": (None,), "points_per_run": POINTS_PER_SWEEP,
+                    "point_timeout_s": POINT_TIMEOUT_S},
+             8192: {"grouping": "one_trial_per_modal_run", "runs": (1, 2, 3), "points_per_run": TRIAL_POINTS,
+                    "point_timeout_s": L8192_POINT_TIMEOUT_S}}
+
+
+def static_watchdog_budget(length: int) -> int:
+    e = EXECUTION[length]
+    return GATE_TIMEOUT_S + e["points_per_run"] * e["point_timeout_s"]
 TAG = re.compile(r"^(EXP6_[A-Z0-9_]+)=(\{.*\})\s*$")
 TOP_TAG = re.compile(r"^(S3C_[A-Z0-9_]+)=(\{.*\})\s*$")
 LOGGED_PREEMPTIONS = re.compile(r"Preemptions: (\d+)")
@@ -203,6 +226,61 @@ def out_dir(length: int) -> Path:
     return BASE_OUT / f"L{length}" / ATTEMPT_DIR_NAME
 
 
+def run_dir(length: int, trial: int | None = None) -> Path:
+    return out_dir(length) if trial is None else out_dir(length) / f"trial_{trial}"
+
+
+def run_plan(length: int, trial: int | None = None) -> list[dict]:
+    """The pre-registered points executed by ONE Modal run (whole sweep, or one trial for L8192)."""
+    if trial not in EXECUTION[length]["runs"]:
+        raise ValueError(f"L{length} runs are {EXECUTION[length]['runs']}, not trial={trial}")
+    return [p for p in wl.plan_points(length) if trial is None or p["trial"] == trial]
+
+
+def build_l8192_amendment() -> dict:
+    return {
+        "amendment": "Experiment 6 L8192 execution amendment (infrastructure only)",
+        "scientific_protocol_unchanged": True,
+        "scientific_protocol_file": "benchmarks/mlsys2027/exp6_protocol.json",
+        "changed": ["execution grouping (L8192 only)", "L8192 point watchdog"],
+        "original_plan": "one prompt-length sweep (all 36 points, 3 trials) in one Modal run",
+        "amended_l8192_execution": {
+            "grouping": "one pre-registered trial per detached Modal run; trials run SEQUENTIALLY (1, then 2, then 3); "
+                        "a trial starts only after the previous trial reached a terminal remote state and its complete "
+                        "raw evidence was retrieved",
+            "points_per_run": TRIAL_POINTS, "trial_dtype_order": {str(k): list(v) for k, v in wl.TRIAL_DTYPE_ORDER.items()},
+            "concurrency_order_within_dtype": list(wl.CONCURRENCY_GRID),
+            "point_watchdog_s": {"L2048": POINT_TIMEOUT_S, "L8192": L8192_POINT_TIMEOUT_S},
+            "gate_timeout_s": GATE_TIMEOUT_S, "modal_backstop_s": MODAL_FUNCTION_TIMEOUT_S,
+            "static_budget_per_trial_run_s": {"formula": "600 + 12 x 3600", "value": static_watchdog_budget(8192)},
+            "backstop_margin_s": MODAL_FUNCTION_TIMEOUT_S - static_watchdog_budget(8192),
+            "invariant": "outer Modal backstop exceeds the complete static watchdog budget of the run (preserved)"},
+        "reason": ("Existing-evidence-only conservative projection of L8192 point process time (256 shadow + 2 warmup "
+                   "+ 256 measured): RABIT C4 ~2070 s, C8 ~1840 s, C16 ~1500 s, C32 ~1410 s, C64 ~1730 s, C1 ~820 s; "
+                   "BF16 max ~775 s. A 3600 s point watchdog gives ~1.74x margin over the slowest projection. With "
+                   "3600 s, a single 36-point run's static budget (600 + 36 x 3600 = 130200 s) exceeds a single Modal "
+                   "function's supported / safe budget; one trial per run keeps 600 + 12 x 3600 = 43800 s < 45000 s."),
+        "preflight_wording_correction": ("For the registered L8192 grid, every point with C >= 4 exceeds "
+                                         "max_num_batched_tokens=16384 and may exercise chunked prefill (8192 x 2 = "
+                                         "16384 exactly). The correction changes no workload or projection."),
+        "matching": ("each trial remains internally matched BF16 vs RABIT on the same H100 / container; all three trials "
+                     "use identical code, model, workload and prompt hashes"),
+        "analysis": ("each trial is analyzed independently; cross-trial summaries are medians of the three trial-level "
+                     "statistics; raw per-request samples are never concatenated across trials"),
+        "failure_policy": ("unchanged within a trial; an infrastructure-aborted trial is preserved separately with no "
+                           "automatic rerun; a point hitting the 3600 s watchdog is classified exactly as the harness "
+                           "specifies; no further timeout tuning after observing L8192 performance"),
+        "l2048_unchanged": "the accepted L2048 run keeps its historical execution (one 36-point run, 1200 s watchdog)",
+    }
+
+
+def load_l8192_amendment() -> dict:
+    committed = json.loads(L8192_AMENDMENT.read_text(encoding="utf-8"))
+    if committed != json.loads(json.dumps(build_l8192_amendment())):
+        raise RuntimeError("exp6_l8192_execution_amendment.json differs from the regenerated amendment")
+    return committed
+
+
 # ------------------------------------------------------------------ protocol metadata (frozen, committed)
 def build_protocol() -> dict:
     return {
@@ -263,9 +341,9 @@ def assert_protected_paths_clean(context: str) -> None:
         raise RuntimeError(f"CRITICAL: protected paths changed ({context}):\n" + status)
 
 
-def prior_evidence_digest() -> dict:
+def prior_evidence_digest(extra: tuple = ()) -> dict:
     out = {}
-    for d in EVIDENCE_DIRS:
+    for d in [*EVIDENCE_DIRS, *extra]:
         if d.is_dir():
             for f in sorted(p for p in d.rglob("*") if p.is_file()):
                 out[f"{rel(d)}/{f.relative_to(d).as_posix()}"] = sha256_raw(f)
@@ -292,6 +370,8 @@ def verify_equivalence(cfg: dict) -> dict:
             raise RuntimeError(f"Modal helper {fn}() differs from the accepted smoke app")
     for const, mine in (("GATE_TIMEOUT_S", GATE_TIMEOUT_S), ("POINT_TIMEOUT_S", POINT_TIMEOUT_S),
                         ("POINTS_PER_SWEEP", POINTS_PER_SWEEP), ("GPU_CLEAN_TOLERANCE_MIB", 256),
+                        ("L8192_POINT_TIMEOUT_S", L8192_POINT_TIMEOUT_S), ("TRIAL_POINTS", TRIAL_POINTS),
+                        ("MODAL_BACKSTOP_S", MODAL_FUNCTION_TIMEOUT_S),
                         ("EXPECTED_RABIT_SHA256_LF", rs6.a2.r5.EXPECTED_RABIT_SHA256_LF)):
         if rd._const(m, const) != mine:
             raise RuntimeError(f"Modal {const} differs")
@@ -299,13 +379,19 @@ def verify_equivalence(cfg: dict) -> dict:
                     for k in getattr(dec, "keywords", []) if k.arg == "timeout")
     if not (backstop == MODAL_FUNCTION_TIMEOUT_S > WATCHDOG_BUDGET_S):
         raise RuntimeError(f"Modal backstop {backstop} must exceed the watchdog budget {WATCHDOG_BUDGET_S}")
+    for L in EXECUTION:  # the invariant holds for every pinned execution grouping
+        if not backstop > static_watchdog_budget(L):
+            raise RuntimeError(f"Modal backstop {backstop} must exceed the L{L} static budget {static_watchdog_budget(L)}")
     rs6.verify_equivalence(cfg)  # accepted shared_decode / triton_attn / rabit_kv2 sources, smoke app unchanged
     return {"engine_kwargs_equal_frozen_exp5_except_max_num_seqs_and_kv_dtype": True, "greedy": True,
             "image_and_helpers_equal_accepted_smoke_app": True, "accepted_implementation_sources": True,
-            "watchdog_budget_s": WATCHDOG_BUDGET_S, "modal_backstop_s": backstop}
+            "watchdog_budget_s": WATCHDOG_BUDGET_S, "modal_backstop_s": backstop,
+            "static_watchdog_budget_per_run_s": {str(L): static_watchdog_budget(L) for L in EXECUTION}}
 
 
-def preflight(length: int, dry_run: bool) -> dict:
+def preflight(length: int, dry_run: bool, trial: int | None = None) -> dict:
+    if trial not in EXECUTION[length]["runs"]:
+        raise RuntimeError(f"L{length} is executed as runs {EXECUTION[length]['runs']}; got trial={trial}")
     assert_protected_paths_clean("preflight")
     cfg = rs6.final_config()
     protocol = load_protocol()
@@ -318,34 +404,55 @@ def preflight(length: int, dry_run: bool) -> dict:
     uncommitted = run_git("status", "--short", "--", *[rel(p) for p in MUST_BE_COMMITTED])
     if uncommitted and not dry_run:
         raise RuntimeError("Refusing to run: Exp6 harness has uncommitted changes:\n" + uncommitted)
-    d = out_dir(length)
+    d = run_dir(length, trial)
     if any(d == x or x in d.parents or d in x.parents for x in excluded_attempts(length)):
         raise RuntimeError(f"Refusing to run: {rel(d)} overlaps an archived diagnostic attempt")
     leftovers = sorted(p.name for p in d.iterdir()) if d.is_dir() else []
     if leftovers and not dry_run:
         raise RuntimeError(f"Refusing to run: {rel(d)} is not empty ({leftovers})")
+    amendment_sha, earlier = None, []
+    if trial is not None:
+        load_l8192_amendment()
+        amendment_sha = sha256(L8192_AMENDMENT)
+        for tt in EXECUTION[length]["runs"][:EXECUTION[length]["runs"].index(trial)]:  # strictly sequential trials
+            prev = run_dir(length, tt)
+            mp = prev / "manifest.json"
+            m = json.loads(mp.read_text(encoding="utf-8")) if mp.is_file() else {}
+            r = m.get("remote_session_log") or {}
+            if not (r.get("done_found") and r.get("remote_log_found") and m.get("status") in ("completed", "failed")):
+                raise RuntimeError(f"Refusing to run trial {trial}: trial {tt} has not reached a terminal remote state "
+                                   f"with its complete raw evidence retrieved ({rel(prev)})")
+            earlier.append(prev)
     return {"git_head": run_git("rev-parse", "HEAD"), "vllm_kvquant_tree": run_git("rev-parse", "HEAD:vllm-kvquant"),
+            "trial": trial, "execution": {**EXECUTION[length], "runs": list(EXECUTION[length]["runs"]),
+                                          "static_watchdog_budget_s": static_watchdog_budget(length),
+                                          "modal_backstop_s": MODAL_FUNCTION_TIMEOUT_S},
+            "l8192_amendment_sha256": amendment_sha, "earlier_trial_dirs": [rel(x) for x in earlier],
             "final_config": cfg, "equivalence": eq, "protocol_sha256": sha256(PROTOCOL),
             "prompt_set_sha256": protocol["prompt_sets"][str(length)]["measured"]["ordered_set_sha256"],
             "runner_script_sha256": sha256(RUNNER_SCRIPT), "modal_app_sha256": sha256(MODAL_APP),
             "worker_sha256": sha256(WORKER), "workload_sha256": sha256(WORKLOAD),
-            "protected_paths": [rel(p) for p in PROTECTED_PATHS], "prior_evidence_sha256_raw": prior_evidence_digest(),
+            "protected_paths": [rel(p) for p in PROTECTED_PATHS],
+            "prior_evidence_sha256_raw": prior_evidence_digest(tuple(earlier)),
             "uncommitted_files": uncommitted or None, "existing_output_files": leftovers or None}
 
 
-def points_arg(length: int) -> str:
+def points_arg(length: int, trial: int | None = None) -> str:
     return ",".join(f"{p['label']}={p['dtype']}:{p['prompt_tokens']}:{p['concurrency']}:{p['trial']}"
-                    for p in wl.plan_points(length))
+                    for p in run_plan(length, trial))
 
 
-def build_command(length: int, prompt_set_sha: str, cfg: dict, run_id: str) -> list[str]:
-    return [sys.executable, "-m", "modal", "run", "--detach", str(MODAL_APP), "--points", points_arg(length),
+def build_command(length: int, prompt_set_sha: str, cfg: dict, run_id: str, trial: int | None = None) -> list[str]:
+    e = EXECUTION[length]
+    return [sys.executable, "-m", "modal", "run", "--detach", str(MODAL_APP), "--points", points_arg(length, trial),
             "--prompt-set-sha256", prompt_set_sha, "--stage3c-impl", cfg["impl"], "--query-block", str(cfg["query_block"]),
-            "--run-id", run_id]
+            "--run-id", run_id, "--point-timeout-s", str(e["point_timeout_s"]), "--expected-points",
+            str(e["points_per_run"])]
 
 
-def make_run_id(length: int, git_head: str) -> str:
-    return f"exp6-L{length}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{git_head[:7]}"
+def make_run_id(length: int, git_head: str, trial: int | None = None) -> str:
+    t = "" if trial is None else f"-t{trial}"
+    return f"exp6-L{length}{t}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{git_head[:7]}"
 
 
 def modal_volume_get(remote: str, local: Path) -> bool:
@@ -630,8 +737,8 @@ def parse_top(lines: list[str]) -> dict:
     return out
 
 
-def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, dict]:
-    plan = wl.plan_points(length)
+def analyze(text: str, length: int, cfg: dict, protocol: dict, trial: int | None = None) -> tuple[dict, dict]:
+    plan = run_plan(length, trial)
     pts_lines, gate_lines, top_lines = demux(text, plan)
     top = parse_top(top_lines)
     gate = rs6.a2.r5.parse_gate(gate_lines)
@@ -647,12 +754,21 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
     env = top.get("S3C_ENVIRONMENT", {})
     add("exactly one H100", "environment",
         (len(env.get("gpus", [])) == 1 and "H100" in env["gpus"][0].get("name", "")) if env else NOT_EVALUATED)
-    add("point order as pre-registered (36 points)", "environment",
+    add(f"point order as pre-registered ({len(plan)} points)", "environment",
         env.get("point_labels") == [p["label"] for p in plan] if env else NOT_EVALUATED)
+    if trial is not None:  # amended execution: one trial per run with the pinned watchdog budget
+        e = EXECUTION[length]
+        add(f"execution: trial {trial} only, {e['points_per_run']} points, point watchdog {e['point_timeout_s']} s, "
+            f"static budget {static_watchdog_budget(length)} s < backstop {MODAL_FUNCTION_TIMEOUT_S} s", "environment",
+            (env.get("point_timeout_s") == e["point_timeout_s"] and env.get("expected_points") == e["points_per_run"]
+             and env.get("static_watchdog_budget_s") == static_watchdog_budget(length)
+             and env.get("modal_backstop_s") == MODAL_FUNCTION_TIMEOUT_S
+             and all(q["trial"] == trial for q in plan)) if env else NOT_EVALUATED,
+            {k: env.get(k) for k in ("point_timeout_s", "expected_points", "static_watchdog_budget_s")} if env else None)
     add("gate passed", "gate", (top.get("S3C_GATE_EXIT", {}).get("returncode") == 0
                                 and (gate.get("result") or {}).get("passed") is True) if "S3C_GATE_START" in top else NOT_RUN)
-    add("sweep completed all 36 points (no stop)", "completion",
-        bool(top["complete"]) and top["complete"].get("points") == POINTS_PER_SWEEP and not top["stopped"],
+    add(f"sweep completed all {len(plan)} points (no stop)", "completion",
+        bool(top["complete"]) and top["complete"].get("points") == len(plan) and not top["stopped"],
         top["stopped"] or None)
     base = top.get("S3C_GPU_BASELINE", {})
     results, points_out = {}, []
@@ -733,7 +849,102 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
                "labels": {"concurrency": CONCURRENCY_TERMINOLOGY,
                           "gpu_memory": "device-wide nvidia-smi memory.used; NOT request KV memory",
                           "capacity": "MEASURED allocator capacity (num_gpu_blocks x block_size)"}}
+    if trial is not None:  # ONE trial: never a complete result; all-trial statements need --combine
+        summary.update(trial=trial, complete_three_trial_result=False,
+                       highest_successfully_tested_concurrency=None, rabit_only_extension=None,
+                       all_trial_statements="require --combine over all three trial-level analyses",
+                       execution_environment={k: env.get(k) for k in ("gpus", "point_timeout_s", "expected_points",
+                                                                        "static_watchdog_budget_s", "modal_backstop_s")})
     return integ, summary
+
+
+CROSS_TRIAL_METRICS = {
+    "requests_per_s": lambda p: p["requests_per_s"], "output_tokens_per_s": lambda p: p["output_tokens_per_s"],
+    "total_tokens_per_s": lambda p: p["total_tokens_per_s"], "wall_s": lambda p: p["wall_s"],
+    "latency_median_s": lambda p: p["latency_s"]["median"], "latency_p90_s": lambda p: p["latency_s"]["p90"],
+    "latency_p99_s": lambda p: p["latency_s"]["p99"], "ttft_median_s": lambda p: p["ttft_s"]["median"],
+    "ttft_p90_s": lambda p: p["ttft_s"]["p90"], "tpot_median_s": lambda p: p["tpot_s"]["median"],
+    "tpot_p90_s": lambda p: p["tpot_s"]["p90"], "preemptions": lambda p: p["preemptions"],
+    "observed_max_inflight_concurrency": lambda p: (p["inflight_concurrency"] or {}).get("observed_max_inflight_concurrency"),
+    "all_c_inflight_overlap_total_s": lambda p: (p["inflight_concurrency"] or {}).get("all_c_inflight_overlap_total_s"),
+}
+RATIO_METRICS = ("requests_per_s", "output_tokens_per_s", "total_tokens_per_s", "latency_median_s", "latency_p90_s",
+                 "latency_p99_s", "ttft_median_s", "ttft_p90_s", "tpot_median_s", "tpot_p90_s")
+
+
+def combine_trials(length: int, trials: dict) -> dict:
+    """Cross-trial result from the trial-level analyses ONLY. `trials` maps trial -> {"summary", "integrity",
+    "provenance"}. Every metric is first computed within a trial (by analyze); the cross-trial value is the median of
+    the three trial-level values. No per-request sample is read, so raw samples cannot be pooled across trials."""
+    expected = EXECUTION[length]["runs"]
+    if tuple(sorted(trials)) != tuple(expected) or None in expected:
+        raise ValueError(f"cross-trial summary needs exactly trials {expected}; got {sorted(trials)}")
+    points, results = [], {}
+    for t in expected:
+        s = trials[t]["summary"]
+        labels = [p["label"] for p in run_plan(length, t)]
+        if s.get("trial") != t or s.get("prompt_tokens") != length or [p["label"] for p in s["points"]] != labels \
+                or any(p["trial"] != t for p in s["points"]):
+            raise ValueError(f"trial {t} analysis does not have the identity of pre-registered trial {t}")
+        for p in s["points"]:
+            points.append(p)
+            results[(p["dtype"], p["target_concurrency"], t)] = {
+                "class": p["outcome_class"],
+                "interpretable_success": p["outcome_class"] == "sustained_target_concurrency" and p["interpretable"]}
+    by = {(p["dtype"], p["target_concurrency"], p["trial"]): p for p in points}
+    table = {}
+    for dtype in ("bfloat16", "rabit_kv2"):
+        for c in wl.CONCURRENCY_GRID:
+            row = {"outcome_class_per_trial": {str(t): by[(dtype, c, t)]["outcome_class"] for t in expected},
+                   "interpretable_per_trial": {str(t): by[(dtype, c, t)]["interpretable"] for t in expected}}
+            for name, get in CROSS_TRIAL_METRICS.items():
+                vals = {str(t): get(by[(dtype, c, t)]) for t in expected}
+                ok = all(v is not None for v in vals.values())
+                row[name] = {"per_trial": vals,
+                             "cross_trial_median": statistics.median(vals.values()) if ok else None}
+            table[f"{dtype}|{c}"] = row
+    ratios = {}
+    for c in wl.CONCURRENCY_GRID:
+        b, r = table[f"bfloat16|{c}"], table[f"rabit_kv2|{c}"]
+        ratios[str(c)] = {m: (r[m]["cross_trial_median"] / b[m]["cross_trial_median"]
+                              if r[m]["cross_trial_median"] is not None and b[m]["cross_trial_median"] else None)
+                          for m in RATIO_METRICS}
+    per_trial_validity = {str(t): {"integrity_counts": trials[t]["integrity"]["counts"],
+                                   "all_integrity_passed": trials[t]["integrity"]["all_ok"],
+                                   **trials[t].get("provenance", {})} for t in expected}
+    return {"summary_schema": SUMMARY_SCHEMA, "prompt_tokens": length, "complete_three_trial_result": True,
+            "execution": {**EXECUTION[length], "runs": list(expected)},
+            "sample_pooling": "none: cross-trial values are medians of trial-level statistics; raw per-request samples "
+                              "are never concatenated across trials",
+            "per_trial_validity": per_trial_validity,
+            "all_trials_integrity_passed": all(v["all_integrity_passed"] for v in per_trial_validity.values()),
+            "cross_trial": table, "rabit_over_bf16_cross_trial_median_ratio": ratios,
+            "outcome_class_counts": {c: sum(1 for p in points if p["outcome_class"] == c) for c in CLASSES},
+            "highest_successfully_tested_concurrency": highest_successful(results),
+            "rabit_only_extension": extension_eligibility(results),
+            "labels": {"concurrency": CONCURRENCY_TERMINOLOGY}}
+
+
+def combine_from_disk(length: int) -> int:
+    trials = {}
+    for t in EXECUTION[length]["runs"]:
+        d = run_dir(length, t)
+        m = json.loads((d / "manifest.json").read_text(encoding="utf-8"))
+        s = json.loads((d / "summary.json").read_text(encoding="utf-8"))
+        r = m.get("remote_session_log") or {}
+        trials[t] = {"summary": s, "integrity": json.loads((d / "integrity_check.json").read_text(encoding="utf-8")),
+                     "provenance": {"run_id": m.get("run_id"), "manifest_status": m.get("status"),
+                                    "remote_log_complete": r.get("complete"),
+                                    "remote_session_log_sha256": r.get("remote_log_sha256"),
+                                    "code_commit": m["provenance"]["git_head"],
+                                    "protocol_sha256": m["provenance"]["protocol_sha256"],
+                                    "l8192_amendment_sha256": m["provenance"].get("l8192_amendment_sha256"),
+                                    "gpu_uuid": [g.get("uuid") for g in (s.get("execution_environment") or {}).get("gpus") or []]}}
+    combined = combine_trials(length, trials)
+    (out_dir(length) / "combined_summary.json").write_text(json.dumps(combined, indent=2, default=str) + "\n",
+                                                           encoding="utf-8")
+    print(f"EXP6 L{length} COMBINED: all trials integrity passed = {combined['all_trials_integrity_passed']}")
+    return 0 if combined["all_trials_integrity_passed"] else 1
 
 
 def normalize_pre_keyfix_summary(old: dict) -> dict:
@@ -799,6 +1010,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--write-protocol", action="store_true", help="write exp6_protocol.json (pre-commit only)")
     ap.add_argument("--rabit-extension", action="store_true", help="NOT enabled until reviewed")
     ap.add_argument("--reparse", action="store_true", help="offline re-analysis of the pinned accepted raw log")
+    ap.add_argument("--trial", type=int, choices=(1, 2, 3), help="L8192: the ONE trial this Modal run executes")
+    ap.add_argument("--combine", action="store_true", help="L8192: cross-trial summary from the 3 trial analyses")
     a = ap.parse_args(argv)
     if a.rabit_extension:
         raise SystemExit("RABIT-only extension points are pre-registered but NOT enabled until review")
@@ -813,8 +1026,12 @@ def main(argv: list[str] | None = None) -> int:
     L = a.prompt_tokens
     if a.reparse:
         return reparse(L)
-    print(f"RABIT-KV MLSys 2027 -- Experiment 6 concurrency scaling, prompt length {L} (one Modal run)")
-    prov = preflight(L, a.dry_run)
+    if a.combine:
+        return combine_from_disk(L)
+    T = a.trial
+    print(f"RABIT-KV MLSys 2027 -- Experiment 6 concurrency scaling, prompt length {L} "
+          f"({'one Modal run' if T is None else f'trial {T} only, one Modal run'})")
+    prov = preflight(L, a.dry_run, T)
     cfg = prov["final_config"]
     print("Preflight OK:", json.dumps({k: prov[k] for k in ("git_head", "vllm_kvquant_tree", "protocol_sha256",
                                                              "prompt_set_sha256")}))
@@ -823,24 +1040,27 @@ def main(argv: list[str] | None = None) -> int:
     print("  expected runtime:", json.dumps(expected_runtime(L)))
     if prov["uncommitted_files"]:
         print("  WARNING (dry-run only): uncommitted:\n    " + prov["uncommitted_files"].replace("\n", "\n    "))
-    print("Order:", [p["label"] for p in wl.plan_points(L)])
-    run_id = make_run_id(L, prov["git_head"])
-    print("Local command:\n  " + " ".join(build_command(L, prov["prompt_set_sha256"], cfg, run_id))[:600] + " ...")
+    plan = run_plan(L, T)
+    print("Order:", [p["label"] for p in plan])
+    print("  execution:", json.dumps(prov["execution"]))
+    run_id = make_run_id(L, prov["git_head"], T)
+    print("Local command:\n  " + " ".join(build_command(L, prov["prompt_set_sha256"], cfg, run_id, T))[:600] + " ...")
     if a.dry_run:
         print("\n--dry-run: nothing executed, no files written.")
         return 0
-    d = out_dir(L)
+    d = run_dir(L, T)
     d.mkdir(parents=True, exist_ok=True)
     manifest = {"experiment": "Experiment 6 concurrency scaling", "prompt_tokens": L, "scope": SCOPE,
                 "amendments": AMENDMENTS, "attempt": ATTEMPT_DIR_NAME,
                 "excluded_attempts_not_pooled": [rel(x) for x in excluded_attempts(L)], "run_id": run_id,
+                "trial": T, "execution": prov["execution"],
                 "launch": "modal run --detach", "started_utc": now(), "status": "running", "provenance": prov}
     mpath = d / "manifest.json"
     mpath.write_text(json.dumps(manifest, indent=2, default=str) + "\n", encoding="utf-8")
     snap = Path(tempfile.mkdtemp(prefix="exp6_vllm_snapshot_")) / "vllm_kvquant_snapshot.zip"
     run_git("-c", "core.autocrlf=false", "archive", "--format=zip", "-o", str(snap), "HEAD:vllm-kvquant")
     manifest["vllm_kvquant_snapshot"] = {"sha256": sha256_raw(snap), "bytes": snap.stat().st_size}
-    cmd = build_command(L, prov["prompt_set_sha256"], cfg, run_id)
+    cmd = build_command(L, prov["prompt_set_sha256"], cfg, run_id, T)
     t_launch = time.monotonic()
     code = stream_command(cmd, d / "modal_session.log", {"EXP6_VLLM_SNAPSHOT": str(snap)})
     manifest["modal_returncode"] = code  # local client only; with --detach the remote sweep may outlive it
@@ -852,10 +1072,10 @@ def main(argv: list[str] | None = None) -> int:
     source = d / ("remote_session.log" if remote["remote_log_found"] else "modal_session.log")
     manifest["analyzed_log"] = source.name
     text = source.read_text(encoding="utf-8", errors="replace")
-    integ, summary = analyze(text, L, cfg, load_protocol())
-    pts, gate_lines, _ = demux(text, wl.plan_points(L))
+    integ, summary = analyze(text, L, cfg, load_protocol(), T)
+    pts, gate_lines, _ = demux(text, plan)
     (d / "correctness_gate.log").write_text("\n".join(gate_lines) + "\n", encoding="utf-8")
-    for p in wl.plan_points(L):
+    for p in plan:
         name = f"{'bf16' if p['dtype'] == 'bfloat16' else 'rabit_kv2'}_conc{p['concurrency']}_t{p['trial']}.log"
         (d / name).write_text("\n".join(pts[p["label"]]) + "\n", encoding="utf-8")
     (d / "integrity_check.json").write_text(json.dumps(integ, indent=2, default=str) + "\n", encoding="utf-8")
@@ -867,7 +1087,8 @@ def main(argv: list[str] | None = None) -> int:
         manifest["protected_paths_post_run_status"] = "clean"
     except RuntimeError as e:
         manifest.update(protected_paths_post_run_status="check_failed", status="failed", protected_paths_error=str(e))
-    manifest["prior_evidence_unchanged"] = prior_evidence_digest() == prov["prior_evidence_sha256_raw"]
+    manifest["prior_evidence_unchanged"] = (prior_evidence_digest(tuple(ROOT / x for x in prov["earlier_trial_dirs"]))
+                                            == prov["prior_evidence_sha256_raw"])
     if not manifest["prior_evidence_unchanged"]:
         manifest["status"] = "failed"
     mpath.write_text(json.dumps(manifest, indent=2, default=str) + "\n", encoding="utf-8")

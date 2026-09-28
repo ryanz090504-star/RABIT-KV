@@ -1,0 +1,54 @@
+{
+  "amendment": "Experiment 6 L8192 execution amendment (infrastructure only)",
+  "scientific_protocol_unchanged": true,
+  "scientific_protocol_file": "benchmarks/mlsys2027/exp6_protocol.json",
+  "changed": [
+    "execution grouping (L8192 only)",
+    "L8192 point watchdog"
+  ],
+  "original_plan": "one prompt-length sweep (all 36 points, 3 trials) in one Modal run",
+  "amended_l8192_execution": {
+    "grouping": "one pre-registered trial per detached Modal run; trials run SEQUENTIALLY (1, then 2, then 3); a trial starts only after the previous trial reached a terminal remote state and its complete raw evidence was retrieved",
+    "points_per_run": 12,
+    "trial_dtype_order": {
+      "1": [
+        "bfloat16",
+        "rabit_kv2"
+      ],
+      "2": [
+        "rabit_kv2",
+        "bfloat16"
+      ],
+      "3": [
+        "bfloat16",
+        "rabit_kv2"
+      ]
+    },
+    "concurrency_order_within_dtype": [
+      1,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "point_watchdog_s": {
+      "L2048": 1200,
+      "L8192": 3600
+    },
+    "gate_timeout_s": 600,
+    "modal_backstop_s": 45000,
+    "static_budget_per_trial_run_s": {
+      "formula": "600 + 12 x 3600",
+      "value": 43800
+    },
+    "backstop_margin_s": 1200,
+    "invariant": "outer Modal backstop exceeds the complete static watchdog budget of the run (preserved)"
+  },
+  "reason": "Existing-evidence-only conservative projection of L8192 point process time (256 shadow + 2 warmup + 256 measured): RABIT C4 ~2070 s, C8 ~1840 s, C16 ~1500 s, C32 ~1410 s, C64 ~1730 s, C1 ~820 s; BF16 max ~775 s. A 3600 s point watchdog gives ~1.74x margin over the slowest projection. With 3600 s, a single 36-point run's static budget (600 + 36 x 3600 = 130200 s) exceeds a single Modal function's supported / safe budget; one trial per run keeps 600 + 12 x 3600 = 43800 s < 45000 s.",
+  "preflight_wording_correction": "For the registered L8192 grid, every point with C >= 4 exceeds max_num_batched_tokens=16384 and may exercise chunked prefill (8192 x 2 = 16384 exactly). The correction changes no workload or projection.",
+  "matching": "each trial remains internally matched BF16 vs RABIT on the same H100 / container; all three trials use identical code, model, workload and prompt hashes",
+  "analysis": "each trial is analyzed independently; cross-trial summaries are medians of the three trial-level statistics; raw per-request samples are never concatenated across trials",
+  "failure_policy": "unchanged within a trial; an infrastructure-aborted trial is preserved separately with no automatic rerun; a point hitting the 3600 s watchdog is classified exactly as the harness specifies; no further timeout tuning after observing L8192 performance",
+  "l2048_unchanged": "the accepted L2048 run keeps its historical execution (one 36-point run, 1200 s watchdog)"
+}

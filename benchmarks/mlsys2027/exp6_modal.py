@@ -28,6 +28,12 @@ SESSION_LOG_VOLUME at /<run_id>/remote_session.log, committed after the gate
 and after every point; /<run_id>/DONE.json is written when the sweep function
 ends (normally or by exception). The local runner downloads both and analyzes
 the remote log. No protocol / workload / gate change.
+
+L8192 EXECUTION AMENDMENT (infrastructure only; exp6_l8192_execution_amendment.json):
+L8192 runs ONE trial (12 points) per Modal function with a 3600 s point watchdog
+(static budget 600 + 12 x 3600 = 43800 s < 45000 s backstop). L2048 keeps its
+historical execution (36 points, 1200 s). Only these two (points, watchdog)
+configurations are accepted.
 """
 
 from __future__ import annotations
@@ -65,6 +71,10 @@ LEG_TIMEOUT_S = 900  # unused here; kept identical to Experiment 3 (verified)
 REQUEST_CAP_S = 600  # unused here; kept identical (verified)
 POINT_TIMEOUT_S = 1200  # per point: engine start + 256 shadow + 2 warmup + 256 measured requests
 POINTS_PER_SWEEP = 36
+L8192_POINT_TIMEOUT_S = 3600  # L8192 execution amendment (infrastructure only)
+TRIAL_POINTS = 12  # L8192: one trial (2 dtypes x 6 C) per Modal run
+ALLOWED_EXECUTIONS = ((POINTS_PER_SWEEP, POINT_TIMEOUT_S), (TRIAL_POINTS, L8192_POINT_TIMEOUT_S))
+MODAL_BACKSTOP_S = 45000  # must equal the sweep() decorator timeout
 
 if modal.is_local() and not SNAP.is_file():
     raise RuntimeError(
@@ -258,7 +268,8 @@ def _commit_session_logs() -> None:
     timeout=45000,
     volumes={"/model_cache": model_cache, SESSION_LOG_MOUNT: session_logs},
 )
-def sweep(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int, run_id: str) -> None:
+def sweep(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int, run_id: str,
+          point_timeout_s: int = POINT_TIMEOUT_S, expected_points: int = POINTS_PER_SWEEP) -> None:
     import traceback
 
     if not run_id or "/" in run_id or ".." in run_id:
@@ -274,7 +285,7 @@ def sweep(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: i
     try:
         _emit("S3C_SESSION_LOG", {"run_id": run_id, "volume": SESSION_LOG_VOLUME,
                                   "path": f"/{run_id}/remote_session.log"})
-        _sweep_body(points, prompt_set_sha256, stage3c_impl, query_block)
+        _sweep_body(points, prompt_set_sha256, stage3c_impl, query_block, int(point_timeout_s), int(expected_points))
         done["status"] = "complete"
     except BaseException as exc:
         done["error"] = f"{type(exc).__name__}: {exc}"[:2000]
@@ -293,8 +304,15 @@ def sweep(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: i
             pass
 
 
-def _sweep_body(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int) -> None:
+def _sweep_body(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int, point_timeout_s: int,
+                expected_points: int) -> None:
     import importlib.metadata as md
+
+    if (expected_points, point_timeout_s) not in ALLOWED_EXECUTIONS:
+        raise RuntimeError(f"execution ({expected_points} points, {point_timeout_s} s) is not a pinned configuration")
+    budget = GATE_TIMEOUT_S + expected_points * point_timeout_s
+    if not budget < MODAL_BACKSTOP_S:
+        raise RuntimeError(f"static watchdog budget {budget} s does not fit under the {MODAL_BACKSTOP_S} s backstop")
 
     from modelscope import snapshot_download
 
@@ -305,8 +323,8 @@ def _sweep_body(points: str, prompt_set_sha256: str, stage3c_impl: str, query_bl
         dtype, prompt_tokens, conc, trial = spec.split(":")
         plan.append({"label": label, "dtype": dtype, "prompt_tokens": int(prompt_tokens),
                      "concurrency": int(conc), "trial": int(trial)})
-    if len(plan) != POINTS_PER_SWEEP:
-        raise RuntimeError(f"expected {POINTS_PER_SWEEP} points, got {len(plan)}")
+    if len(plan) != expected_points:
+        raise RuntimeError(f"expected {expected_points} points, got {len(plan)}")
     rabit_sha = _sha256_file(Path(RABIT_KV2_REMOTE), normalize_lf=True)
     if rabit_sha != EXPECTED_RABIT_SHA256_LF:
         raise RuntimeError(f"rabit_kv2.py in image is not the frozen source: {rabit_sha}")
@@ -323,7 +341,9 @@ def _sweep_body(points: str, prompt_set_sha256: str, stage3c_impl: str, query_bl
             versions[pkg] = None
     _emit("S3C_ENVIRONMENT", {"gpus": _gpu_query(), "python": sys.version.split()[0], "packages": versions,
                               "rabit_kv2_sha256_lf": rabit_sha, "stage3c_impl": stage3c_impl,
-                              "query_block": int(query_block), "point_timeout_s": POINT_TIMEOUT_S,
+                              "query_block": int(query_block), "point_timeout_s": point_timeout_s,
+                              "expected_points": expected_points, "static_watchdog_budget_s": budget,
+                              "modal_backstop_s": MODAL_BACKSTOP_S,
                               "point_labels": [p["label"] for p in plan], "prompt_set_sha256": prompt_set_sha256})
     gate_cmd = [sys.executable, GATE_REMOTE]
     _emit("S3C_GATE_START", {"cmd": gate_cmd, "timeout_s": GATE_TIMEOUT_S})
@@ -349,9 +369,9 @@ def _sweep_body(points: str, prompt_set_sha256: str, stage3c_impl: str, query_bl
                "--trial", str(p["trial"]), "--label", p["label"], "--prompt-set-sha256", prompt_set_sha256]
         if p["dtype"] == "rabit_kv2":
             cmd += ["--stage3c-impl", stage3c_impl, "--query-block", str(int(query_block))]
-        _emit("S3C_SERIES_START", {"series": p["label"], "index": k, **p, "cmd": cmd, "timeout_s": POINT_TIMEOUT_S})
+        _emit("S3C_SERIES_START", {"series": p["label"], "index": k, **p, "cmd": cmd, "timeout_s": point_timeout_s})
         # Same watchdog as _run_guarded, but a timed-out / failed point is recorded instead of stopping the sweep.
-        meta = run_with_watchdog(cmd, f"[pt{k}:{p['label']}] ", POINT_TIMEOUT_S, p["label"])
+        meta = run_with_watchdog(cmd, f"[pt{k}:{p['label']}] ", point_timeout_s, p["label"])
         _emit("S3C_PROCESS_EXIT", meta)
         if meta["timed_out"]:
             _emit("S3C_WATCHDOG_TIMEOUT", meta)
@@ -370,6 +390,8 @@ def _sweep_body(points: str, prompt_set_sha256: str, stage3c_impl: str, query_bl
 
 
 @app.local_entrypoint()
-def main(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int, run_id: str):
+def main(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int, run_id: str,
+         point_timeout_s: int = POINT_TIMEOUT_S, expected_points: int = POINTS_PER_SWEEP):
     sweep.remote(points=points, prompt_set_sha256=prompt_set_sha256, stage3c_impl=stage3c_impl,
-                 query_block=query_block, run_id=run_id)
+                 query_block=query_block, run_id=run_id, point_timeout_s=point_timeout_s,
+                 expected_points=expected_points)
