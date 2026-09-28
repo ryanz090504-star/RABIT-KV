@@ -19,6 +19,15 @@ Inside ONE container / ONE physical GPU, for ONE prompt length:
      next point -- only a GPU that is not back to its idle baseline stops the run;
   4. post-run GPU state.
 Nothing is retried.
+
+REMOTE-LOG CAPTURE (harness-only, after the infrastructure-aborted L2048
+attempt 3): the app is launched with `modal run --detach`, so the sweep keeps
+running if the local client disconnects. The COMPLETE remote stdout (every
+line the sweep and its watchdogged children print) is tee'd to the Modal Volume
+SESSION_LOG_VOLUME at /<run_id>/remote_session.log, committed after the gate
+and after every point; /<run_id>/DONE.json is written when the sweep function
+ends (normally or by exception). The local runner downloads both and analyzes
+the remote log. No protocol / workload / gate change.
 """
 
 from __future__ import annotations
@@ -67,6 +76,9 @@ app = modal.App("rabit-kv-mlsys2027-exp6-concurrency-scaling")
 model_cache = modal.Volume.from_name(
     "modelscope-llama31-cache", create_if_missing=True
 )
+SESSION_LOG_VOLUME = "rabit-kv-mlsys2027-exp6-session-logs"
+SESSION_LOG_MOUNT = "/session_logs"
+session_logs = modal.Volume.from_name(SESSION_LOG_VOLUME, create_if_missing=True)
 
 image = (
     modal.Image.from_registry(
@@ -210,13 +222,78 @@ def _run_guarded(cmd: list[str], prefix: str, timeout_s: int, label: str) -> dic
     return meta
 
 
+class _Tee:
+    """Writes every line to the original stream AND the remote session log file."""
+
+    def __init__(self, stream, fh):
+        self._stream, self._fh = stream, fh
+
+    def write(self, text):
+        self._stream.write(text)
+        self._fh.write(text)
+        return len(text)
+
+    def flush(self):
+        self._stream.flush()
+        self._fh.flush()
+
+    def fileno(self):
+        return self._stream.fileno()
+
+    def isatty(self):
+        return False
+
+
+def _commit_session_logs() -> None:
+    try:
+        sys.stdout.flush()
+        session_logs.commit()
+    except Exception as exc:  # noqa: BLE001  (never let log persistence change the sweep)
+        print(f"S3C_SESSION_LOG_COMMIT_ERROR={json.dumps({'error': repr(exc)[:500]})}", flush=True)
+
+
 @app.function(
     image=image,
     gpu="H100",
     timeout=45000,
-    volumes={"/model_cache": model_cache},
+    volumes={"/model_cache": model_cache, SESSION_LOG_MOUNT: session_logs},
 )
-def sweep(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int) -> None:
+def sweep(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int, run_id: str) -> None:
+    import traceback
+
+    if not run_id or "/" in run_id or ".." in run_id:
+        raise RuntimeError(f"invalid run_id {run_id!r}")
+    run_dir = Path(SESSION_LOG_MOUNT) / run_id
+    if run_dir.exists():
+        raise RuntimeError(f"session-log directory {run_dir} already exists; run ids are never reused")
+    run_dir.mkdir(parents=True)
+    fh = (run_dir / "remote_session.log").open("w", encoding="utf-8")
+    orig_out, orig_err = sys.stdout, sys.stderr
+    sys.stdout, sys.stderr = _Tee(orig_out, fh), _Tee(orig_err, fh)
+    done = {"run_id": run_id, "status": "exception", "error": None}
+    try:
+        _emit("S3C_SESSION_LOG", {"run_id": run_id, "volume": SESSION_LOG_VOLUME,
+                                  "path": f"/{run_id}/remote_session.log"})
+        _sweep_body(points, prompt_set_sha256, stage3c_impl, query_block)
+        done["status"] = "complete"
+    except BaseException as exc:
+        done["error"] = f"{type(exc).__name__}: {exc}"[:2000]
+        traceback.print_exc()
+        raise
+    finally:
+        sys.stdout.flush()
+        sys.stderr.flush()
+        sys.stdout, sys.stderr = orig_out, orig_err
+        fh.close()
+        done["finished_unix"] = time.time()
+        (run_dir / "DONE.json").write_text(json.dumps(done, sort_keys=True) + "\n", encoding="utf-8")
+        try:
+            session_logs.commit()
+        except Exception:  # noqa: BLE001
+            pass
+
+
+def _sweep_body(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int) -> None:
     import importlib.metadata as md
 
     from modelscope import snapshot_download
@@ -252,6 +329,7 @@ def sweep(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: i
     _emit("S3C_GATE_START", {"cmd": gate_cmd, "timeout_s": GATE_TIMEOUT_S})
     code = _run_guarded(gate_cmd, "[gate] ", GATE_TIMEOUT_S, "gate")["returncode"]
     _emit("S3C_GATE_EXIT", {"returncode": code})
+    _commit_session_logs()
     if code != 0:
         raise RuntimeError(f"correctness gate failed with exit code {code}; no point run")
     os.environ["MODELSCOPE_CACHE"] = "/model_cache"
@@ -284,6 +362,7 @@ def sweep(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: i
                                   "timed_out": meta["timed_out"]})
         if meta["returncode"] != 0 or meta["timed_out"]:
             failed.append(p["label"])
+        _commit_session_logs()
     _require_clean("post_run", baseline["memory_used_mib"])
     _emit("S3C_POST_RUN_GPU_STATE", _gpu_state())
     _emit("S3C_SWEEP_COMPLETE", {"points": len(plan), "failed_points": failed})
@@ -291,6 +370,6 @@ def sweep(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: i
 
 
 @app.local_entrypoint()
-def main(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int):
+def main(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int, run_id: str):
     sweep.remote(points=points, prompt_set_sha256=prompt_set_sha256, stage3c_impl=stage3c_impl,
-                 query_block=query_block)
+                 query_block=query_block, run_id=run_id)

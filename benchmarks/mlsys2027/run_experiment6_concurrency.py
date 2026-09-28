@@ -22,6 +22,14 @@ loop) -- then the original 2 warmup requests, then the unchanged 256 measured
 requests. A point is interpretable only if measured-phase JIT == 0 and its
 shadow-conditioning pass is valid.
 
+REMOTE-LOG CAPTURE (harness-only, after the infrastructure-aborted L2048
+attempt 3, whose local Modal client disconnected): the sweep is launched with
+`modal run --detach` under a unique run id; the Modal app tees its complete
+stdout to a Modal Volume and writes DONE.json at the end. The runner downloads
+remote_session.log + DONE.json (waiting for DONE.json if the local client
+stream ended early) and analyzes the REMOTE log; the locally streamed
+modal_session.log is kept as a secondary record. Protocol unchanged.
+
 Frozen workload (exp6_workload.py; hashes frozen in exp6_protocol.json): prompt
 lengths 2048 and 8192 (separate sweeps / separate Modal runs); concurrency
 {1,4,8,16,32,64}; per point 2 warmup requests (discarded) + 256 measured
@@ -61,7 +69,10 @@ import math
 import re
 import statistics
 import sys
+import subprocess
 import tempfile
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -89,9 +100,20 @@ BASE_OUT = ROOT / "results" / "mlsys2027" / "concurrency_scaling"
 DIAGNOSTIC_ATTEMPTS = {2048: [BASE_OUT / "L2048" / "jit_contaminated_attempt_1",
                               BASE_OUT / "L2048" / "jit_contaminated_attempt_2"]}
 ATTEMPT_DIR_NAME = "shadow_conditioned"  # output directory of the accepted-protocol sweep per prompt length
-EVIDENCE_DIRS = [*rs6.EVIDENCE_DIRS, SMOKE_DIR, *[d for ds in DIAGNOSTIC_ATTEMPTS.values() for d in ds]]
+# Infrastructure-aborted attempts: excluded and never pooled, but NOT part of the frozen protocol file.
+INFRA_ABORTED_ATTEMPTS = {2048: [BASE_OUT / "L2048" / "infrastructure_aborted_attempt_3"]}
+
+
+def excluded_attempts(length: int) -> list[Path]:
+    return [*DIAGNOSTIC_ATTEMPTS.get(length, []), *INFRA_ABORTED_ATTEMPTS.get(length, [])]
+
+
+_ALL_EXCLUDED = [d for L in sorted({*DIAGNOSTIC_ATTEMPTS, *INFRA_ABORTED_ATTEMPTS}) for d in excluded_attempts(L)]
+EVIDENCE_DIRS = [*rs6.EVIDENCE_DIRS, SMOKE_DIR, *_ALL_EXCLUDED]
 PROTECTED_PATHS = [*rs6.PROTECTED_PATHS, SMOKE_DIR, rs6.RUNNER_SCRIPT, rs6.MODAL_APP, rs6.WORKER,
-                   *[d for ds in DIAGNOSTIC_ATTEMPTS.values() for d in ds]]
+                   *_ALL_EXCLUDED]
+SESSION_LOG_VOLUME = "rabit-kv-mlsys2027-exp6-session-logs"
+REMOTE_POLL_S = 120
 MUST_BE_COMMITTED = [RUNNER_SCRIPT, MODAL_APP, WORKER, WORKLOAD, PROTOCOL, OFFLINE_TESTS, rs6.rsd.GATE,
                      rs6.rsd.WATCHDOG]
 EXPECTED_CAPACITY = {"bfloat16": 393024, "rabit_kv2": 2074592}
@@ -278,7 +300,7 @@ def preflight(length: int, dry_run: bool) -> dict:
     if uncommitted and not dry_run:
         raise RuntimeError("Refusing to run: Exp6 harness has uncommitted changes:\n" + uncommitted)
     d = out_dir(length)
-    if any(d == x or x in d.parents or d in x.parents for x in DIAGNOSTIC_ATTEMPTS.get(length, [])):
+    if any(d == x or x in d.parents or d in x.parents for x in excluded_attempts(length)):
         raise RuntimeError(f"Refusing to run: {rel(d)} overlaps an archived diagnostic attempt")
     leftovers = sorted(p.name for p in d.iterdir()) if d.is_dir() else []
     if leftovers and not dry_run:
@@ -297,9 +319,47 @@ def points_arg(length: int) -> str:
                     for p in wl.plan_points(length))
 
 
-def build_command(length: int, prompt_set_sha: str, cfg: dict) -> list[str]:
-    return [sys.executable, "-m", "modal", "run", str(MODAL_APP), "--points", points_arg(length),
-            "--prompt-set-sha256", prompt_set_sha, "--stage3c-impl", cfg["impl"], "--query-block", str(cfg["query_block"])]
+def build_command(length: int, prompt_set_sha: str, cfg: dict, run_id: str) -> list[str]:
+    return [sys.executable, "-m", "modal", "run", "--detach", str(MODAL_APP), "--points", points_arg(length),
+            "--prompt-set-sha256", prompt_set_sha, "--stage3c-impl", cfg["impl"], "--query-block", str(cfg["query_block"]),
+            "--run-id", run_id]
+
+
+def make_run_id(length: int, git_head: str) -> str:
+    return f"exp6-L{length}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{git_head[:7]}"
+
+
+def modal_volume_get(remote: str, local: Path) -> bool:
+    """Download one file from the session-log volume; False if it does not exist (yet)."""
+    env = {**__import__("os").environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
+    r = subprocess.run([sys.executable, "-m", "modal", "volume", "get", "--force", SESSION_LOG_VOLUME, remote,
+                        str(local)], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace",
+                       env=env)
+    return r.returncode == 0 and local.is_file()
+
+
+def fetch_remote_log(run_id: str, dest: Path, deadline_s: float, getter=modal_volume_get, sleep=time.sleep,
+                     clock=time.monotonic, poll_s: float = REMOTE_POLL_S) -> dict:
+    """Wait (up to deadline_s from now) for /<run_id>/DONE.json, then download remote_session.log.
+    Without DONE.json by the deadline, the latest committed partial log (if any) is still downloaded."""
+    t_end = clock() + deadline_s
+    done_path, log_path = dest / "remote_DONE.json", dest / "remote_session.log"
+    polls = 0
+    while True:
+        polls += 1
+        if getter(f"/{run_id}/DONE.json", done_path):
+            break
+        if clock() >= t_end:
+            done_path = None
+            break
+        sleep(poll_s)
+    have_log = getter(f"/{run_id}/remote_session.log", log_path)
+    done = json.loads(done_path.read_text(encoding="utf-8")) if done_path else None
+    return {"run_id": run_id, "volume": SESSION_LOG_VOLUME, "polls": polls, "done": done,
+            "done_found": done is not None, "remote_log_found": have_log,
+            "remote_log_sha256": sha256_raw(log_path) if have_log else None,
+            "remote_log_bytes": log_path.stat().st_size if have_log else None,
+            "complete": bool(done and done.get("status") == "complete" and have_log)}
 
 
 def expected_runtime(length: int) -> dict:
@@ -649,7 +709,7 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
                "outcome_class_counts": {c: sum(1 for p in points_out if p["outcome_class"] == c) for c in CLASSES},
                "highest_successfully_tested_concurrency": highest_successful(results),
                "rabit_only_extension": extension_eligibility(results),
-               "excluded_attempts_not_pooled": [rel(d) for d in DIAGNOSTIC_ATTEMPTS.get(length, [])],
+               "excluded_attempts_not_pooled": [rel(d) for d in excluded_attempts(length)],
                "labels": {"concurrency": CONCURRENCY_TERMINOLOGY,
                           "gpu_memory": "device-wide nvidia-smi memory.used; NOT request KV memory",
                           "capacity": "MEASURED allocator capacity (num_gpu_blocks x block_size)"}}
@@ -686,7 +746,8 @@ def main(argv: list[str] | None = None) -> int:
     if prov["uncommitted_files"]:
         print("  WARNING (dry-run only): uncommitted:\n    " + prov["uncommitted_files"].replace("\n", "\n    "))
     print("Order:", [p["label"] for p in wl.plan_points(L)])
-    print("Local command:\n  " + " ".join(build_command(L, prov["prompt_set_sha256"], cfg))[:600] + " ...")
+    run_id = make_run_id(L, prov["git_head"])
+    print("Local command:\n  " + " ".join(build_command(L, prov["prompt_set_sha256"], cfg, run_id))[:600] + " ...")
     if a.dry_run:
         print("\n--dry-run: nothing executed, no files written.")
         return 0
@@ -694,16 +755,25 @@ def main(argv: list[str] | None = None) -> int:
     d.mkdir(parents=True, exist_ok=True)
     manifest = {"experiment": "Experiment 6 concurrency scaling", "prompt_tokens": L, "scope": SCOPE,
                 "amendments": AMENDMENTS, "attempt": ATTEMPT_DIR_NAME,
-                "excluded_attempts_not_pooled": [rel(x) for x in DIAGNOSTIC_ATTEMPTS.get(L, [])], "started_utc": now(), "status": "running", "provenance": prov}
+                "excluded_attempts_not_pooled": [rel(x) for x in excluded_attempts(L)], "run_id": run_id,
+                "launch": "modal run --detach", "started_utc": now(), "status": "running", "provenance": prov}
     mpath = d / "manifest.json"
     mpath.write_text(json.dumps(manifest, indent=2, default=str) + "\n", encoding="utf-8")
     snap = Path(tempfile.mkdtemp(prefix="exp6_vllm_snapshot_")) / "vllm_kvquant_snapshot.zip"
     run_git("-c", "core.autocrlf=false", "archive", "--format=zip", "-o", str(snap), "HEAD:vllm-kvquant")
     manifest["vllm_kvquant_snapshot"] = {"sha256": sha256_raw(snap), "bytes": snap.stat().st_size}
-    cmd = build_command(L, prov["prompt_set_sha256"], cfg)
+    cmd = build_command(L, prov["prompt_set_sha256"], cfg, run_id)
+    t_launch = time.monotonic()
     code = stream_command(cmd, d / "modal_session.log", {"EXP6_VLLM_SNAPSHOT": str(snap)})
-    manifest["modal_returncode"] = code
-    text = (d / "modal_session.log").read_text(encoding="utf-8", errors="replace")
+    manifest["modal_returncode"] = code  # local client only; with --detach the remote sweep may outlive it
+    mpath.write_text(json.dumps(manifest, indent=2, default=str) + "\n", encoding="utf-8")
+    remaining = max(0.0, MODAL_FUNCTION_TIMEOUT_S + 1800 - (time.monotonic() - t_launch))
+    print(f"Waiting for the remote session log of {run_id} (up to {round(remaining)} s) ...", flush=True)
+    remote = fetch_remote_log(run_id, d, remaining)
+    manifest["remote_session_log"] = remote
+    source = d / ("remote_session.log" if remote["remote_log_found"] else "modal_session.log")
+    manifest["analyzed_log"] = source.name
+    text = source.read_text(encoding="utf-8", errors="replace")
     integ, summary = analyze(text, L, cfg, load_protocol())
     pts, gate_lines, _ = demux(text, wl.plan_points(L))
     (d / "correctness_gate.log").write_text("\n".join(gate_lines) + "\n", encoding="utf-8")
@@ -712,8 +782,8 @@ def main(argv: list[str] | None = None) -> int:
         (d / name).write_text("\n".join(pts[p["label"]]) + "\n", encoding="utf-8")
     (d / "integrity_check.json").write_text(json.dumps(integ, indent=2, default=str) + "\n", encoding="utf-8")
     (d / "summary.json").write_text(json.dumps(summary, indent=2, default=str) + "\n", encoding="utf-8")
-    manifest.update(status="completed" if (code == 0 and integ["all_ok"]) else "failed", completed_utc=now(),
-                    integrity_counts=integ["counts"])
+    manifest.update(status="completed" if (remote["complete"] and integ["all_ok"]) else "failed",
+                    completed_utc=now(), integrity_counts=integ["counts"])
     try:
         assert_protected_paths_clean("post-run")
         manifest["protected_paths_post_run_status"] = "clean"

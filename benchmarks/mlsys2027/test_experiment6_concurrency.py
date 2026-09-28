@@ -384,11 +384,18 @@ def test_diagnostic_attempts_never_pooled_with_accepted_results():
     for d_old in (_attempt(1), _attempt(2)):
         assert d_new != d_old and d_old not in d_new.parents and d_new not in d_old.parents
     _, s = _run()
-    assert s["excluded_attempts_not_pooled"] == [r6.rel(_attempt(1)), r6.rel(_attempt(2))] and len(s["points"]) == 36
+    a3 = r6.BASE_OUT / "L2048" / "infrastructure_aborted_attempt_3"
+    assert s["excluded_attempts_not_pooled"] == [r6.rel(_attempt(1)), r6.rel(_attempt(2)), r6.rel(a3)]
+    assert len(s["points"]) == 36
+    # the frozen protocol lists only the diagnostic attempts (attempt 3 is excluded by the runner, protocol unchanged)
     assert protocol()["excluded_attempts"]["2048"]["dirs"] == [r6.rel(_attempt(1)), r6.rel(_attempt(2))]
+    assert a3 in r6.EVIDENCE_DIRS and a3 in r6.PROTECTED_PATHS and r6.excluded_attempts(2048)[-1] == a3
+    st = json.loads((a3 / "ATTEMPT_STATUS.json").read_text(encoding="utf-8"))
+    assert st["status"] == "infrastructure_aborted" and st["accepted_for_performance_interpretation"] is False
+    assert st["use_in_paper_dataset"] is False and r6.run_git("ls-files", r6.rel(a3 / "modal_session.log"))
     orig = r6.out_dir
     try:
-        for d_old in (_attempt(1), _attempt(2)):
+        for d_old in (_attempt(1), _attempt(2), a3):
             r6.out_dir = lambda L, d=d_old: d  # a run may never write into / next to an archived attempt
             try:
                 r6.preflight(2048, dry_run=True)
@@ -408,6 +415,69 @@ def test_protocol_changed_only_by_reviewed_warmup_amendments():
     assert set(new["amendments"]) - set(old["amendments"]) == {"compile_conditioning_superseded", "shadow_conditioning"}
     assert new["amendments"]["compile_conditioning_superseded"].startswith("SUPERSEDED")
     assert all(new["amendments"][k] == v for k, v in old["amendments"].items())
+
+
+# ------------------------------------------------------------------ detached launch + remote-log capture (harness only)
+def test_detached_launch_and_run_id():
+    cmd = r6.build_command(2048, "x" * 64, cfg(), "exp6-L2048-20260928T000000Z-abcdef0")
+    assert cmd[cmd.index("run") + 1] == "--detach"
+    assert cmd[cmd.index("--run-id") + 1] == "exp6-L2048-20260928T000000Z-abcdef0"
+    rid = r6.make_run_id(2048, "5028eb2ce6a9b1dcfa7ca12bed846acf902ae9db")
+    assert rid.startswith("exp6-L2048-") and rid.endswith("-5028eb2") and "/" not in rid
+
+
+def test_modal_app_tees_complete_remote_log():
+    import ast
+    tree = ast.parse(r6.MODAL_APP.read_text(encoding="utf-8"))
+    assert r6.rd._const(tree, "SESSION_LOG_VOLUME") == r6.SESSION_LOG_VOLUME
+    sweep = ast.unparse(r6._function(tree, "sweep"))
+    assert "run_id: str" in sweep and "_Tee(orig_out, fh)" in sweep and "_sweep_body(" in sweep
+    assert "finally:" in sweep and "DONE.json" in sweep and "already exists" in sweep
+    body = r6._function(tree, "_sweep_body")
+    loop = next(n for n in ast.walk(body) if isinstance(n, ast.For) and "run_with_watchdog" in ast.unparse(n))
+    assert "_commit_session_logs()" in ast.unparse(loop)  # committed after every point
+    assert "run_with_watchdog(cmd" in ast.unparse(loop)
+    r6.verify_equivalence(cfg())  # image and verified helpers still identical to the accepted smoke app
+
+
+def _fake_volume(files, appear_after=None):
+    calls = {"n": 0}
+
+    def getter(remote, local):
+        calls["n"] += 1
+        name = remote.rsplit("/", 1)[1]
+        if name == "DONE.json" and appear_after is not None and calls["n"] <= appear_after:
+            return False
+        if name not in files:
+            return False
+        local.write_bytes(files[name].encode("utf-8"))
+        return True
+    return getter
+
+
+def test_fetch_remote_log_waits_for_done_and_reports_partial():
+    import tempfile
+    clock = {"t": 0.0}
+    tick = lambda: clock["t"]  # noqa: E731
+    sleep = lambda s: clock.__setitem__("t", clock["t"] + s)  # noqa: E731
+    with tempfile.TemporaryDirectory() as tmp:
+        d = Path(tmp)
+        done = '{"run_id": "r", "status": "complete", "error": null}'
+        r = r6.fetch_remote_log("r", d, 3600, _fake_volume({"DONE.json": done, "remote_session.log": "a\n"}),
+                                sleep, tick, 60)
+        assert r["complete"] and r["polls"] == 1 and r["remote_log_bytes"] == 2
+        clock["t"] = 0.0  # DONE.json appears only on the 4th poll (local client disconnected earlier)
+        r = r6.fetch_remote_log("r", d, 3600, _fake_volume({"DONE.json": done, "remote_session.log": "b\n"},
+                                                           appear_after=3), sleep, tick, 60)
+        assert r["complete"] and r["polls"] == 4 and clock["t"] == 180
+        clock["t"] = 0.0
+        exc = '{"run_id": "r", "status": "exception", "error": "RuntimeError: GPU not clean"}'
+        r = r6.fetch_remote_log("r", d, 3600, _fake_volume({"DONE.json": exc, "remote_session.log": "c\n"}),
+                                sleep, tick, 60)
+        assert r["done_found"] and not r["complete"]
+        clock["t"] = 0.0  # never finishes: deadline reached, partial log still fetched, not complete
+        r = r6.fetch_remote_log("r", d, 300, _fake_volume({"remote_session.log": "partial\n"}), sleep, tick, 60)
+        assert not r["done_found"] and r["remote_log_found"] and not r["complete"] and clock["t"] >= 300
 
 
 def test_missing_point_is_not_run_and_fails_completion():
