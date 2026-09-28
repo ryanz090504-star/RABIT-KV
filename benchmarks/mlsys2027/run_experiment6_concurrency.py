@@ -46,6 +46,18 @@ its historical execution (one 36-point run, 1200 s). Each trial is analyzed on i
 own (`--trial N`); `--combine` builds the cross-trial result ONLY from the three
 trial-level statistics (raw per-request samples are never pooled across trials).
 
+INDEPENDENT FUNCTIONCALL (orchestration only, after L8192 trial-1 attempt 1 was
+terminated by an InputCancellation while its local caller blocked on a
+synchronous sweep.remote()): the Modal local entrypoint now calls
+sweep.spawn(), persists the launch record (fc-... ID, App ID, run id, trial,
+commit, launch UTC) to <run dir>/function_call.json and returns. The runner
+then MONITORS the recorded FunctionCall by ID (FunctionCall.from_id; call-graph
+status, non-destructive) together with the canonical Volume log / DONE.json,
+and never cancels it. `--monitor` resumes monitoring after a local restart;
+neither path spawns a second FunctionCall once a launch record exists. A
+FunctionCall that ends TERMINATED / INIT_FAILURE (or a DONE.json reporting an
+InputCancellation) is classified infrastructure_aborted.
+
 Frozen workload (exp6_workload.py; hashes frozen in exp6_protocol.json): prompt
 lengths 2048 and 8192 (separate sweeps / separate Modal runs); concurrency
 {1,4,8,16,32,64}; per point 2 warmup requests (discarded) + 256 measured
@@ -118,7 +130,8 @@ DIAGNOSTIC_ATTEMPTS = {2048: [BASE_OUT / "L2048" / "jit_contaminated_attempt_1",
                               BASE_OUT / "L2048" / "jit_contaminated_attempt_2"]}
 ATTEMPT_DIR_NAME = "shadow_conditioned"  # output directory of the accepted-protocol sweep per prompt length
 # Infrastructure-aborted attempts: excluded and never pooled, but NOT part of the frozen protocol file.
-INFRA_ABORTED_ATTEMPTS = {2048: [BASE_OUT / "L2048" / "infrastructure_aborted_attempt_3"]}
+INFRA_ABORTED_ATTEMPTS = {2048: [BASE_OUT / "L2048" / "infrastructure_aborted_attempt_3"],
+                          8192: [BASE_OUT / "L8192" / "infrastructure_aborted" / "trial_1_attempt_1"]}
 
 
 def excluded_attempts(length: int) -> list[Path]:
@@ -145,6 +158,10 @@ ACCEPTED_RUNS = {2048: {"dir": BASE_OUT / "L2048" / "shadow_conditioned",
 EVIDENCE_DIRS.append(ACCEPTED_RUNS[2048]["dir"])  # accepted, frozen L2048 evidence
 PROTECTED_PATHS.append(ACCEPTED_RUNS[2048]["dir"])
 REMOTE_POLL_S = 120
+LAUNCH_RECORD = "function_call.json"
+# FunctionCall states (modal.call_graph.InputStatus names) after which the call can no longer produce evidence.
+TERMINAL_CALL_STATES = ("SUCCESS", "FAILURE", "TERMINATED", "TIMEOUT", "INIT_FAILURE")
+INFRA_ABORT_CALL_STATES = ("TERMINATED", "INIT_FAILURE")
 MUST_BE_COMMITTED = [RUNNER_SCRIPT, MODAL_APP, WORKER, WORKLOAD, PROTOCOL, L8192_AMENDMENT, OFFLINE_TESTS, rs6.rsd.GATE,
                      rs6.rsd.WATCHDOG]
 EXPECTED_CAPACITY = {"bfloat16": 393024, "rabit_kv2": 2074592}
@@ -442,12 +459,29 @@ def points_arg(length: int, trial: int | None = None) -> str:
                     for p in run_plan(length, trial))
 
 
-def build_command(length: int, prompt_set_sha: str, cfg: dict, run_id: str, trial: int | None = None) -> list[str]:
+def build_command(length: int, prompt_set_sha: str, cfg: dict, run_id: str, trial: int | None = None,
+                  launch_record: Path | None = None, git_commit: str = "") -> list[str]:
     e = EXECUTION[length]
     return [sys.executable, "-m", "modal", "run", "--detach", str(MODAL_APP), "--points", points_arg(length, trial),
             "--prompt-set-sha256", prompt_set_sha, "--stage3c-impl", cfg["impl"], "--query-block", str(cfg["query_block"]),
             "--run-id", run_id, "--point-timeout-s", str(e["point_timeout_s"]), "--expected-points",
-            str(e["points_per_run"])]
+            str(e["points_per_run"]), "--launch-record", str(launch_record or run_dir(length, trial) / LAUNCH_RECORD),
+            "--git-commit", git_commit, "--trial", str(trial or 0)]
+
+
+def function_call_status(fc_id: str) -> dict:
+    """Non-destructive status of a spawned FunctionCall, reconstructed from its saved ID (never cancels it)."""
+    try:
+        import modal
+        from modal.call_graph import InputStatus
+        graph = modal.FunctionCall.from_id(fc_id).get_call_graph()
+        node = next((n for n in graph if n.function_call_id == fc_id), graph[0] if graph else None)
+        if node is None:
+            return {"function_call_id": fc_id, "state": "UNKNOWN", "detail": "empty call graph"}
+        return {"function_call_id": fc_id, "state": InputStatus(node.status).name, "input_id": node.input_id,
+                "task_id": node.task_id, "function_name": node.function_name}
+    except Exception as exc:  # noqa: BLE001  (status is diagnostic; the Volume log stays canonical)
+        return {"function_call_id": fc_id, "state": "UNKNOWN", "detail": f"{type(exc).__name__}: {exc}"[:500]}
 
 
 def make_run_id(length: int, git_head: str, trial: int | None = None) -> str:
@@ -465,27 +499,42 @@ def modal_volume_get(remote: str, local: Path) -> bool:
 
 
 def fetch_remote_log(run_id: str, dest: Path, deadline_s: float, getter=modal_volume_get, sleep=time.sleep,
-                     clock=time.monotonic, poll_s: float = REMOTE_POLL_S) -> dict:
-    """Wait (up to deadline_s from now) for /<run_id>/DONE.json, then download remote_session.log.
-    Without DONE.json by the deadline, the latest committed partial log (if any) is still downloaded."""
+                     clock=time.monotonic, poll_s: float = REMOTE_POLL_S, fc_id: str | None = None,
+                     status_fn=function_call_status, terminal_grace_polls: int = 2) -> dict:
+    """Wait (up to deadline_s from now) for /<run_id>/DONE.json, then download remote_session.log. When the spawned
+    FunctionCall ID is known, its status is polled too (read-only); if it is terminal but DONE.json never appears, the
+    wait ends after `terminal_grace_polls` more polls. The latest committed (possibly partial) log is downloaded."""
     t_end = clock() + deadline_s
     done_path, log_path = dest / "remote_DONE.json", dest / "remote_session.log"
-    polls = 0
+    polls, call, terminal_seen = 0, None, 0
     while True:
         polls += 1
         if getter(f"/{run_id}/DONE.json", done_path):
             break
+        if fc_id:
+            call = status_fn(fc_id)
+            if call["state"] in TERMINAL_CALL_STATES:
+                terminal_seen += 1
+                if terminal_seen > terminal_grace_polls:
+                    done_path = None
+                    break
         if clock() >= t_end:
             done_path = None
             break
         sleep(poll_s)
+    if fc_id:
+        call = status_fn(fc_id)
     have_log = getter(f"/{run_id}/remote_session.log", log_path)
     done = json.loads(done_path.read_text(encoding="utf-8")) if done_path else None
+    cancelled = bool(done and "InputCancellation" in str(done.get("error")))
+    aborted = bool(cancelled or (call and call["state"] in INFRA_ABORT_CALL_STATES)
+                   or (call and call["state"] in TERMINAL_CALL_STATES and done is None))
     return {"run_id": run_id, "volume": SESSION_LOG_VOLUME, "polls": polls, "done": done,
             "done_found": done is not None, "remote_log_found": have_log,
             "remote_log_sha256": sha256_raw(log_path) if have_log else None,
             "remote_log_bytes": log_path.stat().st_size if have_log else None,
-            "complete": bool(done and done.get("status") == "complete" and have_log)}
+            "function_call": call, "infrastructure_aborted": aborted,
+            "complete": bool(done and done.get("status") == "complete" and have_log and not aborted)}
 
 
 def expected_runtime(length: int) -> dict:
@@ -1012,6 +1061,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--reparse", action="store_true", help="offline re-analysis of the pinned accepted raw log")
     ap.add_argument("--trial", type=int, choices=(1, 2, 3), help="L8192: the ONE trial this Modal run executes")
     ap.add_argument("--combine", action="store_true", help="L8192: cross-trial summary from the 3 trial analyses")
+    ap.add_argument("--monitor", action="store_true",
+                    help="resume monitoring the recorded FunctionCall of this run (never spawns)")
     a = ap.parse_args(argv)
     if a.rabit_extension:
         raise SystemExit("RABIT-only extension points are pre-registered but NOT enabled until review")
@@ -1029,6 +1080,11 @@ def main(argv: list[str] | None = None) -> int:
     if a.combine:
         return combine_from_disk(L)
     T = a.trial
+    if a.monitor:
+        return monitor_run(L, T)
+    if (run_dir(L, T) / LAUNCH_RECORD).exists():
+        raise SystemExit(f"{rel(run_dir(L, T) / LAUNCH_RECORD)} exists: a FunctionCall was already spawned for this run; "
+                         f"use --monitor (a second FunctionCall is never launched)")
     print(f"RABIT-KV MLSys 2027 -- Experiment 6 concurrency scaling, prompt length {L} "
           f"({'one Modal run' if T is None else f'trial {T} only, one Modal run'})")
     prov = preflight(L, a.dry_run, T)
@@ -1044,32 +1100,80 @@ def main(argv: list[str] | None = None) -> int:
     print("Order:", [p["label"] for p in plan])
     print("  execution:", json.dumps(prov["execution"]))
     run_id = make_run_id(L, prov["git_head"], T)
-    print("Local command:\n  " + " ".join(build_command(L, prov["prompt_set_sha256"], cfg, run_id, T))[:600] + " ...")
+    print("Local command:\n  " + " ".join(build_command(L, prov["prompt_set_sha256"], cfg, run_id, T,
+                                                          git_commit=prov["git_head"]))[:600] + " ...")
     if a.dry_run:
         print("\n--dry-run: nothing executed, no files written.")
         return 0
+    rc = launch_run(L, T, prov, run_id)
+    if rc != 0:
+        return rc
+    return monitor_run(L, T)
+
+
+def launch_run(length: int, trial: int | None, prov: dict, run_id: str, stream=stream_command) -> int:
+    """Spawn the sweep FunctionCall ONCE and persist its launch record; returns without waiting for the sweep."""
+    L, T, cfg = length, trial, prov["final_config"]
     d = run_dir(L, T)
+    record = d / LAUNCH_RECORD
+    if record.exists():
+        raise RuntimeError(f"{rel(record)} exists; refusing to spawn a second FunctionCall")
     d.mkdir(parents=True, exist_ok=True)
     manifest = {"experiment": "Experiment 6 concurrency scaling", "prompt_tokens": L, "scope": SCOPE,
                 "amendments": AMENDMENTS, "attempt": ATTEMPT_DIR_NAME,
                 "excluded_attempts_not_pooled": [rel(x) for x in excluded_attempts(L)], "run_id": run_id,
                 "trial": T, "execution": prov["execution"],
-                "launch": "modal run --detach", "started_utc": now(), "status": "running", "provenance": prov}
+                "launch": "modal run --detach; local entrypoint sweep.spawn(); FunctionCall monitored by ID",
+                "started_utc": now(), "status": "running", "provenance": prov}
     mpath = d / "manifest.json"
     mpath.write_text(json.dumps(manifest, indent=2, default=str) + "\n", encoding="utf-8")
     snap = Path(tempfile.mkdtemp(prefix="exp6_vllm_snapshot_")) / "vllm_kvquant_snapshot.zip"
     run_git("-c", "core.autocrlf=false", "archive", "--format=zip", "-o", str(snap), "HEAD:vllm-kvquant")
     manifest["vllm_kvquant_snapshot"] = {"sha256": sha256_raw(snap), "bytes": snap.stat().st_size}
-    cmd = build_command(L, prov["prompt_set_sha256"], cfg, run_id, T)
-    t_launch = time.monotonic()
-    code = stream_command(cmd, d / "modal_session.log", {"EXP6_VLLM_SNAPSHOT": str(snap)})
-    manifest["modal_returncode"] = code  # local client only; with --detach the remote sweep may outlive it
+    cmd = build_command(L, prov["prompt_set_sha256"], cfg, run_id, T, record, prov["git_head"])
+    code = stream(cmd, d / "launch_session.log", {"EXP6_VLLM_SNAPSHOT": str(snap)})
+    manifest["launch_returncode"] = code  # the local launcher only; the spawned FunctionCall is independent of it
+    if record.is_file():
+        rec = json.loads(record.read_text(encoding="utf-8"))
+        manifest["function_call"] = rec
+        ok = str(rec.get("function_call_id", "")).startswith("fc-") and rec.get("run_id") == run_id
+    else:
+        ok = False
+    if not ok:
+        manifest.update(status="launch_unconfirmed", completed_utc=now())
     mpath.write_text(json.dumps(manifest, indent=2, default=str) + "\n", encoding="utf-8")
-    remaining = max(0.0, MODAL_FUNCTION_TIMEOUT_S + 1800 - (time.monotonic() - t_launch))
-    print(f"Waiting for the remote session log of {run_id} (up to {round(remaining)} s) ...", flush=True)
-    remote = fetch_remote_log(run_id, d, remaining)
+    if not ok:
+        print(f"\nEXP6 L{L} LAUNCH UNCONFIRMED: no valid {LAUNCH_RECORD}; nothing is relaunched automatically")
+        return 1
+    print(f"Spawned {manifest['function_call']['function_call_id']} (app {manifest['function_call']['app_id']}); "
+          f"launcher done, the FunctionCall runs independently.", flush=True)
+    return 0
+
+
+def monitor_run(length: int, trial: int | None, getter=modal_volume_get, status_fn=function_call_status,
+                sleep=time.sleep, clock=time.monotonic) -> int:
+    """Resumable: reconstruct the recorded FunctionCall by ID, wait for DONE.json / a terminal call state, retrieve the
+    canonical Volume log and analyze it. Never spawns and never cancels."""
+    L, T = length, trial
+    d = run_dir(L, T)
+    mpath, record = d / "manifest.json", d / LAUNCH_RECORD
+    if not (mpath.is_file() and record.is_file()):
+        raise SystemExit(f"no launch record in {rel(d)}; nothing to monitor (monitoring never launches)")
+    manifest = json.loads(mpath.read_text(encoding="utf-8"))
+    if manifest.get("status") not in ("running",):
+        raise SystemExit(f"{rel(mpath)} status is {manifest.get('status')!r}; already analyzed")
+    rec = json.loads(record.read_text(encoding="utf-8"))
+    prov, run_id = manifest["provenance"], manifest["run_id"]
+    cfg = prov["final_config"]
+    plan = run_plan(L, T)
+    launched = datetime.strptime(rec["launch_utc"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    elapsed = (datetime.now(timezone.utc) - launched).total_seconds()
+    remaining = max(0.0, MODAL_FUNCTION_TIMEOUT_S + 1800 - elapsed)
+    print(f"Monitoring {rec['function_call_id']} / {run_id} (up to {round(remaining)} s) ...", flush=True)
+    remote = fetch_remote_log(run_id, d, remaining, getter=getter, sleep=sleep, clock=clock,
+                              fc_id=rec["function_call_id"], status_fn=status_fn)
     manifest["remote_session_log"] = remote
-    source = d / ("remote_session.log" if remote["remote_log_found"] else "modal_session.log")
+    source = d / ("remote_session.log" if remote["remote_log_found"] else "launch_session.log")
     manifest["analyzed_log"] = source.name
     text = source.read_text(encoding="utf-8", errors="replace")
     integ, summary = analyze(text, L, cfg, load_protocol(), T)
@@ -1080,7 +1184,8 @@ def main(argv: list[str] | None = None) -> int:
         (d / name).write_text("\n".join(pts[p["label"]]) + "\n", encoding="utf-8")
     (d / "integrity_check.json").write_text(json.dumps(integ, indent=2, default=str) + "\n", encoding="utf-8")
     (d / "summary.json").write_text(json.dumps(summary, indent=2, default=str) + "\n", encoding="utf-8")
-    manifest.update(status="completed" if (remote["complete"] and integ["all_ok"]) else "failed",
+    manifest.update(status="completed" if (remote["complete"] and integ["all_ok"]) else
+                    "infrastructure_aborted" if remote["infrastructure_aborted"] else "failed",
                     completed_utc=now(), integrity_counts=integ["counts"])
     try:
         assert_protected_paths_clean("post-run")
@@ -1092,8 +1197,9 @@ def main(argv: list[str] | None = None) -> int:
     if not manifest["prior_evidence_unchanged"]:
         manifest["status"] = "failed"
     mpath.write_text(json.dumps(manifest, indent=2, default=str) + "\n", encoding="utf-8")
-    print(f"\nEXP6 L{L} {manifest['status'].upper()}: integrity {integ['counts']}; outcomes "
-          f"{summary['outcome_class_counts']}")
+    summary_counts = summary["outcome_class_counts"]
+    print(f"\nEXP6 L{L}{'' if T is None else f' trial {T}'} {manifest['status'].upper()}: integrity {integ['counts']}; "
+          f"outcomes {summary_counts}; FunctionCall {(remote.get('function_call') or {}).get('state')}")
     return 0 if manifest["status"] == "completed" else 1
 
 

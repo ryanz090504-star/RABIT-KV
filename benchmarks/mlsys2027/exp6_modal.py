@@ -34,6 +34,14 @@ L8192 runs ONE trial (12 points) per Modal function with a 3600 s point watchdog
 (static budget 600 + 12 x 3600 = 43800 s < 45000 s backstop). L2048 keeps its
 historical execution (36 points, 1200 s). Only these two (points, watchdog)
 configurations are accepted.
+
+INDEPENDENT FUNCTIONCALL (orchestration only, after the L8192 trial-1 attempt-1
+InputCancellation): the local entrypoint no longer blocks on a synchronous
+`sweep.remote(...)`. It calls `sweep.spawn(...)`, immediately writes the launch
+record (FunctionCall ID fc-..., App ID, run id, trial, git commit, launch UTC) to
+the local path given by --launch-record, and returns; with `modal run --detach`
+the spawned H100 FunctionCall continues independently of the local caller. The
+runner monitors it by ID (modal.FunctionCall.from_id) and never cancels it.
 """
 
 from __future__ import annotations
@@ -391,7 +399,21 @@ def _sweep_body(points: str, prompt_set_sha256: str, stage3c_impl: str, query_bl
 
 @app.local_entrypoint()
 def main(points: str, prompt_set_sha256: str, stage3c_impl: str, query_block: int, run_id: str,
+         launch_record: str, git_commit: str, trial: int = 0,
          point_timeout_s: int = POINT_TIMEOUT_S, expected_points: int = POINTS_PER_SWEEP):
-    sweep.remote(points=points, prompt_set_sha256=prompt_set_sha256, stage3c_impl=stage3c_impl,
-                 query_block=query_block, run_id=run_id, point_timeout_s=point_timeout_s,
-                 expected_points=expected_points)
+    # Runs LOCALLY. Spawn (never .remote): the FunctionCall has its own durable handle and does not depend on this
+    # process staying alive. The launch record is persisted before this entrypoint returns.
+    record_path = Path(launch_record)
+    if record_path.exists():
+        raise RuntimeError(f"launch record {record_path} already exists; a FunctionCall was already spawned")
+    call = sweep.spawn(points=points, prompt_set_sha256=prompt_set_sha256, stage3c_impl=stage3c_impl,
+                       query_block=query_block, run_id=run_id, point_timeout_s=point_timeout_s,
+                       expected_points=expected_points)
+    record = {"function_call_id": call.object_id, "app_id": app.app_id, "app_name": app.name, "run_id": run_id,
+              "trial": trial or None, "git_commit": git_commit,
+              "launch_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+              "invocation": "sweep.spawn (modal run --detach); monitored by FunctionCall.from_id; never cancelled"}
+    tmp = record_path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    tmp.replace(record_path)
+    print(f"EXP6_LAUNCH_RECORD={json.dumps(record, sort_keys=True)}", flush=True)

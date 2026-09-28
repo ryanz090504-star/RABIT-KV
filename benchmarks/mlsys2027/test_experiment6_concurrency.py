@@ -688,6 +688,216 @@ def test_scientific_protocol_unchanged_by_l8192_amendment():
     assert r6.load_protocol()["points"]["8192"] == wl.plan_points(8192)
 
 
+# ------------------------------------------------------------------ independent FunctionCall orchestration
+def _modal_tree():
+    import ast
+    return ast.parse(r6.MODAL_APP.read_text(encoding="utf-8"))
+
+
+def test_launch_uses_spawn_and_persists_record_immediately():
+    import ast
+    tree = _modal_tree()
+    calls = [n.func.attr for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)]
+    assert "remote" not in calls and calls.count("spawn") == 1  # the sweep is never invoked synchronously
+    main = r6._function(tree, "main")
+    body = ast.unparse(main)
+    assert "call = sweep.spawn(" in body and ".get(" not in body  # no blocking wait on the call
+    i_spawn, i_write, i_replace = (body.index(k) for k in ("sweep.spawn(", "tmp.write_text(", "tmp.replace(record_path)"))
+    assert i_spawn < i_write < i_replace  # record persisted right after spawn, before the entrypoint returns
+    assert "'function_call_id': call.object_id" in body and "'app_id': app.app_id" in body
+    for key in ("'run_id'", "'trial'", "'git_commit'", "'launch_utc'"):
+        assert key in body
+    assert any(isinstance(d, ast.Call) and "local_entrypoint" in ast.unparse(d) for d in main.decorator_list)
+    cmd = r6.build_command(8192, "x" * 64, cfg(), "exp6-L8192-t1-x", 1, Path("rec.json"), "abc1234")
+    assert cmd[cmd.index("--launch-record") + 1] == "rec.json" and cmd[cmd.index("--git-commit") + 1] == "abc1234"
+    assert cmd[cmd.index("--trial") + 1] == "1" and cmd[cmd.index("run") + 1] == "--detach"
+
+
+def test_no_code_path_cancels_a_function_call():
+    import ast
+    for f in (r6.MODAL_APP, r6.RUNNER_SCRIPT, r6.WORKER, r6.WORKLOAD):
+        tree = ast.parse(f.read_text(encoding="utf-8"))
+        names = {n.func.attr for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)}
+        assert "cancel" not in names, f.name
+        assert ".cancel(" not in f.read_text(encoding="utf-8"), f.name
+
+
+class _Env:
+    """Redirect the runner's run directory and snapshot creation to a temp dir (no Modal, no git archive)."""
+
+    def __init__(self, tmp):
+        self.tmp, self.saved = Path(tmp), {}
+
+    def __enter__(self):
+        self.saved = {k: getattr(r6, k) for k in ("run_dir", "run_git", "assert_protected_paths_clean")}
+        real_git = self.saved["run_git"]
+
+        def fake_git(*args):
+            if "archive" in args:
+                Path(args[args.index("-o") + 1]).write_bytes(b"snapshot")
+                return ""
+            return real_git(*args)
+        r6.run_dir = lambda L, T=None: self.tmp / f"L{L}_t{T}"
+        r6.run_git = fake_git
+        r6.assert_protected_paths_clean = lambda ctx: None
+        return self
+
+    def __exit__(self, *exc):
+        for k, v in self.saved.items():
+            setattr(r6, k, v)
+
+
+def _prov():
+    return {"final_config": cfg(), "prompt_set_sha256": protocol()["prompt_sets"]["8192"]["measured"]["ordered_set_sha256"],
+            "git_head": "8e9b9361c47e720ba60bc05305b6981e6fcb1b65", "execution": {"points_per_run": 12},
+            "earlier_trial_dirs": [], "prior_evidence_sha256_raw": {}}
+
+
+def _spawning_stream(fc="fc-TESTCALL0001", app_id="ap-TESTAPP"):
+    calls = []
+
+    def stream(cmd, log_path, env):
+        calls.append(cmd)
+        rec = Path(cmd[cmd.index("--launch-record") + 1])
+        rec.write_text(json.dumps({"function_call_id": fc, "app_id": app_id, "run_id": cmd[cmd.index("--run-id") + 1],
+                                   "trial": int(cmd[cmd.index("--trial") + 1]), "git_commit": "8e9b936",
+                                   "launch_utc": "2026-09-28T12:00:00Z"}), encoding="utf-8")
+        log_path.write_text("EXP6_LAUNCH_RECORD=...\n", encoding="utf-8")
+        return 0
+    return stream, calls
+
+
+def test_launcher_returns_after_spawn_and_refuses_duplicates():
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp, _Env(tmp):
+        stream, calls = _spawning_stream()
+        assert r6.launch_run(8192, 1, _prov(), "exp6-L8192-t1-test", stream=stream) == 0  # returns, no monitoring
+        d = r6.run_dir(8192, 1)
+        m = json.loads((d / "manifest.json").read_text(encoding="utf-8"))
+        assert m["status"] == "running" and m["function_call"]["function_call_id"] == "fc-TESTCALL0001"
+        assert m["function_call"]["app_id"] == "ap-TESTAPP" and len(calls) == 1
+        try:  # a second launch for the same run never spawns again
+            r6.launch_run(8192, 1, _prov(), "exp6-L8192-t1-test", stream=stream)
+        except RuntimeError as e:
+            assert "refusing to spawn a second FunctionCall" in str(e)
+        else:
+            raise AssertionError("duplicate launch accepted")
+        assert len(calls) == 1
+        try:  # the CLI launch path also refuses and points to --monitor
+            r6.main(["--prompt-tokens", "8192", "--trial", "1"])
+        except SystemExit as e:
+            assert "use --monitor" in str(e)
+        else:
+            raise AssertionError("CLI relaunch accepted")
+        assert len(calls) == 1
+        stream2, _ = _spawning_stream(fc="not-a-call")  # an unconfirmed launch is never relaunched automatically
+        assert r6.launch_run(8192, 2, _prov(), "exp6-L8192-t2-test", stream=stream2) == 1
+        assert json.loads((r6.run_dir(8192, 2) / "manifest.json").read_text(encoding="utf-8"))["status"] == \
+            "launch_unconfirmed"
+
+
+def _volume(files):
+    def getter(remote, local):
+        name = remote.rsplit("/", 1)[1]
+        if name not in files:
+            return False
+        local.write_bytes(files[name].encode("utf-8"))
+        return True
+    return getter
+
+
+def test_monitor_reconstructs_call_by_id_and_never_spawns():
+    import ast
+    import tempfile
+    mon = ast.unparse(r6._function(ast.parse(r6.RUNNER_SCRIPT.read_text(encoding="utf-8")), "monitor_run"))
+    assert "build_command" not in mon and "stream" not in mon and "launch_run" not in mon
+    fs = ast.unparse(r6._function(ast.parse(r6.RUNNER_SCRIPT.read_text(encoding="utf-8")), "function_call_status"))
+    assert "modal.FunctionCall.from_id(fc_id)" in fs and "get_call_graph()" in fs
+    with tempfile.TemporaryDirectory() as tmp, _Env(tmp):
+        stream, calls = _spawning_stream(fc="fc-RESUME0001")
+        prov = _prov()
+        prov["prior_evidence_sha256_raw"] = r6.prior_evidence_digest()
+        assert r6.launch_run(8192, 1, prov, "exp6-L8192-t1-test", stream=stream) == 0
+        seen = []
+        status = lambda fc: seen.append(fc) or {"function_call_id": fc, "state": "SUCCESS"}  # noqa: E731
+        files = {"DONE.json": json.dumps({"run_id": "exp6-L8192-t1-test", "status": "complete", "error": None}),
+                 "remote_session.log": _session(8192, trial=1)}
+        rc = r6.monitor_run(8192, 1, getter=_volume(files), status_fn=status, sleep=lambda s: None, clock=lambda: 0.0)
+        assert rc == 0 and seen and set(seen) == {"fc-RESUME0001"} and len(calls) == 1
+        m = json.loads((r6.run_dir(8192, 1) / "manifest.json").read_text(encoding="utf-8"))
+        assert m["status"] == "completed" and m["remote_session_log"]["function_call"]["state"] == "SUCCESS"
+        assert m["integrity_counts"]["failed"] == 0 and m["analyzed_log"] == "remote_session.log"
+        try:  # restarting the monitor on an analyzed run does nothing (and never spawns)
+            r6.monitor_run(8192, 1, getter=_volume(files), status_fn=status, sleep=lambda s: None, clock=lambda: 0.0)
+        except SystemExit as e:
+            assert "already analyzed" in str(e)
+        else:
+            raise AssertionError("re-monitoring an analyzed run was accepted")
+        assert len(calls) == 1
+
+
+def test_cancelled_function_call_is_infrastructure_aborted():
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        d = Path(tmp)
+        cancel = json.dumps({"run_id": "r", "status": "exception", "error": "InputCancellation: Input was cancelled by user"})
+        term = lambda fc: {"function_call_id": fc, "state": "TERMINATED"}  # noqa: E731
+        r = r6.fetch_remote_log("r", d, 3600, _volume({"DONE.json": cancel, "remote_session.log": "x\n"}),
+                                lambda s: None, lambda: 0.0, 60, fc_id="fc-X", status_fn=term)
+        assert r["infrastructure_aborted"] and not r["complete"] and r["function_call"]["state"] == "TERMINATED"
+        clock = {"t": 0.0}  # TERMINATED without DONE.json: stop after the grace polls, still aborted
+        r = r6.fetch_remote_log("r", d, 3600, _volume({"remote_session.log": "partial\n"}),
+                                lambda s: clock.__setitem__("t", clock["t"] + s), lambda: clock["t"], 60,
+                                fc_id="fc-X", status_fn=term)
+        assert r["infrastructure_aborted"] and not r["done_found"] and r["polls"] == 3 and clock["t"] == 120
+        ok = lambda fc: {"function_call_id": fc, "state": "SUCCESS"}  # noqa: E731
+        done = json.dumps({"run_id": "r", "status": "complete", "error": None})
+        r = r6.fetch_remote_log("r", d, 3600, _volume({"DONE.json": done, "remote_session.log": "x\n"}),
+                                lambda s: None, lambda: 0.0, 60, fc_id="fc-X", status_fn=ok)
+        assert r["complete"] and not r["infrastructure_aborted"]
+    with tempfile.TemporaryDirectory() as tmp, _Env(tmp):  # end-to-end: the trial manifest is infrastructure_aborted
+        stream, _ = _spawning_stream(fc="fc-CANCELLED01")
+        prov = _prov()
+        prov["prior_evidence_sha256_raw"] = r6.prior_evidence_digest()
+        r6.launch_run(8192, 1, prov, "exp6-L8192-t1-test", stream=stream)
+        files = {"DONE.json": cancel, "remote_session.log": _session(8192, trial=1, omit=tuple(
+            q["label"] for q in r6.run_plan(8192, 1)[1:]))}
+        assert r6.monitor_run(8192, 1, getter=_volume(files), status_fn=term, sleep=lambda s: None,
+                              clock=lambda: 0.0) == 1
+        m = json.loads((r6.run_dir(8192, 1) / "manifest.json").read_text(encoding="utf-8"))
+        assert m["status"] == "infrastructure_aborted"
+
+
+def test_l8192_trial1_attempt1_excluded():
+    a1 = r6.BASE_OUT / "L8192" / "infrastructure_aborted" / "trial_1_attempt_1"
+    assert a1 in r6.excluded_attempts(8192) and a1 in r6.EVIDENCE_DIRS and a1 in r6.PROTECTED_PATHS
+    assert r6.run_git("ls-files", r6.rel(a1 / "remote_session.log"))
+    st = json.loads((a1 / "ATTEMPT_STATUS.json").read_text(encoding="utf-8"))
+    assert st["status"] == "infrastructure_aborted" and st["accepted_for_performance_interpretation"] is False
+    assert r6.run_dir(8192, 1) not in (a1, *a1.parents) and a1 not in r6.run_dir(8192, 1).parents
+
+
+def test_orchestration_change_leaves_science_unchanged():
+    import ast
+    head = "8e9b9361c47e720ba60bc05305b6981e6fcb1b65"
+    for f in ("exp6_protocol.json", "exp6_l8192_execution_amendment.json", "exp6_workload.py", "exp6_worker.py"):
+        assert r6.run_git("show", f"{head}:benchmarks/mlsys2027/{f}") == \
+            (r6.HERE / f).read_text(encoding="utf-8").rstrip("\n"), f
+    old = ast.parse(r6.run_git("show", f"{head}:benchmarks/mlsys2027/run_experiment6_concurrency.py"))
+    new = ast.parse(r6.RUNNER_SCRIPT.read_text(encoding="utf-8"))
+    for fn in ("point_metrics", "inflight_concurrency", "pct", "classify", "shadow_validity", "parse_point", "analyze",
+               "combine_trials", "run_plan", "static_watchdog_budget", "highest_successful", "build_l8192_amendment"):
+        assert ast.dump(r6._function(old, fn)) == ast.dump(r6._function(new, fn)), fn
+    for const in ("EXECUTION", "CROSS_TRIAL_METRICS", "RATIO_METRICS"):
+        assert ast.dump(r6._module_assign(old, const)) == ast.dump(r6._module_assign(new, const)), const
+    om = ast.parse(r6.run_git("show", f"{head}:benchmarks/mlsys2027/exp6_modal.py"))
+    for fn in ("_sweep_body", "sweep", "_Tee", "_commit_session_logs"):
+        a, b = (next(n for n in ast.walk(t) if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and n.name == fn)
+                for t in (om, _modal_tree()))
+        assert ast.dump(a) == ast.dump(b), fn
+    assert r6.EXECUTION[8192]["point_timeout_s"] == 3600 and r6.static_watchdog_budget(8192) == 43800
+
+
 def test_missing_point_is_not_run_and_fails_completion():
     integ, s = _run(omit=("t3_rabit_L2048_c64",))
     assert _pt(s, "t3_rabit_L2048_c64")["outcome_class"] is None
