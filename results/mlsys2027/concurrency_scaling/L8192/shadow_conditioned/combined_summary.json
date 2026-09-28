@@ -1,0 +1,1694 @@
+{
+  "summary_schema": {
+    "version": 2,
+    "point_keys": {
+      "target_concurrency": "int target concurrency C",
+      "inflight_concurrency": "overlapping in-flight concurrency statistics"
+    },
+    "change": "v1 overwrote the point's `concurrency` (C) with the in-flight statistics dict"
+  },
+  "prompt_tokens": 8192,
+  "complete_three_trial_result": true,
+  "execution": {
+    "grouping": "one_trial_per_modal_run",
+    "runs": [
+      1,
+      2,
+      3
+    ],
+    "points_per_run": 12,
+    "point_timeout_s": 3600
+  },
+  "sample_pooling": "none: cross-trial values are medians of trial-level statistics; raw per-request samples are never concatenated across trials",
+  "per_trial_validity": {
+    "1": {
+      "integrity_counts": {
+        "passed": 138,
+        "failed": 0,
+        "not_run": 0,
+        "not_evaluated": 0
+      },
+      "all_integrity_passed": true,
+      "run_id": "exp6-L8192-t1-20260928T141726Z-0a1a6b4",
+      "manifest_status": "failed",
+      "remote_log_complete": true,
+      "remote_session_log_sha256": "5a42a5294dbb612347fd72d7dd43710d4dc3498819f27e61b29c6822fd27ee1c",
+      "code_commit": "0a1a6b4d10466f07775a59b5970f812a4d0283c8",
+      "protocol_sha256": "52362fb5019e113596c8e047df607f4bf3ec8268337f17aa3958f4a54ac1a56e",
+      "l8192_amendment_sha256": "f8a158022c59859165ce92402c1574c1076b0d46c88e0864351b21c6e9dc51ae",
+      "gpu_uuid": [
+        "GPU-14dcbee8-2eb9-5008-a989-6e79e51c40e3"
+      ]
+    },
+    "2": {
+      "integrity_counts": {
+        "passed": 138,
+        "failed": 0,
+        "not_run": 0,
+        "not_evaluated": 0
+      },
+      "all_integrity_passed": true,
+      "run_id": "exp6-L8192-t2-20260928T173519Z-6042a1e",
+      "manifest_status": "completed",
+      "remote_log_complete": true,
+      "remote_session_log_sha256": "6cfe4500f554e84dbe972c5fe1c8e0380777436ef4a95f0dd9df54d40cce8fd9",
+      "code_commit": "6042a1edafc983107c5800f104dd4ab2222c95df",
+      "protocol_sha256": "52362fb5019e113596c8e047df607f4bf3ec8268337f17aa3958f4a54ac1a56e",
+      "l8192_amendment_sha256": "f8a158022c59859165ce92402c1574c1076b0d46c88e0864351b21c6e9dc51ae",
+      "gpu_uuid": [
+        "GPU-228f6d9c-13cb-d1f3-1097-26af0d09e054"
+      ]
+    },
+    "3": {
+      "integrity_counts": {
+        "passed": 138,
+        "failed": 0,
+        "not_run": 0,
+        "not_evaluated": 0
+      },
+      "all_integrity_passed": true,
+      "run_id": "exp6-L8192-t3-20260928T205951Z-a812f2f",
+      "manifest_status": "completed",
+      "remote_log_complete": true,
+      "remote_session_log_sha256": "f605b9d2fc5c315b22c4acaadf2eab879698b7ed890cf0b707cd6dceebb4bdfa",
+      "code_commit": "a812f2f918b314fb95c9f4dd15c54c9d4b170fb3",
+      "protocol_sha256": "52362fb5019e113596c8e047df607f4bf3ec8268337f17aa3958f4a54ac1a56e",
+      "l8192_amendment_sha256": "f8a158022c59859165ce92402c1574c1076b0d46c88e0864351b21c6e9dc51ae",
+      "gpu_uuid": [
+        "GPU-e99fb7e6-9070-9e9b-b3ee-59bff46d0b68"
+      ]
+    }
+  },
+  "all_trials_integrity_passed": true,
+  "cross_trial": {
+    "bfloat16|1": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 0.7102630758954357,
+          "2": 0.9369737742600329,
+          "3": 1.057359311481428
+        },
+        "cross_trial_median": 0.9369737742600329
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 22.728418428653942,
+          "2": 29.983160776321053,
+          "3": 33.83549796740569
+        },
+        "cross_trial_median": 29.983160776321053
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 5841.203536164063,
+          "2": 7705.6723195145105,
+          "3": 8695.722977623263
+        },
+        "cross_trial_median": 7705.6723195145105
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 360.429830422,
+          "2": 273.22002710499964,
+          "3": 242.11258861600004
+        },
+        "cross_trial_median": 273.22002710499964
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 179.9970365405,
+          "2": 134.78751806550008,
+          "3": 116.86713734700004
+        },
+        "cross_trial_median": 134.78751806550008
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 321.97683858799996,
+          "2": 246.1693794289995,
+          "3": 212.41469670099997
+        },
+        "cross_trial_median": 246.1693794289995
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 356.30584321315,
+          "2": 270.1114686022499,
+          "3": 239.36437653864996
+        },
+        "cross_trial_median": 270.1114686022499
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 178.88944724899994,
+          "2": 134.14952033149984,
+          "3": 116.35826529349998
+        },
+        "cross_trial_median": 134.14952033149984
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 321.037240575,
+          "2": 245.53360243799986,
+          "3": 211.642662525
+        },
+        "cross_trial_median": 245.53360243799986
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.0313609328709665,
+          "2": 0.020529000612896198,
+          "3": 0.015779010951613444
+        },
+        "cross_trial_median": 0.020529000612896198
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.033878414983873076,
+          "2": 0.02339241409678042,
+          "3": 0.0250959311129027
+        },
+        "cross_trial_median": 0.0250959311129027
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 1,
+          "2": 1,
+          "3": 1
+        },
+        "cross_trial_median": 1
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 359.9525733830002,
+          "2": 272.6274333319934,
+          "3": 241.67194098500022
+        },
+        "cross_trial_median": 272.6274333319934
+      }
+    },
+    "bfloat16|4": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 1.5638426989717689,
+          "2": 1.8014253585481386,
+          "3": 1.8926685749773593
+        },
+        "cross_trial_median": 1.8014253585481386
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 50.042966367096604,
+          "2": 57.645611473540434,
+          "3": 60.5653943992755
+        },
+        "cross_trial_median": 57.645611473540434
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 12861.042356343827,
+          "2": 14814.92214869989,
+          "3": 15565.306360613802
+        },
+        "cross_trial_median": 14814.92214869989
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 163.6993286909999,
+          "2": 142.10969041000044,
+          "3": 135.25875759999997
+        },
+        "cross_trial_median": 142.10969041000044
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 83.55087155850003,
+          "2": 72.34831714499978,
+          "3": 68.73315544499997
+        },
+        "cross_trial_median": 72.34831714499978
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 148.16411286950006,
+          "2": 128.39291482199997,
+          "3": 122.60604161600004
+        },
+        "cross_trial_median": 128.39291482199997
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 163.2291137191999,
+          "2": 141.65946275999977,
+          "3": 134.81925635844996
+        },
+        "cross_trial_median": 141.65946275999977
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 81.61018031799995,
+          "2": 70.7579090194995,
+          "3": 67.26110218849999
+        },
+        "cross_trial_median": 70.7579090194995
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 146.44254838350003,
+          "2": 126.95428636949964,
+          "3": 121.199953043
+        },
+        "cross_trial_median": 126.95428636949964
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.05679724935483562,
+          "2": 0.045921634483875096,
+          "3": 0.04243151212903278
+        },
+        "cross_trial_median": 0.045921634483875096
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.06937029946774484,
+          "2": 0.05866917108064186,
+          "3": 0.05502709720967907
+        },
+        "cross_trial_median": 0.05866917108064186
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 4,
+          "2": 4,
+          "3": 4
+        },
+        "cross_trial_median": 4
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 163.12975172899974,
+          "2": 141.58697029100313,
+          "3": 134.7588229579993
+        },
+        "cross_trial_median": 141.58697029100313
+      }
+    },
+    "bfloat16|8": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 1.9573751123538412,
+          "2": 2.10109353866575,
+          "3": 2.173086206486993
+        },
+        "cross_trial_median": 2.10109353866575
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 62.63600359532292,
+          "2": 67.234993237304,
+          "3": 69.53875860758377
+        },
+        "cross_trial_median": 67.234993237304
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 16097.45292399799,
+          "2": 17279.393261987127,
+          "3": 17871.46096214903
+        },
+        "cross_trial_median": 17279.393261987127
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 130.78739909600017,
+          "2": 121.84131514799992,
+          "3": 117.80480647100012
+        },
+        "cross_trial_median": 121.84131514799992
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 68.62753968599998,
+          "2": 63.30780319650012,
+          "3": 61.58882173400002
+        },
+        "cross_trial_median": 63.30780319650012
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 119.84580527799993,
+          "2": 111.75164626150035,
+          "3": 108.04455198749987
+        },
+        "cross_trial_median": 111.75164626150035
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 130.32107410115012,
+          "2": 121.39299921079969,
+          "3": 117.35968326599993
+        },
+        "cross_trial_median": 121.39299921079969
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 65.2020821735,
+          "2": 60.08305432099996,
+          "3": 58.52917800700004
+        },
+        "cross_trial_median": 60.08305432099996
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 116.54369650699994,
+          "2": 108.7885522065003,
+          "3": 105.15578738
+        },
+        "cross_trial_median": 108.7885522065003
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.10419117188709401,
+          "2": 0.09559820564515664,
+          "3": 0.09215766472580952
+        },
+        "cross_trial_median": 0.09559820564515664
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.11712176251613425,
+          "2": 0.10781299569354756,
+          "3": 0.10436286843548348
+        },
+        "cross_trial_median": 0.10781299569354756
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 8,
+          "2": 8,
+          "3": 8
+        },
+        "cross_trial_median": 8
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 128.44278434899638,
+          "2": 119.58555914600038,
+          "3": 115.56623178699806
+        },
+        "cross_trial_median": 119.58555914600038
+      }
+    },
+    "bfloat16|16": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 2.1921598587070457,
+          "2": 2.2820084459715515,
+          "3": 2.3128901012971728
+        },
+        "cross_trial_median": 2.2820084459715515
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 70.14911547862546,
+          "2": 73.02427027108965,
+          "3": 74.01248324150953
+        },
+        "cross_trial_median": 73.02427027108965
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 18028.322678006745,
+          "2": 18767.23745967004,
+          "3": 19021.20819306795
+        },
+        "cross_trial_median": 18767.23745967004
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 116.77980462200003,
+          "2": 112.18188103200009,
+          "3": 110.6840311420001
+        },
+        "cross_trial_median": 112.18188103200009
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 64.72852799099996,
+          "2": 62.179918844999975,
+          "3": 61.177522969500046
+        },
+        "cross_trial_median": 62.179918844999975
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 110.62739893500009,
+          "2": 106.42416963799997,
+          "3": 105.06460049599991
+        },
+        "cross_trial_median": 106.42416963799997
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 116.30475974379992,
+          "2": 111.73089420120017,
+          "3": 110.24577527735
+        },
+        "cross_trial_median": 111.73089420120017
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 58.33749429850002,
+          "2": 56.00400969750035,
+          "3": 55.14119907050019
+        },
+        "cross_trial_median": 56.00400969750035
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 104.32510755600015,
+          "2": 100.34453540350023,
+          "3": 98.9820803849999
+        },
+        "cross_trial_median": 100.34453540350023
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.19733322808064802,
+          "2": 0.18783323679033329,
+          "3": 0.18423151033870921
+        },
+        "cross_trial_median": 0.18783323679033329
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.2096780957580662,
+          "2": 0.2014162680161462,
+          "3": 0.19724611429032557
+        },
+        "cross_trial_median": 0.2014162680161462
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 16,
+          "2": 16,
+          "3": 16
+        },
+        "cross_trial_median": 16
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 110.85897989700084,
+          "2": 106.4825809549884,
+          "3": 105.03795358400112
+        },
+        "cross_trial_median": 106.4825809549884
+      }
+    },
+    "bfloat16|32": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 2.3226636346541127,
+          "2": 2.345588714115379,
+          "3": 2.3492174300006012
+        },
+        "cross_trial_median": 2.345588714115379
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 74.32523630893161,
+          "2": 75.05883885169213,
+          "3": 75.17495776001924
+        },
+        "cross_trial_median": 75.05883885169213
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 19101.585731395426,
+          "2": 19290.121584884877,
+          "3": 19319.964144324942
+        },
+        "cross_trial_median": 19290.121584884877
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 110.21828394799968,
+          "2": 109.14104355099971,
+          "3": 108.97245896899994
+        },
+        "cross_trial_median": 109.14104355099971
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 67.3237892589998,
+          "2": 66.79301602199985,
+          "3": 66.74050247799994
+        },
+        "cross_trial_median": 66.79301602199985
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 109.37175753400015,
+          "2": 108.39259994349959,
+          "3": 108.31904613999995
+        },
+        "cross_trial_median": 108.39259994349959
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 109.78169129145023,
+          "2": 108.70785258280011,
+          "3": 108.54939583769985
+        },
+        "cross_trial_median": 108.70785258280011
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 54.44708761149968,
+          "2": 54.075283170499915,
+          "3": 54.00897565799994
+        },
+        "cross_trial_median": 54.075283170499915
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 98.25874435850004,
+          "2": 97.42063001499992,
+          "3": 97.381799279
+        },
+        "cross_trial_median": 97.42063001499992
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.3759761195161269,
+          "2": 0.3716062653548438,
+          "3": 0.3721773488225828
+        },
+        "cross_trial_median": 0.3721773488225828
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.41389995091935816,
+          "2": 0.4102455533225698,
+          "3": 0.40977557745161297
+        },
+        "cross_trial_median": 0.4102455533225698
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 32,
+          "2": 32,
+          "3": 32
+        },
+        "cross_trial_median": 32
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 97.59879253599684,
+          "2": 96.67135027600125,
+          "3": 96.64925597399997
+        },
+        "cross_trial_median": 96.67135027600125
+      }
+    },
+    "bfloat16|64": {
+      "outcome_class_per_trial": {
+        "1": "target_concurrency_not_reached",
+        "2": "target_concurrency_not_reached",
+        "3": "target_concurrency_not_reached"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 2.3514710129111873,
+          "2": 2.3655345968548867,
+          "3": 2.3729827553580813
+        },
+        "cross_trial_median": 2.3655345968548867
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 75.247072413158,
+          "2": 75.69710709935637,
+          "3": 75.9354481714586
+        },
+        "cross_trial_median": 75.69710709935637
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 19338.497610181606,
+          "2": 19454.156524534585,
+          "3": 19515.41018006486
+        },
+        "cross_trial_median": 19454.156524534585
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 108.86802286500006,
+          "2": 108.22078034300011,
+          "3": 107.8811042440002
+        },
+        "cross_trial_median": 108.22078034300011
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 71.76165430849983,
+          "2": 71.73962274700034,
+          "3": 71.534785994
+        },
+        "cross_trial_median": 71.73962274700034
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 107.75648327649994,
+          "2": 107.35377984299976,
+          "3": 107.07449448099999
+        },
+        "cross_trial_median": 107.35377984299976
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 108.44765619899995,
+          "2": 107.80308846014968,
+          "3": 107.46760763160005
+        },
+        "cross_trial_median": 107.80308846014968
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 54.012471575999825,
+          "2": 54.03092240900014,
+          "3": 53.857227784999964
+        },
+        "cross_trial_median": 54.012471575999825
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 96.99102976449991,
+          "2": 96.88845241249965,
+          "3": 96.64076676750007
+        },
+        "cross_trial_median": 96.88845241249965
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.5725416186290335,
+          "2": 0.5710845742741801,
+          "3": 0.5699249350000026
+        },
+        "cross_trial_median": 0.5710845742741801
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.5857890528709724,
+          "2": 0.5840220591612852,
+          "3": 0.5832653412741944
+        },
+        "cross_trial_median": 0.5840220591612852
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 47,
+          "2": 47,
+          "3": 47
+        },
+        "cross_trial_median": 47
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      }
+    },
+    "rabit_kv2|1": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 0.6583574009537455,
+          "2": 0.8283343499356453,
+          "3": 1.0239157376202608
+        },
+        "cross_trial_median": 0.8283343499356453
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 21.067436830519856,
+          "2": 26.506699197940648,
+          "3": 32.765303603848345
+        },
+        "cross_trial_median": 26.506699197940648
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 5414.331265443603,
+          "2": 6812.221693870747,
+          "3": 8420.683026189025
+        },
+        "cross_trial_median": 6812.221693870747
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 388.8465438819999,
+          "2": 309.053946658,
+          "3": 250.0205735630002
+        },
+        "cross_trial_median": 309.053946658
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 194.23850038600017,
+          "2": 156.44473608150003,
+          "3": 125.95407469800011
+        },
+        "cross_trial_median": 156.44473608150003
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 349.9588258929998,
+          "2": 278.78271670249995,
+          "3": 225.18701565499984
+        },
+        "cross_trial_median": 278.78271670249995
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 384.51648128984993,
+          "2": 305.7008011925,
+          "3": 246.9287771517002
+        },
+        "cross_trial_median": 305.7008011925
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 193.07813750550008,
+          "2": 155.58701131649997,
+          "3": 125.30774684750008
+        },
+        "cross_trial_median": 155.58701131649997
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 348.821780817,
+          "2": 277.94082360999994,
+          "3": 224.57728813750006
+        },
+        "cross_trial_median": 277.94082360999994
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.03706689132257951,
+          "2": 0.027988804483872202,
+          "3": 0.020663565999997913
+        },
+        "cross_trial_median": 0.027988804483872202
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.03983129675806331,
+          "2": 0.029154024354837813,
+          "3": 0.02461872546774107
+        },
+        "cross_trial_median": 0.029154024354837813
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 1,
+          "2": 1,
+          "3": 1
+        },
+        "cross_trial_median": 1
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 388.36010354800146,
+          "2": 308.60179492400084,
+          "3": 249.60447182200278
+        },
+        "cross_trial_median": 308.60179492400084
+      }
+    },
+    "rabit_kv2|4": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 0.9959859240374958,
+          "2": 1.2585684012067058,
+          "3": 1.4780806539277982
+        },
+        "cross_trial_median": 1.2585684012067058
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 31.871549569199864,
+          "2": 40.274188838614585,
+          "3": 47.29858092568954
+        },
+        "cross_trial_median": 40.274188838614585
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 8190.988239284365,
+          "2": 10350.466531523947,
+          "3": 12155.735297902213
+        },
+        "cross_trial_median": 10350.466531523947
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 257.0317449490003,
+          "2": 203.4057106109999,
+          "3": 173.19758520599999
+        },
+        "cross_trial_median": 203.4057106109999
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 130.63176555099994,
+          "2": 102.10642882449997,
+          "3": 86.96672586299997
+        },
+        "cross_trial_median": 102.10642882449997
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 231.5520017590002,
+          "2": 184.37591218199995,
+          "3": 156.5016910050001
+        },
+        "cross_trial_median": 184.37591218199995
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 256.5084362403502,
+          "2": 202.97011165735006,
+          "3": 172.80288831579998
+        },
+        "cross_trial_median": 202.97011165735006
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 127.207939549,
+          "2": 99.48888019799995,
+          "3": 84.68357686700006
+        },
+        "cross_trial_median": 99.48888019799995
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 228.27308661000006,
+          "2": 181.23941182599992,
+          "3": 154.07327470200016
+        },
+        "cross_trial_median": 181.23941182599992
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.10800275017742289,
+          "2": 0.08175016041935401,
+          "3": 0.06826031014516193
+        },
+        "cross_trial_median": 0.08175016041935401
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.11411216506451549,
+          "2": 0.08790332308064404,
+          "3": 0.0748189450645177
+        },
+        "cross_trial_median": 0.08790332308064404
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 4,
+          "2": 4,
+          "3": 4
+        },
+        "cross_trial_median": 4
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 255.77913131199966,
+          "2": 202.29875404199856,
+          "3": 172.13196609800343
+        },
+        "cross_trial_median": 202.29875404199856
+      }
+    },
+    "rabit_kv2|8": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 1.0979746549642668,
+          "2": 1.384670617868977,
+          "3": 1.6028537089323542
+        },
+        "cross_trial_median": 1.384670617868977
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 35.13518895885654,
+          "2": 44.30945977180726,
+          "3": 51.291318685835336
+        },
+        "cross_trial_median": 44.30945977180726
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 9029.74356242613,
+          "2": 11387.531161354467,
+          "3": 13181.86890225968
+        },
+        "cross_trial_median": 11387.531161354467
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 233.15656590300023,
+          "2": 184.88151383900004,
+          "3": 159.71513717900007
+        },
+        "cross_trial_median": 184.88151383900004
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 123.13341460049969,
+          "2": 96.85048348350006,
+          "3": 82.87166598799968
+        },
+        "cross_trial_median": 96.85048348350006
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 212.75764119199994,
+          "2": 168.97701916550002,
+          "3": 146.35271006800008
+        },
+        "cross_trial_median": 168.97701916550002
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 232.64439175525024,
+          "2": 184.45796835955,
+          "3": 159.34138320114974
+        },
+        "cross_trial_median": 184.45796835955
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 116.71775716549973,
+          "2": 91.75502827749995,
+          "3": 78.63132855749996
+        },
+        "cross_trial_median": 91.75502827749995
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 206.42464450949998,
+          "2": 164.03134461600007,
+          "3": 142.09857399049997
+        },
+        "cross_trial_median": 164.03134461600007
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.2050926632096713,
+          "2": 0.16165925703225803,
+          "3": 0.13652618751612983
+        },
+        "cross_trial_median": 0.16165925703225803
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.21436474174193026,
+          "2": 0.16632245545161503,
+          "3": 0.14780477938709358
+        },
+        "cross_trial_median": 0.16632245545161503
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 8,
+          "2": 8,
+          "3": 8
+        },
+        "cross_trial_median": 8
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 230.1716716680021,
+          "2": 182.1951768580027,
+          "3": 157.23226342099906
+        },
+        "cross_trial_median": 182.1951768580027
+      }
+    },
+    "rabit_kv2|16": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 1.1123125359962545,
+          "2": 1.4239159333059148,
+          "3": 1.6311054187938194
+        },
+        "cross_trial_median": 1.4239159333059148
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 35.59400115188014,
+          "2": 45.565309865789274,
+          "3": 52.19537340140222
+        },
+        "cross_trial_median": 45.565309865789274
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 9147.658296033196,
+          "2": 11710.284635507844,
+          "3": 13414.210964160371
+        },
+        "cross_trial_median": 11710.284635507844
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 230.15114162200007,
+          "2": 179.78589466699987,
+          "3": 156.94877660899965
+        },
+        "cross_trial_median": 179.78589466699987
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 130.18377403900013,
+          "2": 102.51537631349993,
+          "3": 90.55784439900003
+        },
+        "cross_trial_median": 102.51537631349993
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 217.42755355799957,
+          "2": 170.14252378949993,
+          "3": 148.79288430150018
+        },
+        "cross_trial_median": 170.14252378949993
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 229.5934848110503,
+          "2": 179.31464226829993,
+          "3": 156.49803984665016
+        },
+        "cross_trial_median": 179.31464226829993
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 117.45821499300018,
+          "2": 92.59455381949999,
+          "3": 81.92276958350021
+        },
+        "cross_trial_median": 92.59455381949999
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 205.7404688409997,
+          "2": 160.79409096799975,
+          "3": 140.79938710350007
+        },
+        "cross_trial_median": 160.79409096799975
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 0.40511988474193666,
+          "2": 0.3123974299032229,
+          "3": 0.26956458509677406
+        },
+        "cross_trial_median": 0.3123974299032229
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 0.44532990198388606,
+          "2": 0.34344080151612943,
+          "3": 0.3007252788387074
+        },
+        "cross_trial_median": 0.34344080151612943
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 16,
+          "2": 16,
+          "3": 16
+        },
+        "cross_trial_median": 16
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 221.56463196999994,
+          "2": 172.5583239689995,
+          "3": 150.10840431700217
+        },
+        "cross_trial_median": 172.5583239689995
+      }
+    },
+    "rabit_kv2|32": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 0.6663754352826531,
+          "2": 0.8700948989066347,
+          "3": 1.0513185509144336
+        },
+        "cross_trial_median": 0.8700948989066347
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 21.3240139290449,
+          "2": 27.84303676501231,
+          "3": 33.642193629261875
+        },
+        "cross_trial_median": 27.84303676501231
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 5480.271579764539,
+          "2": 7155.660448608164,
+          "3": 8646.043762720303
+        },
+        "cross_trial_median": 7155.660448608164
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 384.16782258999956,
+          "2": 294.2207801950003,
+          "3": 243.50374087599994
+        },
+        "cross_trial_median": 294.2207801950003
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 234.3200619094996,
+          "2": 179.57905276149995,
+          "3": 147.46346742700007
+        },
+        "cross_trial_median": 179.57905276149995
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 380.37277471649986,
+          "2": 291.40956941000013,
+          "3": 241.43328527249992
+        },
+        "cross_trial_median": 291.40956941000013
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 383.70744197970055,
+          "2": 293.81212931090005,
+          "3": 243.1535973428498
+        },
+        "cross_trial_median": 293.81212931090005
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 189.26884069799917,
+          "2": 145.62034269600008,
+          "3": 119.02326702699997
+        },
+        "cross_trial_median": 145.62034269600008
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 338.0905803190003,
+          "2": 259.2040128315002,
+          "3": 214.44856077200006
+        },
+        "cross_trial_median": 259.2040128315002
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 1.358974709870953,
+          "2": 1.032867892951601,
+          "3": 0.8606954833387077
+        },
+        "cross_trial_median": 1.032867892951601
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 1.565563345338711,
+          "2": 1.184083810854843,
+          "3": 0.9650841992903194
+        },
+        "cross_trial_median": 1.184083810854843
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 32,
+          "2": 32,
+          "3": 32
+        },
+        "cross_trial_median": 32
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 355.86425980800414,
+          "2": 271.1888668839988,
+          "3": 224.63588675800202
+        },
+        "cross_trial_median": 271.1888668839988
+      }
+    },
+    "rabit_kv2|64": {
+      "outcome_class_per_trial": {
+        "1": "sustained_target_concurrency",
+        "2": "sustained_target_concurrency",
+        "3": "sustained_target_concurrency"
+      },
+      "interpretable_per_trial": {
+        "1": true,
+        "2": true,
+        "3": true
+      },
+      "requests_per_s": {
+        "per_trial": {
+          "1": 0.23541957343989248,
+          "2": 0.322632034843913,
+          "3": 0.40312227280173235
+        },
+        "cross_trial_median": 0.322632034843913
+      },
+      "output_tokens_per_s": {
+        "per_trial": {
+          "1": 7.533426350076559,
+          "2": 10.324225115005216,
+          "3": 12.899912729655435
+        },
+        "cross_trial_median": 10.324225115005216
+      },
+      "total_tokens_per_s": {
+        "per_trial": {
+          "1": 1936.0905719696757,
+          "2": 2653.3258545563403,
+          "3": 3315.277571521447
+        },
+        "cross_trial_median": 2653.3258545563403
+      },
+      "wall_s": {
+        "per_trial": {
+          "1": 1087.420201555,
+          "2": 793.4735932960002,
+          "3": 635.0430558469998
+        },
+        "cross_trial_median": 793.4735932960002
+      },
+      "latency_median_s": {
+        "per_trial": {
+          "1": 732.668800548,
+          "2": 533.0413287474996,
+          "3": 428.7329621274994
+        },
+        "cross_trial_median": 533.0413287474996
+      },
+      "latency_p90_s": {
+        "per_trial": {
+          "1": 1084.3870768294996,
+          "2": 791.3164944660004,
+          "3": 633.3166187450001
+        },
+        "cross_trial_median": 791.3164944660004
+      },
+      "latency_p99_s": {
+        "per_trial": {
+          "1": 1086.9623082368998,
+          "2": 793.0799692570498,
+          "3": 634.6813293921994
+        },
+        "cross_trial_median": 793.0799692570498
+      },
+      "ttft_median_s": {
+        "per_trial": {
+          "1": 447.62902912000027,
+          "2": 327.3745167274999,
+          "3": 264.8235108174995
+        },
+        "cross_trial_median": 327.3745167274999
+      },
+      "ttft_p90_s": {
+        "per_trial": {
+          "1": 891.4896064065001,
+          "2": 651.6251875640003,
+          "3": 521.1473901590002
+        },
+        "cross_trial_median": 651.6251875640003
+      },
+      "tpot_median_s": {
+        "per_trial": {
+          "1": 8.879882688580643,
+          "2": 6.487033478032264,
+          "3": 5.155670620935487
+        },
+        "cross_trial_median": 6.487033478032264
+      },
+      "tpot_p90_s": {
+        "per_trial": {
+          "1": 9.930931490854839,
+          "2": 7.147865059854834,
+          "3": 5.718469924983867
+        },
+        "cross_trial_median": 7.147865059854834
+      },
+      "preemptions": {
+        "per_trial": {
+          "1": 0.0,
+          "2": 0.0,
+          "3": 0.0
+        },
+        "cross_trial_median": 0.0
+      },
+      "observed_max_inflight_concurrency": {
+        "per_trial": {
+          "1": 64,
+          "2": 64,
+          "3": 64
+        },
+        "cross_trial_median": 64
+      },
+      "all_c_inflight_overlap_total_s": {
+        "per_trial": {
+          "1": 937.5994999580062,
+          "2": 681.0121493189959,
+          "3": 544.9985137220019
+        },
+        "cross_trial_median": 681.0121493189959
+      }
+    }
+  },
+  "rabit_over_bf16_cross_trial_median_ratio": {
+    "1": {
+      "requests_per_s": 0.8840528653961689,
+      "output_tokens_per_s": 0.8840528653961689,
+      "total_tokens_per_s": 0.884052865396169,
+      "latency_median_s": 1.1606767327333352,
+      "latency_p90_s": 1.1324833224552482,
+      "latency_p99_s": 1.131757947096489,
+      "ttft_median_s": 1.1598029641255927,
+      "ttft_p90_s": 1.1319869087172427,
+      "tpot_median_s": 1.3633788128141902,
+      "tpot_p90_s": 1.1617032348263303
+    },
+    "4": {
+      "requests_per_s": 0.6986514291222429,
+      "output_tokens_per_s": 0.6986514291222429,
+      "total_tokens_per_s": 0.6986514291222429,
+      "latency_median_s": 1.4113172614624785,
+      "latency_p90_s": 1.4360287126249383,
+      "latency_p99_s": 1.432803059554328,
+      "ttft_median_s": 1.4060460742357828,
+      "ttft_p90_s": 1.4275958457873865,
+      "tpot_median_s": 1.7802101632087972,
+      "tpot_p90_s": 1.4982881377311312
+    },
+    "8": {
+      "requests_per_s": 0.6590237856560539,
+      "output_tokens_per_s": 0.6590237856560539,
+      "total_tokens_per_s": 0.659023785656054,
+      "latency_median_s": 1.5298348480500472,
+      "latency_p90_s": 1.5120763301337998,
+      "latency_p99_s": 1.5195107589296613,
+      "ttft_median_s": 1.527136549804695,
+      "ttft_p90_s": 1.5077996837814238,
+      "tpot_median_s": 1.6910281520587127,
+      "tpot_p90_s": 1.542693943171539
+    },
+    "16": {
+      "requests_per_s": 0.6239748743347403,
+      "output_tokens_per_s": 0.6239748743347403,
+      "total_tokens_per_s": 0.6239748743347403,
+      "latency_median_s": 1.6486894517994923,
+      "latency_p90_s": 1.5987207076008851,
+      "latency_p99_s": 1.6048796848022882,
+      "ttft_median_s": 1.653355792194872,
+      "ttft_p90_s": 1.6024200054484572,
+      "tpot_median_s": 1.6631637469567377,
+      "tpot_p90_s": 1.7051294063724687
+    },
+    "32": {
+      "requests_per_s": 0.3709494736526239,
+      "output_tokens_per_s": 0.3709494736526239,
+      "total_tokens_per_s": 0.3709494736526239,
+      "latency_median_s": 2.6885902667181756,
+      "latency_p90_s": 2.6884636918193623,
+      "latency_p99_s": 2.702768220788011,
+      "ttft_median_s": 2.6929187265993164,
+      "ttft_p90_s": 2.660668615996329,
+      "tpot_median_s": 2.7752035319160973,
+      "tpot_p90_s": 2.8862806708445077
+    },
+    "64": {
+      "requests_per_s": 0.1363886350564776,
+      "output_tokens_per_s": 0.1363886350564776,
+      "total_tokens_per_s": 0.1363886350564776,
+      "latency_median_s": 7.430222077238171,
+      "latency_p90_s": 7.3711097608604605,
+      "latency_p99_s": 7.356746273092338,
+      "ttft_median_s": 6.061091210515298,
+      "ttft_p90_s": 6.72551961909481,
+      "tpot_median_s": 11.359146736325277,
+      "tpot_p90_s": 12.239032666197389
+    }
+  },
+  "outcome_class_counts": {
+    "engine_or_request_failure": 0,
+    "oom_or_allocation_failure": 0,
+    "completed_with_preemption": 0,
+    "target_concurrency_not_reached": 3,
+    "sustained_target_concurrency": 33
+  },
+  "highest_successfully_tested_concurrency": {
+    "bfloat16": {
+      "highest_successfully_tested_concurrency_all_trials": 32,
+      "highest_contiguous_successful_concurrency_all_trials": 32,
+      "non_monotonic": false,
+      "per_trial": {
+        "1": 32,
+        "2": 32,
+        "3": 32
+      },
+      "failure_boundary_bracketed_by_grid": true
+    },
+    "rabit_kv2": {
+      "highest_successfully_tested_concurrency_all_trials": 64,
+      "highest_contiguous_successful_concurrency_all_trials": 64,
+      "non_monotonic": false,
+      "per_trial": {
+        "1": 64,
+        "2": 64,
+        "3": 64
+      },
+      "failure_boundary_bracketed_by_grid": false
+    }
+  },
+  "rabit_only_extension": {
+    "bf16_fails_first_at": [
+      64
+    ],
+    "rabit_sustains_64_all_trials": true,
+    "eligible_for_pre_registered_rabit_only_extension": true,
+    "extension_grid": [
+      128,
+      256
+    ],
+    "enabled": false,
+    "note": "requires review before any 128 / 256 point"
+  },
+  "labels": {
+    "concurrency": "Concurrency derived from request [scheduled_ts, last_token_ts] intervals is OVERLAPPING IN-FLIGHT concurrency (requests that have been scheduled and not yet produced their last token). It is NOT strict GPU-resident or continuously-executing concurrency: a preempted request stays in flight while not resident. If preemption occurs (or its status is unavailable), the point's overlap statistics are reported but must not by themselves be used to claim sustained residency at target C."
+  }
+}
