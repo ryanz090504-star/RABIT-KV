@@ -10,12 +10,14 @@ SHA-256(tag:length:index:position) -- deterministic, distinct per index, no
 special tokens. For each prompt length there is ONE fixed ordered set of 256
 measured prompts and ONE fixed set of 2 warmup prompts (distinct from them).
 
-COMPILE-CONDITIONING AMENDMENT (reviewed, after the JIT-contaminated L2048
-attempt 1 and before any rerun): for every prompt length x concurrency C there is
-ONE fixed set of exactly C conditioning prompts of the sweep prompt length
-(tag "exp6-conditioning-c{C}"), disjoint from the measured and warmup prompts.
-They are run concurrently (max_num_seqs = C) BEFORE the 2 original warmup
-requests, identically for BF16 and RABIT, and are never measured.
+SHADOW-CONDITIONING AMENDMENT (reviewed; final warmup amendment, after the
+JIT-contaminated L2048 attempts 1 and 2 and before any rerun; supersedes the
+C-request conditioning of attempt 2): for every prompt length there is ONE fixed
+ordered set of 256 shadow-conditioning prompts of that length (tag
+"exp6-shadow-conditioning"), pairwise distinct and disjoint from the measured and
+warmup prompts. At every point (both dtypes, every trial and concurrency) they
+are run as ONE queued llm.generate batch under the point's engine (max_num_seqs =
+C, closed loop) BEFORE the 2 original warmup requests, and are never measured.
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ MEASURED_REQUESTS = 256
 WARMUP_REQUESTS = 2
 OUTPUT_TOKENS = 32
 TRIALS = 3
+SHADOW_CONDITIONING_REQUESTS = 256  # unmeasured; same shape as the measured workload
 # Pre-registered counterbalanced dtype order per trial (fixed before any run).
 TRIAL_DTYPE_ORDER = {1: ("bfloat16", "rabit_kv2"), 2: ("rabit_kv2", "bfloat16"), 3: ("bfloat16", "rabit_kv2")}
 BOS = 128000
@@ -67,11 +70,9 @@ def set_digest(prompts: list[list[int]]) -> dict:
             "ordered_set_sha256": hashlib.sha256("\n".join(per).encode("ascii")).hexdigest()}
 
 
-def conditioning_prompts(length: int, concurrency: int) -> list[list[int]]:
-    """Point-matched compile-conditioning: exactly C prompts of the sweep length (unmeasured)."""
-    if concurrency < 1:
-        raise ValueError("concurrency must be >= 1")
-    return [_prompt(f"exp6-conditioning-c{concurrency}", length, i) for i in range(concurrency)]
+def shadow_conditioning_prompts(length: int) -> list[list[int]]:
+    """Unmeasured shadow workload: one fixed ordered set per prompt length, independent of dtype / trial / C."""
+    return [_prompt("exp6-shadow-conditioning", length, i) for i in range(SHADOW_CONDITIONING_REQUESTS)]
 
 
 def plan_points(length: int) -> list[dict]:

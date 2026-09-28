@@ -12,13 +12,15 @@ accepted concurrency correctness smoke (results/mlsys2027/concurrency_smoke/).
 Benchmark-harness change only; rabit_kv2.py, shared_decode and triton_attn.py
 are untouched. CONCURRENCY AMENDMENT (reviewed): max_num_seqs = target
 concurrency C at EVERY point, identical for both dtypes (the plan's text kept
-the canonical 32 for C <= 32). COMPILE-CONDITIONING AMENDMENT (reviewed, after
-the JIT-contaminated L2048 attempt 1 and before any rerun): every point runs a
-point-matched, UNMEASURED compile-conditioning batch -- exactly C fixed
-conditioning prompts of the sweep length, 32 output tokens, concurrently under
-max_num_seqs = C, identical for both dtypes -- BEFORE the original 2 warmup
-requests; the measured workload is unchanged. A point is interpretable only if
-measured-phase JIT == 0 and its conditioning batch is valid.
+the canonical 32 for C <= 32). SHADOW-CONDITIONING AMENDMENT (reviewed; the
+final warmup amendment, after the JIT-contaminated L2048 attempts 1 and 2; it
+supersedes attempt 2's C-request conditioning): every point first runs an
+UNMEASURED shadow workload -- ONE queued batch of 256 fixed shadow prompts of the
+sweep length (one set per length, the same for both dtypes / all trials / all C),
+32 greedy output tokens, under the point's own engine (max_num_seqs = C, closed
+loop) -- then the original 2 warmup requests, then the unchanged 256 measured
+requests. A point is interpretable only if measured-phase JIT == 0 and its
+shadow-conditioning pass is valid.
 
 Frozen workload (exp6_workload.py; hashes frozen in exp6_protocol.json): prompt
 lengths 2048 and 8192 (separate sweeps / separate Modal runs); concurrency
@@ -84,8 +86,9 @@ EXP5_WORKER = rs6.EXP5_WORKER
 SMOKE_DIR = rs6.OUT_DIR
 BASE_OUT = ROOT / "results" / "mlsys2027" / "concurrency_scaling"
 # Failed diagnostic attempts: archived byte-exact, never interpreted, never pooled with any other attempt.
-DIAGNOSTIC_ATTEMPTS = {2048: [BASE_OUT / "L2048" / "jit_contaminated_attempt_1"]}
-ATTEMPT_DIR_NAME = "conditioned"  # output directory of the accepted-protocol sweep per prompt length
+DIAGNOSTIC_ATTEMPTS = {2048: [BASE_OUT / "L2048" / "jit_contaminated_attempt_1",
+                              BASE_OUT / "L2048" / "jit_contaminated_attempt_2"]}
+ATTEMPT_DIR_NAME = "shadow_conditioned"  # output directory of the accepted-protocol sweep per prompt length
 EVIDENCE_DIRS = [*rs6.EVIDENCE_DIRS, SMOKE_DIR, *[d for ds in DIAGNOSTIC_ATTEMPTS.values() for d in ds]]
 PROTECTED_PATHS = [*rs6.PROTECTED_PATHS, SMOKE_DIR, rs6.RUNNER_SCRIPT, rs6.MODAL_APP, rs6.WORKER,
                    *[d for ds in DIAGNOSTIC_ATTEMPTS.values() for d in ds]]
@@ -97,9 +100,9 @@ WATCHDOG_BUDGET_S = GATE_TIMEOUT_S + POINTS_PER_SWEEP * POINT_TIMEOUT_S  # 43800
 TAG = re.compile(r"^(EXP6_[A-Z0-9_]+)=(\{.*\})\s*$")
 TOP_TAG = re.compile(r"^(S3C_[A-Z0-9_]+)=(\{.*\})\s*$")
 LOGGED_PREEMPTIONS = re.compile(r"Preemptions: (\d+)")
-MARKERS = ["EXP6_CONDITIONING_BEGIN", "EXP6_CONDITIONING_END", "EXP6_WARMUP_BEGIN", "EXP6_WARMUP_END",
+MARKERS = ["EXP6_SHADOW_CONDITIONING_BEGIN", "EXP6_SHADOW_CONDITIONING_END", "EXP6_WARMUP_BEGIN", "EXP6_WARMUP_END",
            "EXP6_MEASURED_BEGIN", "EXP6_MEASURED_END", "EXP6_WORKER_COMPLETE"]
-JIT_PHASES = ("setup", "conditioning", "warmup", "measured", "after")
+JIT_PHASES = ("setup", "shadow_conditioning", "original_warmup", "measured", "after")
 JIT = "Triton kernel JIT compilation during inference"
 OOM = ("CUDA out of memory", "OutOfMemoryError", "out of memory")
 CLASSES = ("engine_or_request_failure", "oom_or_allocation_failure", "completed_with_preemption",
@@ -123,7 +126,9 @@ AMENDMENTS = {
                        "the sweep uses the vLLM multi-request LLM.generate API validated by the accepted concurrency "
                        "correctness smoke. Benchmark-harness change only."),
     "max_num_seqs": "max_num_seqs = target concurrency C at every point, identical for BF16 and RABIT.",
-    "compile_conditioning": (
+    "compile_conditioning_superseded": (
+        "SUPERSEDED by shadow_conditioning after L2048 attempt 2 (jit_contaminated_attempt_2) still showed "
+        "measured-phase JIT at RABIT C16 / C32. Original text: "
         "Point-matched compile-conditioning phase (reviewed amendment, pre-registered before the rerun). "
         "Justification: the original two warmup requests contain only 4096 prompt tokens at L2048 and cannot "
         "exercise concurrency-induced chunked prefill; at C>=16, C*2048 > max_num_batched_tokens=16384, and the "
@@ -135,6 +140,21 @@ AMENDMENTS = {
         "concurrently in one llm.generate call under max_num_seqs=C, disjoint from the measured and warmup prompts. "
         "Outputs and timings of this phase are discarded from all result tables. This is a pre-measurement "
         "kernel-conditioning fix, not a change to the measured workload."),
+    "shadow_conditioning": (
+        "Full point-matched shadow-workload conditioning (reviewed; the FINAL warmup amendment, pre-registered before "
+        "the rerun). Attempt 1: the 2-request warmup did not exercise concurrency-induced Stage3C. Attempt 2 (Modal "
+        "ap-l630ypsTpdW1bItQYkNG1x): a one-shot C-request conditioning batch also failed to reproduce the measured "
+        "closed-loop scheduler states (measured-phase JIT of _rabit2_shared_decode_closed_page_partial_kernel and "
+        "_rabit2_tile32_reduce_partials_kernel at RABIT C16, _rabit2_tail_partial_kernel at C32, all three trials). "
+        "Observed cause: the measured workload continuously admits new requests while existing requests decode, so "
+        "prompt chunks share the 16,384-token scheduler budget at different offsets. The final conditioning protocol "
+        "therefore mirrors the full measured closed-loop workload shape instead of targeting specific RABIT kernels: "
+        "before the 2 original warmup requests, every point runs ONE queued batch of 256 UNMEASURED shadow requests "
+        "(same prompt length, 32 greedy output tokens with ignore_eos, max_num_seqs=C, same engine, same closed-loop "
+        "admission; different prompt token IDs: one fixed set per prompt length, disjoint from the measured and warmup "
+        "prompts, identical for BF16 and RABIT, all trials and all C). Symmetric across dtypes, independent of RABIT "
+        "kernel names. It is a benchmark warmup / JIT-conditioning change only and is NOT part of the measured "
+        "workload; its throughput / latency never enter performance tables."),
 }
 
 
@@ -159,24 +179,26 @@ def build_protocol() -> dict:
                                 "SHA-256(tag:length:index:position); see exp6_workload.py"),
         "prompt_sets": {str(L): {"measured": wl.set_digest(wl.measured_prompts(L)),
                                  "warmup": wl.set_digest(wl.warmup_prompts(L))} for L in wl.PROMPT_LENGTHS},
-        "compile_conditioning": {
-            "rule": ("per point, before the 2 original warmup requests: exactly C conditioning requests of the sweep "
-                     "prompt length, 32 greedy output tokens (ignore_eos), executed concurrently in one llm.generate "
-                     "call with max_num_seqs=C; identical rule for BF16 and RABIT; unmeasured (outputs / timings "
-                     "discarded from result tables; emitted only for validity checks)"),
-            "requests_per_point": "C (target concurrency)", "output_tokens": wl.OUTPUT_TOKENS,
-            "phase_order": ["engine setup", "compile-conditioning", "2 original warmup", "256 measured"],
-            "validity": ["C/C completed", "every prompt exactly the sweep prompt length and pinned hash",
+        "shadow_conditioning": {
+            "rule": ("per point, before the 2 original warmup requests: ONE queued llm.generate batch of the 256 "
+                     "shadow-conditioning prompts of the sweep length, 32 greedy output tokens (ignore_eos), under the "
+                     "point's engine (max_num_seqs=C; the scheduler replenishes slots as they free, as in the measured "
+                     "phase); identical for BF16 and RABIT; unmeasured (outputs / timings never enter result tables; "
+                     "emitted only for validity checks)"),
+            "requests_per_point": wl.SHADOW_CONDITIONING_REQUESTS, "output_tokens": wl.OUTPUT_TOKENS,
+            "same_set_for": "both dtypes, all trials and all concurrency values of a prompt length",
+            "phase_order": ["engine setup", "shadow conditioning (256)", "2 original warmup", "256 measured"],
+            "validity": ["256/256 completed", "every prompt exactly the sweep prompt length and pinned hash",
                          "every output 32 tokens (finish_reason length)",
                          "target overlapping in-flight concurrency C reached (observed max >= C, all-C overlap > 0)",
                          "no OOM / request failure / watchdog", "same engine (max_num_seqs=C, dtype, selector / QB, "
                          "profiling off) as the measured phase"],
             "jit_accounting_phases": list(JIT_PHASES),
-            "jit_rule": ("JIT is expected / allowed in setup, compile-conditioning and warmup; a point is interpretable "
-                         "only if measured_phase_jit == 0 (and its conditioning batch is valid). If any measured point "
-                         "still has JIT: no automatic rerun; preserve evidence and stop for review."),
-            "prompt_sets": {str(L): {str(C): wl.set_digest(wl.conditioning_prompts(L, C)) for C in wl.CONCURRENCY_GRID}
-                            for L in wl.PROMPT_LENGTHS}},
+            "jit_rule": ("JIT is expected / allowed in setup, shadow_conditioning and original_warmup; a point is "
+                         "interpretable only if measured_phase_jit == 0 (and its shadow pass is valid). If ANY measured "
+                         "point still has JIT: STOP -- no new warmup scheme, no rerun, affected numbers not accepted; "
+                         "return for review."),
+            "prompt_sets": {str(L): wl.set_digest(wl.shadow_conditioning_prompts(L)) for L in wl.PROMPT_LENGTHS}},
         "excluded_attempts": {str(L): {"dirs": [rel(d) for d in ds], "use": "diagnostic only; never interpreted or "
                                        "pooled with any other attempt"} for L, ds in DIAGNOSTIC_ATTEMPTS.items()},
         "points": {str(L): wl.plan_points(L) for L in wl.PROMPT_LENGTHS},
@@ -315,7 +337,7 @@ def demux(text: str, plan: list[dict]):
 
 
 def parse_point(lines: list[str]) -> dict:
-    out = {"tags": {}, "requests": [], "conditioning_requests": [], "markers": [], "jit": dict.fromkeys(JIT_PHASES, 0),
+    out = {"tags": {}, "requests": [], "shadow_requests": [], "markers": [], "jit": dict.fromkeys(JIT_PHASES, 0),
            "oom_lines": 0, "malformed": [], "logged_preemptions_measured": 0, "logged_preemption_lines": 0,
            "gpu_memory": {}, "failure": None}
     phase = "setup"
@@ -323,8 +345,9 @@ def parse_point(lines: list[str]) -> dict:
         s = line.strip()
         if s in MARKERS:
             out["markers"].append(s)
-            phase = {"EXP6_CONDITIONING_BEGIN": "conditioning", "EXP6_CONDITIONING_END": "setup_after_conditioning",
-                     "EXP6_WARMUP_BEGIN": "warmup", "EXP6_WARMUP_END": "setup_after_warmup",
+            phase = {"EXP6_SHADOW_CONDITIONING_BEGIN": "shadow_conditioning",
+                     "EXP6_SHADOW_CONDITIONING_END": "setup_after_shadow",
+                     "EXP6_WARMUP_BEGIN": "original_warmup", "EXP6_WARMUP_END": "setup_after_warmup",
                      "EXP6_MEASURED_BEGIN": "measured", "EXP6_MEASURED_END": "after",
                      "EXP6_WORKER_COMPLETE": "after"}[s]
             continue
@@ -336,8 +359,8 @@ def parse_point(lines: list[str]) -> dict:
             tag, p = m.group(1), json.loads(m.group(2))
             if tag == "EXP6_REQUEST":
                 out["requests"].append(p)
-            elif tag == "EXP6_CONDITIONING_REQUEST":
-                out["conditioning_requests"].append(p)
+            elif tag == "EXP6_SHADOW_CONDITIONING_REQUEST":
+                out["shadow_requests"].append(p)
             elif tag == "EXP6_GPU_MEMORY":
                 out["gpu_memory"][p["phase"]] = p["memory_used_mib"]
             elif tag == "EXP6_REQUEST_FAILURE":
@@ -346,7 +369,7 @@ def parse_point(lines: list[str]) -> dict:
                 out["tags"][tag] = p
             continue
         if JIT in s:
-            key = phase if phase in ("conditioning", "warmup", "measured", "after") else "setup"
+            key = phase if phase in JIT_PHASES else "setup"
             out["jit"][key] += 1
         if any(o in s for o in OOM):
             out["oom_lines"] += 1
@@ -426,24 +449,26 @@ def point_metrics(p: dict, spec: dict, pinned_hashes: list[str]) -> dict:
             "overlap_stats_are_not_residency_evidence": preempt is None or preempt > 0}
 
 
-def conditioning_validity(p: dict, spec: dict, pinned_hashes: list[str]) -> dict:
-    """Validity of the unmeasured compile-conditioning batch (never used for performance)."""
-    rows = sorted(p["conditioning_requests"], key=lambda r: r["i"])
+def shadow_validity(p: dict, spec: dict, pinned_hashes: list[str]) -> dict:
+    """Validity of the unmeasured 256-request shadow-conditioning pass (never used for performance)."""
+    rows = sorted(p["shadow_requests"], key=lambda r: r["i"])
+    N = wl.SHADOW_CONDITIONING_REQUESTS
     L, C = spec["prompt_tokens"], spec["concurrency"]
     exact = [r for r in rows if r["prompt_tokens"] == L and r["i"] < len(pinned_hashes)
              and r["prompt_token_ids_sha256"] == pinned_hashes[r["i"]]
              and r["output_tokens"] == wl.OUTPUT_TOKENS and r["finish_reason"] == "length"]
     conc = inflight_concurrency(rows, C) if rows else {"evaluable": False}
-    ran = "EXP6_CONDITIONING_END" in p["markers"]
-    failed_here = (p["failure"] or {}).get("phase") == "conditioning"
-    completed = ran and not failed_here and len(rows) == len(exact) == C == len(pinned_hashes)
+    ran = "EXP6_SHADOW_CONDITIONING_END" in p["markers"]
+    failed_here = (p["failure"] or {}).get("phase") == "shadow_conditioning"
+    completed = ran and not failed_here and len(rows) == len(exact) == N == len(pinned_hashes)
     reached = (bool(conc.get("evaluable")) and conc["observed_max_inflight_concurrency"] >= C
                and conc["all_c_inflight_overlap_total_s"] > 0)
-    return {"requests": len(rows), "exact_requests": len(exact), "target": C, "completed_all_exact": completed,
+    return {"requests": len(rows), "exact_requests": len(exact), "expected_requests": N, "target_concurrency": C,
+            "completed_all_exact": completed,
             "observed_max_inflight_concurrency": conc.get("observed_max_inflight_concurrency"),
             "all_c_inflight_overlap_total_s": conc.get("all_c_inflight_overlap_total_s"),
             "target_inflight_concurrency_reached": reached, "failure_in_conditioning": failed_here,
-            "jit_lines": p["jit"]["conditioning"], "valid": completed and reached and not failed_here}
+            "jit_lines": p["jit"]["shadow_conditioning"], "valid": completed and reached and not failed_here}
 
 
 def classify(p: dict, proc: dict | None, metrics: dict) -> str:
@@ -532,7 +557,7 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
     top = parse_top(top_lines)
     gate = rs6.a2.r5.parse_gate(gate_lines)
     pinned = protocol["prompt_sets"][str(length)]["measured"]["per_prompt_sha256"]
-    cond_sets = protocol["compile_conditioning"]["prompt_sets"][str(length)]
+    shadow_set = protocol["shadow_conditioning"]["prompt_sets"][str(length)]
     checks = []
 
     def add(name, cat, state, observed=None):
@@ -560,7 +585,7 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
         pre = top["pre"].get(label)
         add(f"{label}: GPU clean before point", "gpu_clean", rs6.a2.r5.gpu_leg_clean(pre, base) if pre else NOT_RUN)
         m = point_metrics(p, spec, pinned)
-        cv = conditioning_validity(p, spec, cond_sets[str(C)]["per_prompt_sha256"])
+        cv = shadow_validity(p, spec, shadow_set["per_prompt_sha256"])
         cls = classify(p, top["proc"].get(label), m) if started else None
         st = lambda ok: ok if started else NOT_RUN  # noqa: E731
         add(f"{label}: point identity", "point", st(tg.get("EXP6_POINT") == {
@@ -590,16 +615,16 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
                                  and wkl.get("output_tokens") == wl.OUTPUT_TOKENS and wkl.get("temperature") == 0.0
                                  and wkl.get("measured_requests") == wl.MEASURED_REQUESTS
                                  and wkl.get("warmup_requests") == wl.WARMUP_REQUESTS
-                                 and wkl.get("conditioning_requests") == C
-                                 and (wkl.get("conditioning_prompt_set") or {}).get("ordered_set_sha256")
-                                 == cond_sets[str(C)]["ordered_set_sha256"])))
+                                 and wkl.get("shadow_conditioning_requests") == wl.SHADOW_CONDITIONING_REQUESTS
+                                 and (wkl.get("shadow_conditioning_prompt_set") or {}).get("ordered_set_sha256")
+                                 == shadow_set["ordered_set_sha256"])))
         cap = (tg.get("EXP6_CAPACITY") or {}).get("capacity_tokens")
         add(f"{label}: allocator capacity == expected {EXPECTED_CAPACITY[dtype]} tokens", "capacity",
             st(cap == EXPECTED_CAPACITY[dtype]) if engine_up else NOT_EVALUATED, cap)
-        add(f"{label}: compile-conditioning completed {C}/{C} exact requests (prompt length, pinned hash, 32 "
+        add(f"{label}: shadow conditioning completed 256/256 exact requests (prompt length, pinned hash, 32 "
             f"outputs)", "conditioning", st(cv["completed_all_exact"]) if engine_up else NOT_EVALUATED,
             {k: cv[k] for k in ("requests", "exact_requests", "failure_in_conditioning")})
-        add(f"{label}: compile-conditioning reached target overlapping in-flight concurrency {C}", "conditioning",
+        add(f"{label}: shadow conditioning reached target overlapping in-flight concurrency {C}", "conditioning",
             st(cv["target_inflight_concurrency_reached"]) if engine_up else NOT_EVALUATED,
             cv["observed_max_inflight_concurrency"])
         add(f"{label}: no Triton JIT during the measured phase", "jit",
@@ -610,7 +635,7 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
         results[(dtype, C, t)] = {"class": cls, "interpretable_success": interpretable}
         points_out.append({**spec, "outcome_class": cls, "measured_jit_lines": p["jit"]["measured"],
                            "interpretable": p["jit"]["measured"] == 0 and cls is not None and cv["valid"],
-                           "compile_conditioning": cv,
+                           "shadow_conditioning": cv,
                            "jit_lines_by_phase": p["jit"], "capacity": tg.get("EXP6_CAPACITY"),
                            "gpu_memory_mib": p["gpu_memory"], "oom_lines": p["oom_lines"], "failure": p["failure"],
                            "process": top["proc"].get(label), **m})

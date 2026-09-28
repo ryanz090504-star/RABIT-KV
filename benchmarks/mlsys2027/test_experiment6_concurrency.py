@@ -67,23 +67,24 @@ def _point_lines(spec, *, serial=False, preempt=0, counter=True, logged=None, ji
     wkl = {"prompt_tokens": L, "output_tokens": 32, "measured_requests": 256, "warmup_requests": 2,
            "temperature": 0.0, "ignore_eos": True,
            "prompt_set": prompt_set or protocol()["prompt_sets"][str(L)]["measured"],
-           "conditioning_requests": C,
-           "conditioning_prompt_set": protocol()["compile_conditioning"]["prompt_sets"][str(L)][str(C)]}
-    ch = protocol()["compile_conditioning"]["prompt_sets"][str(L)][str(C)]["per_prompt_sha256"]
+           "shadow_conditioning_requests": 256,
+           "shadow_conditioning_prompt_set": protocol()["shadow_conditioning"]["prompt_sets"][str(L)]}
+    ch = protocol()["shadow_conditioning"]["prompt_sets"][str(L)]["per_prompt_sha256"]
+    # closed loop like the measured phase: waves of C (or strictly serial when cond_serial)
     cond_rows = [{"i": i, "prompt_tokens": L - 1 if (cond_bad_len and i == 0) else L, "prompt_token_ids_sha256": ch[i],
                   "output_tokens": 32, "finish_reason": "length",
-                  "scheduled_ts": 1.0 + (2.0 * i if cond_serial else 0.0),
-                  "last_token_ts": 2.0 + (2.0 * i if cond_serial else 0.0)} for i in range(C - cond_drop)]
+                  "scheduled_ts": 1.0 + 2.0 * (i if cond_serial else i // C),
+                  "last_token_ts": 2.5 + 2.0 * (i if cond_serial else i // C)} for i in range(256 - cond_drop)]
     lines += [f"EXP6_EFFECTIVE_ENGINE_CONFIG={json.dumps({'max_num_seqs': ms})}",
               f"EXP6_CAPACITY={json.dumps({'num_gpu_blocks': 1, 'block_size': 32, 'capacity_tokens': cap or r6.EXPECTED_CAPACITY[d]})}",
               f"EXP6_WORKLOAD={json.dumps(wkl)}",
               "WARNING Triton kernel JIT compilation during inference: setup_kernel",
-              "EXP6_CONDITIONING_BEGIN"]
+              "EXP6_SHADOW_CONDITIONING_BEGIN"]
     lines += ["WARNING Triton kernel JIT compilation during inference: cond"] * cond_jit
     if cond_fail:
-        fail_c = {"phase": "conditioning", "kind": "request_execution_failure", "error": "x"}
+        fail_c = {"phase": "shadow_conditioning", "kind": "request_execution_failure", "error": "x"}
         return lines + [f"EXP6_REQUEST_FAILURE={json.dumps(fail_c)}"]
-    lines += ["EXP6_CONDITIONING_END"] + [f"EXP6_CONDITIONING_REQUEST={json.dumps(r)}" for r in cond_rows]
+    lines += ["EXP6_SHADOW_CONDITIONING_END"] + [f"EXP6_SHADOW_CONDITIONING_REQUEST={json.dumps(r)}" for r in cond_rows]
     lines += ["EXP6_WARMUP_BEGIN", "WARNING Triton kernel JIT compilation during inference: warm", "EXP6_WARMUP_END",
               "EXP6_MEASURED_BEGIN"]
     lines += ["WARNING Triton kernel JIT compilation during inference: m"] * jit_measured
@@ -280,118 +281,132 @@ def test_measured_jit_surfaced_and_not_interpretable():
     assert [x["state"] for x in _check(integ, "t3_rabit_L2048_c64: no Triton JIT")] == ["failed"]
     p = _pt(s, "t3_rabit_L2048_c64")
     assert p["measured_jit_lines"] == 2 and p["interpretable"] is False
-    assert p["jit_lines_by_phase"] == {"setup": 1, "conditioning": 1, "warmup": 1, "measured": 2, "after": 0}
+    assert p["jit_lines_by_phase"] == {"setup": 1, "shadow_conditioning": 1, "original_warmup": 1, "measured": 2,
+                                       "after": 0}
     assert s["highest_successfully_tested_concurrency"]["rabit_kv2"]["per_trial"]["3"] == 32
     assert not integ["all_ok"]
 
 
-# ------------------------------------------------------------------ compile-conditioning amendment
-def test_conditioning_prompt_sets_frozen_and_disjoint():
+# ------------------------------------------------------------------ shadow-conditioning amendment (final warmup)
+def test_shadow_prompt_set_frozen_disjoint_and_shared():
     p = protocol()
-    cc = p["compile_conditioning"]
-    assert cc["output_tokens"] == 32
-    assert cc["jit_accounting_phases"] == ["setup", "conditioning", "warmup", "measured", "after"]
+    sc = p["shadow_conditioning"]
+    assert sc["requests_per_point"] == 256 == wl.SHADOW_CONDITIONING_REQUESTS and sc["output_tokens"] == 32
+    assert sc["jit_accounting_phases"] == ["setup", "shadow_conditioning", "original_warmup", "measured", "after"]
     for L in wl.PROMPT_LENGTHS:
-        base = (set(p["prompt_sets"][str(L)]["measured"]["per_prompt_sha256"])
-                | set(p["prompt_sets"][str(L)]["warmup"]["per_prompt_sha256"]))
-        seen = set()
-        for C in wl.CONCURRENCY_GRID:
-            prompts = wl.conditioning_prompts(L, C)
-            d = cc["prompt_sets"][str(L)][str(C)]
-            assert len(prompts) == C == d["count"] and all(len(x) == L for x in prompts)  # count == C, same length
-            assert wl.set_digest(prompts) == d  # hash-pinned
-            assert len(set(d["per_prompt_sha256"])) == C and not set(d["per_prompt_sha256"]) & base
-            assert not set(d["per_prompt_sha256"]) & seen
-            seen |= set(d["per_prompt_sha256"])
+        prompts = wl.shadow_conditioning_prompts(L)
+        d = sc["prompt_sets"][str(L)]  # ONE set per length: same for every dtype / trial / C (no such key exists)
+        assert wl.set_digest(prompts) == d and d["count"] == 256 and all(len(x) == L for x in prompts)
+        assert len(set(d["per_prompt_sha256"])) == 256  # pairwise distinct
+        assert not set(d["per_prompt_sha256"]) & set(p["prompt_sets"][str(L)]["measured"]["per_prompt_sha256"])
+        assert not set(d["per_prompt_sha256"]) & set(p["prompt_sets"][str(L)]["warmup"]["per_prompt_sha256"])
 
 
-def test_worker_conditioning_same_rule_for_both_dtypes_and_order():
+def test_worker_shadow_same_for_all_points_and_phase_order():
     import ast
     fn = r6._function(ast.parse(r6.WORKER.read_text(encoding="utf-8")), "main")
     main_src = ast.unparse(fn)
-    # conditioning prompts depend only on (prompt length, concurrency), never on dtype; same 32-token greedy sampler
-    assert "cond = wl.conditioning_prompts(args.prompt_tokens, args.concurrency)" in main_src
-    assert "llm.generate([{'prompt_token_ids': p} for p in cond], sp, use_tqdm=False)" in main_src
+    # depends only on the prompt length: same set for both dtypes, all trials, all C
+    assert "shadow = wl.shadow_conditioning_prompts(args.prompt_tokens)" in main_src
+    # ONE queued batch on the point's engine (max_num_seqs=C) with the measured sampler -> closed-loop admission
+    assert "llm.generate([{'prompt_token_ids': p} for p in shadow], sp, use_tqdm=False)" in main_src
     assert "sp = SamplingParams(temperature=0.0, max_tokens=wl.OUTPUT_TOKENS, ignore_eos=True)" in main_src
-    i = [main_src.index(k) for k in ("EXP6_CONDITIONING_BEGIN", "EXP6_WARMUP_BEGIN", "EXP6_MEASURED_BEGIN")]
+    assert main_src.count("llm = LLM(**kwargs)") == 1  # same engine for shadow, warmup and measured
+    i = [main_src.index(k) for k in ("EXP6_SHADOW_CONDITIONING_BEGIN", "EXP6_WARMUP_BEGIN", "EXP6_MEASURED_BEGIN")]
     assert i == sorted(i)
     for node in ast.walk(fn):  # never inside a dtype branch
         if isinstance(node, ast.If) and "kv_cache_dtype" in ast.unparse(node.test):
-            assert "cond" not in ast.unparse(node).replace("conditioning", "")
+            assert "shadow" not in ast.unparse(node)
+    # original measurement fields unchanged
     assert wl.WARMUP_REQUESTS == 2 and wl.MEASURED_REQUESTS == 256 and wl.OUTPUT_TOKENS == 32
+    assert "measured = wl.measured_prompts(args.prompt_tokens)" in main_src
 
 
-def test_conditioning_valid_and_its_jit_allowed():
-    integ, s = _run(overrides={"t1_rabit_L2048_c64": {"cond_jit": 5}, "t2_bf16_L2048_c16": {"cond_jit": 3}})
+def test_shadow_valid_reaches_target_and_its_jit_allowed():
+    integ, s = _run(overrides={"t1_rabit_L2048_c64": {"cond_jit": 11}, "t2_bf16_L2048_c16": {"cond_jit": 3}})
     assert integ["all_ok"]
-    for label in ("t1_rabit_L2048_c64", "t2_bf16_L2048_c16", "t3_bf16_L2048_c1"):
-        p = _pt(s, label)
-        cv = p["compile_conditioning"]
-        assert cv["valid"] and cv["requests"] == cv["exact_requests"] == p["target_concurrency"]
-        assert cv["observed_max_inflight_concurrency"] == p["target_concurrency"] and p["interpretable"]
-    assert _pt(s, "t1_rabit_L2048_c64")["jit_lines_by_phase"]["conditioning"] == 5
-    assert len(_check(integ, "t1_rabit_L2048_c64: compile-conditioning")) == 2
+    for p in s["points"]:  # count 256 and target in-flight C at every point
+        cv = p["shadow_conditioning"]
+        assert cv["valid"] and cv["requests"] == cv["exact_requests"] == 256
+        assert cv["observed_max_inflight_concurrency"] == p["target_concurrency"] == cv["target_concurrency"]
+        assert p["interpretable"]
+    assert _pt(s, "t1_rabit_L2048_c64")["jit_lines_by_phase"]["shadow_conditioning"] == 11
+    assert len(_check(integ, "t1_rabit_L2048_c64: shadow conditioning")) == 2
+    integ, s = _run(overrides={"t2_rabit_L2048_c32": {"max_seqs": 16}})  # same max_num_seqs=C check still applies
+    assert [c["state"] for c in _check(integ, "t2_rabit_L2048_c32: max_num_seqs")] == ["failed"]
 
 
-def test_conditioning_invalid_makes_point_non_interpretable():
+def test_shadow_invalid_makes_point_non_interpretable():
     integ, s = _run(overrides={"t1_rabit_L2048_c16": {"cond_serial": True}, "t1_rabit_L2048_c32": {"cond_drop": 1},
                                "t2_bf16_L2048_c8": {"cond_bad_len": True}, "t3_rabit_L2048_c4": {"cond_fail": True}})
     assert not integ["all_ok"] and "conditioning" in integ["failed_categories"]
     a = _pt(s, "t1_rabit_L2048_c16")
-    assert a["compile_conditioning"]["observed_max_inflight_concurrency"] == 1 and not a["interpretable"]
-    assert [x["state"] for x in _check(integ, "t1_rabit_L2048_c16: compile-conditioning reached")] == ["failed"]
+    assert a["shadow_conditioning"]["observed_max_inflight_concurrency"] == 1 and not a["interpretable"]
+    assert [x["state"] for x in _check(integ, "t1_rabit_L2048_c16: shadow conditioning reached")] == ["failed"]
     assert a["outcome_class"] == "sustained_target_concurrency"  # measured classification itself unchanged
     b = _pt(s, "t1_rabit_L2048_c32")
-    assert not b["compile_conditioning"]["completed_all_exact"] and not b["interpretable"]
-    assert not _pt(s, "t2_bf16_L2048_c8")["compile_conditioning"]["valid"]
+    assert b["shadow_conditioning"]["requests"] == 255 and not b["shadow_conditioning"]["completed_all_exact"]
+    assert not b["interpretable"]
+    assert not _pt(s, "t2_bf16_L2048_c8")["shadow_conditioning"]["valid"]
     f = _pt(s, "t3_rabit_L2048_c4")
-    assert f["compile_conditioning"]["failure_in_conditioning"] and f["outcome_class"] == "engine_or_request_failure"
+    assert f["shadow_conditioning"]["failure_in_conditioning"] and f["outcome_class"] == "engine_or_request_failure"
     h = s["highest_successfully_tested_concurrency"]["rabit_kv2"]
     assert h["per_trial"]["1"] == 64 and h["highest_contiguous_successful_concurrency_all_trials"] == 1
 
 
-def test_old_jit_contaminated_attempt_remains_failed():
-    d = r6.DIAGNOSTIC_ATTEMPTS[2048][0]
-    assert r6.run_git("ls-files", r6.rel(d / "modal_session.log"))  # archived, committed
-    assert d in r6.EVIDENCE_DIRS and d in r6.PROTECTED_PATHS
-    st = json.loads((d / "ATTEMPT_STATUS.json").read_text(encoding="utf-8"))
-    assert st["accepted_for_performance_interpretation"] is False and st["use_in_paper_dataset"] is False
-    m = json.loads((d / "manifest.json").read_text(encoding="utf-8"))
-    ic = json.loads((d / "integrity_check.json").read_text(encoding="utf-8"))
-    assert m["status"] == "failed" and ic["failed_categories"] == ["jit"]
-    assert ic["counts"] == {"passed": 320, "failed": 9, "not_run": 0, "not_evaluated": 0}
-    # re-analysis under the amended harness still fails (measured JIT; and it has no conditioning phase at all)
-    text = (d / "modal_session.log").read_text(encoding="utf-8", errors="replace")
-    integ, s = r6.analyze(text, 2048, cfg(), protocol())
-    assert not integ["all_ok"] and {"jit", "conditioning"} <= set(integ["failed_categories"])
-    assert not any(p["interpretable"] for p in s["points"])
+def _attempt(n):
+    return r6.BASE_OUT / "L2048" / f"jit_contaminated_attempt_{n}"
 
 
-def test_failed_attempt_never_pooled_with_rerun():
-    d_old, d_new = r6.DIAGNOSTIC_ATTEMPTS[2048][0], r6.out_dir(2048)
-    assert d_new != d_old and d_old not in d_new.parents and d_new not in d_old.parents
+def test_diagnostic_attempts_remain_failed_and_excluded():
+    expect = {1: {"passed": 320, "failed": 9, "not_run": 0, "not_evaluated": 0},
+              2: {"passed": 395, "failed": 6, "not_run": 0, "not_evaluated": 0}}
+    assert r6.DIAGNOSTIC_ATTEMPTS[2048] == [_attempt(1), _attempt(2)]
+    for n, counts in expect.items():
+        d = _attempt(n)
+        assert r6.run_git("ls-files", r6.rel(d / "modal_session.log"))  # archived, committed
+        assert d in r6.EVIDENCE_DIRS and d in r6.PROTECTED_PATHS
+        st = json.loads((d / "ATTEMPT_STATUS.json").read_text(encoding="utf-8"))
+        assert st["accepted_for_performance_interpretation"] is False and st["use_in_paper_dataset"] is False
+        m = json.loads((d / "manifest.json").read_text(encoding="utf-8"))
+        ic = json.loads((d / "integrity_check.json").read_text(encoding="utf-8"))
+        assert m["status"] == "failed" and ic["failed_categories"] == ["jit"] and ic["counts"] == counts
+        # re-analysis under the amended harness still fails (measured JIT; no valid shadow pass)
+        text = (d / "modal_session.log").read_text(encoding="utf-8", errors="replace")
+        integ, s = r6.analyze(text, 2048, cfg(), protocol())
+        assert not integ["all_ok"] and {"jit", "conditioning"} <= set(integ["failed_categories"])
+        assert not any(p["interpretable"] for p in s["points"])
+
+
+def test_diagnostic_attempts_never_pooled_with_accepted_results():
+    d_new = r6.out_dir(2048)
+    assert d_new.name == "shadow_conditioned"
+    for d_old in (_attempt(1), _attempt(2)):
+        assert d_new != d_old and d_old not in d_new.parents and d_new not in d_old.parents
     _, s = _run()
-    assert s["excluded_attempts_not_pooled"] == [r6.rel(d_old)] and len(s["points"]) == 36
-    assert protocol()["excluded_attempts"]["2048"]["dirs"] == [r6.rel(d_old)]
+    assert s["excluded_attempts_not_pooled"] == [r6.rel(_attempt(1)), r6.rel(_attempt(2))] and len(s["points"]) == 36
+    assert protocol()["excluded_attempts"]["2048"]["dirs"] == [r6.rel(_attempt(1)), r6.rel(_attempt(2))]
     orig = r6.out_dir
     try:
-        r6.out_dir = lambda L: d_old  # a run may never write into / next to the archived attempt
-        try:
-            r6.preflight(2048, dry_run=True)
-        except RuntimeError as e:
-            assert "overlaps an archived diagnostic attempt" in str(e)
-        else:
-            raise AssertionError("preflight accepted the diagnostic attempt directory")
+        for d_old in (_attempt(1), _attempt(2)):
+            r6.out_dir = lambda L, d=d_old: d  # a run may never write into / next to an archived attempt
+            try:
+                r6.preflight(2048, dry_run=True)
+            except RuntimeError as e:
+                assert "overlaps an archived diagnostic attempt" in str(e)
+            else:
+                raise AssertionError("preflight accepted a diagnostic attempt directory")
     finally:
         r6.out_dir = orig
 
 
-def test_protocol_changed_only_by_reviewed_conditioning_amendment():
+def test_protocol_changed_only_by_reviewed_warmup_amendments():
     old = json.loads(r6.run_git("show", "abefce2:benchmarks/mlsys2027/exp6_protocol.json"))
     new = protocol()
-    assert set(new) - set(old) == {"compile_conditioning", "excluded_attempts"} and not set(old) - set(new)
-    assert [k for k in old if old[k] != new[k]] == ["amendments"]
-    assert set(new["amendments"]) - set(old["amendments"]) == {"compile_conditioning"}
+    assert set(new) - set(old) == {"shadow_conditioning", "excluded_attempts"} and not set(old) - set(new)
+    assert [k for k in old if old[k] != new[k]] == ["amendments"]  # measurement fields, points / trial order unchanged
+    assert set(new["amendments"]) - set(old["amendments"]) == {"compile_conditioning_superseded", "shadow_conditioning"}
+    assert new["amendments"]["compile_conditioning_superseded"].startswith("SUPERSEDED")
     assert all(new["amendments"][k] == v for k, v in old["amendments"].items())
 
 
