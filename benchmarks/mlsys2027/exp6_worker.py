@@ -17,9 +17,13 @@ Per point:
   * workload (exp6_workload.py): the frozen ordered set of 256 distinct prompts
     of this length (hash-checked), 32 greedy output tokens (temperature 0,
     ignore_eos);
-  * phases: setup | 2 warmup requests (discarded) | 256 measured requests in ONE
-    llm.generate call (closed-loop: the scheduler keeps at most C sequences in
-    flight and admits the next request as a slot frees);
+  * phases: setup | compile-conditioning (reviewed amendment: exactly C fixed
+    conditioning prompts of the sweep length, one concurrent llm.generate call
+    under max_num_seqs = C, identical for both dtypes; outputs / timings are
+    discarded from the results and emitted only for validity checks) | 2 warmup
+    requests (discarded) | 256 measured requests in ONE llm.generate call
+    (closed-loop: the scheduler keeps at most C sequences in flight and admits
+    the next request as a slot frees);
   * per measured request: engine-core queued / scheduled / first-token /
     last-token timestamps (one monotonic engine clock), output token count,
     finish reason, prompt / output token-ID SHA-256; total wall time
@@ -114,6 +118,7 @@ def main() -> int:
 
     measured = wl.measured_prompts(args.prompt_tokens)
     warm = wl.warmup_prompts(args.prompt_tokens)
+    cond = wl.conditioning_prompts(args.prompt_tokens, args.concurrency)
     digest = wl.set_digest(measured)
     if digest["ordered_set_sha256"] != args.prompt_set_sha256:
         raise SystemExit("measured prompt set does not match the pinned hash")
@@ -162,11 +167,24 @@ def main() -> int:
     emit("EXP6_WORKLOAD", {"prompt_tokens": args.prompt_tokens, "output_tokens": wl.OUTPUT_TOKENS,
                            "measured_requests": wl.MEASURED_REQUESTS, "warmup_requests": wl.WARMUP_REQUESTS,
                            "temperature": 0.0, "ignore_eos": True, "prompt_set": digest,
-                           "warmup_prompt_sha256": wl.set_digest(warm)["per_prompt_sha256"]})
+                           "warmup_prompt_sha256": wl.set_digest(warm)["per_prompt_sha256"],
+                           "conditioning_requests": len(cond), "conditioning_prompt_set": wl.set_digest(cond)})
     sp = SamplingParams(temperature=0.0, max_tokens=wl.OUTPUT_TOKENS, ignore_eos=True)
 
-    phase = "warmup"
+    phase = "conditioning"
     try:
+        print("EXP6_CONDITIONING_BEGIN", flush=True)
+        couts = llm.generate([{"prompt_token_ids": p} for p in cond], sp, use_tqdm=False)
+        print("EXP6_CONDITIONING_END", flush=True)
+        for i, o in enumerate(couts):  # validity evidence only; never used in result tables
+            m = o.metrics
+            ids = list(o.outputs[0].token_ids) if o.outputs else []
+            emit("EXP6_CONDITIONING_REQUEST", {
+                "i": i, "prompt_tokens": len(o.prompt_token_ids),
+                "prompt_token_ids_sha256": wl.ids_sha256(o.prompt_token_ids), "output_tokens": len(ids),
+                "finish_reason": o.outputs[0].finish_reason if o.outputs else None,
+                "scheduled_ts": getattr(m, "scheduled_ts", None), "last_token_ts": getattr(m, "last_token_ts", None)})
+        phase = "warmup"
         print("EXP6_WARMUP_BEGIN", flush=True)
         llm.generate([{"prompt_token_ids": p} for p in warm], sp, use_tqdm=False)
         print("EXP6_WARMUP_END", flush=True)

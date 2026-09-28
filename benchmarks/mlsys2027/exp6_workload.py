@@ -9,6 +9,13 @@ followed by pseudo-random ordinary vocabulary IDs in [1000, 30000) derived from
 SHA-256(tag:length:index:position) -- deterministic, distinct per index, no
 special tokens. For each prompt length there is ONE fixed ordered set of 256
 measured prompts and ONE fixed set of 2 warmup prompts (distinct from them).
+
+COMPILE-CONDITIONING AMENDMENT (reviewed, after the JIT-contaminated L2048
+attempt 1 and before any rerun): for every prompt length x concurrency C there is
+ONE fixed set of exactly C conditioning prompts of the sweep prompt length
+(tag "exp6-conditioning-c{C}"), disjoint from the measured and warmup prompts.
+They are run concurrently (max_num_seqs = C) BEFORE the 2 original warmup
+requests, identically for BF16 and RABIT, and are never measured.
 """
 
 from __future__ import annotations
@@ -58,6 +65,13 @@ def set_digest(prompts: list[list[int]]) -> dict:
     per = [ids_sha256(p) for p in prompts]
     return {"count": len(per), "per_prompt_sha256": per,
             "ordered_set_sha256": hashlib.sha256("\n".join(per).encode("ascii")).hexdigest()}
+
+
+def conditioning_prompts(length: int, concurrency: int) -> list[list[int]]:
+    """Point-matched compile-conditioning: exactly C prompts of the sweep length (unmeasured)."""
+    if concurrency < 1:
+        raise ValueError("concurrency must be >= 1")
+    return [_prompt(f"exp6-conditioning-c{concurrency}", length, i) for i in range(concurrency)]
 
 
 def plan_points(length: int) -> list[dict]:

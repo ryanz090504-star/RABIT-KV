@@ -12,9 +12,10 @@ Inside ONE container / ONE physical GPU, for ONE prompt length:
   3. the 36 pre-registered points in the given order (3 trials; per-trial dtype
      order BF16->RABIT, RABIT->BF16, BF16->RABIT; ascending concurrency
      1,4,8,16,32,64 within each dtype). Each point is ONE fresh engine process
-     (exp6_worker.py) under the process-group watchdog, after a GPU clean-state
-     check. Every point is attempted independently: a failed point (engine /
-     request failure, OOM, watchdog) is recorded and the sweep continues with the
+     (exp6_worker.py: point-matched compile-conditioning, 2 warmup, 256 measured)
+     under the process-group watchdog, after a GPU clean-state check. Every
+     point is attempted independently: a failed point (engine / request
+     failure, OOM, watchdog) is recorded and the sweep continues with the
      next point -- only a GPU that is not back to its idle baseline stops the run;
   4. post-run GPU state.
 Nothing is retried.
@@ -53,7 +54,7 @@ GPU_CLEAN_POLL_S = 2
 GATE_TIMEOUT_S = 600
 LEG_TIMEOUT_S = 900  # unused here; kept identical to Experiment 3 (verified)
 REQUEST_CAP_S = 600  # unused here; kept identical (verified)
-POINT_TIMEOUT_S = 1200  # per point: engine start + 2 warmup + 256 measured requests (largest expected ~5 min)
+POINT_TIMEOUT_S = 1200  # per point: engine start + C conditioning + 2 warmup + 256 measured requests
 POINTS_PER_SWEEP = 36
 
 if modal.is_local() and not SNAP.is_file():
