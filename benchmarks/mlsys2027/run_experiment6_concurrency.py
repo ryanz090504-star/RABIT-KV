@@ -58,6 +58,19 @@ neither path spawns a second FunctionCall once a launch record exists. A
 FunctionCall that ends TERMINATED / INIT_FAILURE (or a DONE.json reporting an
 InputCancellation) is classified infrastructure_aborted.
 
+CAPACITY-BOUND SHADOW VALIDITY (validation-logic fix only, after L8192 trial 1):
+the shadow-conditioning rule "shadow reaches target C" conflicts with the
+pre-registered outcome target_concurrency_not_reached when physical KV capacity
+makes C impossible. The normal rule is unchanged. ONLY when the shadow pass did
+not reach C, a narrow alternative applies, and only if ALL hold: measured class
+target_concurrency_not_reached; measured and shadow 256/256; measured JIT 0; no
+OOM / request failure / watchdog; selector / QB / engine config / prompt hashes /
+capacity exact; preemption status available; shadow max >= measured max;
+allocator-derived full-length sequence ceiling floor(num_gpu_blocks /
+ceil((prompt + output) / block_size)) < C; measured max <= that ceiling. The
+outcome class is never changed. `--reparse --trial N` re-analyzes a pinned trial
+log offline.
+
 Frozen workload (exp6_workload.py; hashes frozen in exp6_protocol.json): prompt
 lengths 2048 and 8192 (separate sweeps / separate Modal runs); concurrency
 {1,4,8,16,32,64}; per point 2 warmup requests (discarded) + 256 measured
@@ -155,6 +168,20 @@ ACCEPTED_RUNS = {2048: {"dir": BASE_OUT / "L2048" / "shadow_conditioned",
                         "run_id": "exp6-L2048-20260928T033048Z-2ccaa10",
                         "pre_keyfix_summary_sha256": "b57effa457c8b1e9ee62ae8813537568cd72ef233c01733624537a40da9f54bf",
                         "integrity_check_sha256": "74ac28da35ed879c7525aeaa16fe4ddfddb3a06237d16160403045e0ccaeac2e"}}
+# Measured L8192 trial runs whose canonical raw evidence is pinned for an offline --reparse --trial N.
+PINNED_TRIAL_RAW = {(8192, 1): {
+    "dir": BASE_OUT / "L8192" / "shadow_conditioned" / "trial_1",
+    "remote_session_log_sha256": "5a42a5294dbb612347fd72d7dd43710d4dc3498819f27e61b29c6822fd27ee1c",
+    "remote_session_log_bytes": 3102296,
+    "remote_done_sha256": "c38c35c09dbc5eeba144b9f53294f959015fbe082b1f5eab7c65e1b7531747d2",
+    "pre_fix_summary": ("summary_pre_capacity_validation_fix.json",
+                        "6c9331b38b06c32db92a7c38a325fde9d9896981a93bfe68a2e100ba3858054a"),
+    "pre_fix_integrity": ("integrity_check_pre_capacity_validation_fix.json",
+                          "a9fb47bc2562e96d886d2820d40fefeb28ce2001c21623b7eb9b62432af6479c"),
+    "measurement_commit": "0a1a6b4d10466f07775a59b5970f812a4d0283c8", "modal_app": "ap-5pvRrz6NUTtnh2gZQMyS1M",
+    "function_call_id": "fc-01M3M67DNZZH5QZYT5DMBVX37K", "run_id": "exp6-L8192-t1-20260928T141726Z-0a1a6b4"}}
+CAPACITY_FIX_POINT_KEYS = ("capacity_bound", "capacity_bound_validation")
+SHADOW_TARGET_CHECK = "shadow conditioning reached target overlapping in-flight concurrency"
 EVIDENCE_DIRS.append(ACCEPTED_RUNS[2048]["dir"])  # accepted, frozen L2048 evidence
 PROTECTED_PATHS.append(ACCEPTED_RUNS[2048]["dir"])
 REMOTE_POLL_S = 120
@@ -706,6 +733,52 @@ def shadow_validity(p: dict, spec: dict, pinned_hashes: list[str]) -> dict:
             "jit_lines": p["jit"]["shadow_conditioning"], "valid": completed and reached and not failed_here}
 
 
+def allocator_full_length_ceiling(capacity: dict | None, prompt_tokens: int) -> dict | None:
+    """DERIVED (not observed) ceiling on simultaneously resident full-length requests: allocator blocks divided by the
+    blocks one full request (prompt + all output tokens) occupies."""
+    if not capacity or not capacity.get("num_gpu_blocks") or not capacity.get("block_size"):
+        return None
+    full = prompt_tokens + wl.OUTPUT_TOKENS
+    per = math.ceil(full / capacity["block_size"])
+    return {"num_gpu_blocks": capacity["num_gpu_blocks"], "block_size": capacity["block_size"],
+            "full_request_tokens": full, "blocks_per_full_request": per,
+            "allocator_derived_full_length_sequence_ceiling": capacity["num_gpu_blocks"] // per,
+            "kind": "derived from allocator capacity; NOT an observed residency count"}
+
+
+def capacity_bound_shadow_validity(*, cls: str | None, m: dict, cv: dict, p: dict, proc: dict | None,
+                                   capacity: dict | None, prompt_tokens: int, exact_config: bool) -> dict:
+    """Narrow alternative to "shadow reached target C" for a point the allocator cannot hold at C."""
+    C = m["target_concurrency"]
+    ceil_info = allocator_full_length_ceiling(capacity, prompt_tokens)
+    ceiling = ceil_info["allocator_derived_full_length_sequence_ceiling"] if ceil_info else None
+    measured_max = (m["inflight_concurrency"] or {}).get("observed_max_inflight_concurrency")
+    shadow_max = cv["observed_max_inflight_concurrency"]
+    fail = p["failure"] or {}
+    conds = {
+        "measured_outcome_is_target_concurrency_not_reached": cls == "target_concurrency_not_reached",
+        "measured_256_of_256_completed": m["completed_requests"] == wl.MEASURED_REQUESTS and m["output_token_count_valid"],
+        "shadow_256_of_256_completed": bool(cv["completed_all_exact"]) and not cv["failure_in_conditioning"],
+        "measured_phase_jit_zero": p["jit"]["measured"] == 0,
+        "no_oom": p["oom_lines"] == 0 and fail.get("kind") != "request_oom",
+        "no_request_failure": not p["failure"],
+        "no_watchdog": bool(proc) and not proc.get("timed_out") and proc.get("returncode") == 0,
+        "selector_qb_engine_config_prompt_hashes_capacity_exact": bool(exact_config),
+        "preemption_status_available": m["preemption_source"] != "unavailable",
+        "shadow_max_ge_measured_max": shadow_max is not None and measured_max is not None and shadow_max >= measured_max,
+        "allocator_ceiling_below_target": ceiling is not None and ceiling < C,
+        "measured_max_le_allocator_ceiling": ceiling is not None and measured_max is not None and measured_max <= ceiling,
+    }
+    bound = all(conds.values())
+    return {"target_concurrency": C, "observed_max_inflight_concurrency": measured_max,
+            "shadow_observed_max_inflight_concurrency": shadow_max, "allocator_ceiling": ceil_info,
+            "allocator_derived_full_length_sequence_ceiling": ceiling, "conditions": conds, "capacity_bound": bound,
+            "outcome_class": cls,
+            "statement": (f"At offered concurrency {C}, the system admitted at most {measured_max} overlapping in-flight "
+                          f"requests, matching the allocator-derived full-length KV ceiling of {ceiling} under this "
+                          f"workload." if bound else None)}
+
+
 def classify(p: dict, proc: dict | None, metrics: dict) -> str:
     started = "EXP6_CAPACITY" in p["tags"]
     oom = p["oom_lines"] > 0 or (p["failure"] or {}).get("kind") == "request_oom"
@@ -847,40 +920,54 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict, trial: int | None
         ok = ok and all(v in (None, "0") for v in (s3.get("profiling_env") or {"x": "missing"}).values())
         add(f"{label}: Stage3C selection ({'shared_decode / QB' if dtype == 'rabit_kv2' else 'none'}) and profiling off",
             "stage3c", st(ok), s3 or None)
+        selector_ok = bool(ok)
         engine_up = "EXP6_CAPACITY" in tg
         eff = tg.get("EXP6_EFFECTIVE_ENGINE_CONFIG", {})
-        add(f"{label}: max_num_seqs == target concurrency {C} (requested and effective)", "config",
-            st((tg.get("EXP6_REQUESTED_ENGINE_KWARGS") or {}).get("max_num_seqs") == C
-               and (eff.get("max_num_seqs") == C if engine_up else True)))
+        config_ok = ((tg.get("EXP6_REQUESTED_ENGINE_KWARGS") or {}).get("max_num_seqs") == C
+                     and (eff.get("max_num_seqs") == C if engine_up else True))
+        add(f"{label}: max_num_seqs == target concurrency {C} (requested and effective)", "config", st(config_ok))
         wkl = tg.get("EXP6_WORKLOAD") or {}
-        add(f"{label}: frozen prompt set (hash) and 32 greedy outputs", "workload",
-            st(not engine_up or (wkl.get("prompt_set", {}).get("ordered_set_sha256")
+        workload_ok = (not engine_up or (wkl.get("prompt_set", {}).get("ordered_set_sha256")
                                  == protocol["prompt_sets"][str(spec["prompt_tokens"])]["measured"]["ordered_set_sha256"]
                                  and wkl.get("output_tokens") == wl.OUTPUT_TOKENS and wkl.get("temperature") == 0.0
                                  and wkl.get("measured_requests") == wl.MEASURED_REQUESTS
                                  and wkl.get("warmup_requests") == wl.WARMUP_REQUESTS
                                  and wkl.get("shadow_conditioning_requests") == wl.SHADOW_CONDITIONING_REQUESTS
                                  and (wkl.get("shadow_conditioning_prompt_set") or {}).get("ordered_set_sha256")
-                                 == shadow_set["ordered_set_sha256"])))
+                                 == shadow_set["ordered_set_sha256"]))
+        add(f"{label}: frozen prompt set (hash) and 32 greedy outputs", "workload", st(workload_ok))
         cap = (tg.get("EXP6_CAPACITY") or {}).get("capacity_tokens")
         add(f"{label}: allocator capacity == expected {EXPECTED_CAPACITY[dtype]} tokens", "capacity",
             st(cap == EXPECTED_CAPACITY[dtype]) if engine_up else NOT_EVALUATED, cap)
         add(f"{label}: shadow conditioning completed 256/256 exact requests (prompt length, pinned hash, 32 "
             f"outputs)", "conditioning", st(cv["completed_all_exact"]) if engine_up else NOT_EVALUATED,
             {k: cv[k] for k in ("requests", "exact_requests", "failure_in_conditioning")})
+        cbv = None
+        if engine_up and started and not cv["target_inflight_concurrency_reached"]:  # only then: narrow alternative
+            cbv = capacity_bound_shadow_validity(
+                cls=cls, m=m, cv=cv, p=p, proc=top["proc"].get(label), capacity=tg.get("EXP6_CAPACITY"),
+                prompt_tokens=spec["prompt_tokens"],
+                exact_config=selector_ok and config_ok and workload_ok and cap == EXPECTED_CAPACITY[dtype])
+        shadow_ok = cv["target_inflight_concurrency_reached"] or bool(cbv and cbv["capacity_bound"])
         add(f"{label}: shadow conditioning reached target overlapping in-flight concurrency {C}", "conditioning",
-            st(cv["target_inflight_concurrency_reached"]) if engine_up else NOT_EVALUATED,
-            cv["observed_max_inflight_concurrency"])
+            st(shadow_ok) if engine_up else NOT_EVALUATED,
+            cv["observed_max_inflight_concurrency"] if cbv is None else
+            {"shadow_observed_max_inflight_concurrency": cv["observed_max_inflight_concurrency"],
+             "capacity_bound_alternative": {k: cbv[k] for k in ("capacity_bound", "allocator_derived_full_length_sequence_ceiling",
+                                                                "observed_max_inflight_concurrency", "conditions")}})
+        shadow_valid = cv["valid"] or bool(cbv and cbv["capacity_bound"] and cv["completed_all_exact"]
+                                           and not cv["failure_in_conditioning"])
         add(f"{label}: no Triton JIT during the measured phase", "jit",
             st(p["jit"]["measured"] == 0) if engine_up else NOT_EVALUATED, p["jit"])
         add(f"{label}: no malformed machine lines", "point", st(not p["malformed"]), p["malformed"] or None)
         add(f"{label}: outcome classified", "outcome", st(cls in CLASSES), cls)
-        interpretable = cls == "sustained_target_concurrency" and p["jit"]["measured"] == 0 and cv["valid"]
+        interpretable = cls == "sustained_target_concurrency" and p["jit"]["measured"] == 0 and shadow_valid
         results[(dtype, C, t)] = {"class": cls, "interpretable_success": interpretable}
         plan_fields = {k: v for k, v in spec.items() if k != "concurrency"}  # C is `target_concurrency` (from m)
+        extra = {} if cbv is None else {"capacity_bound": cbv["capacity_bound"], "capacity_bound_validation": cbv}
         points_out.append({**plan_fields, "outcome_class": cls, "measured_jit_lines": p["jit"]["measured"],
-                           "interpretable": p["jit"]["measured"] == 0 and cls is not None and cv["valid"],
-                           "shadow_conditioning": cv,
+                           "interpretable": p["jit"]["measured"] == 0 and cls is not None and shadow_valid,
+                           "shadow_conditioning": cv, **extra,
                            "jit_lines_by_phase": p["jit"], "capacity": tg.get("EXP6_CAPACITY"),
                            "gpu_memory_mib": p["gpu_memory"], "oom_lines": p["oom_lines"], "failure": p["failure"],
                            "process": top["proc"].get(label), **m})
@@ -1051,6 +1138,87 @@ def reparse(length: int) -> int:
     return 0
 
 
+def capacity_fix_diff(old_integ: dict, new_integ: dict, old_sum: dict, new_sum: dict) -> dict:
+    """What the capacity-bound validation fix changed. Allowed: the shadow-target check of a capacity-bound point
+    flipping failed -> passed (observed detail added), that point's `interpretable` flag and the added
+    capacity-bound fields, and the integrity totals. Everything else -- every metric value -- must be identical."""
+    bound = {p["label"] for p in new_sum["points"] if p.get("capacity_bound")}
+    problems, flipped = [], []
+    if [c["check"] for c in old_integ["checks"]] != [c["check"] for c in new_integ["checks"]]:
+        problems.append("integrity check list differs")
+    else:
+        for o, n in zip(old_integ["checks"], new_integ["checks"]):
+            if o == n:
+                continue
+            label = n["check"].split(":", 1)[0]
+            if SHADOW_TARGET_CHECK in n["check"] and label in bound and o["state"] == FAILED and n["state"] == PASSED:
+                flipped.append(n["check"])
+            else:
+                problems.append(f"check changed: {n['check']}")
+    if [p["label"] for p in old_sum["points"]] != [p["label"] for p in new_sum["points"]]:
+        problems.append("point list differs")
+    else:
+        for o, n in zip(old_sum["points"], new_sum["points"]):
+            o2 = {k: v for k, v in o.items() if k != "interpretable"}
+            n2 = {k: v for k, v in n.items() if k != "interpretable" and k not in CAPACITY_FIX_POINT_KEYS}
+            if o2 != n2:
+                problems.append(f"point values changed: {n['label']}")
+            if o["interpretable"] != n["interpretable"] and n["label"] not in bound:
+                problems.append(f"interpretability changed for a non-capacity-bound point: {n['label']}")
+    skip = {"points", "all_integrity_passed", "integrity_counts"}
+    if {k: v for k, v in old_sum.items() if k not in skip} != {k: v for k, v in new_sum.items() if k not in skip}:
+        problems.append("summary-level fields changed")
+    return {"capacity_bound_points": sorted(bound), "flipped_checks": flipped, "problems": problems}
+
+
+def reparse_trial(length: int, trial: int) -> int:
+    """Offline re-analysis of a pinned L8192 trial raw log after the capacity-bound validation fix. Writes the new
+    summary / integrity only if the fix's diff is exactly the allowed one; raw logs and manifest are untouched."""
+    pin = PINNED_TRIAL_RAW.get((length, trial))
+    if pin is None:
+        raise SystemExit(f"no pinned raw log for L{length} trial {trial}")
+    assert_protected_paths_clean("reparse")
+    uncommitted = run_git("status", "--short", "--", *[rel(p) for p in MUST_BE_COMMITTED])
+    if uncommitted:
+        raise SystemExit("Refusing to reparse: the analysis code has uncommitted changes:\n" + uncommitted)
+    d = pin["dir"]
+    raw = d / "remote_session.log"
+    raw_sha = sha256_raw(raw)
+    if raw_sha != pin["remote_session_log_sha256"] or raw.stat().st_size != pin["remote_session_log_bytes"]:
+        raise SystemExit(f"{rel(raw)} does not match the pinned canonical raw log")
+    if sha256_raw(d / "remote_DONE.json") != pin["remote_done_sha256"]:
+        raise SystemExit("remote_DONE.json does not match its pin")
+    for name, want in (pin["pre_fix_summary"], pin["pre_fix_integrity"]):
+        if sha256_raw(d / name) != want:
+            raise SystemExit(f"{name} does not match its pin")
+    integ, summary = analyze(raw.read_text(encoding="utf-8", errors="replace"), length, rs6.final_config(),
+                             load_protocol(), trial)
+    new_integ, new_sum = json.loads(json.dumps(integ, default=str)), json.loads(json.dumps(summary, default=str))
+    old_integ = json.loads((d / pin["pre_fix_integrity"][0]).read_text(encoding="utf-8"))
+    old_sum = json.loads((d / pin["pre_fix_summary"][0]).read_text(encoding="utf-8"))
+    diff = capacity_fix_diff(old_integ, new_integ, old_sum, new_sum)
+    if diff["problems"] or sha256_raw(raw) != raw_sha:
+        raise SystemExit(f"reparse changed more than the capacity-bound validation: {diff['problems']}; nothing written")
+    (d / "integrity_check.json").write_text(json.dumps(integ, indent=2, default=str) + "\n", encoding="utf-8")
+    (d / "summary.json").write_text(json.dumps(summary, indent=2, default=str) + "\n", encoding="utf-8")
+    prov = {"measurement_commit": pin["measurement_commit"], "modal_app": pin["modal_app"],
+            "function_call_id": pin["function_call_id"], "run_id": pin["run_id"], "trial": trial,
+            "analysis_validation_fix_commit": run_git("rev-parse", "HEAD"),
+            "reparsed_from_existing_raw": True, "h100_rerun": False, "raw_unchanged": True,
+            "raw": {"file": "remote_session.log", "sha256": raw_sha, "bytes": raw.stat().st_size,
+                    "remote_DONE.json_sha256": pin["remote_done_sha256"]},
+            "pre_fix": {"summary": {"file": pin["pre_fix_summary"][0], "sha256": pin["pre_fix_summary"][1]},
+                        "integrity": {"file": pin["pre_fix_integrity"][0], "sha256": pin["pre_fix_integrity"][1],
+                                      "counts": old_integ["counts"]}},
+            "integrity_counts": integ["counts"], "fix_diff": diff, "all_metric_values_identical": True,
+            "summary_sha256": sha256_raw(d / "summary.json"),
+            "integrity_check_sha256": sha256_raw(d / "integrity_check.json"), "reparsed_utc": now()}
+    (d / "reparse_provenance.json").write_text(json.dumps(prov, indent=2) + "\n", encoding="utf-8")
+    print(f"EXP6 L{length} trial {trial} REPARSE OK: integrity {integ['counts']}; capacity-bound points "
+          f"{diff['capacity_bound_points']}; metric values identical; raw unchanged")
+    return 0 if integ["all_ok"] else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     make_console_encoding_safe()
     ap = argparse.ArgumentParser(description=__doc__)
@@ -1076,7 +1244,7 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("--prompt-tokens {2048,8192} is required (prompt-length sweeps run separately)")
     L = a.prompt_tokens
     if a.reparse:
-        return reparse(L)
+        return reparse(L) if a.trial is None else reparse_trial(L, a.trial)
     if a.combine:
         return combine_from_disk(L)
     T = a.trial

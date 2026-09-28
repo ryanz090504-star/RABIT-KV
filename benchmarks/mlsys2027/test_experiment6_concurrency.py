@@ -30,14 +30,14 @@ def protocol():
     return _CACHE["protocol"]
 
 
-def _rows(L, C, serial=False, bad_len_at=None, drop=0, hashes=None):
+def _rows(L, C, serial=False, bad_len_at=None, drop=0, hashes=None, wave=None):
     hashes = hashes or protocol()["prompt_sets"][str(L)]["measured"]["per_prompt_sha256"]
     rows, n = [], wl.MEASURED_REQUESTS - drop
     for i in range(n):
         if serial:
             s = 10.0 + i * 2.0
         else:
-            s = 10.0 + (i // C) * 2.0  # closed loop: waves of C requests
+            s = 10.0 + (i // (wave or C)) * 2.0  # closed loop: waves of C (or of an admission cap) requests
         rows.append({"i": i, "prompt_tokens": L, "prompt_token_ids_sha256": hashes[i],
                      "output_tokens": 31 if i == bad_len_at else 32,
                      "output_token_ids_sha256": "o" * 64, "finish_reason": "length",
@@ -47,7 +47,8 @@ def _rows(L, C, serial=False, bad_len_at=None, drop=0, hashes=None):
 
 def _point_lines(spec, *, serial=False, preempt=0, counter=True, logged=None, jit_measured=0, oom=False,
                  fail=None, bad_len_at=None, drop=0, cap=None, s3=None, max_seqs=None, no_engine=False,
-                 prompt_set=None, cond_jit=1, cond_serial=False, cond_drop=0, cond_bad_len=False, cond_fail=False):
+                 prompt_set=None, cond_jit=1, cond_serial=False, cond_drop=0, cond_bad_len=False, cond_fail=False,
+                 meas_cap=None, cond_cap=None, blocks=None):
     L, C, d = spec["prompt_tokens"], spec["concurrency"], spec["dtype"]
     c = cfg()
     if s3 is None:
@@ -73,10 +74,11 @@ def _point_lines(spec, *, serial=False, preempt=0, counter=True, logged=None, ji
     # closed loop like the measured phase: waves of C (or strictly serial when cond_serial)
     cond_rows = [{"i": i, "prompt_tokens": L - 1 if (cond_bad_len and i == 0) else L, "prompt_token_ids_sha256": ch[i],
                   "output_tokens": 32, "finish_reason": "length",
-                  "scheduled_ts": 1.0 + 2.0 * (i if cond_serial else i // C),
-                  "last_token_ts": 2.5 + 2.0 * (i if cond_serial else i // C)} for i in range(256 - cond_drop)]
+                  "scheduled_ts": 1.0 + 2.0 * (i if cond_serial else i // (cond_cap or C)),
+                  "last_token_ts": 2.5 + 2.0 * (i if cond_serial else i // (cond_cap or C))} for i in range(256 - cond_drop)]
+    nblocks = blocks if blocks is not None else (cap or r6.EXPECTED_CAPACITY[d]) // 32
     lines += [f"EXP6_EFFECTIVE_ENGINE_CONFIG={json.dumps({'max_num_seqs': ms})}",
-              f"EXP6_CAPACITY={json.dumps({'num_gpu_blocks': 1, 'block_size': 32, 'capacity_tokens': cap or r6.EXPECTED_CAPACITY[d]})}",
+              f"EXP6_CAPACITY={json.dumps({'num_gpu_blocks': nblocks, 'block_size': 32, 'capacity_tokens': cap or r6.EXPECTED_CAPACITY[d]})}",
               f"EXP6_WORKLOAD={json.dumps(wkl)}",
               "WARNING Triton kernel JIT compilation during inference: setup_kernel",
               "EXP6_SHADOW_CONDITIONING_BEGIN"]
@@ -95,7 +97,7 @@ def _point_lines(spec, *, serial=False, preempt=0, counter=True, logged=None, ji
     if fail:
         return lines + [f"EXP6_REQUEST_FAILURE={json.dumps({'phase': 'measured', 'kind': fail, 'error': 'x'})}"]
     lines.append("EXP6_MEASURED_END")
-    lines += [f"EXP6_REQUEST={json.dumps(r)}" for r in _rows(L, C, serial, bad_len_at, drop)]
+    lines += [f"EXP6_REQUEST={json.dumps(r)}" for r in _rows(L, C, serial, bad_len_at, drop, wave=meas_cap)]
     before = 5.0 if counter else None
     lines.append(f"EXP6_MEASURED_SUMMARY={json.dumps({'wall_s': 100.0, 'returned_requests': 256 - drop, 'preemptions_before': before, 'preemptions_after': (before + preempt) if counter else None, 'preemption_counter_available': counter})}")
     return lines + ["EXP6_WORKER_COMPLETE"]
@@ -885,7 +887,9 @@ def test_orchestration_change_leaves_science_unchanged():
             (r6.HERE / f).read_text(encoding="utf-8").rstrip("\n"), f
     old = ast.parse(r6.run_git("show", f"{head}:benchmarks/mlsys2027/run_experiment6_concurrency.py"))
     new = ast.parse(r6.RUNNER_SCRIPT.read_text(encoding="utf-8"))
-    for fn in ("point_metrics", "inflight_concurrency", "pct", "classify", "shadow_validity", "parse_point", "analyze",
+    # `analyze` is intentionally excluded: its validation logic changed in the capacity-bound fix; its metric values
+    # on real evidence are pinned by test_accepted_trial1_capacity_fix_changes_only_one_check.
+    for fn in ("point_metrics", "inflight_concurrency", "pct", "classify", "shadow_validity", "parse_point",
                "combine_trials", "run_plan", "static_watchdog_budget", "highest_successful", "build_l8192_amendment"):
         assert ast.dump(r6._function(old, fn)) == ast.dump(r6._function(new, fn)), fn
     for const in ("EXECUTION", "CROSS_TRIAL_METRICS", "RATIO_METRICS"):
@@ -896,6 +900,141 @@ def test_orchestration_change_leaves_science_unchanged():
                 for t in (om, _modal_tree()))
         assert ast.dump(a) == ast.dump(b), fn
     assert r6.EXECUTION[8192]["point_timeout_s"] == 3600 and r6.static_watchdog_budget(8192) == 43800
+
+
+# ------------------------------------------------------------------ capacity-bound shadow validity (validation logic)
+_BF64 = "t1_bf16_L8192_c64"
+_CAPBOUND = {"meas_cap": 47, "cond_cap": 47}  # the allocator admits at most 47 full-length requests
+
+
+def _t1(overrides=None, proc_over=None):
+    integ, s = r6.analyze(_session(8192, overrides=overrides, proc_over=proc_over, trial=1), 8192, cfg(), protocol(), 1)
+    return integ, s
+
+
+def _shadow_state(integ, label):
+    return [c["state"] for c in _check(integ, f"{label}: shadow conditioning reached")]
+
+
+def test_allocator_ceiling_formula():
+    bf = r6.allocator_full_length_ceiling({"num_gpu_blocks": 12282, "block_size": 32}, 8192)
+    assert bf["full_request_tokens"] == 8224 and bf["blocks_per_full_request"] == 257
+    assert bf["allocator_derived_full_length_sequence_ceiling"] == 47 and "NOT an observed" in bf["kind"]
+    rb = r6.allocator_full_length_ceiling({"num_gpu_blocks": 64831, "block_size": 32}, 8192)
+    assert rb["allocator_derived_full_length_sequence_ceiling"] == 252 and rb["blocks_per_full_request"] == 257
+    assert 393024 // 32 == 12282 and 2074592 // 32 == 64831  # the pinned allocator capacities
+    l2 = r6.allocator_full_length_ceiling({"num_gpu_blocks": 12282, "block_size": 32}, 2048)
+    assert l2["blocks_per_full_request"] == 65 and l2["allocator_derived_full_length_sequence_ceiling"] == 188
+    assert r6.allocator_full_length_ceiling(None, 8192) is None
+    assert r6.allocator_full_length_ceiling({"num_gpu_blocks": 1}, 8192) is None
+
+
+def test_normal_point_reaching_c_still_requires_shadow_to_reach_c():
+    integ, s = _t1({"t1_rabit_L8192_c16": {"cond_serial": True}, "t1_bf16_L8192_c32": {"cond_cap": 20}})
+    for label in ("t1_rabit_L8192_c16", "t1_bf16_L8192_c32"):
+        p = _pt(s, label)
+        assert p["outcome_class"] == "sustained_target_concurrency" and not p["interpretable"]
+        assert _shadow_state(integ, label) == ["failed"] and p["capacity_bound"] is False
+        assert not p["capacity_bound_validation"]["conditions"]["measured_outcome_is_target_concurrency_not_reached"]
+
+
+def test_capacity_bound_point_uses_narrow_alternative():
+    integ, s = _t1({_BF64: dict(_CAPBOUND)})
+    assert integ["all_ok"] and integ["counts"] == {"passed": 138, "failed": 0, "not_run": 0, "not_evaluated": 0}
+    p = _pt(s, _BF64)
+    assert p["outcome_class"] == "target_concurrency_not_reached"  # never converted to sustained
+    assert p["target_concurrency"] == 64 and p["inflight_concurrency"]["observed_max_inflight_concurrency"] == 47
+    cb = p["capacity_bound_validation"]
+    assert p["capacity_bound"] is True and cb["allocator_derived_full_length_sequence_ceiling"] == 47
+    assert cb["shadow_observed_max_inflight_concurrency"] == 47 and all(cb["conditions"].values())
+    assert cb["statement"] == ("At offered concurrency 64, the system admitted at most 47 overlapping in-flight "
+                               "requests, matching the allocator-derived full-length KV ceiling of 47 under this workload.")
+    assert _shadow_state(integ, _BF64) == ["passed"] and p["interpretable"]
+    hs = r6.highest_successful({(p2["dtype"], p2["target_concurrency"], 1): {
+        "interpretable_success": p2["outcome_class"] == "sustained_target_concurrency" and p2["interpretable"]}
+        for p2 in s["points"]})
+    assert hs["bfloat16"]["per_trial"]["1"] == 32 and hs["rabit_kv2"]["per_trial"]["1"] == 64  # C64 not a BF16 success
+    assert all("capacity_bound" not in q for q in s["points"] if q["label"] != _BF64)  # only evaluated on a miss
+
+
+def _capacity_bound_fails(overrides=None, proc_over=None, cond=None):
+    integ, s = _t1({_BF64: {**_CAPBOUND, **(overrides or {})}}, proc_over={_BF64: proc_over} if proc_over else None)
+    p = _pt(s, _BF64)
+    assert _shadow_state(integ, _BF64) == ["failed"] and not integ["all_ok"], overrides
+    assert p["capacity_bound"] is False and not p["interpretable"]
+    if cond:
+        assert p["capacity_bound_validation"]["conditions"][cond] is False, (cond, p["capacity_bound_validation"])
+    return p
+
+
+def test_shadow_max_must_cover_measured_max():
+    _capacity_bound_fails({"cond_cap": 40}, cond="shadow_max_ge_measured_max")
+
+
+def test_measured_max_must_not_exceed_ceiling_and_ceiling_below_target():
+    _capacity_bound_fails({"blocks": 11000}, cond="measured_max_le_allocator_ceiling")  # ceiling 42 < measured 47
+    _capacity_bound_fails({"blocks": 12282 * 2}, cond="allocator_ceiling_below_target")  # ceiling 95 >= 64
+
+
+def test_non_capacity_bound_miss_still_fails():
+    integ, s = _t1({"t1_rabit_L8192_c64": dict(_CAPBOUND)})  # RABIT ceiling 252 >= 64: a 47 miss is not capacity
+    p = _pt(s, "t1_rabit_L8192_c64")
+    assert p["outcome_class"] == "target_concurrency_not_reached" and p["capacity_bound"] is False
+    assert p["capacity_bound_validation"]["allocator_derived_full_length_sequence_ceiling"] == 252
+    assert _shadow_state(integ, "t1_rabit_L8192_c64") == ["failed"] and not integ["all_ok"]
+
+
+def test_exception_blocked_by_jit_oom_failure_watchdog_preemption_and_config():
+    _capacity_bound_fails({"jit_measured": 1}, cond="measured_phase_jit_zero")
+    p = _capacity_bound_fails({"oom": True, "fail": "request_oom"})
+    assert p["outcome_class"] == "oom_or_allocation_failure"
+    p = _capacity_bound_fails({"fail": "request_execution_failure"}, cond="no_request_failure")
+    assert p["outcome_class"] == "engine_or_request_failure"
+    p = _capacity_bound_fails(proc_over={"timed_out": True, "returncode": -9}, cond="no_watchdog")
+    assert p["outcome_class"] == "engine_or_request_failure"
+    p = _capacity_bound_fails({"counter": False}, cond="preemption_status_available")
+    assert p["preemption_source"] == "unavailable"
+    leak = {"applicable": False, "env": {"VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"}, "profiling_env": {}}
+    _capacity_bound_fails({"s3": leak}, cond="selector_qb_engine_config_prompt_hashes_capacity_exact")
+    _capacity_bound_fails({"max_seqs": 47}, cond="selector_qb_engine_config_prompt_hashes_capacity_exact")
+    _capacity_bound_fails({"prompt_set": protocol()["prompt_sets"]["2048"]["measured"]},
+                          cond="selector_qb_engine_config_prompt_hashes_capacity_exact")
+    _capacity_bound_fails({"cap": 393000, "blocks": 12282},
+                          cond="selector_qb_engine_config_prompt_hashes_capacity_exact")
+    _capacity_bound_fails({"cond_drop": 1}, cond="shadow_256_of_256_completed")
+    _capacity_bound_fails({"drop": 1})  # measured 255/256 -> engine_or_request_failure, never capacity-bound
+
+
+def test_accepted_trial1_capacity_fix_changes_only_one_check():
+    pin = r6.PINNED_TRIAL_RAW[(8192, 1)]
+    d = pin["dir"]
+    raw = d / "remote_session.log"
+    assert r6.sha256_raw(raw) == pin["remote_session_log_sha256"] == (
+        "5a42a5294dbb612347fd72d7dd43710d4dc3498819f27e61b29c6822fd27ee1c") and raw.stat().st_size == 3102296
+    assert r6.sha256_raw(d / "remote_DONE.json") == pin["remote_done_sha256"]
+    for name, want in (pin["pre_fix_summary"], pin["pre_fix_integrity"]):
+        assert r6.sha256_raw(d / name) == want
+    integ, s = r6.analyze(raw.read_text(encoding="utf-8", errors="replace"), 8192, cfg(), protocol(), 1)
+    integ, s = json.loads(json.dumps(integ, default=str)), json.loads(json.dumps(s, default=str))
+    old_i = json.loads((d / pin["pre_fix_integrity"][0]).read_text(encoding="utf-8"))
+    old_s = json.loads((d / pin["pre_fix_summary"][0]).read_text(encoding="utf-8"))
+    assert old_i["counts"] == {"passed": 137, "failed": 1, "not_run": 0, "not_evaluated": 0}
+    assert integ["counts"] == {"passed": 138, "failed": 0, "not_run": 0, "not_evaluated": 0}
+    diff = r6.capacity_fix_diff(old_i, integ, old_s, s)
+    assert diff == {"capacity_bound_points": [_BF64], "problems": [],
+                    "flipped_checks": [f"{_BF64}: shadow conditioning reached target overlapping in-flight concurrency 64"]}
+    p = _pt(s, _BF64)
+    assert p["outcome_class"] == "target_concurrency_not_reached" and p["capacity_bound"] is True
+    assert p["inflight_concurrency"]["observed_max_inflight_concurrency"] == 47 and p["target_concurrency"] == 64
+    assert p["capacity_bound_validation"]["allocator_derived_full_length_sequence_ceiling"] == 47
+    for o, n in zip(old_s["points"], s["points"]):  # every metric value identical
+        for k in ("requests_per_s", "output_tokens_per_s", "total_tokens_per_s", "wall_s", "latency_s", "ttft_s",
+                  "tpot_s", "completed_requests", "preemptions", "inflight_concurrency", "outcome_class"):
+            assert o[k] == n[k], (n["label"], k)
+    rb = _pt(s, "t1_rabit_L8192_c64")
+    assert "capacity_bound" not in rb and rb["inflight_concurrency"]["observed_max_inflight_concurrency"] == 64
+    assert r6.run_git("show", "5028eb2:benchmarks/mlsys2027/exp6_protocol.json") == \
+        r6.PROTOCOL.read_text(encoding="utf-8").rstrip("\n")  # scientific protocol byte-identical
 
 
 def test_missing_point_is_not_run_and_fails_completion():
