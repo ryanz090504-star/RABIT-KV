@@ -1,0 +1,32 @@
+{
+  "attempt": "L8192 trial 1, attempt 1",
+  "status": "infrastructure_aborted",
+  "classification": "INFRASTRUCTURE-ABORTED trial; not a scientific or performance failure",
+  "accepted_for_performance_interpretation": false,
+  "use_in_paper_dataset": false,
+  "salvage_of_any_point_allowed": false,
+  "decision": "Modal delivered a cancellation signal to the running container at 2026-09-28T13:03:34Z ('Received a cancellation signal while processing input'; container: 'InputCancellation: Input was cancelled by user'). The local client was still connected (no disconnect logged before the cancellation) and the app was launched with `modal run --detach`. The cancellation originated outside the harness; its initiator is not identifiable from the logs. Per the L8192 execution amendment the trial is preserved separately and NOT rerun automatically.",
+  "archival_note": "Every other file in this directory is the byte-exact output of the run (moved unchanged from results/mlsys2027/concurrency_scaling/L8192/shadow_conditioned/trial_1/; SHA-256 verified before and after the move). Paths inside manifest.json refer to the original location. remote_session.log (from the Modal Volume) is the canonical raw record; DONE.json status 'exception'.",
+  "modal_app": "ap-ST5prUU5A4qvJnoNat9XAu",
+  "run_id": "exp6-L8192-t1-20260928T124953Z-8e9b936",
+  "code_commit": "8e9b9361c47e720ba60bc05305b6981e6fcb1b65",
+  "protocol_sha256": "52362fb5019e113596c8e047df607f4bf3ec8268337f17aa3958f4a54ac1a56e",
+  "l8192_amendment_sha256": "f8a158022c59859165ce92402c1574c1076b0d46c88e0864351b21c6e9dc51ae",
+  "vllm_kvquant_snapshot_sha256": "fd0c492d3bfaae375b56adc1a9f2a92546f2335a8581a43765dbfe25508313df",
+  "gpu": {"model": "NVIDIA H100 80GB HBM3", "uuid": "GPU-47301c0b-72e2-a014-5c2f-493c24bd54b6", "driver": "580.95.05"},
+  "remote_session_log": {"sha256": "3ea95dd79365a64af835b4f9903d9676d626bb6c0b8d6d61d0d7353462cdc639", "bytes": 141315,
+                         "done": {"status": "exception", "error": "InputCancellation: Input was cancelled by user"}},
+  "utc": {"started": "2026-09-28T12:49:53.461664+00:00", "cancelled": "2026-09-28T13:03:34+00:00",
+          "completed": "2026-09-28T13:04:09.277125+00:00"},
+  "integrity_counts": {"passed": 15, "failed": 1, "not_run": 78, "not_evaluated": 44},
+  "execution_facts": {
+    "environment_checks": "3/3 passed (incl. execution: trial 1 only, 12 points, 3600 s watchdog, 43800 s budget)",
+    "gate": "passed",
+    "point_in_progress_when_cancelled": "t1_bf16_L8192_c1 (shadow conditioning 256/256 valid; measured phase in progress, no measured rows emitted)",
+    "points_completed": 0,
+    "points_not_started": 11,
+    "watchdog_timeouts": 0,
+    "protected_paths_post_run": "clean",
+    "prior_evidence_unchanged": true
+  }
+}
