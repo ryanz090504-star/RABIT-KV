@@ -1,0 +1,3446 @@
+{
+  "checks": [
+    {
+      "check": "exactly one H100",
+      "category": "environment",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "point order as pre-registered (36 points)",
+      "category": "environment",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "gate passed",
+      "category": "gate",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "sweep completed all 36 points (no stop)",
+      "category": "completion",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c1: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c1: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t1_bf16_L2048_c1",
+        "prompt_tokens": 2048,
+        "target_concurrency": 1,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c1: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c1: max_num_seqs == target concurrency 1 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c1: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c1: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t1_bf16_L2048_c1: compile-conditioning completed 1/1 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 1,
+        "exact_requests": 1,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c1: compile-conditioning reached target overlapping in-flight concurrency 1",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 1
+    },
+    {
+      "check": "t1_bf16_L2048_c1: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 0,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c1: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c1: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_bf16_L2048_c4: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c4: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t1_bf16_L2048_c4",
+        "prompt_tokens": 2048,
+        "target_concurrency": 4,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c4: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c4: max_num_seqs == target concurrency 4 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c4: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c4: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t1_bf16_L2048_c4: compile-conditioning completed 4/4 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 4,
+        "exact_requests": 4,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c4: compile-conditioning reached target overlapping in-flight concurrency 4",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 4
+    },
+    {
+      "check": "t1_bf16_L2048_c4: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 1,
+        "warmup": 1,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c4: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c4: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_bf16_L2048_c8: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c8: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t1_bf16_L2048_c8",
+        "prompt_tokens": 2048,
+        "target_concurrency": 8,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c8: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c8: max_num_seqs == target concurrency 8 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c8: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c8: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t1_bf16_L2048_c8: compile-conditioning completed 8/8 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 8,
+        "exact_requests": 8,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c8: compile-conditioning reached target overlapping in-flight concurrency 8",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 8
+    },
+    {
+      "check": "t1_bf16_L2048_c8: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 1,
+        "warmup": 1,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c8: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c8: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_bf16_L2048_c16: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c16: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t1_bf16_L2048_c16",
+        "prompt_tokens": 2048,
+        "target_concurrency": 16,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c16: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c16: max_num_seqs == target concurrency 16 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c16: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c16: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t1_bf16_L2048_c16: compile-conditioning completed 16/16 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 16,
+        "exact_requests": 16,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c16: compile-conditioning reached target overlapping in-flight concurrency 16",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 16
+    },
+    {
+      "check": "t1_bf16_L2048_c16: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 2,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c16: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c16: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_bf16_L2048_c32: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c32: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t1_bf16_L2048_c32",
+        "prompt_tokens": 2048,
+        "target_concurrency": 32,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c32: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c32: max_num_seqs == target concurrency 32 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c32: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c32: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t1_bf16_L2048_c32: compile-conditioning completed 32/32 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 32,
+        "exact_requests": 32,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c32: compile-conditioning reached target overlapping in-flight concurrency 32",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 32
+    },
+    {
+      "check": "t1_bf16_L2048_c32: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 2,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c32: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c32: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_bf16_L2048_c64: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c64: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t1_bf16_L2048_c64",
+        "prompt_tokens": 2048,
+        "target_concurrency": 64,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c64: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c64: max_num_seqs == target concurrency 64 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c64: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c64: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t1_bf16_L2048_c64: compile-conditioning completed 64/64 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 64,
+        "exact_requests": 64,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c64: compile-conditioning reached target overlapping in-flight concurrency 64",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 64
+    },
+    {
+      "check": "t1_bf16_L2048_c64: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 2,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_bf16_L2048_c64: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_bf16_L2048_c64: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_rabit_L2048_c1: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c1: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t1_rabit_L2048_c1",
+        "prompt_tokens": 2048,
+        "target_concurrency": 1,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c1: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c1: max_num_seqs == target concurrency 1 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c1: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c1: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t1_rabit_L2048_c1: compile-conditioning completed 1/1 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 1,
+        "exact_requests": 1,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c1: compile-conditioning reached target overlapping in-flight concurrency 1",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 1
+    },
+    {
+      "check": "t1_rabit_L2048_c1: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c1: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c1: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_rabit_L2048_c4: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c4: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t1_rabit_L2048_c4",
+        "prompt_tokens": 2048,
+        "target_concurrency": 4,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c4: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c4: max_num_seqs == target concurrency 4 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c4: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c4: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t1_rabit_L2048_c4: compile-conditioning completed 4/4 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 4,
+        "exact_requests": 4,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c4: compile-conditioning reached target overlapping in-flight concurrency 4",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 4
+    },
+    {
+      "check": "t1_rabit_L2048_c4: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c4: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c4: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_rabit_L2048_c8: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c8: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t1_rabit_L2048_c8",
+        "prompt_tokens": 2048,
+        "target_concurrency": 8,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c8: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c8: max_num_seqs == target concurrency 8 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c8: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c8: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t1_rabit_L2048_c8: compile-conditioning completed 8/8 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 8,
+        "exact_requests": 8,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c8: compile-conditioning reached target overlapping in-flight concurrency 8",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 8
+    },
+    {
+      "check": "t1_rabit_L2048_c8: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c8: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c8: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_rabit_L2048_c16: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c16: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t1_rabit_L2048_c16",
+        "prompt_tokens": 2048,
+        "target_concurrency": 16,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c16: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c16: max_num_seqs == target concurrency 16 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c16: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c16: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t1_rabit_L2048_c16: compile-conditioning completed 16/16 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 16,
+        "exact_requests": 16,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c16: compile-conditioning reached target overlapping in-flight concurrency 16",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 16
+    },
+    {
+      "check": "t1_rabit_L2048_c16: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "failed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 2,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c16: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c16: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_rabit_L2048_c32: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c32: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t1_rabit_L2048_c32",
+        "prompt_tokens": 2048,
+        "target_concurrency": 32,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c32: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c32: max_num_seqs == target concurrency 32 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c32: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c32: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t1_rabit_L2048_c32: compile-conditioning completed 32/32 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 32,
+        "exact_requests": 32,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c32: compile-conditioning reached target overlapping in-flight concurrency 32",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 32
+    },
+    {
+      "check": "t1_rabit_L2048_c32: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "failed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 10,
+        "warmup": 0,
+        "measured": 1,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c32: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c32: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t1_rabit_L2048_c64: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c64: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t1_rabit_L2048_c64",
+        "prompt_tokens": 2048,
+        "target_concurrency": 64,
+        "trial": 1
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c64: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c64: max_num_seqs == target concurrency 64 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c64: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c64: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t1_rabit_L2048_c64: compile-conditioning completed 64/64 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 64,
+        "exact_requests": 64,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c64: compile-conditioning reached target overlapping in-flight concurrency 64",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 64
+    },
+    {
+      "check": "t1_rabit_L2048_c64: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 11,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t1_rabit_L2048_c64: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t1_rabit_L2048_c64: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_rabit_L2048_c1: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c1: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t2_rabit_L2048_c1",
+        "prompt_tokens": 2048,
+        "target_concurrency": 1,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c1: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c1: max_num_seqs == target concurrency 1 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c1: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c1: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t2_rabit_L2048_c1: compile-conditioning completed 1/1 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 1,
+        "exact_requests": 1,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c1: compile-conditioning reached target overlapping in-flight concurrency 1",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 1
+    },
+    {
+      "check": "t2_rabit_L2048_c1: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c1: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c1: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_rabit_L2048_c4: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c4: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t2_rabit_L2048_c4",
+        "prompt_tokens": 2048,
+        "target_concurrency": 4,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c4: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c4: max_num_seqs == target concurrency 4 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c4: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c4: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t2_rabit_L2048_c4: compile-conditioning completed 4/4 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 4,
+        "exact_requests": 4,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c4: compile-conditioning reached target overlapping in-flight concurrency 4",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 4
+    },
+    {
+      "check": "t2_rabit_L2048_c4: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c4: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c4: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_rabit_L2048_c8: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c8: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t2_rabit_L2048_c8",
+        "prompt_tokens": 2048,
+        "target_concurrency": 8,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c8: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c8: max_num_seqs == target concurrency 8 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c8: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c8: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t2_rabit_L2048_c8: compile-conditioning completed 8/8 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 8,
+        "exact_requests": 8,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c8: compile-conditioning reached target overlapping in-flight concurrency 8",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 8
+    },
+    {
+      "check": "t2_rabit_L2048_c8: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c8: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c8: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_rabit_L2048_c16: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c16: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t2_rabit_L2048_c16",
+        "prompt_tokens": 2048,
+        "target_concurrency": 16,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c16: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c16: max_num_seqs == target concurrency 16 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c16: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c16: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t2_rabit_L2048_c16: compile-conditioning completed 16/16 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 16,
+        "exact_requests": 16,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c16: compile-conditioning reached target overlapping in-flight concurrency 16",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 16
+    },
+    {
+      "check": "t2_rabit_L2048_c16: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "failed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 2,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c16: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c16: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_rabit_L2048_c32: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c32: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t2_rabit_L2048_c32",
+        "prompt_tokens": 2048,
+        "target_concurrency": 32,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c32: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c32: max_num_seqs == target concurrency 32 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c32: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c32: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t2_rabit_L2048_c32: compile-conditioning completed 32/32 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 32,
+        "exact_requests": 32,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c32: compile-conditioning reached target overlapping in-flight concurrency 32",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 32
+    },
+    {
+      "check": "t2_rabit_L2048_c32: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "failed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 10,
+        "warmup": 0,
+        "measured": 1,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c32: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c32: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_rabit_L2048_c64: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c64: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t2_rabit_L2048_c64",
+        "prompt_tokens": 2048,
+        "target_concurrency": 64,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c64: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c64: max_num_seqs == target concurrency 64 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c64: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c64: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t2_rabit_L2048_c64: compile-conditioning completed 64/64 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 64,
+        "exact_requests": 64,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c64: compile-conditioning reached target overlapping in-flight concurrency 64",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 64
+    },
+    {
+      "check": "t2_rabit_L2048_c64: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 11,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_rabit_L2048_c64: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_rabit_L2048_c64: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_bf16_L2048_c1: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c1: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t2_bf16_L2048_c1",
+        "prompt_tokens": 2048,
+        "target_concurrency": 1,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c1: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c1: max_num_seqs == target concurrency 1 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c1: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c1: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t2_bf16_L2048_c1: compile-conditioning completed 1/1 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 1,
+        "exact_requests": 1,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c1: compile-conditioning reached target overlapping in-flight concurrency 1",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 1
+    },
+    {
+      "check": "t2_bf16_L2048_c1: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 0,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c1: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c1: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_bf16_L2048_c4: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c4: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t2_bf16_L2048_c4",
+        "prompt_tokens": 2048,
+        "target_concurrency": 4,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c4: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c4: max_num_seqs == target concurrency 4 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c4: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c4: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t2_bf16_L2048_c4: compile-conditioning completed 4/4 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 4,
+        "exact_requests": 4,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c4: compile-conditioning reached target overlapping in-flight concurrency 4",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 4
+    },
+    {
+      "check": "t2_bf16_L2048_c4: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 1,
+        "warmup": 1,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c4: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c4: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_bf16_L2048_c8: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c8: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t2_bf16_L2048_c8",
+        "prompt_tokens": 2048,
+        "target_concurrency": 8,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c8: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c8: max_num_seqs == target concurrency 8 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c8: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c8: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t2_bf16_L2048_c8: compile-conditioning completed 8/8 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 8,
+        "exact_requests": 8,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c8: compile-conditioning reached target overlapping in-flight concurrency 8",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 8
+    },
+    {
+      "check": "t2_bf16_L2048_c8: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 1,
+        "warmup": 1,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c8: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c8: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_bf16_L2048_c16: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c16: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t2_bf16_L2048_c16",
+        "prompt_tokens": 2048,
+        "target_concurrency": 16,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c16: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c16: max_num_seqs == target concurrency 16 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c16: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c16: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t2_bf16_L2048_c16: compile-conditioning completed 16/16 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 16,
+        "exact_requests": 16,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c16: compile-conditioning reached target overlapping in-flight concurrency 16",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 16
+    },
+    {
+      "check": "t2_bf16_L2048_c16: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 2,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c16: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c16: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_bf16_L2048_c32: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c32: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t2_bf16_L2048_c32",
+        "prompt_tokens": 2048,
+        "target_concurrency": 32,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c32: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c32: max_num_seqs == target concurrency 32 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c32: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c32: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t2_bf16_L2048_c32: compile-conditioning completed 32/32 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 32,
+        "exact_requests": 32,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c32: compile-conditioning reached target overlapping in-flight concurrency 32",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 32
+    },
+    {
+      "check": "t2_bf16_L2048_c32: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 2,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c32: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c32: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t2_bf16_L2048_c64: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c64: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t2_bf16_L2048_c64",
+        "prompt_tokens": 2048,
+        "target_concurrency": 64,
+        "trial": 2
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c64: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c64: max_num_seqs == target concurrency 64 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c64: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c64: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t2_bf16_L2048_c64: compile-conditioning completed 64/64 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 64,
+        "exact_requests": 64,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c64: compile-conditioning reached target overlapping in-flight concurrency 64",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 64
+    },
+    {
+      "check": "t2_bf16_L2048_c64: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 2,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t2_bf16_L2048_c64: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t2_bf16_L2048_c64: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_bf16_L2048_c1: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c1: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t3_bf16_L2048_c1",
+        "prompt_tokens": 2048,
+        "target_concurrency": 1,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c1: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c1: max_num_seqs == target concurrency 1 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c1: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c1: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t3_bf16_L2048_c1: compile-conditioning completed 1/1 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 1,
+        "exact_requests": 1,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c1: compile-conditioning reached target overlapping in-flight concurrency 1",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 1
+    },
+    {
+      "check": "t3_bf16_L2048_c1: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 0,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c1: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c1: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_bf16_L2048_c4: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c4: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t3_bf16_L2048_c4",
+        "prompt_tokens": 2048,
+        "target_concurrency": 4,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c4: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c4: max_num_seqs == target concurrency 4 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c4: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c4: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t3_bf16_L2048_c4: compile-conditioning completed 4/4 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 4,
+        "exact_requests": 4,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c4: compile-conditioning reached target overlapping in-flight concurrency 4",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 4
+    },
+    {
+      "check": "t3_bf16_L2048_c4: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 1,
+        "warmup": 1,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c4: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c4: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_bf16_L2048_c8: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c8: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t3_bf16_L2048_c8",
+        "prompt_tokens": 2048,
+        "target_concurrency": 8,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c8: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c8: max_num_seqs == target concurrency 8 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c8: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c8: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t3_bf16_L2048_c8: compile-conditioning completed 8/8 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 8,
+        "exact_requests": 8,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c8: compile-conditioning reached target overlapping in-flight concurrency 8",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 8
+    },
+    {
+      "check": "t3_bf16_L2048_c8: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 1,
+        "warmup": 1,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c8: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c8: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_bf16_L2048_c16: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c16: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t3_bf16_L2048_c16",
+        "prompt_tokens": 2048,
+        "target_concurrency": 16,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c16: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c16: max_num_seqs == target concurrency 16 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c16: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c16: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t3_bf16_L2048_c16: compile-conditioning completed 16/16 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 16,
+        "exact_requests": 16,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c16: compile-conditioning reached target overlapping in-flight concurrency 16",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 16
+    },
+    {
+      "check": "t3_bf16_L2048_c16: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 2,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c16: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c16: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_bf16_L2048_c32: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c32: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t3_bf16_L2048_c32",
+        "prompt_tokens": 2048,
+        "target_concurrency": 32,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c32: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c32: max_num_seqs == target concurrency 32 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c32: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c32: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t3_bf16_L2048_c32: compile-conditioning completed 32/32 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 32,
+        "exact_requests": 32,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c32: compile-conditioning reached target overlapping in-flight concurrency 32",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 32
+    },
+    {
+      "check": "t3_bf16_L2048_c32: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 2,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c32: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c32: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_bf16_L2048_c64: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c64: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "label": "t3_bf16_L2048_c64",
+        "prompt_tokens": 2048,
+        "target_concurrency": 64,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c64: Stage3C selection (none) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c64: max_num_seqs == target concurrency 64 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c64: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c64: allocator capacity == expected 393024 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 393024
+    },
+    {
+      "check": "t3_bf16_L2048_c64: compile-conditioning completed 64/64 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 64,
+        "exact_requests": 64,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c64: compile-conditioning reached target overlapping in-flight concurrency 64",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 64
+    },
+    {
+      "check": "t3_bf16_L2048_c64: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 2,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_bf16_L2048_c64: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_bf16_L2048_c64: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_rabit_L2048_c1: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c1: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t3_rabit_L2048_c1",
+        "prompt_tokens": 2048,
+        "target_concurrency": 1,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c1: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c1: max_num_seqs == target concurrency 1 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c1: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c1: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t3_rabit_L2048_c1: compile-conditioning completed 1/1 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 1,
+        "exact_requests": 1,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c1: compile-conditioning reached target overlapping in-flight concurrency 1",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 1
+    },
+    {
+      "check": "t3_rabit_L2048_c1: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c1: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c1: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_rabit_L2048_c4: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c4: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t3_rabit_L2048_c4",
+        "prompt_tokens": 2048,
+        "target_concurrency": 4,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c4: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c4: max_num_seqs == target concurrency 4 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c4: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c4: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t3_rabit_L2048_c4: compile-conditioning completed 4/4 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 4,
+        "exact_requests": 4,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c4: compile-conditioning reached target overlapping in-flight concurrency 4",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 4
+    },
+    {
+      "check": "t3_rabit_L2048_c4: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c4: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c4: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_rabit_L2048_c8: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c8: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t3_rabit_L2048_c8",
+        "prompt_tokens": 2048,
+        "target_concurrency": 8,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c8: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c8: max_num_seqs == target concurrency 8 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c8: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c8: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t3_rabit_L2048_c8: compile-conditioning completed 8/8 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 8,
+        "exact_requests": 8,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c8: compile-conditioning reached target overlapping in-flight concurrency 8",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 8
+    },
+    {
+      "check": "t3_rabit_L2048_c8: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c8: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c8: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_rabit_L2048_c16: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c16: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t3_rabit_L2048_c16",
+        "prompt_tokens": 2048,
+        "target_concurrency": 16,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c16: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c16: max_num_seqs == target concurrency 16 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c16: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c16: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t3_rabit_L2048_c16: compile-conditioning completed 16/16 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 16,
+        "exact_requests": 16,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c16: compile-conditioning reached target overlapping in-flight concurrency 16",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 16
+    },
+    {
+      "check": "t3_rabit_L2048_c16: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "failed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 8,
+        "warmup": 0,
+        "measured": 2,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c16: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c16: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_rabit_L2048_c32: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c32: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t3_rabit_L2048_c32",
+        "prompt_tokens": 2048,
+        "target_concurrency": 32,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c32: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c32: max_num_seqs == target concurrency 32 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c32: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c32: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t3_rabit_L2048_c32: compile-conditioning completed 32/32 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 32,
+        "exact_requests": 32,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c32: compile-conditioning reached target overlapping in-flight concurrency 32",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 32
+    },
+    {
+      "check": "t3_rabit_L2048_c32: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "failed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 10,
+        "warmup": 0,
+        "measured": 1,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c32: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c32: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "t3_rabit_L2048_c64: GPU clean before point",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c64: point identity",
+      "category": "point",
+      "state": "passed",
+      "observed": {
+        "kv_cache_dtype": "rabit_kv2",
+        "label": "t3_rabit_L2048_c64",
+        "prompt_tokens": 2048,
+        "target_concurrency": 64,
+        "trial": 3
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c64: Stage3C selection (shared_decode / QB) and profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c64: max_num_seqs == target concurrency 64 (requested and effective)",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c64: frozen prompt set (hash) and 32 greedy outputs",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c64: allocator capacity == expected 2074592 tokens",
+      "category": "capacity",
+      "state": "passed",
+      "observed": 2074592
+    },
+    {
+      "check": "t3_rabit_L2048_c64: compile-conditioning completed 64/64 exact requests (prompt length, pinned hash, 32 outputs)",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": {
+        "requests": 64,
+        "exact_requests": 64,
+        "failure_in_conditioning": false
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c64: compile-conditioning reached target overlapping in-flight concurrency 64",
+      "category": "conditioning",
+      "state": "passed",
+      "observed": 64
+    },
+    {
+      "check": "t3_rabit_L2048_c64: no Triton JIT during the measured phase",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "setup": 0,
+        "conditioning": 11,
+        "warmup": 0,
+        "measured": 0,
+        "after": 0
+      }
+    },
+    {
+      "check": "t3_rabit_L2048_c64: no malformed machine lines",
+      "category": "point",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "t3_rabit_L2048_c64: outcome classified",
+      "category": "outcome",
+      "state": "passed",
+      "observed": "sustained_target_concurrency"
+    },
+    {
+      "check": "GPU clean after the run",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    }
+  ],
+  "counts": {
+    "passed": 395,
+    "failed": 6,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "all_ok": false,
+  "failed_categories": [
+    "jit"
+  ]
+}
