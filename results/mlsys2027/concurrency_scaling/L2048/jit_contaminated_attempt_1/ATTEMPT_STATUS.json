@@ -1,0 +1,49 @@
+{
+  "attempt": "L2048 jit_contaminated_attempt_1",
+  "status": "failed_diagnostic_attempt",
+  "accepted_for_performance_interpretation": false,
+  "use_in_paper_dataset": false,
+  "salvage_of_any_point_allowed": false,
+  "decision": "The run is NOT accepted for performance interpretation because RABIT C=16/32/64 in all three trials compiled Triton kernels during the measured phase. Its throughput / latency values are not interpreted, not published, and not pooled with any rerun. C<=8 points are NOT salvaged. The whole run is diagnostic evidence for the warmup deficiency only.",
+  "archival_note": "Every other file in this directory is the byte-exact output of the run (moved unchanged from results/mlsys2027/concurrency_scaling/L2048/; SHA-256 verified before and after the move). Paths recorded inside manifest.json refer to the original location. This file is the only one added after the run.",
+  "modal_app": "ap-OwRGAH3ak5JiNMafSwvN6Q",
+  "code_commit": "abefce2110082659ef65548c65bff747930c435d",
+  "vllm_kvquant_snapshot_sha256": "fb972a018857da32b87325d8e90b2dd429b9a10dac51ecbca8248aeaf5a33cc4",
+  "gpu": {"model": "H100", "uuid": "GPU-64145173-e36c-b49c-bb06-f4d295a58ec7", "driver": "580.95.05"},
+  "utc": {"started": "2026-09-27T23:09:03.885669+00:00", "completed": "2026-09-28T00:50:01.101614+00:00"},
+  "manifest_status": "failed",
+  "modal_returncode": 0,
+  "failure_category": "jit",
+  "integrity_counts": {"passed": 320, "failed": 9, "not_run": 0, "not_evaluated": 0},
+  "execution_facts": {
+    "points_attempted": 36,
+    "points_completed": 36,
+    "measured_requests_completed_per_point": "256/256 at every point",
+    "prompt_set_sha256": "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+    "oom": 0,
+    "request_failures": 0,
+    "watchdog_timeouts": 0,
+    "preemptions": "0 at every point (vllm:num_preemptions counter delta)",
+    "target_overlapping_inflight_concurrency": "observed max == C with non-zero all-C overlap at all 36 points",
+    "allocator_capacity_exact": "36/36 (BF16 393024, RABIT 2074592 tokens)",
+    "selector_qb_exact": "36/36 (RABIT shared_decode / QB32 requested == effective; BF16 no selector; profiling off)",
+    "gpu_clean_checks": "37/37",
+    "protected_paths_post_run": "clean",
+    "prior_evidence_unchanged": true
+  },
+  "measured_phase_jit_failures": {
+    "t1_rabit_L2048_c16": 2, "t2_rabit_L2048_c16": 2, "t3_rabit_L2048_c16": 2,
+    "t1_rabit_L2048_c32": 3, "t2_rabit_L2048_c32": 3, "t3_rabit_L2048_c32": 3,
+    "t1_rabit_L2048_c64": 3, "t2_rabit_L2048_c64": 3, "t3_rabit_L2048_c64": 3
+  },
+  "measured_phase_jit_all_other_points": 0,
+  "diagnosis": {
+    "kernels_compiled_during_measurement": [
+      "_rabit2_shared_decode_closed_page_partial_kernel",
+      "_rabit2_tile32_reduce_partials_kernel",
+      "_rabit2_tail_partial_kernel (C=32 and C=64 only)"
+    ],
+    "mechanism": "The two pre-registered warmup requests contain only 4096 prompt tokens and cannot exercise concurrency-induced chunked prefill. At C>=16, C*2048 > max_num_batched_tokens=16384, so prompts are chunked and later chunks take the RABIT Stage3C (shared_decode) path. The Stage3C marker appeared at every RABIT C>=16 point and at no C<=8 point.",
+    "remedy": "Point-matched compile-conditioning phase (pre-registered amendment, committed before the rerun)."
+  }
+}
