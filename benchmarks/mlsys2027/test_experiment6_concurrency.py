@@ -179,7 +179,8 @@ def test_valid_sweep_passes_and_classifies_success():
     assert s["outcome_class_counts"]["sustained_target_concurrency"] == 36
     p = _pt(s, "t1_rabit_L2048_c64")
     assert p["completed_requests"] == 256 and p["output_token_count_valid"]
-    assert p["concurrency"]["observed_max_inflight_concurrency"] == 64 and p["concurrency"]["all_c_inflight_overlap_total_s"] > 0
+    assert p["inflight_concurrency"]["observed_max_inflight_concurrency"] == 64
+    assert p["inflight_concurrency"]["all_c_inflight_overlap_total_s"] > 0
     assert abs(p["requests_per_s"] - 2.56) < 1e-9 and abs(p["output_tokens_per_s"] - 2.56 * 32) < 1e-9
     assert abs(p["total_tokens_per_s"] - 2.56 * (2048 + 32)) < 1e-9
     assert p["latency_s"]["median"] is not None and p["latency_s"]["p99"] is not None
@@ -219,7 +220,7 @@ def test_prompt_set_and_capacity_checks():
 def test_serialized_run_is_not_concurrency():
     integ, s = _run(overrides={"t1_rabit_L2048_c16": {"serial": True}})
     p = _pt(s, "t1_rabit_L2048_c16")
-    assert p["concurrency"]["observed_max_inflight_concurrency"] == 1
+    assert p["inflight_concurrency"]["observed_max_inflight_concurrency"] == 1
     assert p["outcome_class"] == "target_concurrency_not_reached"
     assert s["highest_successfully_tested_concurrency"]["rabit_kv2"]["per_trial"]["1"] == 64  # other points fine
     h = s["highest_successfully_tested_concurrency"]["rabit_kv2"]
@@ -478,6 +479,69 @@ def test_fetch_remote_log_waits_for_done_and_reports_partial():
         clock["t"] = 0.0  # never finishes: deadline reached, partial log still fetched, not complete
         r = r6.fetch_remote_log("r", d, 300, _fake_volume({"remote_session.log": "partial\n"}), sleep, tick, 60)
         assert not r["done_found"] and r["remote_log_found"] and not r["complete"] and clock["t"] >= 300
+
+
+# ------------------------------------------------------------------ summary schema fix (reporting only)
+def test_summary_schema_has_no_concurrency_key_collision():
+    _, s = _run()
+    assert s["summary_schema"]["version"] == 2
+    for p in s["points"]:
+        assert "concurrency" not in p  # never two meanings for one key
+        assert isinstance(p["target_concurrency"], int) and not isinstance(p["target_concurrency"], bool)
+        assert isinstance(p["inflight_concurrency"], dict)
+        assert p["label"].endswith(f"_c{p['target_concurrency']}")
+        assert p["inflight_concurrency"]["observed_max_inflight_concurrency"] == p["target_concurrency"]
+    assert {p["target_concurrency"] for p in s["points"]} == set(wl.CONCURRENCY_GRID)
+
+
+_ACCEPTED: dict = {}
+
+
+def _accepted_l2048():
+    if not _ACCEPTED:
+        acc = r6.ACCEPTED_RUNS[2048]
+        raw = acc["dir"] / "remote_session.log"
+        _ACCEPTED["acc"] = acc
+        _ACCEPTED["raw_sha"] = r6.sha256_raw(raw)
+        _ACCEPTED["raw_bytes"] = raw.stat().st_size
+        _ACCEPTED["res"] = r6.analyze(raw.read_text(encoding="utf-8", errors="replace"), 2048, cfg(), protocol())
+    return _ACCEPTED
+
+
+def test_accepted_l2048_raw_pinned_and_unchanged():
+    a = _accepted_l2048()
+    assert a["raw_sha"] == a["acc"]["remote_session_log_sha256"] == (
+        "19a6c7d951bc617c3b6230bff2cf2ac5f5ac8632c385d3be02b171a77b004a17")
+    assert a["raw_bytes"] == 8984334
+    d = a["acc"]["dir"]
+    assert r6.sha256_raw(d / "summary_pre_concurrency_keyfix.json") == a["acc"]["pre_keyfix_summary_sha256"]
+    assert r6.sha256_raw(d / "integrity_check.json") == a["acc"]["integrity_check_sha256"]
+
+
+def test_accepted_l2048_reparse_reproduces_integrity_and_values():
+    a = _accepted_l2048()
+    integ, new = a["res"]
+    d = a["acc"]["dir"]
+    assert integ["counts"] == {"passed": 401, "failed": 0, "not_run": 0, "not_evaluated": 0} and integ["all_ok"]
+    assert json.loads(json.dumps(integ, default=str)) == json.loads((d / "integrity_check.json").read_text(encoding="utf-8"))
+    new = json.loads(json.dumps(new, default=str))
+    old = json.loads((d / "summary_pre_concurrency_keyfix.json").read_text(encoding="utf-8"))
+    # every throughput / latency / TTFT / TPOT / wall / preemption value identical; only the key was renamed
+    assert {k: v for k, v in new.items() if k != "summary_schema"} == r6.normalize_pre_keyfix_summary(old)
+    pts = new["points"]
+    assert len(pts) == 36 and {p["target_concurrency"] for p in pts} == {1, 4, 8, 16, 32, 64}
+    assert {(p["dtype"], p["target_concurrency"], p["trial"]) for p in pts} == {
+        (dt, c, t) for dt in ("bfloat16", "rabit_kv2") for c in wl.CONCURRENCY_GRID for t in (1, 2, 3)}
+    assert all(p["measured_jit_lines"] == 0 and p["jit_lines_by_phase"]["measured"] == 0 for p in pts)
+    assert all(p["interpretable"] and p["preemptions"] == 0 for p in pts)
+    cur = json.loads((d / "summary.json").read_text(encoding="utf-8"))
+    if "summary_schema" in cur:  # after the offline reparse: the written summary is exactly the re-analysis
+        assert cur == new
+        prov = json.loads((d / "reparse_provenance.json").read_text(encoding="utf-8"))
+        assert prov["reparsed_from_existing_raw"] and not prov["h100_rerun"] and prov["raw_unchanged"]
+        assert prov["measurement_commit"].startswith("2ccaa10") and prov["raw"]["sha256"] == a["raw_sha"]
+    else:  # before the reparse: the stored v1 summary is exactly the pre-keyfix one
+        assert cur == old
 
 
 def test_missing_point_is_not_run_and_fails_completion():

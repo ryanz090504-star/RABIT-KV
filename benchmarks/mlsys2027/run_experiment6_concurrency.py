@@ -30,6 +30,13 @@ remote_session.log + DONE.json (waiting for DONE.json if the local client
 stream ended early) and analyzes the REMOTE log; the locally streamed
 modal_session.log is kept as a secondary record. Protocol unchanged.
 
+SUMMARY SCHEMA FIX (reporting only, after the accepted L2048 attempt 4): in
+summary.json each point's plan field `concurrency` (target C) was overwritten by
+the in-flight statistics dict (key collision). Points now carry
+`target_concurrency` (int C) and `inflight_concurrency` (statistics dict) and no
+`concurrency` key. Metric definitions are unchanged. `--reparse` re-analyzes
+ONLY a pinned, immutable remote_session.log offline (no Modal / CUDA / H100).
+
 Frozen workload (exp6_workload.py; hashes frozen in exp6_protocol.json): prompt
 lengths 2048 and 8192 (separate sweeps / separate Modal runs); concurrency
 {1,4,8,16,32,64}; per point 2 warmup requests (discarded) + 256 measured
@@ -113,6 +120,18 @@ EVIDENCE_DIRS = [*rs6.EVIDENCE_DIRS, SMOKE_DIR, *_ALL_EXCLUDED]
 PROTECTED_PATHS = [*rs6.PROTECTED_PATHS, SMOKE_DIR, rs6.RUNNER_SCRIPT, rs6.MODAL_APP, rs6.WORKER,
                    *_ALL_EXCLUDED]
 SESSION_LOG_VOLUME = "rabit-kv-mlsys2027-exp6-session-logs"
+SUMMARY_SCHEMA = {"version": 2, "point_keys": {"target_concurrency": "int target concurrency C",
+                                               "inflight_concurrency": "overlapping in-flight concurrency statistics"},
+                  "change": "v1 overwrote the point's `concurrency` (C) with the in-flight statistics dict"}
+# Accepted final performance runs: canonical raw log pinned (the only input a --reparse may read).
+ACCEPTED_RUNS = {2048: {"dir": BASE_OUT / "L2048" / "shadow_conditioned",
+                        "remote_session_log_sha256": "19a6c7d951bc617c3b6230bff2cf2ac5f5ac8632c385d3be02b171a77b004a17",
+                        "remote_session_log_bytes": 8984334,
+                        "measurement_commit": "2ccaa10a35d9ead414a5a52d26e6161a9042ec2b",
+                        "modal_app": "ap-PFckXF9Fc2yMiljv4ZRErl",
+                        "run_id": "exp6-L2048-20260928T033048Z-2ccaa10",
+                        "pre_keyfix_summary_sha256": "b57effa457c8b1e9ee62ae8813537568cd72ef233c01733624537a40da9f54bf",
+                        "integrity_check_sha256": "74ac28da35ed879c7525aeaa16fe4ddfddb3a06237d16160403045e0ccaeac2e"}}
 REMOTE_POLL_S = 120
 MUST_BE_COMMITTED = [RUNNER_SCRIPT, MODAL_APP, WORKER, WORKLOAD, PROTOCOL, OFFLINE_TESTS, rs6.rsd.GATE,
                      rs6.rsd.WATCHDOG]
@@ -505,7 +524,7 @@ def point_metrics(p: dict, spec: dict, pinned_hashes: list[str]) -> dict:
             "ttft_s": {"median": statistics.median(ttft) if ttft else None, "p90": pct(ttft, 90),
                        "definition": "first_token_ts - queued_ts"},
             "tpot_s": {"median": statistics.median(tpot) if tpot else None, "p90": pct(tpot, 90)},
-            "target_concurrency": C, "concurrency": conc, "preemptions": preempt, "preemption_source": source,
+            "target_concurrency": C, "inflight_concurrency": conc, "preemptions": preempt, "preemption_source": source,
             "overlap_stats_are_not_residency_evidence": preempt is None or preempt > 0}
 
 
@@ -541,7 +560,7 @@ def classify(p: dict, proc: dict | None, metrics: dict) -> str:
         return "engine_or_request_failure"
     if metrics["preemptions"] is not None and metrics["preemptions"] > 0:
         return "completed_with_preemption"
-    c = metrics["concurrency"]
+    c = metrics["inflight_concurrency"]
     if not c.get("evaluable") or c["observed_max_inflight_concurrency"] < metrics["target_concurrency"] \
             or c["all_c_inflight_overlap_total_s"] <= 0:
         return "target_concurrency_not_reached"
@@ -693,7 +712,8 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
         add(f"{label}: outcome classified", "outcome", st(cls in CLASSES), cls)
         interpretable = cls == "sustained_target_concurrency" and p["jit"]["measured"] == 0 and cv["valid"]
         results[(dtype, C, t)] = {"class": cls, "interpretable_success": interpretable}
-        points_out.append({**spec, "outcome_class": cls, "measured_jit_lines": p["jit"]["measured"],
+        plan_fields = {k: v for k, v in spec.items() if k != "concurrency"}  # C is `target_concurrency` (from m)
+        points_out.append({**plan_fields, "outcome_class": cls, "measured_jit_lines": p["jit"]["measured"],
                            "interpretable": p["jit"]["measured"] == 0 and cls is not None and cv["valid"],
                            "shadow_conditioning": cv,
                            "jit_lines_by_phase": p["jit"], "capacity": tg.get("EXP6_CAPACITY"),
@@ -704,7 +724,7 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
     counts = {s: sum(1 for c in checks if c["state"] == s) for s in (PASSED, FAILED, NOT_RUN, NOT_EVALUATED)}
     integ = {"checks": checks, "counts": counts, "all_ok": counts[PASSED] == len(checks),
              "failed_categories": sorted({c["category"] for c in checks if c["state"] == FAILED})}
-    summary = {"scope": SCOPE, "amendments": AMENDMENTS, "prompt_tokens": length, "final_rabit_configuration": cfg,
+    summary = {"summary_schema": SUMMARY_SCHEMA, "scope": SCOPE, "amendments": AMENDMENTS, "prompt_tokens": length, "final_rabit_configuration": cfg,
                "all_integrity_passed": integ["all_ok"], "integrity_counts": counts, "points": points_out,
                "outcome_class_counts": {c: sum(1 for p in points_out if p["outcome_class"] == c) for c in CLASSES},
                "highest_successfully_tested_concurrency": highest_successful(results),
@@ -716,6 +736,61 @@ def analyze(text: str, length: int, cfg: dict, protocol: dict) -> tuple[dict, di
     return integ, summary
 
 
+def normalize_pre_keyfix_summary(old: dict) -> dict:
+    """Map a schema-v1 summary to v2 keys (rename only; values untouched) for equality checks."""
+    new = json.loads(json.dumps(old))
+    for pt in new["points"]:
+        pt["inflight_concurrency"] = pt.pop("concurrency")
+    return new
+
+
+def reparse(length: int) -> int:
+    """Offline re-analysis of the pinned canonical remote_session.log of an accepted run (no Modal / CUDA / H100).
+    Rewrites only summary.json (new schema); raw logs, manifest and integrity_check.json are left untouched and the
+    re-derived integrity must equal the stored one."""
+    acc = ACCEPTED_RUNS.get(length)
+    if acc is None:
+        raise SystemExit(f"no accepted L{length} run is pinned for reparse")
+    assert_protected_paths_clean("reparse")
+    uncommitted = run_git("status", "--short", "--", *[rel(p) for p in MUST_BE_COMMITTED])
+    if uncommitted:
+        raise SystemExit("Refusing to reparse: the analysis code has uncommitted changes:\n" + uncommitted)
+    d = acc["dir"]
+    raw = d / "remote_session.log"
+    raw_sha_before = sha256_raw(raw)
+    if raw_sha_before != acc["remote_session_log_sha256"] or raw.stat().st_size != acc["remote_session_log_bytes"]:
+        raise SystemExit(f"{rel(raw)} does not match the pinned canonical raw log")
+    pre = d / "summary_pre_concurrency_keyfix.json"
+    if sha256_raw(pre) != acc["pre_keyfix_summary_sha256"]:
+        raise SystemExit("the preserved pre-keyfix summary does not match its pinned SHA-256")
+    if sha256_raw(d / "integrity_check.json") != acc["integrity_check_sha256"]:
+        raise SystemExit("integrity_check.json does not match its pinned SHA-256")
+    cfg = rs6.final_config()
+    integ, summary = analyze(raw.read_text(encoding="utf-8", errors="replace"), length, cfg, load_protocol())
+    stored_integ = json.loads((d / "integrity_check.json").read_text(encoding="utf-8"))
+    same_integrity = json.loads(json.dumps(integ, default=str)) == stored_integ
+    old = normalize_pre_keyfix_summary(json.loads(pre.read_text(encoding="utf-8")))
+    new = json.loads(json.dumps(summary, default=str))
+    same_values = {k: v for k, v in new.items() if k != "summary_schema"} == old
+    raw_sha_after = sha256_raw(raw)
+    if not (same_integrity and same_values and integ["all_ok"] and raw_sha_after == raw_sha_before):
+        raise SystemExit(f"reparse did not reproduce the accepted analysis (integrity equal {same_integrity}, values "
+                         f"equal {same_values}, all_ok {integ['all_ok']}); nothing written")
+    (d / "summary.json").write_text(json.dumps(summary, indent=2, default=str) + "\n", encoding="utf-8")
+    prov = {"measurement_commit": acc["measurement_commit"], "modal_app": acc["modal_app"], "run_id": acc["run_id"],
+            "analysis_schema_fix_commit": run_git("rev-parse", "HEAD"), "summary_schema": SUMMARY_SCHEMA,
+            "reparsed_from_existing_raw": True, "h100_rerun": False, "raw_unchanged": True,
+            "raw": {"file": "remote_session.log", "sha256": raw_sha_after, "bytes": raw.stat().st_size},
+            "integrity_counts": integ["counts"], "integrity_identical_to_measurement_time_analysis": True,
+            "all_metric_values_identical_to_pre_keyfix_summary": True,
+            "pre_keyfix_summary": {"file": pre.name, "sha256": acc["pre_keyfix_summary_sha256"],
+                                   "note": "historical derived analysis produced at measurement time (schema v1)"},
+            "summary_sha256": sha256_raw(d / "summary.json"), "reparsed_utc": now()}
+    (d / "reparse_provenance.json").write_text(json.dumps(prov, indent=2) + "\n", encoding="utf-8")
+    print(f"EXP6 L{length} REPARSE OK: integrity {integ['counts']}; values identical; raw unchanged")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     make_console_encoding_safe()
     ap = argparse.ArgumentParser(description=__doc__)
@@ -723,6 +798,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--write-protocol", action="store_true", help="write exp6_protocol.json (pre-commit only)")
     ap.add_argument("--rabit-extension", action="store_true", help="NOT enabled until reviewed")
+    ap.add_argument("--reparse", action="store_true", help="offline re-analysis of the pinned accepted raw log")
     a = ap.parse_args(argv)
     if a.rabit_extension:
         raise SystemExit("RABIT-only extension points are pre-registered but NOT enabled until review")
@@ -735,6 +811,8 @@ def main(argv: list[str] | None = None) -> int:
     if a.prompt_tokens is None:
         raise SystemExit("--prompt-tokens {2048,8192} is required (prompt-length sweeps run separately)")
     L = a.prompt_tokens
+    if a.reparse:
+        return reparse(L)
     print(f"RABIT-KV MLSys 2027 -- Experiment 6 concurrency scaling, prompt length {L} (one Modal run)")
     prov = preflight(L, a.dry_run)
     cfg = prov["final_config"]
