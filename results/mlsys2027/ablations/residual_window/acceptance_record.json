@@ -1,0 +1,85 @@
+{
+  "experiment": 10,
+  "type": "logical fake-quant / dequant QUALITY ablation (NOT a physical serving benchmark)",
+  "status": "accepted",
+  "accepted_attempt": 2,
+  "failed_attempt_1_excluded": true,
+  "no_cross_attempt_pooling": true,
+  "qa_control_gate": "post-failure empirical per-example reproducibility envelope",
+  "accepted_files": "the top-level files of results/mlsys2027/ablations/residual_window/ listed in files_sha256 (Attempt 2 only); failed_attempt_1/ is excluded evidence",
+  "failed_attempt_1": {"path": "results/mlsys2027/ablations/residual_window/failed_attempt_1/",
+                       "status": "invalid_control_reproduction",
+                       "archive_commit": "9889e334437fda567f82e67d3ffb7e6528b86422"},
+  "methodological_amendment": {
+    "path": "results/mlsys2027/control_reproducibility_audit/qa_control_gate_amendment.json",
+    "sha256_lf": "eaf28d66f38eedc13f447eb9776cd6affd2abb06dc2c64dec8d7e7d2a1a2e10c",
+    "label": "transparent post-failure methodological amendment (not pre-registered)",
+    "frozen_commit": "86b03eabaecfed0a838cabd7a7d1cce2f0a2fa38",
+    "audit": "results/mlsys2027/control_reproducibility_audit/qa_control_audit.json (commit 9edc016ba0e24e0f1a7b47fbcf2be964863df10e)"},
+  "execution_commit": "86b03eabaecfed0a838cabd7a7d1cce2f0a2fa38",
+  "runner": "benchmarks/mlsys2027/run_experiment10_attempt2.py (overlays the amendment on the unmodified Exp10 runner)",
+  "protocol": "benchmarks/mlsys2027/exp10_residual_protocol.json",
+  "protocol_sha256": "171cdbcab5c57137edda12ad044e038a52c722f32b740b26cc084ff0539c53d4",
+  "started_utc": "2026-09-29T20:51:40.293634+00:00",
+  "completed_utc": "2026-09-29T21:03:41.749678+00:00",
+  "control_rules_applied": {
+    "continuation_ppl": "original (PPL +/-0.5% relative; KV MB +/-0.1%)",
+    "niah": "original (accuracy +/-1.0 point; KV MB +/-0.1%)",
+    "passage_retrieval": "original (accuracy +/-1.0 point; KV MB +/-0.1%)",
+    "hotpotqa": "amendment: per-example gate (bf16 <= 1 mismatch / L1 <= 0.065; rabit2 <= 1 / 0.500) + KV MB +/-0.1%",
+    "qasper": "amendment: per-example gate (bf16 <= 1 mismatch / L1 <= 0.096; rabit2 <= 2 / 0.185) + KV MB +/-0.1%"
+  },
+  "qa_control_gate_outcome": {
+    "hotpotqa": {"bf16": {"score_mismatches": 0, "l1": 0.0, "text_only_differences": [7], "aggregate_f1": 60.6,
+                          "inside_historical_envelope_report_only": true},
+                 "rabit2_R4": {"score_mismatches": 1, "mismatch_indices": [1], "l1": 0.5,
+                               "note": "the known index-1 variant '2016-17' -> '2016–17' (0.000 -> 0.500), exactly at the frozen bounds",
+                               "aggregate_f1": 57.7, "inside_historical_envelope_report_only": true,
+                               "superseded_aggregate_check_report_only": "55.2 target, |diff| 2.5 > 1.0"}},
+    "qasper": {"bf16": {"score_mismatches": 0, "l1": 0.0, "aggregate_f1": 35.9,
+                        "inside_historical_envelope_report_only": true},
+               "rabit2_R4": {"score_mismatches": 1, "mismatch_indices": [20], "l1": 0.174,
+                             "note": "the known index-20 variant (0.174 -> 0.000; also seen in Exp1 and Exp8)",
+                             "text_only_differences": [22, 23], "aggregate_f1": 34.9,
+                             "inside_historical_envelope_report_only": true,
+                             "superseded_aggregate_check_report_only": "35.6 target, |diff| 0.7 <= 1.0"}}
+  },
+  "gates": {
+    "all_five_rows_all_five_benchmarks": true,
+    "counts_exact": true,
+    "r4_config_exactly_canonical_rabit2": true,
+    "ppl_niah_passage_retrieval_controls_within_original_tolerances": true,
+    "qa_controls_pass_frozen_per_example_gate": true,
+    "logical_storage_accounting_integrity_gate": true,
+    "storage_ordering_r0_lt_r2_lt_r4_lt_r8": true,
+    "prior_evidence_unchanged": true
+  },
+  "modal_app_ids": {
+    "continuation_ppl": "ap-THrq3Ry5DDBeFwSj5K6Q1A",
+    "niah": "ap-qOtxhea9uKJNTjlYVqPr32",
+    "passage_retrieval": "ap-lhxeJUJpJYOQaSfH8sEkmM",
+    "hotpotqa": "ap-tarOD5Q1DMBcK3iaMWAZSO",
+    "qasper": "ap-yjYd03dXAwyIWck7JNqffD"
+  },
+  "files_sha256": {
+    "continuation_ppl.log": "1458f0d4815e5274a588d09bb26d5ef7ac61cffdb0e0d67b4fd6e8ac9f94b988",
+    "niah.log": "2b409eaed6ff7f57d10caad1ba3d715ee2ff6125a227df09e36029f80d979e3b",
+    "passage_retrieval.log": "61d660f2dde6f10e694fa7350ce7f538fe204b00033a0b8ce1e18e5e54638f45",
+    "hotpotqa.log": "8959d876679d1278204c03f420ceb8d9bd1ac2b58e7aa6ce973d68486315fa68",
+    "qasper.log": "4043d99fe11ec8eaa353a1f1ed8fe397f517e72656cd2402fb43155887e4af5b",
+    "manifest.json": "48a5f83d3cc505b797cd340e2d1cc2f286ccc2b70775f53e51d44c5c0887e2eb",
+    "regression_check.json": "880c5f572a9bb1afcd3150b668da1c6d7e8a04167a14157b56c0dee7de3988aa",
+    "residual_results.json": "cf94016d0b91d1d657e63612925b1b4312a050be17aede4ca7d5e890dab73ae1"
+  },
+  "files_sha256_lf_normalized": {
+    "note": "sha256 with CR removed = the committed git blob (core.autocrlf=true); files_sha256 are the raw CRLF bytes written by the runner (= manifest log_sha256 for the logs)",
+    "continuation_ppl.log": "e023f4e2be3bcfbe255dcd139cd0fe7c4edabb7be7d347239895bcfe256ffd9c",
+    "niah.log": "b4c9d63d1a834752040b38bc2099699d57d66b9f8d859ac06c8d193296c83290",
+    "passage_retrieval.log": "c5474cd3469cff8afc8574e0aa757a8fa67624a64ce64777810cdd4041e0fb71",
+    "hotpotqa.log": "f708484824fd1b40c7171203fcbed0204b229976f41d55cb632a940ffdc2e4bd",
+    "qasper.log": "f94538861868ac3aebd85658945a69b1e681b2334e84fa16580bc671de30ecf1",
+    "manifest.json": "a4949f3dc987170dbb926fbb7c3b38fd2009e7cf1cf7ed869b3268403e541a96",
+    "regression_check.json": "0ef624eb8d2a58a556218df56ffa33d758085beeb77a2c18b2a84b79c540e331",
+    "residual_results.json": "aacf109731163574a9848d2aaec2dadd93551be99df8f5fe428fa32df45d5f91"
+  }
+}
