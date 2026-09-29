@@ -1,0 +1,1376 @@
+{
+  "experiment": "Experiment 11 -- metadata ablation (logical fake-quant quality + storage)",
+  "methods": "bf16,rabit2_mbf,rabit2_m32,rabit2,rabit2_m128",
+  "conditions": {
+    "rabit2_mbf": {
+      "metadata_mode": "bf16",
+      "metadata_group_size": 64
+    },
+    "rabit2_m32": {
+      "metadata_mode": "int8",
+      "metadata_group_size": 32
+    },
+    "rabit2": {
+      "metadata_mode": "int8",
+      "metadata_group_size": 64
+    },
+    "rabit2_m128": {
+      "metadata_mode": "int8",
+      "metadata_group_size": 128
+    }
+  },
+  "frozen": {
+    "k_bits": 3,
+    "v_bits": 2,
+    "k_style": "seq_affine",
+    "v_style": "group_affine",
+    "k_group": 32,
+    "v_group": 32,
+    "residual": 4
+  },
+  "status": "passed",
+  "qa_control_gate": "frozen post-failure per-example reproducibility envelope",
+  "started_utc": "2026-09-29T22:10:12.620403+00:00",
+  "provenance": {
+    "git_head": "cd227e3abd22fb1558183fdae9b62b04129b6572",
+    "rabit_kv2_sha256": "108ba8afaac862bc4e070d2dc812493aaeae4e458837c4bda2ac703e72a57524",
+    "exp10_evidence_commit": "01fe47eb4af2199e968747ac3abd4e3a5d54e341",
+    "amendment_commit": "86b03eabaecfed0a838cabd7a7d1cce2f0a2fa38",
+    "amendment_sha256_lf": "eaf28d66f38eedc13f447eb9776cd6affd2abb06dc2c64dec8d7e7d2a1a2e10c",
+    "canonical_script_sha256": {
+      "continuation_ppl": "4f1385a6dfee1e4f75b93c9e61bd90ff8bf86d6c038a4e4b01b568b61ff793d9",
+      "niah": "845e58c018859554400c6c2a239b160320e6fae8fe3089d050a3de53cbdd3c9e",
+      "passage_retrieval": "d9835832b586a7a6c09118436694ad028f7f32473573ca952523cf6fa013dbee",
+      "hotpotqa": "67c9b5754bced90a0dc0cac5cbacc748566ad28005eefb5d2dd2ae95696d7288",
+      "qasper": "62667cda5993b02845139d394e5726b5170da012e993f42756cd4c8b9345b424"
+    },
+    "derived_script_sha256": {
+      "continuation_ppl": "0a8a8541056bcbbd268464439801f63873c8602fec672ca893e3f54b342db558",
+      "niah": "c983e49d8305e3f42dba27f1b4bd547204c4ee0dfc310779272cba141c79edb8",
+      "passage_retrieval": "b2353442b471cb5bc8520721006fd46cd2e43d3e0bc673db89d465d86f2af098",
+      "hotpotqa": "2adedbe8871f9e412c2c8a3526a96bff5d651cfc405e0e113c255e019700d5b2",
+      "qasper": "bebf031e0b03a957f7467c0853416bdd1d8613bdd7deaa4063bded844a5b8227"
+    },
+    "runner_script_sha256": "bf71af60ed5ddfa6cbec606c66ad66388d4f173c81dcb825eee45605539c6433",
+    "protocol_sha256": "47f4560d5ce285c56847502854d5a37c7202ab9ec4e81c1311d6cddd221398a1",
+    "protocol": {
+      "experiment": 11,
+      "type": "logical fake-quant / dequant QUALITY + logical storage metadata-policy ablation (NOT a physical serving benchmark)",
+      "axis": "metadata-policy ablation (NOT one uniform numerical single-axis sweep) with two contrasts around the META8g64 control: (1) metadata representation -- BF16 metadata vs grouped UINT8 metadata; (2) within grouped UINT8 -- metadata group size 32 / 64 / 128. BF16 metadata does not lie on the group-size axis",
+      "contrasts": {
+        "representation": {
+          "conditions": [
+            "rabit2_mbf",
+            "rabit2"
+          ],
+          "compares": "BF16 metadata vs grouped UINT8 metadata (META8g64 control)"
+        },
+        "uint8_group_size": {
+          "conditions": [
+            "rabit2_m32",
+            "rabit2",
+            "rabit2_m128"
+          ],
+          "compares": "grouped UINT8 metadata at group size 32 / 64 (control) / 128"
+        }
+      },
+      "not_reported": [
+        "physical allocator capacity",
+        "throughput",
+        "latency"
+      ],
+      "question": "Holding K3 / V2 / G32 / R4 fixed: (1) does grouped UINT8 metadata (META8g64) materially hurt quality relative to BF16 metadata? (2) within grouped UINT8 metadata, what quality / logical-storage trade-off results from metadata group size 32 / 64 / 128? META8g64 is not presupposed best.",
+      "source": "docs/MLSYS_EXPERIMENT_PLAN.md, Experiment 11 (control rabit2 uint8 g64; treatment BF16 metadata (metadata_mode='bf16') and uint8 metadata at group 32 and 128; config_for_method entries only)",
+      "methods_argument": "bf16,rabit2_mbf,rabit2_m32,rabit2,rabit2_m128",
+      "meta8g64_definition": {
+        "primary_parameters": {
+          "k": "seq_affine K: min and scale per (layer, KV head, 32-token sequence group, head_dim channel); per quantized region of Lk = ceil((T-4)/32)*32 tokens: 8*(Lk/32)*128 values per tensor",
+          "v": "group_affine V: min and scale per (layer, KV head, token, 32-channel head_dim group); per quantized region of Lq = T-4 tokens: 8*Lq*4 values per tensor",
+          "computed_in": "fp32 (payload codes are computed from the fp32 min / scale)",
+          "applies_to": "both K and V; two tensors (min, scale) per side per layer"
+        },
+        "stored_components_meta8g64": [
+          {
+            "component": "primary metadata codes",
+            "semantic_role": "the K / V min and scale values, each affinely quantized",
+            "dtype": "uint8 (8 bits)",
+            "grouping_axis": "the flattened min (or scale) tensor of one quantized region (row-major over its shape), padded by repeating the last value",
+            "group_size": 64,
+            "elements": "ceil(n/64)*64 per tensor of n values",
+            "applies_to": "K and V",
+            "kind": "primary",
+            "bytes": "ceil(n/64)*64"
+          },
+          {
+            "component": "second-level minimum",
+            "semantic_role": "offset of each 64-value metadata group",
+            "dtype": "bfloat16 (16 bits)",
+            "grouping_axis": "per metadata group",
+            "group_size": 64,
+            "elements": "ceil(n/64) per tensor",
+            "applies_to": "K and V",
+            "kind": "secondary",
+            "bytes": "2*ceil(n/64)"
+          },
+          {
+            "component": "second-level scale",
+            "semantic_role": "(max-min)/255 of each 64-value metadata group (1.0 if < 1e-12)",
+            "dtype": "bfloat16 (16 bits)",
+            "grouping_axis": "per metadata group",
+            "group_size": 64,
+            "elements": "ceil(n/64) per tensor",
+            "applies_to": "K and V",
+            "kind": "secondary",
+            "bytes": "2*ceil(n/64)"
+          }
+        ],
+        "decode": "value = code * bf16_scale + bf16_min (fp32 arithmetic); dequantized K / V = payload_code * decoded_scale + decoded_min",
+        "bytes_per_metadata_value": {
+          "META8g32": 1.125,
+          "META8g64": 1.0625,
+          "META8g128": 1.03125,
+          "BF16": 2.0
+        },
+        "physical_implementation_agrees": "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py encode_metadata_uint8_group_ref (group 64, /255, BF16 min / scale) and rabit_kv2.py encode_metadata_blob_ref (blob = uint8 codes incl. padding, then BF16 minima, then BF16 scales); physical per-page padding is not modelled here (logical experiment)",
+        "bf16_mode": "each primary value rounded to BF16 (2 bytes); no secondary parameters; metadata_group_size is not read"
+      },
+      "conditions": {
+        "bf16": {
+          "role": "reference (uncompressed); not an ablation condition"
+        },
+        "rabit2_mbf": {
+          "role": "treatment",
+          "config": {
+            "name": "K3V2 METAbf16 G32 R4 (metadata ablation of rabit2)",
+            "k_bits": 3,
+            "v_bits": 2,
+            "k_style": "seq_affine",
+            "v_style": "group_affine",
+            "k_group": 32,
+            "v_group": 32,
+            "residual": 4,
+            "metadata_mode": "bf16",
+            "metadata_group_size": 64
+          },
+          "changed_fields": [
+            "metadata_mode"
+          ]
+        },
+        "rabit2_m32": {
+          "role": "treatment",
+          "config": {
+            "name": "K3V2 META8g32 G32 R4 (metadata ablation of rabit2)",
+            "k_bits": 3,
+            "v_bits": 2,
+            "k_style": "seq_affine",
+            "v_style": "group_affine",
+            "k_group": 32,
+            "v_group": 32,
+            "residual": 4,
+            "metadata_mode": "int8",
+            "metadata_group_size": 32
+          },
+          "changed_fields": [
+            "metadata_group_size"
+          ]
+        },
+        "rabit2": {
+          "role": "control",
+          "config": {
+            "name": "2b META8g64 K3V2 G32 R4",
+            "k_bits": 3,
+            "v_bits": 2,
+            "k_style": "seq_affine",
+            "v_style": "group_affine",
+            "k_group": 32,
+            "v_group": 32,
+            "residual": 4,
+            "metadata_mode": "int8",
+            "metadata_group_size": 64
+          },
+          "changed_fields": []
+        },
+        "rabit2_m128": {
+          "role": "treatment",
+          "config": {
+            "name": "K3V2 META8g128 G32 R4 (metadata ablation of rabit2)",
+            "k_bits": 3,
+            "v_bits": 2,
+            "k_style": "seq_affine",
+            "v_style": "group_affine",
+            "k_group": 32,
+            "v_group": 32,
+            "residual": 4,
+            "metadata_mode": "int8",
+            "metadata_group_size": 128
+          },
+          "changed_fields": [
+            "metadata_group_size"
+          ]
+        }
+      },
+      "only_metadata_field_differs_proof": {
+        "control": "rabit2",
+        "fields_differing_from_control_excluding_display_name": {
+          "rabit2_mbf": [
+            "metadata_mode"
+          ],
+          "rabit2_m32": [
+            "metadata_group_size"
+          ],
+          "rabit2": [],
+          "rabit2_m128": [
+            "metadata_group_size"
+          ]
+        },
+        "holds": true,
+        "single_field_per_treatment": true,
+        "note": "rabit2_mbf keeps metadata_group_size = 64 in its config, but in bf16 mode encode_metadata returns before reading it (inert); rabit2_m32 / rabit2_m128 keep metadata_mode = int8",
+        "frozen_fields": {
+          "k_bits": 3,
+          "v_bits": 2,
+          "k_style": "seq_affine",
+          "v_style": "group_affine",
+          "k_group": 32,
+          "v_group": 32,
+          "residual": 4
+        },
+        "configs_identical_across_all_five_scripts": true
+      },
+      "quality_semantics": {
+        "reconstructed_kv_changes": true,
+        "why": "dequantization uses the DECODED min / scale; uint8 metadata at group M quantizes each min / scale with a per-M-group affine 8-bit code and BF16 group parameters, so the decoding error depends on M; BF16 metadata rounds each value to BF16 instead. The four conditions therefore generally reconstruct different K / V values (not an equivalent re-encoding); quality evaluation is scientifically meaningful and GPU evaluation is required",
+        "offline_evidence": "test_experiment11_metadata.py emulates encode/decode_metadata and shows different decoded parameters across the four conditions (identical when the config is identical)"
+      },
+      "common": {
+        "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct (modelscope snapshot_download)",
+        "model_dtype": "bfloat16",
+        "attention": "sdpa",
+        "seed": "torch.manual_seed(0) and torch.cuda.manual_seed_all(0) in every script",
+        "tf32": "enabled (matmul and cudnn)",
+        "gpu": "NVIDIA H100 via Modal"
+      },
+      "benchmarks": {
+        "continuation_ppl": {
+          "dataset": "WikiText-2 test (raw text: https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt), non-empty stripped lines joined in blocks of 64",
+          "selection": "deterministic: the first samples x (context + eval) tokens of the tokenized stream, split into consecutive non-overlapping spans",
+          "samples": 8,
+          "context_tokens": 1024,
+          "eval_tokens_per_sample": 128,
+          "scored_tokens_per_method": 1024,
+          "quantized_prefix_tokens": "context (1024)",
+          "procedure": "teacher-forced: prefill the 1024-token context, quantize/dequantize its KV once, score the 128 continuation tokens (first logit from the prefill)",
+          "metric": "PPL (exp of mean token cross-entropy) and PPL delta % vs bf16",
+          "script": "benchmarks/mlsys2027/exp11_metadata/continuation_ppl.py",
+          "canonical_source": "benchmarks/quality/continuation_ppl.py",
+          "canonical_source_sha256_lf": "caaae5c3744e9ba03c4bf385337f563802f58331efdb3a239380741885781374",
+          "args": [
+            "--context-tokens",
+            "1024",
+            "--eval-tokens",
+            "128",
+            "--samples",
+            "8",
+            "--methods",
+            "bf16,rabit2_mbf,rabit2_m32,rabit2,rabit2_m128"
+          ],
+          "expected_count_per_method": 1024
+        },
+        "niah": {
+          "dataset": "synthetic needle-in-a-haystack: WikiText-2 test as distractor filler; needle 'The hidden secret code is RABIT-7291'",
+          "selection": "deterministic: every (context length, depth) pair; needle inserted at round(filler x depth)",
+          "cases": 15,
+          "context_lengths": [
+            4096,
+            8192,
+            16384
+          ],
+          "needle_depths": [
+            0.1,
+            0.25,
+            0.5,
+            0.75,
+            0.9
+          ],
+          "quantized_prefix_tokens": "prompt length - 1 (the last prompt token is fed at the first decode step)",
+          "generation": {
+            "decoding": "greedy argmax",
+            "max_new_tokens": 16,
+            "stop": "eos"
+          },
+          "metric": "exact-match accuracy: regex RABIT-\\d{4} on the decoded answer equals RABIT-7291",
+          "warmup": "one BF16 warm-up case at 4096 tokens, not reported",
+          "script": "benchmarks/mlsys2027/exp11_metadata/niah.py",
+          "canonical_source": "benchmarks/quality/niah.py",
+          "canonical_source_sha256_lf": "35764fd6a1ba52c6e9811af33f8ac613a57432288608f5795d2e8986c9a9f1ba",
+          "args": [
+            "--context-lengths",
+            "4096,8192,16384",
+            "--needle-depths",
+            "0.1,0.25,0.5,0.75,0.9",
+            "--max-new-tokens",
+            "16",
+            "--methods",
+            "bf16,rabit2_mbf,rabit2_m32,rabit2,rabit2_m128"
+          ],
+          "expected_count_per_method": 15
+        },
+        "passage_retrieval": {
+          "dataset": "LongBench passage_retrieval_en (zai-org/LongBench @ 915b0c6ec0b6dfae1cd44224b7d8995317837f27, passage_retrieval_en/test-00000-of-00001.parquet, split test)",
+          "selection": "deterministic: dataset indices [0, 10)",
+          "samples": 10,
+          "sample_start": 0,
+          "max_input_tokens": 16384,
+          "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+          "prompt": "LongBench official template via the tokenizer chat template",
+          "quantized_prefix_tokens": "prompt length - 1",
+          "generation": {
+            "decoding": "greedy argmax",
+            "max_new_tokens": 32,
+            "stop": "eos"
+          },
+          "metric": "LongBench official retrieval score (fraction of numbers in the prediction equal to the target paragraph id), mean x 100",
+          "script": "benchmarks/mlsys2027/exp11_metadata/passage_retrieval.py",
+          "canonical_source": "benchmarks/quality/passage_retrieval.py",
+          "canonical_source_sha256_lf": "4aa1bde469ce0edabe9e60f94cf29395ee982cc9c5b80b503e49b06c2c23ada9",
+          "args": [
+            "--sample-start",
+            "0",
+            "--samples",
+            "10",
+            "--max-input-tokens",
+            "16384",
+            "--max-new-tokens",
+            "32",
+            "--methods",
+            "bf16,rabit2_mbf,rabit2_m32,rabit2,rabit2_m128"
+          ],
+          "expected_count_per_method": 10
+        },
+        "hotpotqa": {
+          "dataset": "LongBench-E hotpotqa (zai-org/LongBench @ 92b6c5fbfb0c97b91e92d9ef79802f95ce74b05e, hotpotqa_e/test-00000-of-00001.parquet, split test)",
+          "selection": "deterministic: examples with length >= 8000 (bucket 8k+), filtered positions [0, 20)",
+          "samples": 20,
+          "sample_start": 0,
+          "length_bucket": "8k+",
+          "max_input_tokens": 16384,
+          "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+          "prompt": "LongBench official template via the tokenizer chat template",
+          "quantized_prefix_tokens": "prompt length - 1",
+          "generation": {
+            "decoding": "greedy argmax",
+            "max_new_tokens": 32,
+            "stop": "eos"
+          },
+          "metric": "LongBench qa_f1_score (max over reference answers), mean x 100",
+          "script": "benchmarks/mlsys2027/exp11_metadata/hotpotqa.py",
+          "canonical_source": "benchmarks/quality/hotpotqa.py",
+          "canonical_source_sha256_lf": "6253c17a37f37b7930c2311cc4228551962aac0df087f00608e92fa4b3e99f8d",
+          "args": [
+            "--sample-start",
+            "0",
+            "--samples",
+            "20",
+            "--length-bucket",
+            "8k+",
+            "--max-input-tokens",
+            "16384",
+            "--max-new-tokens",
+            "32",
+            "--methods",
+            "bf16,rabit2_mbf,rabit2_m32,rabit2,rabit2_m128"
+          ],
+          "expected_count_per_method": 20
+        },
+        "qasper": {
+          "dataset": "LongBench-E qasper (zai-org/LongBench @ 52edb9d18ea01d49ec7580fefcfe6b9d97a0fa96, qasper_e/test-00000-of-00001.parquet, split test)",
+          "selection": "deterministic: examples with length >= 8000 (bucket 8k+), filtered positions [0, 24)",
+          "samples": 24,
+          "sample_start": 0,
+          "length_bucket": "8k+",
+          "max_input_tokens": 16384,
+          "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+          "prompt": "LongBench official template via the tokenizer chat template",
+          "quantized_prefix_tokens": "prompt length - 1",
+          "generation": {
+            "decoding": "greedy argmax",
+            "max_new_tokens": 32,
+            "stop": "eos"
+          },
+          "metric": "LongBench qa_f1_score (max over reference answers), mean x 100",
+          "script": "benchmarks/mlsys2027/exp11_metadata/qasper.py",
+          "canonical_source": "benchmarks/quality/qasper.py",
+          "canonical_source_sha256_lf": "cd25ae8842082c8ac6530abbd2b9806f85088833e5e8da09c491b6a13b90c08d",
+          "args": [
+            "--sample-start",
+            "0",
+            "--samples",
+            "24",
+            "--length-bucket",
+            "8k+",
+            "--max-input-tokens",
+            "16384",
+            "--max-new-tokens",
+            "32",
+            "--methods",
+            "bf16,rabit2_mbf,rabit2_m32,rabit2,rabit2_m128"
+          ],
+          "expected_count_per_method": 24
+        }
+      },
+      "control_reproduction": {
+        "configuration_equality": "EXACT: the META8g64 control is the canonical rabit2 config (compiled and compared)",
+        "continuation_ppl_niah_passage_retrieval": {
+          "rule": "original Exp1 tolerances on bf16 and the control",
+          "tolerances": {
+            "continuation_ppl.ppl": {
+              "relative": 0.005
+            },
+            "niah.accuracy_pct": {
+              "absolute_points": 1.0
+            },
+            "passage_retrieval.accuracy_pct": {
+              "absolute_points": 1.0
+            },
+            "avg_logical_kv_mb": {
+              "relative": 0.001
+            }
+          }
+        },
+        "hotpotqa_qasper": {
+          "rule": "the FROZEN post-failure per-example QA control gate (transparent post-failure methodological amendment, not pre-registered), applied unchanged to bf16 and the control; the aggregate +/-1.0 F1 check is report-only; bf16 / control logical KV MB keep the 0.1 % tolerance",
+          "amendment": "results/mlsys2027/control_reproducibility_audit/qa_control_gate_amendment.json",
+          "amendment_sha256_lf": "eaf28d66f38eedc13f447eb9776cd6affd2abb06dc2c64dec8d7e7d2a1a2e10c",
+          "amendment_commit": "86b03eabaecfed0a838cabd7a7d1cce2f0a2fa38",
+          "thresholds": {
+            "hotpotqa": {
+              "bf16": {
+                "historical_max_score_mismatch_count": 1,
+                "historical_max_l1_score_distance": 0.065
+              },
+              "rabit2": {
+                "historical_max_score_mismatch_count": 1,
+                "historical_max_l1_score_distance": 0.5
+              }
+            },
+            "qasper": {
+              "bf16": {
+                "historical_max_score_mismatch_count": 1,
+                "historical_max_l1_score_distance": 0.096
+              },
+              "rabit2": {
+                "historical_max_score_mismatch_count": 2,
+                "historical_max_l1_score_distance": 0.185
+              }
+            }
+          },
+          "new_thresholds_derived": false
+        },
+        "canonical_targets": {
+          "continuation_ppl": {
+            "bf16": {
+              "ppl": 8.502,
+              "avg_logical_kv_mb": 128.0
+            },
+            "rabit2_META8g64": {
+              "ppl": 8.6317,
+              "avg_logical_kv_mb": 24.71
+            }
+          },
+          "niah": {
+            "bf16": {
+              "accuracy_pct": 100.0,
+              "avg_logical_kv_mb": 1194.542
+            },
+            "rabit2_META8g64": {
+              "accuracy_pct": 100.0,
+              "avg_logical_kv_mb": 226.786
+            }
+          },
+          "passage_retrieval": {
+            "bf16": {
+              "accuracy_pct": 100.0,
+              "avg_logical_kv_mb": 1517.375
+            },
+            "rabit2_META8g64": {
+              "accuracy_pct": 100.0,
+              "avg_logical_kv_mb": 288.09
+            }
+          },
+          "hotpotqa": {
+            "bf16": {
+              "f1_pct": 60.6,
+              "avg_logical_kv_mb": 1896.106
+            },
+            "rabit2_META8g64": {
+              "f1_pct": 55.2,
+              "avg_logical_kv_mb": 359.85
+            }
+          },
+          "qasper": {
+            "bf16": {
+              "f1_pct": 35.9,
+              "avg_logical_kv_mb": 1783.531
+            },
+            "rabit2_META8g64": {
+              "f1_pct": 35.6,
+              "avg_logical_kv_mb": 338.428
+            }
+          }
+        }
+      },
+      "logical_storage_expectations": {
+        "label": "LOGICAL packed prefix-KV storage (payload bits + metadata + BF16 residual); NOT physical allocator capacity",
+        "formula": "per layer (32 layers, 8 KV heads, head_dim 128), quantized prefix T, R = 4, Lq = T - 4, Lk = ceil(Lq/32)*32: K payload = ceil(8*Lk*128*3/8); V payload = ceil(8*Lq*128*2/8); n_K = 8*(Lk/32)*128 and n_V = 8*Lq*4 values per min (and per scale) tensor; per tensor of n values: META8gM primary = ceil(n/M)*M uint8 bytes, secondary = BF16 group minima 2*ceil(n/M) bytes + BF16 group scales 2*ceil(n/M) bytes (= 4*ceil(n/M)); BF16 primary = 2n bytes, secondary = 0; K / V metadata = 2 tensors each; residual = 2*4*8*128*2 bytes. Exact integers; averages / 2^20.",
+        "linearity": "metadata bytes are not exactly linear in 1/M (ceil padding of each tensor to M values)",
+        "model_anchor": "the int8 totals equal the accepted Exp9 / Exp10 storage model; the model reproduces the 20 observed Exp1 preset MB values exactly",
+        "expected": {
+          "continuation_ppl": {
+            "bf16_reference_avg_mb": 128.0,
+            "rabit2_mbf": {
+              "total_logical_bytes_all_samples": 238682112,
+              "component_bytes_all_samples": {
+                "k_payload": 100663296,
+                "v_payload": 66846720,
+                "k_meta_primary": 33554432,
+                "k_meta_secondary_min": 0,
+                "k_meta_secondary_scale": 0,
+                "v_meta_primary": 33423360,
+                "v_meta_secondary_min": 0,
+                "v_meta_secondary_scale": 0,
+                "residual": 4194304
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 33554432,
+                "v_meta_total": 33423360,
+                "meta_primary_total": 66977792,
+                "meta_secondary_total": 0,
+                "metadata_total": 66977792
+              },
+              "avg_logical_kv_mb": 28.453,
+              "avg_logical_kv_mb_full_precision": 28.453125,
+              "avg_metadata_mb": 7.984,
+              "compression_vs_bf16": 4.499,
+              "delta_vs_meta8g64_mb": 3.743,
+              "metadata_bytes_delta_vs_meta8g64": 31395840
+            },
+            "rabit2_m32": {
+              "total_logical_bytes_all_samples": 209379328,
+              "component_bytes_all_samples": {
+                "k_payload": 100663296,
+                "v_payload": 66846720,
+                "k_meta_primary": 16777216,
+                "k_meta_secondary_min": 1048576,
+                "k_meta_secondary_scale": 1048576,
+                "v_meta_primary": 16711680,
+                "v_meta_secondary_min": 1044480,
+                "v_meta_secondary_scale": 1044480,
+                "residual": 4194304
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 18874368,
+                "v_meta_total": 18800640,
+                "meta_primary_total": 33488896,
+                "meta_secondary_total": 4186112,
+                "metadata_total": 37675008
+              },
+              "avg_logical_kv_mb": 24.96,
+              "avg_logical_kv_mb_full_precision": 24.9599609375,
+              "avg_metadata_mb": 4.491,
+              "compression_vs_bf16": 5.128,
+              "delta_vs_meta8g64_mb": 0.25,
+              "metadata_bytes_delta_vs_meta8g64": 2093056
+            },
+            "rabit2": {
+              "total_logical_bytes_all_samples": 207286272,
+              "component_bytes_all_samples": {
+                "k_payload": 100663296,
+                "v_payload": 66846720,
+                "k_meta_primary": 16777216,
+                "k_meta_secondary_min": 524288,
+                "k_meta_secondary_scale": 524288,
+                "v_meta_primary": 16711680,
+                "v_meta_secondary_min": 522240,
+                "v_meta_secondary_scale": 522240,
+                "residual": 4194304
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 17825792,
+                "v_meta_total": 17756160,
+                "meta_primary_total": 33488896,
+                "meta_secondary_total": 2093056,
+                "metadata_total": 35581952
+              },
+              "avg_logical_kv_mb": 24.71,
+              "avg_logical_kv_mb_full_precision": 24.71044921875,
+              "avg_metadata_mb": 4.242,
+              "compression_vs_bf16": 5.18,
+              "delta_vs_meta8g64_mb": 0.0,
+              "metadata_bytes_delta_vs_meta8g64": 0
+            },
+            "rabit2_m128": {
+              "total_logical_bytes_all_samples": 206239744,
+              "component_bytes_all_samples": {
+                "k_payload": 100663296,
+                "v_payload": 66846720,
+                "k_meta_primary": 16777216,
+                "k_meta_secondary_min": 262144,
+                "k_meta_secondary_scale": 262144,
+                "v_meta_primary": 16711680,
+                "v_meta_secondary_min": 261120,
+                "v_meta_secondary_scale": 261120,
+                "residual": 4194304
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 17301504,
+                "v_meta_total": 17233920,
+                "meta_primary_total": 33488896,
+                "meta_secondary_total": 1046528,
+                "metadata_total": 34535424
+              },
+              "avg_logical_kv_mb": 24.586,
+              "avg_logical_kv_mb_full_precision": 24.585693359375,
+              "avg_metadata_mb": 4.117,
+              "compression_vs_bf16": 5.206,
+              "delta_vs_meta8g64_mb": -0.125,
+              "metadata_bytes_delta_vs_meta8g64": -1046528
+            }
+          },
+          "niah": {
+            "bf16_reference_avg_mb": 1194.542,
+            "rabit2_mbf": {
+              "total_logical_bytes_all_samples": 4117360640,
+              "component_bytes_all_samples": {
+                "k_payload": 1761607680,
+                "v_payload": 1173790720,
+                "k_meta_primary": 587202560,
+                "k_meta_secondary_min": 0,
+                "k_meta_secondary_scale": 0,
+                "v_meta_primary": 586895360,
+                "v_meta_secondary_min": 0,
+                "v_meta_secondary_scale": 0,
+                "residual": 7864320
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 587202560,
+                "v_meta_total": 586895360,
+                "meta_primary_total": 1174097920,
+                "meta_secondary_total": 0,
+                "metadata_total": 1174097920
+              },
+              "avg_logical_kv_mb": 261.775,
+              "avg_logical_kv_mb_full_precision": 261.7747395833333,
+              "avg_metadata_mb": 74.647,
+              "compression_vs_bf16": 4.563,
+              "delta_vs_meta8g64_mb": 34.989,
+              "metadata_bytes_delta_vs_meta8g64": 550325760
+            },
+            "rabit2_m32": {
+              "total_logical_bytes_all_samples": 3603692800,
+              "component_bytes_all_samples": {
+                "k_payload": 1761607680,
+                "v_payload": 1173790720,
+                "k_meta_primary": 293601280,
+                "k_meta_secondary_min": 18350080,
+                "k_meta_secondary_scale": 18350080,
+                "v_meta_primary": 293447680,
+                "v_meta_secondary_min": 18340480,
+                "v_meta_secondary_scale": 18340480,
+                "residual": 7864320
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 330301440,
+                "v_meta_total": 330128640,
+                "meta_primary_total": 587048960,
+                "meta_secondary_total": 73381120,
+                "metadata_total": 660430080
+              },
+              "avg_logical_kv_mb": 229.117,
+              "avg_logical_kv_mb_full_precision": 229.11661783854166,
+              "avg_metadata_mb": 41.989,
+              "compression_vs_bf16": 5.214,
+              "delta_vs_meta8g64_mb": 2.331,
+              "metadata_bytes_delta_vs_meta8g64": 36657920
+            },
+            "rabit2": {
+              "total_logical_bytes_all_samples": 3567034880,
+              "component_bytes_all_samples": {
+                "k_payload": 1761607680,
+                "v_payload": 1173790720,
+                "k_meta_primary": 293601280,
+                "k_meta_secondary_min": 9175040,
+                "k_meta_secondary_scale": 9175040,
+                "v_meta_primary": 293478400,
+                "v_meta_secondary_min": 9171200,
+                "v_meta_secondary_scale": 9171200,
+                "residual": 7864320
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 311951360,
+                "v_meta_total": 311820800,
+                "meta_primary_total": 587079680,
+                "meta_secondary_total": 36692480,
+                "metadata_total": 623772160
+              },
+              "avg_logical_kv_mb": 226.786,
+              "avg_logical_kv_mb_full_precision": 226.78597005208334,
+              "avg_metadata_mb": 39.658,
+              "compression_vs_bf16": 5.267,
+              "delta_vs_meta8g64_mb": 0.0,
+              "metadata_bytes_delta_vs_meta8g64": 0
+            },
+            "rabit2_m128": {
+              "total_logical_bytes_all_samples": 3548688640,
+              "component_bytes_all_samples": {
+                "k_payload": 1761607680,
+                "v_payload": 1173790720,
+                "k_meta_primary": 293601280,
+                "k_meta_secondary_min": 4587520,
+                "k_meta_secondary_scale": 4587520,
+                "v_meta_primary": 293478400,
+                "v_meta_secondary_min": 4585600,
+                "v_meta_secondary_scale": 4585600,
+                "residual": 7864320
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 302776320,
+                "v_meta_total": 302649600,
+                "meta_primary_total": 587079680,
+                "meta_secondary_total": 18346240,
+                "metadata_total": 605425920
+              },
+              "avg_logical_kv_mb": 225.62,
+              "avg_logical_kv_mb_full_precision": 225.61954752604166,
+              "avg_metadata_mb": 38.492,
+              "compression_vs_bf16": 5.294,
+              "delta_vs_meta8g64_mb": -1.166,
+              "metadata_bytes_delta_vs_meta8g64": -18346240
+            }
+          },
+          "passage_retrieval": {
+            "bf16_reference_avg_mb": 1517.375,
+            "rabit2_mbf": {
+              "total_logical_bytes_all_samples": 3487113216,
+              "component_bytes_all_samples": {
+                "k_payload": 1493041152,
+                "v_payload": 994099200,
+                "k_meta_primary": 497680384,
+                "k_meta_secondary_min": 0,
+                "k_meta_secondary_scale": 0,
+                "v_meta_primary": 497049600,
+                "v_meta_secondary_min": 0,
+                "v_meta_secondary_scale": 0,
+                "residual": 5242880
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 497680384,
+                "v_meta_total": 497049600,
+                "meta_primary_total": 994729984,
+                "meta_secondary_total": 0,
+                "metadata_total": 994729984
+              },
+              "avg_logical_kv_mb": 332.557,
+              "avg_logical_kv_mb_full_precision": 332.55703125,
+              "avg_metadata_mb": 94.865,
+              "compression_vs_bf16": 4.563,
+              "delta_vs_meta8g64_mb": 44.467,
+              "metadata_bytes_delta_vs_meta8g64": 466270976
+            },
+            "rabit2_m32": {
+              "total_logical_bytes_all_samples": 3051918848,
+              "component_bytes_all_samples": {
+                "k_payload": 1493041152,
+                "v_payload": 994099200,
+                "k_meta_primary": 248840192,
+                "k_meta_secondary_min": 15552512,
+                "k_meta_secondary_scale": 15552512,
+                "v_meta_primary": 248524800,
+                "v_meta_secondary_min": 15532800,
+                "v_meta_secondary_scale": 15532800,
+                "residual": 5242880
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 279945216,
+                "v_meta_total": 279590400,
+                "meta_primary_total": 497364992,
+                "meta_secondary_total": 62170624,
+                "metadata_total": 559535616
+              },
+              "avg_logical_kv_mb": 291.054,
+              "avg_logical_kv_mb_full_precision": 291.053662109375,
+              "avg_metadata_mb": 53.361,
+              "compression_vs_bf16": 5.213,
+              "delta_vs_meta8g64_mb": 2.964,
+              "metadata_bytes_delta_vs_meta8g64": 31076608
+            },
+            "rabit2": {
+              "total_logical_bytes_all_samples": 3020842240,
+              "component_bytes_all_samples": {
+                "k_payload": 1493041152,
+                "v_payload": 994099200,
+                "k_meta_primary": 248840192,
+                "k_meta_secondary_min": 7776256,
+                "k_meta_secondary_scale": 7776256,
+                "v_meta_primary": 248532992,
+                "v_meta_secondary_min": 7766656,
+                "v_meta_secondary_scale": 7766656,
+                "residual": 5242880
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 264392704,
+                "v_meta_total": 264066304,
+                "meta_primary_total": 497373184,
+                "meta_secondary_total": 31085824,
+                "metadata_total": 528459008
+              },
+              "avg_logical_kv_mb": 288.09,
+              "avg_logical_kv_mb_full_precision": 288.0899658203125,
+              "avg_metadata_mb": 50.398,
+              "compression_vs_bf16": 5.267,
+              "delta_vs_meta8g64_mb": 0.0,
+              "metadata_bytes_delta_vs_meta8g64": 0
+            },
+            "rabit2_m128": {
+              "total_logical_bytes_all_samples": 3005320448,
+              "component_bytes_all_samples": {
+                "k_payload": 1493041152,
+                "v_payload": 994099200,
+                "k_meta_primary": 248840192,
+                "k_meta_secondary_min": 3888128,
+                "k_meta_secondary_scale": 3888128,
+                "v_meta_primary": 248553472,
+                "v_meta_secondary_min": 3883648,
+                "v_meta_secondary_scale": 3883648,
+                "residual": 5242880
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 256616448,
+                "v_meta_total": 256320768,
+                "meta_primary_total": 497393664,
+                "meta_secondary_total": 15543552,
+                "metadata_total": 512937216
+              },
+              "avg_logical_kv_mb": 286.61,
+              "avg_logical_kv_mb_full_precision": 286.6096923828125,
+              "avg_metadata_mb": 48.918,
+              "compression_vs_bf16": 5.294,
+              "delta_vs_meta8g64_mb": -1.48,
+              "metadata_bytes_delta_vs_meta8g64": -15521792
+            }
+          },
+          "hotpotqa": {
+            "bf16_reference_avg_mb": 1896.106,
+            "rabit2_mbf": {
+              "total_logical_bytes_all_samples": 8711843840,
+              "component_bytes_all_samples": {
+                "k_payload": 3730833408,
+                "v_payload": 2484609024,
+                "k_meta_primary": 1243611136,
+                "k_meta_secondary_min": 0,
+                "k_meta_secondary_scale": 0,
+                "v_meta_primary": 1242304512,
+                "v_meta_secondary_min": 0,
+                "v_meta_secondary_scale": 0,
+                "residual": 10485760
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 1243611136,
+                "v_meta_total": 1242304512,
+                "meta_primary_total": 2485915648,
+                "meta_secondary_total": 0,
+                "metadata_total": 2485915648
+              },
+              "avg_logical_kv_mb": 415.413,
+              "avg_logical_kv_mb_full_precision": 415.4130859375,
+              "avg_metadata_mb": 118.538,
+              "compression_vs_bf16": 4.564,
+              "delta_vs_meta8g64_mb": 55.563,
+              "metadata_bytes_delta_vs_meta8g64": 1165240320
+            },
+            "rabit2_m32": {
+              "total_logical_bytes_all_samples": 7624255744,
+              "component_bytes_all_samples": {
+                "k_payload": 3730833408,
+                "v_payload": 2484609024,
+                "k_meta_primary": 621805568,
+                "k_meta_secondary_min": 38862848,
+                "k_meta_secondary_scale": 38862848,
+                "v_meta_primary": 621152256,
+                "v_meta_secondary_min": 38822016,
+                "v_meta_secondary_scale": 38822016,
+                "residual": 10485760
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 699531264,
+                "v_meta_total": 698796288,
+                "meta_primary_total": 1242957824,
+                "meta_secondary_total": 155369728,
+                "metadata_total": 1398327552
+              },
+              "avg_logical_kv_mb": 363.553,
+              "avg_logical_kv_mb_full_precision": 363.55284423828124,
+              "avg_metadata_mb": 66.677,
+              "compression_vs_bf16": 5.215,
+              "delta_vs_meta8g64_mb": 3.703,
+              "metadata_bytes_delta_vs_meta8g64": 77652224
+            },
+            "rabit2": {
+              "total_logical_bytes_all_samples": 7546603520,
+              "component_bytes_all_samples": {
+                "k_payload": 3730833408,
+                "v_payload": 2484609024,
+                "k_meta_primary": 621805568,
+                "k_meta_secondary_min": 19431424,
+                "k_meta_secondary_scale": 19431424,
+                "v_meta_primary": 621182976,
+                "v_meta_secondary_min": 19411968,
+                "v_meta_secondary_scale": 19411968,
+                "residual": 10485760
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 660668416,
+                "v_meta_total": 660006912,
+                "meta_primary_total": 1242988544,
+                "meta_secondary_total": 77686784,
+                "metadata_total": 1320675328
+              },
+              "avg_logical_kv_mb": 359.85,
+              "avg_logical_kv_mb_full_precision": 359.85009765625,
+              "avg_metadata_mb": 62.975,
+              "compression_vs_bf16": 5.269,
+              "delta_vs_meta8g64_mb": 0.0,
+              "metadata_bytes_delta_vs_meta8g64": 0
+            },
+            "rabit2_m128": {
+              "total_logical_bytes_all_samples": 7507793920,
+              "component_bytes_all_samples": {
+                "k_payload": 3730833408,
+                "v_payload": 2484609024,
+                "k_meta_primary": 621805568,
+                "k_meta_secondary_min": 9715712,
+                "k_meta_secondary_scale": 9715712,
+                "v_meta_primary": 621215744,
+                "v_meta_secondary_min": 9706496,
+                "v_meta_secondary_scale": 9706496,
+                "residual": 10485760
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 641236992,
+                "v_meta_total": 640628736,
+                "meta_primary_total": 1243021312,
+                "meta_secondary_total": 38844416,
+                "metadata_total": 1281865728
+              },
+              "avg_logical_kv_mb": 358.0,
+              "avg_logical_kv_mb_full_precision": 357.99951171875,
+              "avg_metadata_mb": 61.124,
+              "compression_vs_bf16": 5.296,
+              "delta_vs_meta8g64_mb": -1.851,
+              "metadata_bytes_delta_vs_meta8g64": -38809600
+            }
+          },
+          "qasper": {
+            "bf16_reference_avg_mb": 1783.531,
+            "rabit2_mbf": {
+              "total_logical_bytes_all_samples": 9831784448,
+              "component_bytes_all_samples": {
+                "k_payload": 4209377280,
+                "v_payload": 2804465664,
+                "k_meta_primary": 1403125760,
+                "k_meta_secondary_min": 0,
+                "k_meta_secondary_scale": 0,
+                "v_meta_primary": 1402232832,
+                "v_meta_secondary_min": 0,
+                "v_meta_secondary_scale": 0,
+                "residual": 12582912
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 1403125760,
+                "v_meta_total": 1402232832,
+                "meta_primary_total": 2805358592,
+                "meta_secondary_total": 0,
+                "metadata_total": 2805358592
+              },
+              "avg_logical_kv_mb": 390.68,
+              "avg_logical_kv_mb_full_precision": 390.6800130208333,
+              "avg_metadata_mb": 111.475,
+              "compression_vs_bf16": 4.565,
+              "delta_vs_meta8g64_mb": 52.252,
+              "metadata_bytes_delta_vs_meta8g64": 1314968320
+            },
+            "rabit2_m32": {
+              "total_logical_bytes_all_samples": 8604440064,
+              "component_bytes_all_samples": {
+                "k_payload": 4209377280,
+                "v_payload": 2804465664,
+                "k_meta_primary": 701562880,
+                "k_meta_secondary_min": 43847680,
+                "k_meta_secondary_scale": 43847680,
+                "v_meta_primary": 701116416,
+                "v_meta_secondary_min": 43819776,
+                "v_meta_secondary_scale": 43819776,
+                "residual": 12582912
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 789258240,
+                "v_meta_total": 788755968,
+                "meta_primary_total": 1402679296,
+                "meta_secondary_total": 175334912,
+                "metadata_total": 1578014208
+              },
+              "avg_logical_kv_mb": 341.91,
+              "avg_logical_kv_mb_full_precision": 341.90972900390625,
+              "avg_metadata_mb": 62.705,
+              "compression_vs_bf16": 5.216,
+              "delta_vs_meta8g64_mb": 3.482,
+              "metadata_bytes_delta_vs_meta8g64": 87623936
+            },
+            "rabit2": {
+              "total_logical_bytes_all_samples": 8516816128,
+              "component_bytes_all_samples": {
+                "k_payload": 4209377280,
+                "v_payload": 2804465664,
+                "k_meta_primary": 701562880,
+                "k_meta_secondary_min": 21923840,
+                "k_meta_secondary_scale": 21923840,
+                "v_meta_primary": 701157376,
+                "v_meta_secondary_min": 21911168,
+                "v_meta_secondary_scale": 21911168,
+                "residual": 12582912
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 745410560,
+                "v_meta_total": 744979712,
+                "meta_primary_total": 1402720256,
+                "meta_secondary_total": 87670016,
+                "metadata_total": 1490390272
+              },
+              "avg_logical_kv_mb": 338.428,
+              "avg_logical_kv_mb_full_precision": 338.42786661783856,
+              "avg_metadata_mb": 59.223,
+              "compression_vs_bf16": 5.27,
+              "delta_vs_meta8g64_mb": 0.0,
+              "metadata_bytes_delta_vs_meta8g64": 0
+            },
+            "rabit2_m128": {
+              "total_logical_bytes_all_samples": 8472993792,
+              "component_bytes_all_samples": {
+                "k_payload": 4209377280,
+                "v_payload": 2804465664,
+                "k_meta_primary": 701562880,
+                "k_meta_secondary_min": 10961920,
+                "k_meta_secondary_scale": 10961920,
+                "v_meta_primary": 701169664,
+                "v_meta_secondary_min": 10955776,
+                "v_meta_secondary_scale": 10955776,
+                "residual": 12582912
+              },
+              "subtotal_bytes_all_samples": {
+                "k_meta_total": 723486720,
+                "v_meta_total": 723081216,
+                "meta_primary_total": 1402732544,
+                "meta_secondary_total": 43835392,
+                "metadata_total": 1446567936
+              },
+              "avg_logical_kv_mb": 336.687,
+              "avg_logical_kv_mb_full_precision": 336.6865234375,
+              "avg_metadata_mb": 57.481,
+              "compression_vs_bf16": 5.297,
+              "delta_vs_meta8g64_mb": -1.741,
+              "metadata_bytes_delta_vs_meta8g64": -43822336
+            }
+          }
+        },
+        "gates": {
+          "matches_expected": {
+            "rule": "ACCOUNTING-INTEGRITY gate: each observed avg logical KV MB (3-decimal print) within absolute_mb of avg_logical_kv_mb_full_precision",
+            "absolute_mb": 0.001
+          },
+          "ordering": {
+            "rule": "observed conditions ordered (smallest MB first) exactly as the formula orders them",
+            "expected_order_smallest_first": {
+              "continuation_ppl": [
+                "rabit2_m128",
+                "rabit2",
+                "rabit2_m32",
+                "rabit2_mbf"
+              ],
+              "niah": [
+                "rabit2_m128",
+                "rabit2",
+                "rabit2_m32",
+                "rabit2_mbf"
+              ],
+              "passage_retrieval": [
+                "rabit2_m128",
+                "rabit2",
+                "rabit2_m32",
+                "rabit2_mbf"
+              ],
+              "hotpotqa": [
+                "rabit2_m128",
+                "rabit2",
+                "rabit2_m32",
+                "rabit2_mbf"
+              ],
+              "qasper": [
+                "rabit2_m128",
+                "rabit2",
+                "rabit2_m32",
+                "rabit2_mbf"
+              ]
+            }
+          }
+        }
+      },
+      "execution_gates": [
+        "exit code 0 and no traceback",
+        "all five rows (bf16, mbf, m32, m64 control, m128) present",
+        "per-method counts equal the frozen counts",
+        "continuation_ppl / NIAH / passage retrieval: bf16 and control within the original tolerances",
+        "hotpotqa / qasper: frozen per-example QA control gate for bf16 and the control, and bf16 / control logical KV MB within 0.1 %",
+        "logical storage gates above",
+        "protected paths clean; Exp6-10 evidence and the QA amendment unchanged",
+        "stop at the first failing benchmark; no retry"
+      ],
+      "completion_criterion": "bf16-metadata and uint8 g32 / g64 (control) / g128 measured across the 5 benchmarks with all gates passing (plan: g64 row reproduces canonical numbers, under the rules above)",
+      "artifacts": [
+        "results/mlsys2027/ablations/metadata/continuation_ppl.log",
+        "results/mlsys2027/ablations/metadata/niah.log",
+        "results/mlsys2027/ablations/metadata/passage_retrieval.log",
+        "results/mlsys2027/ablations/metadata/hotpotqa.log",
+        "results/mlsys2027/ablations/metadata/qasper.log",
+        "results/mlsys2027/ablations/metadata/manifest.json",
+        "results/mlsys2027/ablations/metadata/regression_check.json",
+        "results/mlsys2027/ablations/metadata/metadata_results.json"
+      ]
+    },
+    "amendment": {
+      "label": "transparent post-failure methodological amendment",
+      "pre_registered": false,
+      "written_after": "Experiment 10 Attempt 1 failed the HotpotQA R4 control-reproduction gate (results/mlsys2027/ablations/residual_window/failed_attempt_1/, archived at 9889e33)",
+      "motivation": "repeated identical-config generated-QA control instability (HotpotQA rabit2 55.2 / 57.7 from one example's greedy answer; Qasper rabit2 34.8-36.2 from three examples)",
+      "derived_from": {
+        "audit": "results/mlsys2027/control_reproducibility_audit/qa_control_audit.json",
+        "audit_sha256_lf": "a5443863381a80708b6aaa88e45a48bde69542cf2b8e8cbca968d30a5d046e6b",
+        "rows_used": "bf16 and canonical rabit2 control rows only",
+        "treatment_quality_used": false
+      },
+      "status_of_prior_attempts": {
+        "exp10_attempt1": "remains invalid_control_reproduction (excluded)",
+        "exp9_attempt1": "remains invalid_control_reproduction (excluded)",
+        "prior_accepted_experiments": "unchanged; none relabeled"
+      },
+      "unchanged": [
+        "LongBench scorer (qa_f1_score)",
+        "prompts",
+        "generation settings",
+        "datasets",
+        "sample selection and counts",
+        "configs",
+        "logical-storage accounting",
+        "official aggregate F1 metric and its reporting",
+        "continuation_ppl / NIAH / passage-retrieval control-reproduction rules",
+        "original frozen Exp10 protocol file (benchmarks/mlsys2027/exp10_residual_protocol.json, sha256 171cdbcab5c57137edda12ad044e038a52c722f32b740b26cc084ff0539c53d4) -- not modified; this amendment overlays it"
+      ],
+      "changes": "ONLY the QA control-validity rule, prospectively: for hotpotqa and qasper the aggregate +/-1.0-point F1 control-reproduction pass/fail gate (bf16 and canonical control) is superseded by the per-example gate below; the bf16 / control logical KV MB reproduction checks keep their original tolerance",
+      "applies_to": [
+        "Experiment 10 Attempt 2",
+        "Experiment 11"
+      ],
+      "reference": "the frozen canonical run results/quality/<benchmark>.log (per-example scores, dataset indices, ordering and ground truths)",
+      "gate": {
+        "mandatory": [
+          "exact canonical config equality (existing protocol gates)",
+          "exact dataset identity: the Dataset / Length bucket / Samples / Maximum input length / Metric header lines equal the reference's",
+          "exact sample indices, ordering, token counts and ground truths: every 'Sample i/N (dataset index d): ...' and 'Ground truth: ...' line equals the reference's, in order",
+          "exact sample count: one parsed row per sample for bf16 and for the control",
+          "exact logical-storage accounting (existing protocol gates)",
+          "no missing / malformed per-example rows"
+        ],
+        "per_example_bound": "independently for bf16 and for the canonical control: score_mismatch_count <= historical_max_score_mismatch_count AND l1_score_distance <= historical_max_l1_score_distance",
+        "definitions": {
+          "score_mismatch": "an example whose logged official F1 (3 decimals) differs from the reference's",
+          "l1_score_distance": "sum over examples of |run F1 - reference F1| using the logged per-example scores (0-1 scale), computed exactly in integer thousandths",
+          "text_only_differences": "answer-text differences with an identical logged F1 are recorded, not counted"
+        },
+        "numerical_tolerance": "none needed: scores are compared as exact integer thousandths of the printed values",
+        "slack": "none: thresholds equal the historical maxima"
+      },
+      "thresholds": {
+        "hotpotqa": {
+          "bf16": {
+            "historical_max_score_mismatch_count": 1,
+            "historical_max_l1_score_distance": 0.065,
+            "historical_max_l1_score_distance_milli": 65,
+            "per_run": {
+              "exp1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 35
+              },
+              "exp7": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 65
+              },
+              "exp8": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp9_attempt1": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp9_attempt2": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 35
+              },
+              "exp10_attempt1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 35
+              }
+            },
+            "n_historical_runs_excluding_reference": 6,
+            "aggregate_f1_envelope_report_only": [
+              60.2,
+              60.7
+            ]
+          },
+          "rabit2": {
+            "historical_max_score_mismatch_count": 1,
+            "historical_max_l1_score_distance": 0.5,
+            "historical_max_l1_score_distance_milli": 500,
+            "per_run": {
+              "exp1": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp7": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp8": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp9_attempt1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 500
+              },
+              "exp9_attempt2": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp10_attempt1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 500
+              }
+            },
+            "n_historical_runs_excluding_reference": 6,
+            "aggregate_f1_envelope_report_only": [
+              55.2,
+              57.7
+            ]
+          }
+        },
+        "qasper": {
+          "bf16": {
+            "historical_max_score_mismatch_count": 1,
+            "historical_max_l1_score_distance": 0.096,
+            "historical_max_l1_score_distance_milli": 96,
+            "per_run": {
+              "exp1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 96
+              },
+              "exp7": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 96
+              },
+              "exp8": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp9_attempt2": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 96
+              }
+            },
+            "n_historical_runs_excluding_reference": 4,
+            "aggregate_f1_envelope_report_only": [
+              35.5,
+              35.9
+            ]
+          },
+          "rabit2": {
+            "historical_max_score_mismatch_count": 2,
+            "historical_max_l1_score_distance": 0.185,
+            "historical_max_l1_score_distance_milli": 185,
+            "per_run": {
+              "exp1": {
+                "score_mismatch_count": 2,
+                "l1_score_distance_milli": 185
+              },
+              "exp7": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 140
+              },
+              "exp8": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 174
+              },
+              "exp9_attempt2": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 11
+              }
+            },
+            "n_historical_runs_excluding_reference": 4,
+            "aggregate_f1_envelope_report_only": [
+              34.8,
+              36.2
+            ]
+          }
+        }
+      },
+      "aggregate_f1": "reported exactly as before (official LongBench aggregate); whether it lies inside aggregate_f1_envelope_report_only is REPORT-ONLY and never a pass/fail gate"
+    },
+    "uncommitted_files": null
+  },
+  "runs": [
+    {
+      "name": "continuation_ppl",
+      "returncode": 0,
+      "passed": true,
+      "control_rule": "original control-reproduction rule",
+      "log_sha256": "691f0836b670f8894627eae5bb82ff1c5be92dec0fa149256fcbc09aaf3c111c"
+    },
+    {
+      "name": "niah",
+      "returncode": 0,
+      "passed": true,
+      "control_rule": "original control-reproduction rule",
+      "log_sha256": "e37b778da1e422cfe916fb88e5436356957975fcd3c54078664fd180aa47c049"
+    },
+    {
+      "name": "passage_retrieval",
+      "returncode": 0,
+      "passed": true,
+      "control_rule": "original control-reproduction rule",
+      "log_sha256": "2c0878a8c31edde52e71cef0e458a0a0a6a4f9f4c9a1a3b42b91ff398e11f00c"
+    },
+    {
+      "name": "hotpotqa",
+      "returncode": 0,
+      "passed": true,
+      "control_rule": "frozen post-failure per-example QA control gate",
+      "log_sha256": "db25a801631df310b6be7f88b219eaaae4aabed14fb63c1a18739db858241bce"
+    },
+    {
+      "name": "qasper",
+      "returncode": 0,
+      "passed": true,
+      "control_rule": "frozen post-failure per-example QA control gate",
+      "log_sha256": "7feac51e5e1c1509f9bcebc6bc3b3bb1e9c8923b33f84e2d2d4955a522e2acc3"
+    }
+  ],
+  "completed_utc": "2026-09-29T22:22:15.897206+00:00"
+}
