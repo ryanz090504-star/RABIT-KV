@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import math
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -100,12 +101,43 @@ def test_metadata_codec_semantics_match_the_model():
     assert 'meta_min.to(torch.bfloat16)' in phys and 'meta_scale.to(torch.bfloat16)' in phys
 
 
-def _meta(n: int, m: int) -> tuple[int, int]:
+def _meta(n: int, m: int) -> tuple[int, int, int]:
+    """(uint8 codes, BF16 group minima, BF16 group scales) bytes of one META8gM tensor of n values."""
     groups = math.ceil(n / m)
-    return groups * m, 4 * groups
+    return groups * m, 2 * groups, 2 * groups
 
 
-def test_exact_byte_accounting_with_secondary_metadata():
+def test_meta8gm_tensor_layout_is_codes_plus_bf16_min_plus_bf16_scale():
+    for m in (32, 64, 128):
+        cfg = {"metadata_mode": "int8", "metadata_group_size": m}
+        for n in (1, 63, 64, 65, 4096, 32 * 11207, 32 * 11232):
+            primary, smin, sscale = r11.metadata_tensor_bytes(n, cfg)
+            g = math.ceil(n / m)
+            assert (primary, smin, sscale) == (g * m, 2 * g, 2 * g)
+            assert smin + sscale == 4 * g and primary + smin + sscale == g * m + 4 * g
+    assert r11.metadata_tensor_bytes(1000, {"metadata_mode": "bf16", "metadata_group_size": 64}) == (2000, 0, 0)
+
+
+def test_canonical_and_physical_codecs_store_both_secondary_tensors():
+    for b in gen.BENCHMARKS:
+        fns = _functions(gen.canonical_path(b).read_text(encoding="utf-8"))
+        enc, mb = ast.unparse(fns["encode_metadata"]), ast.unparse(fns["metadata_bytes"])
+        assert "'codes': codes.contiguous()" in enc
+        assert "'min': meta_min.to(dtype).contiguous()" in enc and "'scale': meta_scale.to(dtype).contiguous()" in enc
+        assert "meta_min = grouped.amin(dim=-1, keepdim=True)" in enc  # one min per metadata group
+        assert re.search(r"tensor_bytes\(meta\w*\['codes'\]\) \+ tensor_bytes\(meta\w*\['min'\]\) \+ "
+                         r"tensor_bytes\(meta\w*\['scale'\]\)", mb.replace("\n", " "))
+    ops = e1.ROOT / "vllm-kvquant" / "vllm" / "v1" / "attention" / "ops"
+    blob = (ops / "rabit_kv2.py").read_text(encoding="utf-8")
+    assert "expected = padded_count + groups * 4" in blob and "secondary_bytes = groups * 2" in blob
+    assert 'metadata["codes"].reshape(-1).to(torch.uint8),' in blob
+    assert '_tensor_as_bytes(metadata["min"]),' in blob and '_tensor_as_bytes(metadata["scale"]),' in blob
+    ref = (ops / "kvquant_k3.py").read_text(encoding="utf-8")
+    assert '"min": meta_min.to(torch.bfloat16).contiguous()' in ref
+    assert '"scale": meta_scale.to(torch.bfloat16).contiguous()' in ref
+
+
+def test_exact_byte_accounting_with_both_secondary_tensors():
     cfgs = r11.derived_configs("qasper")
     for method, c in cfgs.items():
         for T in (5, 36, 1024, 4095, 10679, 16383):
@@ -113,18 +145,25 @@ def test_exact_byte_accounting_with_secondary_metadata():
             lq, lk = T - 4, math.ceil((T - 4) / 32) * 32
             nk, nv = 8 * (lk // 32) * 128, 8 * lq * 4
             if c["metadata_mode"] == "bf16":
-                (kp, ks), (vp, vs) = (2 * nk, 0), (2 * nv, 0)
+                (kp, kmin, kscl), (vp, vmin, vscl) = (2 * nk, 0, 0), (2 * nv, 0, 0)
             else:
-                (kp, ks), (vp, vs) = _meta(nk, c["metadata_group_size"]), _meta(nv, c["metadata_group_size"])
+                (kp, kmin, kscl), (vp, vmin, vscl) = (_meta(nk, c["metadata_group_size"]),
+                                                      _meta(nv, c["metadata_group_size"]))
             hand = {"k_payload": 32 * (8 * lk * 128 * 3 // 8), "v_payload": 32 * (8 * lq * 128 * 2 // 8),
-                    "k_meta_primary": 32 * 2 * kp, "k_meta_secondary": 32 * 2 * ks,
-                    "v_meta_primary": 32 * 2 * vp, "v_meta_secondary": 32 * 2 * vs, "residual": 32 * 2 * 4 * 8 * 128 * 2}
+                    "k_meta_primary": 32 * 2 * kp, "k_meta_secondary_min": 32 * 2 * kmin,
+                    "k_meta_secondary_scale": 32 * 2 * kscl,
+                    "v_meta_primary": 32 * 2 * vp, "v_meta_secondary_min": 32 * 2 * vmin,
+                    "v_meta_secondary_scale": 32 * 2 * vscl, "residual": 32 * 2 * 4 * 8 * 128 * 2}
             assert {k: got[k] for k in hand} == hand, (method, T)
+            assert set(r11.COMPONENTS) == set(hand)
             assert got["total"] == sum(hand.values()) == r9.traced_logical_bytes(T, c)["total"]  # accepted model
-            if c["metadata_mode"] == "int8":
-                assert got["k_meta_secondary"] > 0 and got["v_meta_secondary"] > 0  # secondary params not omitted
+            assert got["metadata_total"] == got["k_meta_total"] + got["v_meta_total"] == \
+                got["meta_primary_total"] + got["meta_secondary_total"]
+            if c["metadata_mode"] == "int8":  # both secondary tensors present, on both sides, equal in size
+                for s in ("k", "v"):
+                    assert got[f"{s}_meta_secondary_min"] == got[f"{s}_meta_secondary_scale"] > 0
             else:
-                assert got["k_meta_secondary"] == got["v_meta_secondary"] == 0
+                assert got["meta_secondary_total"] == 0
 
 
 def test_expected_storage_in_protocol_matches_model_and_canonical():
@@ -139,9 +178,10 @@ def test_expected_storage_in_protocol_matches_model_and_canonical():
             total = sum(r11.logical_bytes(t, cfgs[m])["total"] for t in prefixes)
             assert exp[m]["total_logical_bytes_all_samples"] == total
             assert exp[m]["avg_logical_kv_mb_full_precision"] == total / len(prefixes) / 2**20
-            comp = exp[m]["component_bytes_all_samples"]
+            comp, sub = exp[m]["component_bytes_all_samples"], exp[m]["subtotal_bytes_all_samples"]
             assert sum(comp[k] for k in r11.COMPONENTS) == total
-            assert comp["metadata_total"] == sum(comp[k] for k in r11.COMPONENTS if "meta" in k)
+            assert sub["metadata_total"] == sum(comp[k] for k in r11.META_COMPONENTS)
+            assert sub["meta_secondary_total"] == sum(comp[k] for k in r11.META_COMPONENTS if "secondary" in k)
         assert exp["rabit2"]["avg_logical_kv_mb"] == tgt[b]["rabit2_META8g64"]["avg_logical_kv_mb"]
         assert exp["bf16_reference_avg_mb"] == tgt[b]["bf16"]["avg_logical_kv_mb"]
         assert L["gates"]["ordering"]["expected_order_smallest_first"][b] == \
@@ -213,6 +253,9 @@ def test_protocol_frozen_complete_and_not_overwritable():
     p = r11.load_protocol()
     assert p["experiment"] == 11 and "NOT a physical serving benchmark" in p["type"]
     assert "META8g64 is not presupposed best" in p["question"]
+    assert "metadata-policy ablation" in p["axis"] and "NOT one uniform numerical single-axis sweep" in p["axis"]
+    assert set(p["contrasts"]) == {"representation", "uint8_group_size"}
+    assert "rabit2_mbf" not in p["contrasts"]["uint8_group_size"]["conditions"]
     assert p["methods_argument"] == "bf16,rabit2_mbf,rabit2_m32,rabit2,rabit2_m128"
     assert p["only_metadata_field_differs_proof"]["holds"]
     kinds = {c["kind"] for c in p["meta8g64_definition"]["stored_components_meta8g64"]}

@@ -1,5 +1,5 @@
 """
-RABIT-KV MLSys 2027 -- Experiment 11 runner: metadata ablation, LOGICAL fake-quant QUALITY + logical storage only.
+RABIT-KV MLSys 2027 -- Experiment 11 runner: metadata-POLICY ablation (two contrasts), LOGICAL fake-quant QUALITY + logical storage only.
 
 Question (docs/MLSYS_EXPERIMENT_PLAN.md, Experiment 11): holding K3 (seq_affine) / V2 (group_affine) / G32 / R4 fixed,
 does grouped UINT8 metadata (META8g64) cost quality relative to BF16 metadata, and how does the metadata group size
@@ -84,21 +84,29 @@ PROTECTED_PATHS = [*r10.PROTECTED_PATHS, *EXP10_FILES, *AMENDMENT_FILES]
 COUNT_COLUMNS = r8.COUNT_COLUMNS
 STORAGE_MATCH_ABS_TOL_MB = r10.STORAGE_MATCH_ABS_TOL_MB  # accounting-integrity gate (Exp10 semantics)
 LAYERS, KV_HEADS, HEAD_DIM = r7.LAYERS, r7.KV_HEADS, r7.HEAD_DIM
-COMPONENTS = ("k_payload", "v_payload", "k_meta_primary", "k_meta_secondary", "v_meta_primary", "v_meta_secondary",
+# Additive components (sum = total). Secondary metadata is listed as its two BF16 tensors separately.
+COMPONENTS = ("k_payload", "v_payload",
+              "k_meta_primary", "k_meta_secondary_min", "k_meta_secondary_scale",
+              "v_meta_primary", "v_meta_secondary_min", "v_meta_secondary_scale",
               "residual")
+META_COMPONENTS = tuple(k for k in COMPONENTS if "_meta_" in k)
+# Derived subtotals (not additive with COMPONENTS).
+SUBTOTALS = ("k_meta_total", "v_meta_total", "meta_primary_total", "meta_secondary_total", "metadata_total")
 
 
 # ---------------------------------------------------------------------------------------------------------------
 # Exact integer logical-storage model with metadata split into PRIMARY (uint8 codes incl. metadata-group padding, or
-# BF16 values) and SECONDARY (BF16 per-metadata-group minimum + scale) bytes.
+# BF16 values) and SECONDARY bytes: the BF16 per-metadata-group minimum AND the BF16 per-metadata-group scale.
 # ---------------------------------------------------------------------------------------------------------------
-def metadata_tensor_bytes(n: int, config: dict) -> tuple[int, int]:
-    """(primary, secondary) bytes of encode_metadata on one min or scale tensor of n values."""
+def metadata_tensor_bytes(n: int, config: dict) -> tuple[int, int, int]:
+    """(primary, secondary_min, secondary_scale) bytes of encode_metadata on one min or scale tensor of n values:
+    META8gM -> (ceil(n/M)*M uint8 codes, 2*ceil(n/M) BF16 group minima, 2*ceil(n/M) BF16 group scales);
+    BF16    -> (2n, 0, 0)."""
     if str(config["metadata_mode"]).lower() == "bf16":
-        return 2 * n, 0
+        return 2 * n, 0, 0
     g = max(8, int(config["metadata_group_size"]))
     groups = math.ceil(n / g)
-    return groups * g, 4 * groups
+    return groups * g, 2 * groups, 2 * groups
 
 
 def metadata_value_counts(prefix_tokens: int, config: dict) -> dict:
@@ -112,15 +120,21 @@ def metadata_value_counts(prefix_tokens: int, config: dict) -> dict:
 def logical_bytes(prefix_tokens: int, config: dict) -> dict:
     """Exact logical bytes (all layers, batch 1) by component, for a prefix longer than the residual window."""
     c = metadata_value_counts(prefix_tokens, config)
-    kp, ks = metadata_tensor_bytes(c["k_values_per_tensor"], config)
-    vp, vs = metadata_tensor_bytes(c["v_values_per_tensor"], config)
+    kp, kmin, kscl = metadata_tensor_bytes(c["k_values_per_tensor"], config)
+    vp, vmin, vscl = metadata_tensor_bytes(c["v_values_per_tensor"], config)
+    # each side encodes TWO primary tensors (the quantization min and the quantization scale), each with its own
+    # primary codes and its own secondary (BF16 group min + BF16 group scale) -> factor 2 on every metadata term
     per_layer = {"k_payload": math.ceil(KV_HEADS * c["lk"] * HEAD_DIM * config["k_bits"] / 8),
                  "v_payload": math.ceil(KV_HEADS * c["lq"] * HEAD_DIM * config["v_bits"] / 8),
-                 "k_meta_primary": 2 * kp, "k_meta_secondary": 2 * ks,  # 2 tensors: min and scale
-                 "v_meta_primary": 2 * vp, "v_meta_secondary": 2 * vs,
+                 "k_meta_primary": 2 * kp, "k_meta_secondary_min": 2 * kmin, "k_meta_secondary_scale": 2 * kscl,
+                 "v_meta_primary": 2 * vp, "v_meta_secondary_min": 2 * vmin, "v_meta_secondary_scale": 2 * vscl,
                  "residual": 2 * int(config["residual"]) * KV_HEADS * HEAD_DIM * 2}
     out = {k: LAYERS * v for k, v in per_layer.items()}
-    out["metadata_total"] = sum(out[k] for k in COMPONENTS if "meta" in k)
+    out["k_meta_total"] = sum(out[k] for k in META_COMPONENTS if k.startswith("k_"))
+    out["v_meta_total"] = sum(out[k] for k in META_COMPONENTS if k.startswith("v_"))
+    out["meta_primary_total"] = out["k_meta_primary"] + out["v_meta_primary"]
+    out["meta_secondary_total"] = sum(out[k] for k in META_COMPONENTS if "secondary" in k)
+    out["metadata_total"] = sum(out[k] for k in META_COMPONENTS)
     out["total"] = sum(out[k] for k in COMPONENTS)
     return out
 
@@ -143,10 +157,11 @@ def expected_storage(name: str, configs: dict) -> dict:
     bf16_ref = [LAYERS * 2 * t * KV_HEADS * HEAD_DIM * 2 for t in prefixes]
     out = {"bf16_reference_avg_mb": round(sum(bf16_ref) / n / 2**20, 3)}
     for m in CONDITIONS:
-        comp = {k: sum(_per_prefix(name, configs[m], k)) for k in (*COMPONENTS, "metadata_total", "total")}
+        comp = {k: sum(_per_prefix(name, configs[m], k)) for k in (*COMPONENTS, *SUBTOTALS, "total")}
         full = comp["total"] / n / 2**20
         out[m] = {"total_logical_bytes_all_samples": comp["total"],
-                  "component_bytes_all_samples": {k: comp[k] for k in (*COMPONENTS, "metadata_total")},
+                  "component_bytes_all_samples": {k: comp[k] for k in COMPONENTS},
+                  "subtotal_bytes_all_samples": {k: comp[k] for k in SUBTOTALS},
                   "avg_logical_kv_mb": round(full, 3), "avg_logical_kv_mb_full_precision": full,
                   "avg_metadata_mb": round(comp["metadata_total"] / n / 2**20, 3),
                   "compression_vs_bf16": round(sum(bf16_ref) / comp["total"], 3)}
@@ -154,8 +169,8 @@ def expected_storage(name: str, configs: dict) -> dict:
     for m in CONDITIONS:
         out[m]["delta_vs_meta8g64_mb"] = round(out[m]["avg_logical_kv_mb_full_precision"]
                                                - ctrl["avg_logical_kv_mb_full_precision"], 3)
-        out[m]["metadata_bytes_delta_vs_meta8g64"] = (out[m]["component_bytes_all_samples"]["metadata_total"]
-                                                      - ctrl["component_bytes_all_samples"]["metadata_total"])
+        out[m]["metadata_bytes_delta_vs_meta8g64"] = (out[m]["subtotal_bytes_all_samples"]["metadata_total"]
+                                                      - ctrl["subtotal_bytes_all_samples"]["metadata_total"])
     return out
 
 
@@ -223,13 +238,20 @@ def build_protocol() -> dict:
                   "hotpotqa": "f1_pct", "qasper": "f1_pct"}
     amendment = qg.load_amendment()
     return {
-        "experiment": 11, "type": "logical fake-quant / dequant QUALITY + logical storage ablation "
+        "experiment": 11, "type": "logical fake-quant / dequant QUALITY + logical storage metadata-policy ablation "
                                   "(NOT a physical serving benchmark)",
-        "axis": "metadata representation of the K / V quantization parameters (encoding mode; uint8 metadata group size)",
+        "axis": ("metadata-policy ablation (NOT one uniform numerical single-axis sweep) with two contrasts around the "
+                 "META8g64 control: (1) metadata representation -- BF16 metadata vs grouped UINT8 metadata; "
+                 "(2) within grouped UINT8 -- metadata group size 32 / 64 / 128. BF16 metadata does not lie on the "
+                 "group-size axis"),
+        "contrasts": {"representation": {"conditions": ["rabit2_mbf", "rabit2"],
+                                         "compares": "BF16 metadata vs grouped UINT8 metadata (META8g64 control)"},
+                      "uint8_group_size": {"conditions": ["rabit2_m32", "rabit2", "rabit2_m128"],
+                                           "compares": "grouped UINT8 metadata at group size 32 / 64 (control) / 128"}},
         "not_reported": ["physical allocator capacity", "throughput", "latency"],
-        "question": ("Holding K3 / V2 / G32 / R4 fixed, does grouped UINT8 metadata (META8g64) cost quality relative "
-                     "to BF16 metadata, and how does the uint8 metadata group size (32 / 64 / 128) affect the quality / "
-                     "logical-storage trade-off? META8g64 is not presupposed best."),
+        "question": ("Holding K3 / V2 / G32 / R4 fixed: (1) does grouped UINT8 metadata (META8g64) materially hurt "
+                     "quality relative to BF16 metadata? (2) within grouped UINT8 metadata, what quality / logical-storage "
+                     "trade-off results from metadata group size 32 / 64 / 128? META8g64 is not presupposed best."),
         "source": "docs/MLSYS_EXPERIMENT_PLAN.md, Experiment 11 (control rabit2 uint8 g64; treatment BF16 metadata "
                   "(metadata_mode='bf16') and uint8 metadata at group 32 and 128; config_for_method entries only)",
         "methods_argument": METHODS,
@@ -322,7 +344,8 @@ def build_protocol() -> dict:
             "formula": ("per layer (32 layers, 8 KV heads, head_dim 128), quantized prefix T, R = 4, Lq = T - 4, "
                         "Lk = ceil(Lq/32)*32: K payload = ceil(8*Lk*128*3/8); V payload = ceil(8*Lq*128*2/8); "
                         "n_K = 8*(Lk/32)*128 and n_V = 8*Lq*4 values per min (and per scale) tensor; per tensor of "
-                        "n values: META8gM primary = ceil(n/M)*M bytes, secondary = 4*ceil(n/M) bytes; BF16 primary = "
+                        "n values: META8gM primary = ceil(n/M)*M uint8 bytes, secondary = BF16 group minima "
+                        "2*ceil(n/M) bytes + BF16 group scales 2*ceil(n/M) bytes (= 4*ceil(n/M)); BF16 primary = "
                         "2n bytes, secondary = 0; K / V metadata = 2 tensors each; residual = 2*4*8*128*2 bytes. "
                         "Exact integers; averages / 2^20."),
             "linearity": "metadata bytes are not exactly linear in 1/M (ceil padding of each tensor to M values)",

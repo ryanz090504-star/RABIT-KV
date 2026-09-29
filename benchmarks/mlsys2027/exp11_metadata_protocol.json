@@ -1,13 +1,30 @@
 {
   "experiment": 11,
-  "type": "logical fake-quant / dequant QUALITY + logical storage ablation (NOT a physical serving benchmark)",
-  "axis": "metadata representation of the K / V quantization parameters (encoding mode; uint8 metadata group size)",
+  "type": "logical fake-quant / dequant QUALITY + logical storage metadata-policy ablation (NOT a physical serving benchmark)",
+  "axis": "metadata-policy ablation (NOT one uniform numerical single-axis sweep) with two contrasts around the META8g64 control: (1) metadata representation -- BF16 metadata vs grouped UINT8 metadata; (2) within grouped UINT8 -- metadata group size 32 / 64 / 128. BF16 metadata does not lie on the group-size axis",
+  "contrasts": {
+    "representation": {
+      "conditions": [
+        "rabit2_mbf",
+        "rabit2"
+      ],
+      "compares": "BF16 metadata vs grouped UINT8 metadata (META8g64 control)"
+    },
+    "uint8_group_size": {
+      "conditions": [
+        "rabit2_m32",
+        "rabit2",
+        "rabit2_m128"
+      ],
+      "compares": "grouped UINT8 metadata at group size 32 / 64 (control) / 128"
+    }
+  },
   "not_reported": [
     "physical allocator capacity",
     "throughput",
     "latency"
   ],
-  "question": "Holding K3 / V2 / G32 / R4 fixed, does grouped UINT8 metadata (META8g64) cost quality relative to BF16 metadata, and how does the uint8 metadata group size (32 / 64 / 128) affect the quality / logical-storage trade-off? META8g64 is not presupposed best.",
+  "question": "Holding K3 / V2 / G32 / R4 fixed: (1) does grouped UINT8 metadata (META8g64) materially hurt quality relative to BF16 metadata? (2) within grouped UINT8 metadata, what quality / logical-storage trade-off results from metadata group size 32 / 64 / 128? META8g64 is not presupposed best.",
   "source": "docs/MLSYS_EXPERIMENT_PLAN.md, Experiment 11 (control rabit2 uint8 g64; treatment BF16 metadata (metadata_mode='bf16') and uint8 metadata at group 32 and 128; config_for_method entries only)",
   "methods_argument": "bf16,rabit2_mbf,rabit2_m32,rabit2,rabit2_m128",
   "meta8g64_definition": {
@@ -449,7 +466,7 @@
   },
   "logical_storage_expectations": {
     "label": "LOGICAL packed prefix-KV storage (payload bits + metadata + BF16 residual); NOT physical allocator capacity",
-    "formula": "per layer (32 layers, 8 KV heads, head_dim 128), quantized prefix T, R = 4, Lq = T - 4, Lk = ceil(Lq/32)*32: K payload = ceil(8*Lk*128*3/8); V payload = ceil(8*Lq*128*2/8); n_K = 8*(Lk/32)*128 and n_V = 8*Lq*4 values per min (and per scale) tensor; per tensor of n values: META8gM primary = ceil(n/M)*M bytes, secondary = 4*ceil(n/M) bytes; BF16 primary = 2n bytes, secondary = 0; K / V metadata = 2 tensors each; residual = 2*4*8*128*2 bytes. Exact integers; averages / 2^20.",
+    "formula": "per layer (32 layers, 8 KV heads, head_dim 128), quantized prefix T, R = 4, Lq = T - 4, Lk = ceil(Lq/32)*32: K payload = ceil(8*Lk*128*3/8); V payload = ceil(8*Lq*128*2/8); n_K = 8*(Lk/32)*128 and n_V = 8*Lq*4 values per min (and per scale) tensor; per tensor of n values: META8gM primary = ceil(n/M)*M uint8 bytes, secondary = BF16 group minima 2*ceil(n/M) bytes + BF16 group scales 2*ceil(n/M) bytes (= 4*ceil(n/M)); BF16 primary = 2n bytes, secondary = 0; K / V metadata = 2 tensors each; residual = 2*4*8*128*2 bytes. Exact integers; averages / 2^20.",
     "linearity": "metadata bytes are not exactly linear in 1/M (ceil padding of each tensor to M values)",
     "model_anchor": "the int8 totals equal the accepted Exp9 / Exp10 storage model; the model reproduces the 20 observed Exp1 preset MB values exactly",
     "expected": {
@@ -461,10 +478,18 @@
             "k_payload": 100663296,
             "v_payload": 66846720,
             "k_meta_primary": 33554432,
-            "k_meta_secondary": 0,
+            "k_meta_secondary_min": 0,
+            "k_meta_secondary_scale": 0,
             "v_meta_primary": 33423360,
-            "v_meta_secondary": 0,
-            "residual": 4194304,
+            "v_meta_secondary_min": 0,
+            "v_meta_secondary_scale": 0,
+            "residual": 4194304
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 33554432,
+            "v_meta_total": 33423360,
+            "meta_primary_total": 66977792,
+            "meta_secondary_total": 0,
             "metadata_total": 66977792
           },
           "avg_logical_kv_mb": 28.453,
@@ -480,10 +505,18 @@
             "k_payload": 100663296,
             "v_payload": 66846720,
             "k_meta_primary": 16777216,
-            "k_meta_secondary": 2097152,
+            "k_meta_secondary_min": 1048576,
+            "k_meta_secondary_scale": 1048576,
             "v_meta_primary": 16711680,
-            "v_meta_secondary": 2088960,
-            "residual": 4194304,
+            "v_meta_secondary_min": 1044480,
+            "v_meta_secondary_scale": 1044480,
+            "residual": 4194304
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 18874368,
+            "v_meta_total": 18800640,
+            "meta_primary_total": 33488896,
+            "meta_secondary_total": 4186112,
             "metadata_total": 37675008
           },
           "avg_logical_kv_mb": 24.96,
@@ -499,10 +532,18 @@
             "k_payload": 100663296,
             "v_payload": 66846720,
             "k_meta_primary": 16777216,
-            "k_meta_secondary": 1048576,
+            "k_meta_secondary_min": 524288,
+            "k_meta_secondary_scale": 524288,
             "v_meta_primary": 16711680,
-            "v_meta_secondary": 1044480,
-            "residual": 4194304,
+            "v_meta_secondary_min": 522240,
+            "v_meta_secondary_scale": 522240,
+            "residual": 4194304
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 17825792,
+            "v_meta_total": 17756160,
+            "meta_primary_total": 33488896,
+            "meta_secondary_total": 2093056,
             "metadata_total": 35581952
           },
           "avg_logical_kv_mb": 24.71,
@@ -518,10 +559,18 @@
             "k_payload": 100663296,
             "v_payload": 66846720,
             "k_meta_primary": 16777216,
-            "k_meta_secondary": 524288,
+            "k_meta_secondary_min": 262144,
+            "k_meta_secondary_scale": 262144,
             "v_meta_primary": 16711680,
-            "v_meta_secondary": 522240,
-            "residual": 4194304,
+            "v_meta_secondary_min": 261120,
+            "v_meta_secondary_scale": 261120,
+            "residual": 4194304
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 17301504,
+            "v_meta_total": 17233920,
+            "meta_primary_total": 33488896,
+            "meta_secondary_total": 1046528,
             "metadata_total": 34535424
           },
           "avg_logical_kv_mb": 24.586,
@@ -540,10 +589,18 @@
             "k_payload": 1761607680,
             "v_payload": 1173790720,
             "k_meta_primary": 587202560,
-            "k_meta_secondary": 0,
+            "k_meta_secondary_min": 0,
+            "k_meta_secondary_scale": 0,
             "v_meta_primary": 586895360,
-            "v_meta_secondary": 0,
-            "residual": 7864320,
+            "v_meta_secondary_min": 0,
+            "v_meta_secondary_scale": 0,
+            "residual": 7864320
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 587202560,
+            "v_meta_total": 586895360,
+            "meta_primary_total": 1174097920,
+            "meta_secondary_total": 0,
             "metadata_total": 1174097920
           },
           "avg_logical_kv_mb": 261.775,
@@ -559,10 +616,18 @@
             "k_payload": 1761607680,
             "v_payload": 1173790720,
             "k_meta_primary": 293601280,
-            "k_meta_secondary": 36700160,
+            "k_meta_secondary_min": 18350080,
+            "k_meta_secondary_scale": 18350080,
             "v_meta_primary": 293447680,
-            "v_meta_secondary": 36680960,
-            "residual": 7864320,
+            "v_meta_secondary_min": 18340480,
+            "v_meta_secondary_scale": 18340480,
+            "residual": 7864320
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 330301440,
+            "v_meta_total": 330128640,
+            "meta_primary_total": 587048960,
+            "meta_secondary_total": 73381120,
             "metadata_total": 660430080
           },
           "avg_logical_kv_mb": 229.117,
@@ -578,10 +643,18 @@
             "k_payload": 1761607680,
             "v_payload": 1173790720,
             "k_meta_primary": 293601280,
-            "k_meta_secondary": 18350080,
+            "k_meta_secondary_min": 9175040,
+            "k_meta_secondary_scale": 9175040,
             "v_meta_primary": 293478400,
-            "v_meta_secondary": 18342400,
-            "residual": 7864320,
+            "v_meta_secondary_min": 9171200,
+            "v_meta_secondary_scale": 9171200,
+            "residual": 7864320
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 311951360,
+            "v_meta_total": 311820800,
+            "meta_primary_total": 587079680,
+            "meta_secondary_total": 36692480,
             "metadata_total": 623772160
           },
           "avg_logical_kv_mb": 226.786,
@@ -597,10 +670,18 @@
             "k_payload": 1761607680,
             "v_payload": 1173790720,
             "k_meta_primary": 293601280,
-            "k_meta_secondary": 9175040,
+            "k_meta_secondary_min": 4587520,
+            "k_meta_secondary_scale": 4587520,
             "v_meta_primary": 293478400,
-            "v_meta_secondary": 9171200,
-            "residual": 7864320,
+            "v_meta_secondary_min": 4585600,
+            "v_meta_secondary_scale": 4585600,
+            "residual": 7864320
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 302776320,
+            "v_meta_total": 302649600,
+            "meta_primary_total": 587079680,
+            "meta_secondary_total": 18346240,
             "metadata_total": 605425920
           },
           "avg_logical_kv_mb": 225.62,
@@ -619,10 +700,18 @@
             "k_payload": 1493041152,
             "v_payload": 994099200,
             "k_meta_primary": 497680384,
-            "k_meta_secondary": 0,
+            "k_meta_secondary_min": 0,
+            "k_meta_secondary_scale": 0,
             "v_meta_primary": 497049600,
-            "v_meta_secondary": 0,
-            "residual": 5242880,
+            "v_meta_secondary_min": 0,
+            "v_meta_secondary_scale": 0,
+            "residual": 5242880
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 497680384,
+            "v_meta_total": 497049600,
+            "meta_primary_total": 994729984,
+            "meta_secondary_total": 0,
             "metadata_total": 994729984
           },
           "avg_logical_kv_mb": 332.557,
@@ -638,10 +727,18 @@
             "k_payload": 1493041152,
             "v_payload": 994099200,
             "k_meta_primary": 248840192,
-            "k_meta_secondary": 31105024,
+            "k_meta_secondary_min": 15552512,
+            "k_meta_secondary_scale": 15552512,
             "v_meta_primary": 248524800,
-            "v_meta_secondary": 31065600,
-            "residual": 5242880,
+            "v_meta_secondary_min": 15532800,
+            "v_meta_secondary_scale": 15532800,
+            "residual": 5242880
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 279945216,
+            "v_meta_total": 279590400,
+            "meta_primary_total": 497364992,
+            "meta_secondary_total": 62170624,
             "metadata_total": 559535616
           },
           "avg_logical_kv_mb": 291.054,
@@ -657,10 +754,18 @@
             "k_payload": 1493041152,
             "v_payload": 994099200,
             "k_meta_primary": 248840192,
-            "k_meta_secondary": 15552512,
+            "k_meta_secondary_min": 7776256,
+            "k_meta_secondary_scale": 7776256,
             "v_meta_primary": 248532992,
-            "v_meta_secondary": 15533312,
-            "residual": 5242880,
+            "v_meta_secondary_min": 7766656,
+            "v_meta_secondary_scale": 7766656,
+            "residual": 5242880
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 264392704,
+            "v_meta_total": 264066304,
+            "meta_primary_total": 497373184,
+            "meta_secondary_total": 31085824,
             "metadata_total": 528459008
           },
           "avg_logical_kv_mb": 288.09,
@@ -676,10 +781,18 @@
             "k_payload": 1493041152,
             "v_payload": 994099200,
             "k_meta_primary": 248840192,
-            "k_meta_secondary": 7776256,
+            "k_meta_secondary_min": 3888128,
+            "k_meta_secondary_scale": 3888128,
             "v_meta_primary": 248553472,
-            "v_meta_secondary": 7767296,
-            "residual": 5242880,
+            "v_meta_secondary_min": 3883648,
+            "v_meta_secondary_scale": 3883648,
+            "residual": 5242880
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 256616448,
+            "v_meta_total": 256320768,
+            "meta_primary_total": 497393664,
+            "meta_secondary_total": 15543552,
             "metadata_total": 512937216
           },
           "avg_logical_kv_mb": 286.61,
@@ -698,10 +811,18 @@
             "k_payload": 3730833408,
             "v_payload": 2484609024,
             "k_meta_primary": 1243611136,
-            "k_meta_secondary": 0,
+            "k_meta_secondary_min": 0,
+            "k_meta_secondary_scale": 0,
             "v_meta_primary": 1242304512,
-            "v_meta_secondary": 0,
-            "residual": 10485760,
+            "v_meta_secondary_min": 0,
+            "v_meta_secondary_scale": 0,
+            "residual": 10485760
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 1243611136,
+            "v_meta_total": 1242304512,
+            "meta_primary_total": 2485915648,
+            "meta_secondary_total": 0,
             "metadata_total": 2485915648
           },
           "avg_logical_kv_mb": 415.413,
@@ -717,10 +838,18 @@
             "k_payload": 3730833408,
             "v_payload": 2484609024,
             "k_meta_primary": 621805568,
-            "k_meta_secondary": 77725696,
+            "k_meta_secondary_min": 38862848,
+            "k_meta_secondary_scale": 38862848,
             "v_meta_primary": 621152256,
-            "v_meta_secondary": 77644032,
-            "residual": 10485760,
+            "v_meta_secondary_min": 38822016,
+            "v_meta_secondary_scale": 38822016,
+            "residual": 10485760
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 699531264,
+            "v_meta_total": 698796288,
+            "meta_primary_total": 1242957824,
+            "meta_secondary_total": 155369728,
             "metadata_total": 1398327552
           },
           "avg_logical_kv_mb": 363.553,
@@ -736,10 +865,18 @@
             "k_payload": 3730833408,
             "v_payload": 2484609024,
             "k_meta_primary": 621805568,
-            "k_meta_secondary": 38862848,
+            "k_meta_secondary_min": 19431424,
+            "k_meta_secondary_scale": 19431424,
             "v_meta_primary": 621182976,
-            "v_meta_secondary": 38823936,
-            "residual": 10485760,
+            "v_meta_secondary_min": 19411968,
+            "v_meta_secondary_scale": 19411968,
+            "residual": 10485760
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 660668416,
+            "v_meta_total": 660006912,
+            "meta_primary_total": 1242988544,
+            "meta_secondary_total": 77686784,
             "metadata_total": 1320675328
           },
           "avg_logical_kv_mb": 359.85,
@@ -755,10 +892,18 @@
             "k_payload": 3730833408,
             "v_payload": 2484609024,
             "k_meta_primary": 621805568,
-            "k_meta_secondary": 19431424,
+            "k_meta_secondary_min": 9715712,
+            "k_meta_secondary_scale": 9715712,
             "v_meta_primary": 621215744,
-            "v_meta_secondary": 19412992,
-            "residual": 10485760,
+            "v_meta_secondary_min": 9706496,
+            "v_meta_secondary_scale": 9706496,
+            "residual": 10485760
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 641236992,
+            "v_meta_total": 640628736,
+            "meta_primary_total": 1243021312,
+            "meta_secondary_total": 38844416,
             "metadata_total": 1281865728
           },
           "avg_logical_kv_mb": 358.0,
@@ -777,10 +922,18 @@
             "k_payload": 4209377280,
             "v_payload": 2804465664,
             "k_meta_primary": 1403125760,
-            "k_meta_secondary": 0,
+            "k_meta_secondary_min": 0,
+            "k_meta_secondary_scale": 0,
             "v_meta_primary": 1402232832,
-            "v_meta_secondary": 0,
-            "residual": 12582912,
+            "v_meta_secondary_min": 0,
+            "v_meta_secondary_scale": 0,
+            "residual": 12582912
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 1403125760,
+            "v_meta_total": 1402232832,
+            "meta_primary_total": 2805358592,
+            "meta_secondary_total": 0,
             "metadata_total": 2805358592
           },
           "avg_logical_kv_mb": 390.68,
@@ -796,10 +949,18 @@
             "k_payload": 4209377280,
             "v_payload": 2804465664,
             "k_meta_primary": 701562880,
-            "k_meta_secondary": 87695360,
+            "k_meta_secondary_min": 43847680,
+            "k_meta_secondary_scale": 43847680,
             "v_meta_primary": 701116416,
-            "v_meta_secondary": 87639552,
-            "residual": 12582912,
+            "v_meta_secondary_min": 43819776,
+            "v_meta_secondary_scale": 43819776,
+            "residual": 12582912
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 789258240,
+            "v_meta_total": 788755968,
+            "meta_primary_total": 1402679296,
+            "meta_secondary_total": 175334912,
             "metadata_total": 1578014208
           },
           "avg_logical_kv_mb": 341.91,
@@ -815,10 +976,18 @@
             "k_payload": 4209377280,
             "v_payload": 2804465664,
             "k_meta_primary": 701562880,
-            "k_meta_secondary": 43847680,
+            "k_meta_secondary_min": 21923840,
+            "k_meta_secondary_scale": 21923840,
             "v_meta_primary": 701157376,
-            "v_meta_secondary": 43822336,
-            "residual": 12582912,
+            "v_meta_secondary_min": 21911168,
+            "v_meta_secondary_scale": 21911168,
+            "residual": 12582912
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 745410560,
+            "v_meta_total": 744979712,
+            "meta_primary_total": 1402720256,
+            "meta_secondary_total": 87670016,
             "metadata_total": 1490390272
           },
           "avg_logical_kv_mb": 338.428,
@@ -834,10 +1003,18 @@
             "k_payload": 4209377280,
             "v_payload": 2804465664,
             "k_meta_primary": 701562880,
-            "k_meta_secondary": 21923840,
+            "k_meta_secondary_min": 10961920,
+            "k_meta_secondary_scale": 10961920,
             "v_meta_primary": 701169664,
-            "v_meta_secondary": 21911552,
-            "residual": 12582912,
+            "v_meta_secondary_min": 10955776,
+            "v_meta_secondary_scale": 10955776,
+            "residual": 12582912
+          },
+          "subtotal_bytes_all_samples": {
+            "k_meta_total": 723486720,
+            "v_meta_total": 723081216,
+            "meta_primary_total": 1402732544,
+            "meta_secondary_total": 43835392,
             "metadata_total": 1446567936
           },
           "avg_logical_kv_mb": 336.687,
