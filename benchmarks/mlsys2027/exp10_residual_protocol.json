@@ -1,0 +1,811 @@
+{
+  "experiment": 10,
+  "type": "logical fake-quant / dequant QUALITY ablation (NOT a physical serving benchmark)",
+  "axis": "recent BF16 residual window R (config field: residual)",
+  "not_reported": [
+    "physical allocator capacity",
+    "throughput",
+    "latency"
+  ],
+  "question": "Holding K3 / V2 / G32 / META8g64 fixed, how does changing the recent BF16 residual window affect quality and logical storage? Is R4 a favourable quality / storage operating point? R4 is not presupposed best.",
+  "source": "docs/MLSYS_EXPERIMENT_PLAN.md, Experiment 10 (control rabit2 R4; treatment R0, R2, R8; new config_for_method entries varying only residual)",
+  "plan_note": "the plan's hypothesis text mentions 'R=0, R=1' as low values, but its Treatment list is R0, R2, R8; the explicit Treatment list is used; R1 is not run",
+  "methods_argument": "bf16,rabit2_r0,rabit2_r2,rabit2,rabit2_r8",
+  "residual_definition": {
+    "counts": "token (sequence) positions of the prefill prefix KV cache, per layer; not bytes, not heads",
+    "applied": "q_with_residual is called separately for K (k_bits) and for V (v_bits) of every layer with the same config['residual'], so the SAME R applies independently to K and to V",
+    "which_tokens": "the NEWEST min(R, T) positions of the prefix stay BF16 for both K and V; the older T - R positions are quantized (K: seq_affine groups of 32 tokens over the older part only; V: group_affine along head_dim)",
+    "sequence_length": "T = quantized prefix length (continuation_ppl: 1024 context tokens; NIAH / LongBench: prompt length - 1). R is a fixed token count, independent of T; K's sequence groups start at position 0 of the older part and pad Lq = T - R up to a multiple of 32",
+    "r_zero": "residual <= 0: the whole prefix (all T positions) is quantized; no BF16 residual",
+    "t_le_r": "T <= R: the whole tensor stays BF16 (never reached here: min T = 1024 > 8)",
+    "after_quantization": "quantization is applied once to the prefill prefix; the final prompt token, generated tokens and teacher-forced continuation tokens are appended by the model in BF16 for EVERY method (including R0) and are not counted in logical KV MB",
+    "read_only_in": "q_with_residual (config['residual']); no other canonical code reads residual"
+  },
+  "conditions": {
+    "bf16": {
+      "role": "reference (uncompressed); not an ablation condition"
+    },
+    "rabit2_r0": {
+      "role": "treatment",
+      "shorthand": "K3/V2/G32/R0/META8g64",
+      "config": {
+        "name": "K3V2 META8g64 G32 R0 (residual-window ablation of rabit2)",
+        "k_bits": 3,
+        "v_bits": 2,
+        "k_style": "seq_affine",
+        "v_style": "group_affine",
+        "k_group": 32,
+        "v_group": 32,
+        "residual": 0,
+        "metadata_mode": "int8",
+        "metadata_group_size": 64
+      }
+    },
+    "rabit2_r2": {
+      "role": "treatment",
+      "shorthand": "K3/V2/G32/R2/META8g64",
+      "config": {
+        "name": "K3V2 META8g64 G32 R2 (residual-window ablation of rabit2)",
+        "k_bits": 3,
+        "v_bits": 2,
+        "k_style": "seq_affine",
+        "v_style": "group_affine",
+        "k_group": 32,
+        "v_group": 32,
+        "residual": 2,
+        "metadata_mode": "int8",
+        "metadata_group_size": 64
+      }
+    },
+    "rabit2": {
+      "role": "control",
+      "shorthand": "K3/V2/G32/R4/META8g64",
+      "config": {
+        "name": "2b META8g64 K3V2 G32 R4",
+        "k_bits": 3,
+        "v_bits": 2,
+        "k_style": "seq_affine",
+        "v_style": "group_affine",
+        "k_group": 32,
+        "v_group": 32,
+        "residual": 4,
+        "metadata_mode": "int8",
+        "metadata_group_size": 64
+      }
+    },
+    "rabit2_r8": {
+      "role": "treatment",
+      "shorthand": "K3/V2/G32/R8/META8g64",
+      "config": {
+        "name": "K3V2 META8g64 G32 R8 (residual-window ablation of rabit2)",
+        "k_bits": 3,
+        "v_bits": 2,
+        "k_style": "seq_affine",
+        "v_style": "group_affine",
+        "k_group": 32,
+        "v_group": 32,
+        "residual": 8,
+        "metadata_mode": "int8",
+        "metadata_group_size": 64
+      }
+    }
+  },
+  "only_residual_differs_proof": {
+    "control": "rabit2",
+    "fields_differing_from_control_excluding_display_name": {
+      "rabit2_r0": [
+        "residual"
+      ],
+      "rabit2_r2": [
+        "residual"
+      ],
+      "rabit2": [],
+      "rabit2_r8": [
+        "residual"
+      ]
+    },
+    "holds": true,
+    "frozen_fields": {
+      "k_bits": 3,
+      "v_bits": 2,
+      "k_style": "seq_affine",
+      "v_style": "group_affine",
+      "k_group": 32,
+      "v_group": 32,
+      "metadata_mode": "int8",
+      "metadata_group_size": 64
+    },
+    "configs_identical_across_all_five_scripts": true
+  },
+  "correctness_gate": "none injected: the plan specifies code changes for Experiment 10 as config_for_method entries only; execution gates below apply to every condition",
+  "common": {
+    "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct (modelscope snapshot_download)",
+    "model_dtype": "bfloat16",
+    "attention": "sdpa",
+    "seed": "torch.manual_seed(0) and torch.cuda.manual_seed_all(0) in every script",
+    "tf32": "enabled (matmul and cudnn)",
+    "gpu": "NVIDIA H100 via Modal"
+  },
+  "benchmarks": {
+    "continuation_ppl": {
+      "dataset": "WikiText-2 test (raw text: https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt), non-empty stripped lines joined in blocks of 64",
+      "selection": "deterministic: the first samples x (context + eval) tokens of the tokenized stream, split into consecutive non-overlapping spans",
+      "samples": 8,
+      "context_tokens": 1024,
+      "eval_tokens_per_sample": 128,
+      "scored_tokens_per_method": 1024,
+      "quantized_prefix_tokens": "context (1024)",
+      "procedure": "teacher-forced: prefill the 1024-token context, quantize/dequantize its KV once, score the 128 continuation tokens (first logit from the prefill)",
+      "metric": "PPL (exp of mean token cross-entropy) and PPL delta % vs bf16",
+      "script": "benchmarks/mlsys2027/exp10_residual/continuation_ppl.py",
+      "canonical_source": "benchmarks/quality/continuation_ppl.py",
+      "canonical_source_sha256_lf": "caaae5c3744e9ba03c4bf385337f563802f58331efdb3a239380741885781374",
+      "args": [
+        "--context-tokens",
+        "1024",
+        "--eval-tokens",
+        "128",
+        "--samples",
+        "8",
+        "--methods",
+        "bf16,rabit2_r0,rabit2_r2,rabit2,rabit2_r8"
+      ],
+      "expected_count_per_method": 1024,
+      "min_quantized_prefix_tokens": 1024
+    },
+    "niah": {
+      "dataset": "synthetic needle-in-a-haystack: WikiText-2 test as distractor filler; needle 'The hidden secret code is RABIT-7291'",
+      "selection": "deterministic: every (context length, depth) pair; needle inserted at round(filler x depth)",
+      "cases": 15,
+      "context_lengths": [
+        4096,
+        8192,
+        16384
+      ],
+      "needle_depths": [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        0.9
+      ],
+      "quantized_prefix_tokens": "prompt length - 1 (the last prompt token is fed at the first decode step)",
+      "generation": {
+        "decoding": "greedy argmax",
+        "max_new_tokens": 16,
+        "stop": "eos"
+      },
+      "metric": "exact-match accuracy: regex RABIT-\\d{4} on the decoded answer equals RABIT-7291",
+      "warmup": "one BF16 warm-up case at 4096 tokens, not reported",
+      "script": "benchmarks/mlsys2027/exp10_residual/niah.py",
+      "canonical_source": "benchmarks/quality/niah.py",
+      "canonical_source_sha256_lf": "35764fd6a1ba52c6e9811af33f8ac613a57432288608f5795d2e8986c9a9f1ba",
+      "args": [
+        "--context-lengths",
+        "4096,8192,16384",
+        "--needle-depths",
+        "0.1,0.25,0.5,0.75,0.9",
+        "--max-new-tokens",
+        "16",
+        "--methods",
+        "bf16,rabit2_r0,rabit2_r2,rabit2,rabit2_r8"
+      ],
+      "expected_count_per_method": 15,
+      "min_quantized_prefix_tokens": 4095
+    },
+    "passage_retrieval": {
+      "dataset": "LongBench passage_retrieval_en (zai-org/LongBench @ 915b0c6ec0b6dfae1cd44224b7d8995317837f27, passage_retrieval_en/test-00000-of-00001.parquet, split test)",
+      "selection": "deterministic: dataset indices [0, 10)",
+      "samples": 10,
+      "sample_start": 0,
+      "max_input_tokens": 16384,
+      "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+      "prompt": "LongBench official template via the tokenizer chat template",
+      "quantized_prefix_tokens": "prompt length - 1",
+      "generation": {
+        "decoding": "greedy argmax",
+        "max_new_tokens": 32,
+        "stop": "eos"
+      },
+      "metric": "LongBench official retrieval score (fraction of numbers in the prediction equal to the target paragraph id), mean x 100",
+      "script": "benchmarks/mlsys2027/exp10_residual/passage_retrieval.py",
+      "canonical_source": "benchmarks/quality/passage_retrieval.py",
+      "canonical_source_sha256_lf": "4aa1bde469ce0edabe9e60f94cf29395ee982cc9c5b80b503e49b06c2c23ada9",
+      "args": [
+        "--sample-start",
+        "0",
+        "--samples",
+        "10",
+        "--max-input-tokens",
+        "16384",
+        "--max-new-tokens",
+        "32",
+        "--methods",
+        "bf16,rabit2_r0,rabit2_r2,rabit2,rabit2_r8"
+      ],
+      "expected_count_per_method": 10,
+      "min_quantized_prefix_tokens": 10546
+    },
+    "hotpotqa": {
+      "dataset": "LongBench-E hotpotqa (zai-org/LongBench @ 92b6c5fbfb0c97b91e92d9ef79802f95ce74b05e, hotpotqa_e/test-00000-of-00001.parquet, split test)",
+      "selection": "deterministic: examples with length >= 8000 (bucket 8k+), filtered positions [0, 20)",
+      "samples": 20,
+      "sample_start": 0,
+      "length_bucket": "8k+",
+      "max_input_tokens": 16384,
+      "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+      "prompt": "LongBench official template via the tokenizer chat template",
+      "quantized_prefix_tokens": "prompt length - 1",
+      "generation": {
+        "decoding": "greedy argmax",
+        "max_new_tokens": 32,
+        "stop": "eos"
+      },
+      "metric": "LongBench qa_f1_score (max over reference answers), mean x 100",
+      "script": "benchmarks/mlsys2027/exp10_residual/hotpotqa.py",
+      "canonical_source": "benchmarks/quality/hotpotqa.py",
+      "canonical_source_sha256_lf": "6253c17a37f37b7930c2311cc4228551962aac0df087f00608e92fa4b3e99f8d",
+      "args": [
+        "--sample-start",
+        "0",
+        "--samples",
+        "20",
+        "--length-bucket",
+        "8k+",
+        "--max-input-tokens",
+        "16384",
+        "--max-new-tokens",
+        "32",
+        "--methods",
+        "bf16,rabit2_r0,rabit2_r2,rabit2,rabit2_r8"
+      ],
+      "expected_count_per_method": 20,
+      "min_quantized_prefix_tokens": 11641
+    },
+    "qasper": {
+      "dataset": "LongBench-E qasper (zai-org/LongBench @ 52edb9d18ea01d49ec7580fefcfe6b9d97a0fa96, qasper_e/test-00000-of-00001.parquet, split test)",
+      "selection": "deterministic: examples with length >= 8000 (bucket 8k+), filtered positions [0, 24)",
+      "samples": 24,
+      "sample_start": 0,
+      "length_bucket": "8k+",
+      "max_input_tokens": 16384,
+      "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+      "prompt": "LongBench official template via the tokenizer chat template",
+      "quantized_prefix_tokens": "prompt length - 1",
+      "generation": {
+        "decoding": "greedy argmax",
+        "max_new_tokens": 32,
+        "stop": "eos"
+      },
+      "metric": "LongBench qa_f1_score (max over reference answers), mean x 100",
+      "script": "benchmarks/mlsys2027/exp10_residual/qasper.py",
+      "canonical_source": "benchmarks/quality/qasper.py",
+      "canonical_source_sha256_lf": "cd25ae8842082c8ac6530abbd2b9806f85088833e5e8da09c491b6a13b90c08d",
+      "args": [
+        "--sample-start",
+        "0",
+        "--samples",
+        "24",
+        "--length-bucket",
+        "8k+",
+        "--max-input-tokens",
+        "16384",
+        "--max-new-tokens",
+        "32",
+        "--methods",
+        "bf16,rabit2_r0,rabit2_r2,rabit2,rabit2_r8"
+      ],
+      "expected_count_per_method": 24,
+      "min_quantized_prefix_tokens": 10676
+    }
+  },
+  "control_reproduction": {
+    "configuration_equality": "EXACT: the R4 control is the canonical rabit2 config (compiled and compared)",
+    "numerical_reproduction": "within the frozen tolerances below (copied from the accepted Experiment 1 methodology); applied to bf16 and the R4 control; never changed after the run starts",
+    "tolerances": {
+      "continuation_ppl.ppl": {
+        "relative": 0.005
+      },
+      "niah.accuracy_pct": {
+        "absolute_points": 1.0
+      },
+      "passage_retrieval.accuracy_pct": {
+        "absolute_points": 1.0
+      },
+      "hotpotqa.f1_pct": {
+        "absolute_points": 1.0
+      },
+      "qasper.f1_pct": {
+        "absolute_points": 1.0
+      },
+      "avg_logical_kv_mb": {
+        "relative": 0.001
+      }
+    },
+    "single_example_flip": {
+      "niah": "1 of 15 cases = 6.67 points > 1.0 -> fails",
+      "passage_retrieval": "1 of 10 samples = up to 10.0 points > 1.0 -> fails",
+      "hotpotqa": "one example's F1 moves the mean by up to 5.0 points (1/20)",
+      "qasper": "one example's F1 moves the mean by up to 4.17 points (1/24)",
+      "rule": "1.0-point tolerance is a tight drift detector, identical to Exp1 / Exp7-9"
+    },
+    "observed_control_variation": "identical-config rabit2 runs: Qasper F1 35.6 (canonical) / 36.2 (Exp7) / 34.9 (Exp8) / 35.6 (Exp9); HotpotQA F1 55.2 except Exp9 attempt 1 (57.7, one answer changed; invalid, excluded) -- generation is not bit-exact across fresh runs",
+    "canonical_targets": {
+      "continuation_ppl": {
+        "bf16": {
+          "ppl": 8.502,
+          "avg_logical_kv_mb": 128.0
+        },
+        "rabit2_R4": {
+          "ppl": 8.6317,
+          "avg_logical_kv_mb": 24.71
+        }
+      },
+      "niah": {
+        "bf16": {
+          "accuracy_pct": 100.0,
+          "avg_logical_kv_mb": 1194.542
+        },
+        "rabit2_R4": {
+          "accuracy_pct": 100.0,
+          "avg_logical_kv_mb": 226.786
+        }
+      },
+      "passage_retrieval": {
+        "bf16": {
+          "accuracy_pct": 100.0,
+          "avg_logical_kv_mb": 1517.375
+        },
+        "rabit2_R4": {
+          "accuracy_pct": 100.0,
+          "avg_logical_kv_mb": 288.09
+        }
+      },
+      "hotpotqa": {
+        "bf16": {
+          "f1_pct": 60.6,
+          "avg_logical_kv_mb": 1896.106
+        },
+        "rabit2_R4": {
+          "f1_pct": 55.2,
+          "avg_logical_kv_mb": 359.85
+        }
+      },
+      "qasper": {
+        "bf16": {
+          "f1_pct": 35.9,
+          "avg_logical_kv_mb": 1783.531
+        },
+        "rabit2_R4": {
+          "f1_pct": 35.6,
+          "avg_logical_kv_mb": 338.428
+        }
+      }
+    },
+    "target_source": "results/summary.json and results/quality/*.log (canonical), pinned in the accepted Experiment 1 runner"
+  },
+  "logical_storage_expectations": {
+    "label": "LOGICAL packed prefix-KV storage (payload bits + uint8-group metadata + BF16 residual); NOT physical allocator capacity",
+    "formula": "shape-only trace of the canonical accounting (the accepted Experiment 9 model), per layer (32 layers, 8 KV heads, head_dim 128), quantized prefix T, residual R, Lq = T - R, Lk = ceil(Lq/32)*32: K payload = ceil(8*Lk*128*3/8); K metadata = 2 * meta(8*(Lk/32)*128); V payload = ceil(8*Lq*128*2/8); V metadata = 2 * meta(8*Lq*(128/32)); BF16 residual = 2 (K, V) * R * 8 * 128 * 2 bytes; meta(n) = ceil(n/64)*64 + 4*ceil(n/64). Average over the benchmark's quantized prefixes, / 2^20, rounded to 3 decimals like the scripts' print.",
+    "bf16_residual_contribution": {
+      "bytes_per_residual_token_all_layers": 131072,
+      "mib_per_residual_token_all_layers": 0.125,
+      "by_condition_mib": {
+        "rabit2_r0": 0.0,
+        "rabit2_r2": 0.25,
+        "rabit2": 0.5,
+        "rabit2_r8": 1.0
+      },
+      "note": "exactly linear in R: 0.125 MiB per residual token (K + V, 32 layers, BF16)"
+    },
+    "r_dependence": "R moves (a) the BF16 residual term (+0.125 MiB per token, linear) and (b) the quantized part through Lq = T - R: V payload and V metadata shrink per token removed from the quantized part (~324 B per token per layer), while K payload / metadata change only when Lk = ceil(Lq/32)*32 crosses a 32-token boundary (a whole 32-token K group). The net total is therefore NOT linear in R (e.g. HotpotQA R8 - R4 = 0.394 MB vs 0.460 MB on NIAH); no linearity gate is used",
+    "model_anchors": {
+      "rule": "the model reproduces the MB printed by the canonical Exp1 presets exactly (rabit8 R0, rabit4 R0, rabit3 R2, rabit2 R4 -- including two residual values)",
+      "values": {
+        "continuation_ppl": {
+          "rabit8": {
+            "model_mb": 64.508,
+            "exp1_observed_mb": 64.508
+          },
+          "rabit4": {
+            "model_mb": 32.531,
+            "exp1_observed_mb": 32.531
+          },
+          "rabit3": {
+            "model_mb": 26.324,
+            "exp1_observed_mb": 26.324
+          },
+          "rabit2": {
+            "model_mb": 24.71,
+            "exp1_observed_mb": 24.71
+          }
+        },
+        "niah": {
+          "rabit8": {
+            "model_mb": 602.01,
+            "exp1_observed_mb": 602.01
+          },
+          "rabit4": {
+            "model_mb": 303.594,
+            "exp1_observed_mb": 303.594
+          },
+          "rabit3": {
+            "model_mb": 244.009,
+            "exp1_observed_mb": 244.009
+          },
+          "rabit2": {
+            "model_mb": 226.786,
+            "exp1_observed_mb": 226.786
+          }
+        },
+        "passage_retrieval": {
+          "rabit8": {
+            "model_mb": 764.715,
+            "exp1_observed_mb": 764.715
+          },
+          "rabit4": {
+            "model_mb": 385.644,
+            "exp1_observed_mb": 385.644
+          },
+          "rabit3": {
+            "model_mb": 309.898,
+            "exp1_observed_mb": 309.898
+          },
+          "rabit2": {
+            "model_mb": 288.09,
+            "exp1_observed_mb": 288.09
+          }
+        },
+        "hotpotqa": {
+          "rabit8": {
+            "model_mb": 955.581,
+            "exp1_observed_mb": 955.581
+          },
+          "rabit4": {
+            "model_mb": 481.898,
+            "exp1_observed_mb": 481.898
+          },
+          "rabit3": {
+            "model_mb": 387.199,
+            "exp1_observed_mb": 387.199
+          },
+          "rabit2": {
+            "model_mb": 359.85,
+            "exp1_observed_mb": 359.85
+          }
+        },
+        "qasper": {
+          "rabit8": {
+            "model_mb": 898.845,
+            "exp1_observed_mb": 898.845
+          },
+          "rabit4": {
+            "model_mb": 453.286,
+            "exp1_observed_mb": 453.286
+          },
+          "rabit3": {
+            "model_mb": 364.222,
+            "exp1_observed_mb": 364.222
+          },
+          "rabit2": {
+            "model_mb": 338.428,
+            "exp1_observed_mb": 338.428
+          }
+        }
+      }
+    },
+    "expected_avg_logical_kv_mb": {
+      "continuation_ppl": {
+        "rabit2_r0": 24.25,
+        "rabit2_r2": 24.48,
+        "rabit2": 24.71,
+        "rabit2_r8": 25.171,
+        "bf16_reference": 128.0
+      },
+      "niah": {
+        "rabit2_r0": 226.326,
+        "rabit2_r2": 226.556,
+        "rabit2": 226.786,
+        "rabit2_r8": 227.246,
+        "bf16_reference": 1194.542
+      },
+      "passage_retrieval": {
+        "rabit2_r0": 287.674,
+        "rabit2_r2": 287.904,
+        "rabit2": 288.09,
+        "rabit2_r8": 288.506,
+        "bf16_reference": 1517.375
+      },
+      "hotpotqa": {
+        "rabit2_r0": 359.39,
+        "rabit2_r2": 359.62,
+        "rabit2": 359.85,
+        "rabit2_r8": 360.244,
+        "bf16_reference": 1896.106
+      },
+      "qasper": {
+        "rabit2_r0": 337.986,
+        "rabit2_r2": 338.198,
+        "rabit2": 338.428,
+        "rabit2_r8": 338.888,
+        "bf16_reference": 1783.531
+      }
+    },
+    "expected_delta_vs_r4_mb": {
+      "continuation_ppl": {
+        "rabit2_r0": -0.46,
+        "rabit2_r2": -0.23,
+        "rabit2": 0.0,
+        "rabit2_r8": 0.461
+      },
+      "niah": {
+        "rabit2_r0": -0.46,
+        "rabit2_r2": -0.23,
+        "rabit2": 0.0,
+        "rabit2_r8": 0.46
+      },
+      "passage_retrieval": {
+        "rabit2_r0": -0.416,
+        "rabit2_r2": -0.186,
+        "rabit2": 0.0,
+        "rabit2_r8": 0.416
+      },
+      "hotpotqa": {
+        "rabit2_r0": -0.46,
+        "rabit2_r2": -0.23,
+        "rabit2": 0.0,
+        "rabit2_r8": 0.394
+      },
+      "qasper": {
+        "rabit2_r0": -0.442,
+        "rabit2_r2": -0.23,
+        "rabit2": 0.0,
+        "rabit2_r8": 0.46
+      }
+    },
+    "expected_compression_vs_bf16": {
+      "continuation_ppl": {
+        "rabit2_r0": 5.278,
+        "rabit2_r2": 5.229,
+        "rabit2": 5.18,
+        "rabit2_r8": 5.085
+      },
+      "niah": {
+        "rabit2_r0": 5.278,
+        "rabit2_r2": 5.273,
+        "rabit2": 5.267,
+        "rabit2_r8": 5.257
+      },
+      "passage_retrieval": {
+        "rabit2_r0": 5.275,
+        "rabit2_r2": 5.27,
+        "rabit2": 5.267,
+        "rabit2_r8": 5.259
+      },
+      "hotpotqa": {
+        "rabit2_r0": 5.276,
+        "rabit2_r2": 5.273,
+        "rabit2": 5.269,
+        "rabit2_r8": 5.263
+      },
+      "qasper": {
+        "rabit2_r0": 5.277,
+        "rabit2_r2": 5.274,
+        "rabit2": 5.27,
+        "rabit2_r8": 5.263
+      }
+    },
+    "expected_breakdown_avg_mb": {
+      "continuation_ppl": {
+        "rabit2_r0": {
+          "k_payload": 12.0,
+          "k_meta": 2.125,
+          "v_payload": 8.0,
+          "v_meta": 2.125,
+          "residual": 0.0
+        },
+        "rabit2_r2": {
+          "k_payload": 12.0,
+          "k_meta": 2.125,
+          "v_payload": 7.984,
+          "v_meta": 2.121,
+          "residual": 0.25
+        },
+        "rabit2": {
+          "k_payload": 12.0,
+          "k_meta": 2.125,
+          "v_payload": 7.969,
+          "v_meta": 2.117,
+          "residual": 0.5
+        },
+        "rabit2_r8": {
+          "k_payload": 12.0,
+          "k_meta": 2.125,
+          "v_payload": 7.938,
+          "v_meta": 2.108,
+          "residual": 1.0
+        }
+      },
+      "niah": {
+        "rabit2_r0": {
+          "k_payload": 112.0,
+          "k_meta": 19.833,
+          "v_payload": 74.659,
+          "v_meta": 19.833,
+          "residual": 0.0
+        },
+        "rabit2_r2": {
+          "k_payload": 112.0,
+          "k_meta": 19.833,
+          "v_payload": 74.643,
+          "v_meta": 19.829,
+          "residual": 0.25
+        },
+        "rabit2": {
+          "k_payload": 112.0,
+          "k_meta": 19.833,
+          "v_payload": 74.628,
+          "v_meta": 19.825,
+          "residual": 0.5
+        },
+        "rabit2_r8": {
+          "k_payload": 112.0,
+          "k_meta": 19.833,
+          "v_payload": 74.596,
+          "v_meta": 19.817,
+          "residual": 1.0
+        }
+      },
+      "passage_retrieval": {
+        "rabit2_r0": {
+          "k_payload": 142.425,
+          "k_meta": 25.221,
+          "v_payload": 94.836,
+          "v_meta": 25.192,
+          "residual": 0.0
+        },
+        "rabit2_r2": {
+          "k_payload": 142.425,
+          "k_meta": 25.221,
+          "v_payload": 94.82,
+          "v_meta": 25.187,
+          "residual": 0.25
+        },
+        "rabit2": {
+          "k_payload": 142.387,
+          "k_meta": 25.214,
+          "v_payload": 94.805,
+          "v_meta": 25.183,
+          "residual": 0.5
+        },
+        "rabit2_r8": {
+          "k_payload": 142.35,
+          "k_meta": 25.208,
+          "v_payload": 94.773,
+          "v_meta": 25.175,
+          "residual": 1.0
+        }
+      },
+      "hotpotqa": {
+        "rabit2_r0": {
+          "k_payload": 177.9,
+          "k_meta": 31.503,
+          "v_payload": 118.507,
+          "v_meta": 31.48,
+          "residual": 0.0
+        },
+        "rabit2_r2": {
+          "k_payload": 177.9,
+          "k_meta": 31.503,
+          "v_payload": 118.491,
+          "v_meta": 31.476,
+          "residual": 0.25
+        },
+        "rabit2": {
+          "k_payload": 177.9,
+          "k_meta": 31.503,
+          "v_payload": 118.475,
+          "v_meta": 31.472,
+          "residual": 0.5
+        },
+        "rabit2_r8": {
+          "k_payload": 177.844,
+          "k_meta": 31.493,
+          "v_payload": 118.444,
+          "v_meta": 31.463,
+          "residual": 1.0
+        }
+      },
+      "qasper": {
+        "rabit2_r0": {
+          "k_payload": 167.281,
+          "k_meta": 29.623,
+          "v_payload": 111.471,
+          "v_meta": 29.611,
+          "residual": 0.0
+        },
+        "rabit2_r2": {
+          "k_payload": 167.266,
+          "k_meta": 29.62,
+          "v_payload": 111.455,
+          "v_meta": 29.607,
+          "residual": 0.25
+        },
+        "rabit2": {
+          "k_payload": 167.266,
+          "k_meta": 29.62,
+          "v_payload": 111.439,
+          "v_meta": 29.603,
+          "residual": 0.5
+        },
+        "rabit2_r8": {
+          "k_payload": 167.266,
+          "k_meta": 29.62,
+          "v_payload": 111.408,
+          "v_meta": 29.595,
+          "residual": 1.0
+        }
+      }
+    },
+    "gates": {
+      "matches_expected": {
+        "rule": "observed R0 / R2 / R4 / R8 avg logical KV MB within absolute_mb of expected_avg_logical_kv_mb (one printed unit; the accounting is deterministic -- Exp7 / 8 / 9 matched exactly). Stricter than the 0.1 % relative Exp1 tolerance, which exceeds one R step and could not distinguish conditions",
+        "absolute_mb": 0.001
+      },
+      "ordering": {
+        "rule": "observed conditions ordered (smallest MB first) exactly as the formula orders them",
+        "expected_order_smallest_first": {
+          "continuation_ppl": [
+            "rabit2_r0",
+            "rabit2_r2",
+            "rabit2",
+            "rabit2_r8"
+          ],
+          "niah": [
+            "rabit2_r0",
+            "rabit2_r2",
+            "rabit2",
+            "rabit2_r8"
+          ],
+          "passage_retrieval": [
+            "rabit2_r0",
+            "rabit2_r2",
+            "rabit2",
+            "rabit2_r8"
+          ],
+          "hotpotqa": [
+            "rabit2_r0",
+            "rabit2_r2",
+            "rabit2",
+            "rabit2_r8"
+          ],
+          "qasper": [
+            "rabit2_r0",
+            "rabit2_r2",
+            "rabit2",
+            "rabit2_r8"
+          ]
+        }
+      }
+    }
+  },
+  "execution_gates": [
+    "exit code 0 and no traceback",
+    "all five rows (bf16, R0, R2, R4, R8) present",
+    "per-method counts equal the frozen counts",
+    "bf16 and R4 control within the frozen tolerances of the canonical targets",
+    "logical storage gates above",
+    "protected paths clean; Exp6 identical to 0f5f6ef; Exp7 to 6ce79ed; Exp8 to e13a9b6; Exp9 to 599d059",
+    "stop at the first failing benchmark; no retry"
+  ],
+  "artifacts": [
+    "results/mlsys2027/ablations/residual_window/continuation_ppl.log",
+    "results/mlsys2027/ablations/residual_window/niah.log",
+    "results/mlsys2027/ablations/residual_window/passage_retrieval.log",
+    "results/mlsys2027/ablations/residual_window/hotpotqa.log",
+    "results/mlsys2027/ablations/residual_window/qasper.log",
+    "results/mlsys2027/ablations/residual_window/manifest.json",
+    "results/mlsys2027/ablations/residual_window/regression_check.json",
+    "results/mlsys2027/ablations/residual_window/residual_results.json"
+  ]
+}
