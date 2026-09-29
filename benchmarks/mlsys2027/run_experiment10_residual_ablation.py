@@ -58,9 +58,12 @@ EXP9_FILES = [HERE / "exp9_group_scripts.py", HERE / "exp9_group", HERE / "run_e
               HERE / "test_experiment9_group.py", HERE / "exp9_group_protocol.json", r9.OUT_DIR]
 PROTECTED_PATHS = [*r9.PROTECTED_PATHS, *EXP9_FILES]
 COUNT_COLUMNS = r8.COUNT_COLUMNS  # (count column index, expected per-method count); identical workloads
-# Logical accounting is deterministic (no GPU arithmetic), so each condition must match its model value to the
-# scripts' printed resolution. The Exp1 0.1 % relative tolerance (0.02-0.36 MB here) is wider than one R step
-# (~0.2 MB) and could not distinguish neighbouring conditions; it is kept unchanged for control reproduction.
+# Accounting-integrity gate (not a statistical reproduction tolerance): logical accounting is deterministic, so each
+# condition's printed avg KV MB (3 decimals -- the only precision the canonical scripts log) must lie within 0.001 MB
+# of the FULL-PRECISION expected value (exact integer byte counts, averaged, / 2^20, unrounded). For the
+# larger-context benchmarks the Exp1 0.1 % total-storage tolerance is comparable to or wider than the storage change
+# from a two-token residual step, so Exp10 uses this tighter gate; the 0.1 % tolerance is kept unchanged for
+# control reproduction.
 STORAGE_MATCH_ABS_TOL_MB = 0.001
 
 traced_logical_bytes = r9.traced_logical_bytes  # shape-only trace of the canonical accounting (Exp9, accepted)
@@ -84,6 +87,20 @@ def expected_logical_mb(name: str, configs: dict) -> dict:
     prefixes = r7.quantized_prefixes(name)
     out["bf16_reference"] = round(sum(r7.LAYERS * 2 * t * r7.KV_HEADS * r7.HEAD_DIM * 2 / 2**20
                                       for t in prefixes) / len(prefixes), 3)
+    return out
+
+
+def expected_bytes(name: str, config: dict) -> list[int]:
+    """Exact integer logical byte count of every quantized prefix of the benchmark (one per sample / case)."""
+    return [traced_logical_bytes(t, config)["total"] for t in r7.quantized_prefixes(name)]
+
+
+def expected_full_precision_mb(name: str, configs: dict) -> dict:
+    """Unrounded average logical KV MB from the exact integer byte counts (what the storage gate compares against)."""
+    out = {}
+    for m in CONDITIONS:
+        per = expected_bytes(name, configs[m])
+        out[m] = sum(per) / len(per) / 2**20
     return out
 
 
@@ -226,16 +243,27 @@ def build_protocol() -> dict:
                                       "(rabit8 R0, rabit4 R0, rabit3 R2, rabit2 R4 -- including two residual values)",
                               "values": anchors},
             "expected_avg_logical_kv_mb": expected,
+            "expected_avg_logical_kv_mb_full_precision": {b: expected_full_precision_mb(b, first)
+                                                          for b in gen.BENCHMARKS},
+            "expected_total_logical_bytes": {b: {m: sum(expected_bytes(b, first[m])) for m in CONDITIONS}
+                                             for b in gen.BENCHMARKS},
             "expected_delta_vs_r4_mb": {b: {m: round(expected[b][m] - expected[b]["rabit2"], 3) for m in CONDITIONS}
                                         for b in gen.BENCHMARKS},
             "expected_compression_vs_bf16": {b: {m: round(expected[b]["bf16_reference"] / expected[b][m], 3)
                                                  for m in CONDITIONS} for b in gen.BENCHMARKS},
             "expected_breakdown_avg_mb": {b: storage_breakdown(b, first) for b in gen.BENCHMARKS},
-            "gates": {"matches_expected": {"rule": "observed R0 / R2 / R4 / R8 avg logical KV MB within "
-                                                   "absolute_mb of expected_avg_logical_kv_mb (one printed unit; the "
-                                                   "accounting is deterministic -- Exp7 / 8 / 9 matched exactly). "
-                                                   "Stricter than the 0.1 % relative Exp1 tolerance, which exceeds "
-                                                   "one R step and could not distinguish conditions",
+            "gates": {"matches_expected": {"rule": "ACCOUNTING-INTEGRITY gate (not a statistical reproduction "
+                                                   "tolerance): each observed R0 / R2 / R4 / R8 avg logical KV MB, as "
+                                                   "printed by the canonical script (3 decimals -- the only precision "
+                                                   "it logs), within absolute_mb of "
+                                                   "expected_avg_logical_kv_mb_full_precision (exact integer byte "
+                                                   "counts averaged / 2^20, unrounded; the 3-decimal "
+                                                   "expected_avg_logical_kv_mb is for display only). The accounting "
+                                                   "is deterministic (Exp7 / 8 / 9 matched exactly). For the "
+                                                   "larger-context benchmarks the old 0.1 % total-storage tolerance "
+                                                   "is comparable to or wider than the storage change from a "
+                                                   "two-token residual step, so Exp10 uses this tighter deterministic "
+                                                   "accounting-integrity gate",
                                            "absolute_mb": STORAGE_MATCH_ABS_TOL_MB},
                       "ordering": {"rule": "observed conditions ordered (smallest MB first) exactly as the formula "
                                            "orders them",
@@ -328,7 +356,7 @@ def integrity(name: str, rc: int, log_text: str, protocol: dict | None = None) -
     if checks["all_five_rows_present"]:
         checks["counts_exact"] = all(r["count"] == COUNT_COLUMNS[name][1] for r in rows.values())
         gates = protocol["logical_storage_expectations"]["gates"]
-        exp = protocol["logical_storage_expectations"]["expected_avg_logical_kv_mb"][name]
+        exp = protocol["logical_storage_expectations"]["expected_avg_logical_kv_mb_full_precision"][name]
         tol = gates["matches_expected"]["absolute_mb"]
         checks["kv_mb_matches_expected"] = all(
             abs(rows[m]["avg_logical_kv_mb"] - exp[m]) <= tol + 1e-9 for m in CONDITIONS)

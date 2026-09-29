@@ -531,6 +531,70 @@
         "bf16_reference": 1783.531
       }
     },
+    "expected_avg_logical_kv_mb_full_precision": {
+      "continuation_ppl": {
+        "rabit2_r0": 24.25,
+        "rabit2_r2": 24.480224609375,
+        "rabit2": 24.71044921875,
+        "rabit2_r8": 25.1708984375
+      },
+      "niah": {
+        "rabit2_r0": 226.32552083333334,
+        "rabit2_r2": 226.55574544270834,
+        "rabit2": 226.78597005208334,
+        "rabit2_r8": 227.24641927083334
+      },
+      "passage_retrieval": {
+        "rabit2_r0": 287.6736572265625,
+        "rabit2_r2": 287.9038818359375,
+        "rabit2": 288.0899658203125,
+        "rabit2_r8": 288.5062744140625
+      },
+      "hotpotqa": {
+        "rabit2_r0": 359.3896484375,
+        "rabit2_r2": 359.619873046875,
+        "rabit2": 359.85009765625,
+        "rabit2_r8": 360.2443359375
+      },
+      "qasper": {
+        "rabit2_r0": 337.9858093261719,
+        "rabit2_r2": 338.19764200846356,
+        "rabit2": 338.42786661783856,
+        "rabit2_r8": 338.88831583658856
+      }
+    },
+    "expected_total_logical_bytes": {
+      "continuation_ppl": {
+        "rabit2_r0": 203423744,
+        "rabit2_r2": 205355008,
+        "rabit2": 207286272,
+        "rabit2_r8": 211148800
+      },
+      "niah": {
+        "rabit2_r0": 3559792640,
+        "rabit2_r2": 3563413760,
+        "rabit2": 3567034880,
+        "rabit2_r8": 3574277120
+      },
+      "passage_retrieval": {
+        "rabit2_r0": 3016476928,
+        "rabit2_r2": 3018891008,
+        "rabit2": 3020842240,
+        "rabit2_r8": 3025207552
+      },
+      "hotpotqa": {
+        "rabit2_r0": 7536947200,
+        "rabit2_r2": 7541775360,
+        "rabit2": 7546603520,
+        "rabit2_r8": 7554871296
+      },
+      "qasper": {
+        "rabit2_r0": 8505691392,
+        "rabit2_r2": 8511022336,
+        "rabit2": 8516816128,
+        "rabit2_r8": 8528403712
+      }
+    },
     "expected_delta_vs_r4_mb": {
       "continuation_ppl": {
         "rabit2_r0": -0.46,
@@ -749,7 +813,7 @@
     },
     "gates": {
       "matches_expected": {
-        "rule": "observed R0 / R2 / R4 / R8 avg logical KV MB within absolute_mb of expected_avg_logical_kv_mb (one printed unit; the accounting is deterministic -- Exp7 / 8 / 9 matched exactly). Stricter than the 0.1 % relative Exp1 tolerance, which exceeds one R step and could not distinguish conditions",
+        "rule": "ACCOUNTING-INTEGRITY gate (not a statistical reproduction tolerance): each observed R0 / R2 / R4 / R8 avg logical KV MB, as printed by the canonical script (3 decimals -- the only precision it logs), within absolute_mb of expected_avg_logical_kv_mb_full_precision (exact integer byte counts averaged / 2^20, unrounded; the 3-decimal expected_avg_logical_kv_mb is for display only). The accounting is deterministic (Exp7 / 8 / 9 matched exactly). For the larger-context benchmarks the old 0.1 % total-storage tolerance is comparable to or wider than the storage change from a two-token residual step, so Exp10 uses this tighter deterministic accounting-integrity gate",
         "absolute_mb": 0.001
       },
       "ordering": {

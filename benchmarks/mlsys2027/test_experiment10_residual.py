@@ -151,6 +151,28 @@ def test_expected_mb_match_storage_model_anchors_and_canonical_control():
         assert p["benchmarks"][b]["min_quantized_prefix_tokens"] > 8  # T <= R never occurs
 
 
+def test_storage_gate_uses_full_precision_from_integer_bytes():
+    p = r10.load_protocol()
+    L = p["logical_storage_expectations"]
+    cfgs = r10.derived_configs("hotpotqa")
+    for b in gen.BENCHMARKS:
+        prefixes = r10.r7.quantized_prefixes(b)
+        for m in r10.CONDITIONS:
+            per = [r10.traced_logical_bytes(t, cfgs[m])["total"] for t in prefixes]
+            assert all(isinstance(x, int) for x in per)  # exact integer byte counts
+            assert L["expected_total_logical_bytes"][b][m] == sum(per)
+            full = L["expected_avg_logical_kv_mb_full_precision"][b][m]
+            assert full == sum(per) / len(per) / 2**20  # unrounded
+            assert round(full, 3) == L["expected_avg_logical_kv_mb"][b][m]  # display values unchanged
+    # the gate reads the full-precision value, not the 3-decimal display value
+    exp = dict(L["expected_avg_logical_kv_mb_full_precision"]["continuation_ppl"])
+    shifted = {**p, "logical_storage_expectations": {**L, "expected_avg_logical_kv_mb_full_precision": {
+        **L["expected_avg_logical_kv_mb_full_precision"], "continuation_ppl": {**exp, "rabit2_r2": exp["rabit2_r2"] + 0.0015}}}}
+    assert r10.integrity("continuation_ppl", 0, _log(), p)["checks"]["kv_mb_matches_expected"]
+    assert not r10.integrity("continuation_ppl", 0, _log(), shifted)["checks"]["kv_mb_matches_expected"]
+    assert "ACCOUNTING-INTEGRITY" in L["gates"]["matches_expected"]["rule"]
+
+
 def test_protocol_frozen_complete_and_not_overwritable():
     p = r10.load_protocol()
     assert p["experiment"] == 10 and "NOT a physical serving benchmark" in p["type"]
