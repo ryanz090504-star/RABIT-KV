@@ -18,7 +18,14 @@ exp7_kbit_scripts.py (only: provenance header, Modal App name, allowed set, and 
 that copy rabit2 and replace k_bits). Workloads, sample counts, seeds and all other code are the canonical ones
 (Experiment 1 RUNS, --methods changed only).
 
+Pre-run protocol: benchmarks/mlsys2027/exp7_kbit_protocol.json (frozen before any execution; regenerated and compared
+at preflight). It records every condition's full config (with a mechanical only-k_bits-differs proof), every
+benchmark's dataset / selection / counts / generation parameters, the control-reproduction rule (config: exact;
+numbers: the frozen tolerances, copied from Experiment 1) with the canonical K3 targets, and the expected LOGICAL KV MB
+of K2 / K3 / K4 per benchmark. All gates read their values from the protocol.
+
 Usage:
+    python benchmarks/mlsys2027/run_experiment7_kbit_ablation.py --write-protocol   (once, before commit)
     python benchmarks/mlsys2027/run_experiment7_kbit_ablation.py --dry-run
     python benchmarks/mlsys2027/run_experiment7_kbit_ablation.py            (NOT until explicitly authorized)
 """
@@ -26,9 +33,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import ast
 import datetime as dt
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -43,6 +52,8 @@ OUT_DIR = ROOT / "results" / "mlsys2027" / "ablations" / "k_bit"
 MANIFEST = OUT_DIR / "manifest.json"
 REGRESSION_CHECK = OUT_DIR / "regression_check.json"
 RESULTS = OUT_DIR / "kbit_results.json"
+PROTOCOL = HERE / "exp7_kbit_protocol.json"
+EXP1_DIR = ROOT / "results" / "mlsys2027" / "quality_frontier"
 METHODS = "bf16,rabit2_k2,rabit2,rabit2_k4"
 CONDITIONS = {"rabit2_k2": 2, "rabit2": 3, "rabit2_k4": 4}  # method -> k_bits; everything else frozen
 FROZEN = {"v_bits": 2, "k_style": "seq_affine", "v_style": "group_affine", "k_group": 32, "v_group": 32,
@@ -93,6 +104,195 @@ def logical_kv_bytes(prefix_tokens: int, k_bits: int, v_bits: int = 2, residual:
     return out
 
 
+def derived_configs(benchmark: str) -> dict:
+    """Compile config_for_method of one derived script on its own and return every condition's full config."""
+    text = gen.derived_path(benchmark).read_text(encoding="utf-8")
+    node = next(n for n in ast.walk(ast.parse(text)) if isinstance(n, ast.FunctionDef) and n.name == "config_for_method")
+    ns: dict = {}
+    exec(compile(ast.Module(body=[node], type_ignores=[]), "<config_for_method>", "exec"), ns)  # noqa: S102
+    return {m: ns["config_for_method"](m) for m in CONDITIONS}
+
+
+# Benchmark facts, extracted verbatim from the committed canonical scripts (identical in the derived copies).
+BENCHMARK_FACTS = {
+    "continuation_ppl": {
+        "dataset": "WikiText-2 test (raw text: https://raw.githubusercontent.com/pytorch/examples/main/"
+                   "word_language_model/data/wikitext-2/test.txt), non-empty stripped lines joined in blocks of 64",
+        "selection": "deterministic: the first samples x (context + eval) tokens of the tokenized stream, split into "
+                     "consecutive non-overlapping spans",
+        "samples": 8, "context_tokens": 1024, "eval_tokens_per_sample": 128, "scored_tokens_per_method": 1024,
+        "quantized_prefix_tokens": "context (1024)",
+        "procedure": "teacher-forced: prefill the 1024-token context, quantize/dequantize its KV once, score the 128 "
+                     "continuation tokens (first logit from the prefill)",
+        "metric": "PPL (exp of mean token cross-entropy) and PPL delta % vs bf16",
+    },
+    "niah": {
+        "dataset": "synthetic needle-in-a-haystack: WikiText-2 test as distractor filler; needle 'The hidden secret "
+                   "code is RABIT-7291'",
+        "selection": "deterministic: every (context length, depth) pair; needle inserted at round(filler x depth)",
+        "cases": 15, "context_lengths": [4096, 8192, 16384], "needle_depths": [0.1, 0.25, 0.5, 0.75, 0.9],
+        "quantized_prefix_tokens": "prompt length - 1 (the last prompt token is fed at the first decode step)",
+        "generation": {"decoding": "greedy argmax", "max_new_tokens": 16, "stop": "eos"},
+        "metric": "exact-match accuracy: regex RABIT-\\d{4} on the decoded answer equals RABIT-7291",
+        "warmup": "one BF16 warm-up case at 4096 tokens, not reported",
+    },
+    "passage_retrieval": {
+        "dataset": "LongBench passage_retrieval_en (zai-org/LongBench @ 915b0c6ec0b6dfae1cd44224b7d8995317837f27, "
+                   "passage_retrieval_en/test-00000-of-00001.parquet, split test)",
+        "selection": "deterministic: dataset indices [0, 10)", "samples": 10, "sample_start": 0,
+        "max_input_tokens": 16384, "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+        "prompt": "LongBench official template via the tokenizer chat template",
+        "quantized_prefix_tokens": "prompt length - 1",
+        "generation": {"decoding": "greedy argmax", "max_new_tokens": 32, "stop": "eos"},
+        "metric": "LongBench official retrieval score (fraction of numbers in the prediction equal to the target "
+                  "paragraph id), mean x 100",
+    },
+    "hotpotqa": {
+        "dataset": "LongBench-E hotpotqa (zai-org/LongBench @ 92b6c5fbfb0c97b91e92d9ef79802f95ce74b05e, "
+                   "hotpotqa_e/test-00000-of-00001.parquet, split test)",
+        "selection": "deterministic: examples with length >= 8000 (bucket 8k+), filtered positions [0, 20)",
+        "samples": 20, "sample_start": 0, "length_bucket": "8k+", "max_input_tokens": 16384,
+        "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+        "prompt": "LongBench official template via the tokenizer chat template",
+        "quantized_prefix_tokens": "prompt length - 1",
+        "generation": {"decoding": "greedy argmax", "max_new_tokens": 32, "stop": "eos"},
+        "metric": "LongBench qa_f1_score (max over reference answers), mean x 100",
+    },
+    "qasper": {
+        "dataset": "LongBench-E qasper (zai-org/LongBench @ 52edb9d18ea01d49ec7580fefcfe6b9d97a0fa96, "
+                   "qasper_e/test-00000-of-00001.parquet, split test)",
+        "selection": "deterministic: examples with length >= 8000 (bucket 8k+), filtered positions [0, 24)",
+        "samples": 24, "sample_start": 0, "length_bucket": "8k+", "max_input_tokens": 16384,
+        "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+        "prompt": "LongBench official template via the tokenizer chat template",
+        "quantized_prefix_tokens": "prompt length - 1",
+        "generation": {"decoding": "greedy argmax", "max_new_tokens": 32, "stop": "eos"},
+        "metric": "LongBench qa_f1_score (max over reference answers), mean x 100",
+    },
+}
+COMMON_FACTS = {"model": "LLM-Research/Meta-Llama-3.1-8B-Instruct (modelscope snapshot_download)",
+                "model_dtype": "bfloat16", "attention": "sdpa", "seed": "torch.manual_seed(0) and "
+                "torch.cuda.manual_seed_all(0) in every script", "tf32": "enabled (matmul and cudnn)",
+                "gpu": "NVIDIA H100 via Modal"}
+
+
+def exp1_prompt_lengths(name: str) -> list[int]:
+    """Per-sample prompt lengths ('used tokens') recorded by the accepted Experiment 1 run (same data, tokenizer,
+    selection and truncation). Used ONLY to pre-compute expected logical KV MB."""
+    text = (EXP1_DIR / f"{name}.log").read_text(encoding="utf-8")
+    return [int(x) for x in re.findall(r"original tokens, (\d+) used tokens", text)]
+
+
+def quantized_prefixes(name: str) -> list[int]:
+    if name == "continuation_ppl":
+        return [BENCHMARK_FACTS[name]["context_tokens"]] * BENCHMARK_FACTS[name]["samples"]
+    if name == "niah":
+        f = BENCHMARK_FACTS[name]
+        return [c - 1 for c in f["context_lengths"] for _ in f["needle_depths"]]
+    return [t - 1 for t in exp1_prompt_lengths(name)]
+
+
+def expected_logical_mb(name: str) -> dict:
+    prefixes = quantized_prefixes(name)
+    out = {}
+    for method, bits in CONDITIONS.items():
+        per = [logical_kv_bytes(t, bits)["total"] / 2**20 for t in prefixes]
+        out[method] = round(sum(per) / len(per), 3)
+    bf16 = [LAYERS * 2 * t * KV_HEADS * HEAD_DIM * 2 / 2**20 for t in prefixes]
+    out["bf16_reference"] = round(sum(bf16) / len(bf16), 3)
+    return out
+
+
+def build_protocol() -> dict:
+    cfgs = {b: derived_configs(b) for b in gen.BENCHMARKS}
+    first = cfgs[gen.BENCHMARKS[0]]
+    if any(cfgs[b] != first for b in gen.BENCHMARKS):
+        raise RuntimeError("condition configs differ between benchmark scripts")
+    control = first["rabit2"]
+    proof = {m: sorted(k for k in set(c) | set(control) if c.get(k) != control.get(k) and k != "name")
+             for m, c in first.items()}
+    ref = e1.CANONICAL_REFERENCE
+    metric_key = {"continuation_ppl": "ppl", "niah": "accuracy_pct", "passage_retrieval": "accuracy_pct",
+                  "hotpotqa": "f1_pct", "qasper": "f1_pct"}
+    expected = {b: expected_logical_mb(b) for b in gen.BENCHMARKS}
+    return {
+        "experiment": 7, "type": "logical fake-quant / dequant QUALITY ablation (NOT a physical serving benchmark)",
+        "axis": "K bits", "not_reported": ["physical allocator capacity", "throughput", "latency"],
+        "methods_argument": METHODS,
+        "conditions": {"bf16": {"role": "reference (uncompressed); not an ablation condition"},
+                       **{m: {"role": "control" if m == "rabit2" else "treatment", "shorthand":
+                              f"K{c['k_bits']}/V{c['v_bits']}/G{c['k_group']}/R{c['residual']}/META8g"
+                              f"{c['metadata_group_size']}", "config": c} for m, c in first.items()}},
+        "only_k_bits_differs_proof": {"control": "rabit2", "fields_differing_from_control_excluding_display_name": proof,
+                                      "holds": all(v == ([] if m == "rabit2" else ["k_bits"]) for m, v in proof.items()),
+                                      "configs_identical_across_all_five_scripts": True},
+        "common": COMMON_FACTS,
+        "benchmarks": {b: {**BENCHMARK_FACTS[b], "script": gen.derived_path(b).relative_to(ROOT).as_posix(),
+                           "canonical_source": gen.canonical_path(b).relative_to(ROOT).as_posix(),
+                           "canonical_source_sha256_lf": gen.sha256_text(gen.canonical_path(b).read_text(encoding="utf-8")),
+                           "args": next(r["args"] for r in runs() if r["name"] == b)} for b in gen.BENCHMARKS},
+        "control_reproduction": {
+            "configuration_equality": "EXACT: the K3 control is the canonical rabit2 config (compiled and compared)",
+            "numerical_reproduction": "within the frozen tolerances below (copied from the accepted Experiment 1 "
+                                      "methodology); applied to bf16 and the K3 control; never changed after the run starts",
+            "tolerances": {"continuation_ppl.ppl": {"relative": e1.PPL_RELATIVE_TOLERANCE},
+                           "niah.accuracy_pct": {"absolute_points": e1.PERCENTAGE_ABSOLUTE_TOLERANCE},
+                           "passage_retrieval.accuracy_pct": {"absolute_points": e1.PERCENTAGE_ABSOLUTE_TOLERANCE},
+                           "hotpotqa.f1_pct": {"absolute_points": e1.PERCENTAGE_ABSOLUTE_TOLERANCE},
+                           "qasper.f1_pct": {"absolute_points": e1.PERCENTAGE_ABSOLUTE_TOLERANCE},
+                           "avg_logical_kv_mb": {"relative": e1.KV_MB_RELATIVE_TOLERANCE}},
+            "single_example_flip": {"niah": "1 of 15 cases = 6.67 points > 1.0 -> fails",
+                                    "passage_retrieval": "1 of 10 samples = up to 10.0 points > 1.0 -> fails",
+                                    "hotpotqa": "one example's F1 moves the mean by up to 5.0 points (1/20)",
+                                    "qasper": "one example's F1 moves the mean by up to 4.17 points (1/24)",
+                                    "rule": "1.0-point tolerance is a tight drift detector, identical to Exp1"},
+            "canonical_targets": {b: {"bf16": {metric_key[b]: ref[b]["bf16"][metric_key[b]],
+                                               "avg_logical_kv_mb": ref[b]["bf16"]["avg_kv_mb"]},
+                                      "rabit2_K3": {metric_key[b]: ref[b]["rabit2"][metric_key[b]],
+                                                    "avg_logical_kv_mb": ref[b]["rabit2"]["avg_kv_mb"]}}
+                                  for b in gen.BENCHMARKS},
+            "target_source": "results/summary.json and results/quality/*.log (canonical), pinned in the accepted "
+                             "Experiment 1 runner"},
+        "logical_storage_expectations": {
+            "label": "LOGICAL packed prefix-KV storage (payload bits + uint8-group metadata + BF16 residual); NOT "
+                     "physical allocator capacity",
+            "formula": ("per layer (32 layers, 8 KV heads, head_dim 128), quantized prefix P: residual R=4 BF16 tokens; "
+                        "Lq = P - 4; Lk = ceil(Lq/32)*32; K = ceil(8*Lk*128*k_bits/8) + 2*meta(8*(Lk/32)*128); "
+                        "V = ceil(8*Lq*128*2/8) + 2*meta(8*Lq*4); residual = 2*4*8*128*2; meta(n) = ceil(n/64)*64 "
+                        "+ 4*ceil(n/64) (uint8 codes + BF16 min and scale per 64); reported MB = bytes / 2^20"),
+            "only_k_payload_depends_on_k_bits": True,
+            "expected_avg_logical_kv_mb": expected,
+            "expected_prefix_source": {"continuation_ppl": "fixed 1024-token context",
+                                       "niah": "context length - 1 (fixed)",
+                                       "passage_retrieval/hotpotqa/qasper": "per-sample prompt length - 1, prompt "
+                                       "lengths as recorded by the accepted Experiment 1 run (identical data, "
+                                       "tokenizer, selection and truncation)"},
+            "gates": {"strictly_increasing": "K2 < K3 < K4",
+                      "linearity": {"rule": "|(K4 - K3) - (K3 - K2)| <= tolerance", "tolerance_mb": LINEARITY_ABS_TOL_MB},
+                      "matches_expected": {"rule": "observed K2 / K3 / K4 avg logical KV MB within the relative "
+                                                   "tolerance of expected_avg_logical_kv_mb",
+                                           "relative": e1.KV_MB_RELATIVE_TOLERANCE}}},
+        "execution_gates": ["exit code 0 and no traceback", "all four rows (bf16, K2, K3, K4) present",
+                            "bf16 and K3 control within the frozen tolerances of the canonical targets",
+                            "logical storage gates above",
+                            "protected paths clean before and after; Exp6 evidence identical to 0f5f6ef",
+                            "stop at the first failing benchmark; no retry"],
+        "artifacts": [f"results/mlsys2027/ablations/k_bit/{b}.log" for b in gen.BENCHMARKS]
+                     + ["results/mlsys2027/ablations/k_bit/manifest.json",
+                        "results/mlsys2027/ablations/k_bit/regression_check.json",
+                        "results/mlsys2027/ablations/k_bit/kbit_results.json"],
+    }
+
+
+def load_protocol() -> dict:
+    committed = json.loads(PROTOCOL.read_text(encoding="utf-8"))
+    if committed != json.loads(json.dumps(build_protocol())):
+        raise RuntimeError("exp7_kbit_protocol.json differs from the regenerated protocol")
+    if not committed["only_k_bits_differs_proof"]["holds"]:
+        raise RuntimeError("protocol does not prove that conditions differ only in k_bits")
+    return committed
+
+
 def runs() -> list[dict]:
     """Experiment 1's RUNS verbatim, with --methods replaced and the script taken from the Exp7 derived copies."""
     out = []
@@ -126,8 +326,10 @@ def preflight(dry_run: bool) -> dict:
         if e1.REQUIRED_ALLOWED_LINE not in text or e1.REQUIRED_RABIT2_MARKER not in text:
             raise RuntimeError(f"canonical {b}.py no longer matches the accepted Experiment 1 pins")
     e1.verify_canonical_reference()
+    protocol = load_protocol()
     uncommitted = e1.run_git("status", "--short", "--", *[str(p.relative_to(ROOT)) for p in (
-        RUNNER_SCRIPT, gen.DERIVED_DIR, HERE / "exp7_kbit_scripts.py", HERE / "test_experiment7_kbit.py")])
+        RUNNER_SCRIPT, gen.DERIVED_DIR, HERE / "exp7_kbit_scripts.py", HERE / "test_experiment7_kbit.py",
+        PROTOCOL)])
     if uncommitted and not dry_run:
         raise RuntimeError("Refusing to run: Experiment 7 harness has uncommitted changes:\n" + uncommitted)
     if MANIFEST.exists() and json.loads(MANIFEST.read_text(encoding="utf-8")).get("status") == "passed":
@@ -136,7 +338,8 @@ def preflight(dry_run: bool) -> dict:
             "exp6_frozen_commit": EXP6_FROZEN_COMMIT,
             "canonical_script_sha256": {b: e1.sha256(gen.canonical_path(b)) for b in gen.BENCHMARKS},
             "derived_script_sha256": {b: e1.sha256(gen.derived_path(b)) for b in gen.BENCHMARKS},
-            "runner_script_sha256": e1.sha256(RUNNER_SCRIPT), "uncommitted_files": uncommitted or None}
+            "runner_script_sha256": e1.sha256(RUNNER_SCRIPT), "protocol_sha256": e1.sha256(PROTOCOL),
+            "protocol": protocol, "uncommitted_files": uncommitted or None}
 
 
 def build_commands() -> list[dict]:
@@ -155,14 +358,20 @@ def parse_rows(name: str, log_text: str) -> dict:
     return out
 
 
-def integrity(name: str, rc: int, log_text: str) -> dict:
+def integrity(name: str, rc: int, log_text: str, protocol: dict | None = None) -> dict:
+    protocol = protocol or load_protocol()
     rows = parse_rows(name, log_text)
     checks = {"exit_code_zero": rc == 0, "no_traceback": "Traceback (most recent call last)" not in log_text,
               "all_four_rows_present": all(rows.values())}
     if checks["all_four_rows_present"]:
         k2, k3, k4 = (rows[m]["avg_logical_kv_mb"] for m in ("rabit2_k2", "rabit2", "rabit2_k4"))
         checks["kv_mb_strictly_increasing_in_k_bits"] = k2 < k3 < k4
-        checks["kv_mb_linear_in_k_bits"] = abs((k4 - k3) - (k3 - k2)) <= LINEARITY_ABS_TOL_MB
+        gates = protocol["logical_storage_expectations"]["gates"]
+        checks["kv_mb_linear_in_k_bits"] = abs((k4 - k3) - (k3 - k2)) <= gates["linearity"]["tolerance_mb"]
+        exp = protocol["logical_storage_expectations"]["expected_avg_logical_kv_mb"][name]
+        rel = gates["matches_expected"]["relative"]
+        checks["kv_mb_matches_expected"] = all(
+            abs(rows[m]["avg_logical_kv_mb"] - exp[m]) <= max(abs(exp[m]) * rel, 1e-9) for m in CONDITIONS)
     reg = e1.check_regression(name, log_text)  # bf16 + K3 control vs the canonical reference (Exp1 tolerances)
     checks["bf16_and_k3_control_reproduce_canonical"] = reg["all_within_tolerance"]
     return {"benchmark": name, "rows": rows, "checks": checks, "regression": reg,
@@ -173,7 +382,14 @@ def main(argv: list[str] | None = None) -> int:
     e1.make_console_encoding_safe()
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--write-protocol", action="store_true", help="write exp7_kbit_protocol.json (pre-commit only)")
     a = ap.parse_args(argv)
+    if a.write_protocol:
+        if PROTOCOL.exists():
+            raise SystemExit(f"{PROTOCOL.name} already exists; the frozen protocol is never overwritten")
+        PROTOCOL.write_text(json.dumps(build_protocol(), indent=2) + "\n", encoding="utf-8")
+        print(f"wrote {PROTOCOL.relative_to(ROOT).as_posix()}")
+        return 0
     prov = preflight(a.dry_run)
     print("RABIT-KV MLSys 2027 -- Experiment 7 K-bit ablation (logical fake-quant quality)")
     print("Preflight OK:", json.dumps({k: prov[k] for k in ("git_head", "exp6_frozen_commit")}))
@@ -193,7 +409,7 @@ def main(argv: list[str] | None = None) -> int:
     for c in build_commands():
         log = ROOT / c["log"]
         rc = e1.stream_command(c["command"], log)
-        res = integrity(c["name"], rc, log.read_text(encoding="utf-8", errors="replace"))
+        res = integrity(c["name"], rc, log.read_text(encoding="utf-8", errors="replace"), prov["protocol"])
         results.append(res)
         manifest["runs"].append({"name": c["name"], "returncode": rc, "passed": res["passed"],
                                  "log_sha256": e1.sha256(log)})

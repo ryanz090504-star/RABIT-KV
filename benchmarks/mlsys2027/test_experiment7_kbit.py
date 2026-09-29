@@ -112,6 +112,57 @@ def test_row_parser_distinguishes_control_from_ablation_rows():
     assert not bad["checks"]["bf16_and_k3_control_reproduce_canonical"] and not bad["passed"]
 
 
+def test_protocol_frozen_and_complete():
+    import json
+    p = r7.load_protocol()  # committed == regenerated, and the only-k_bits proof holds
+    assert p["experiment"] == 7 and p["axis"] == "K bits" and "NOT a physical serving benchmark" in p["type"]
+    proof = p["only_k_bits_differs_proof"]
+    assert proof["holds"] and proof["fields_differing_from_control_excluding_display_name"] == {
+        "rabit2_k2": ["k_bits"], "rabit2": [], "rabit2_k4": ["k_bits"]}
+    cfg = {m: p["conditions"][m]["config"] for m in r7.CONDITIONS}
+    assert [cfg[m]["k_bits"] for m in ("rabit2_k2", "rabit2", "rabit2_k4")] == [2, 3, 4]
+    for c in cfg.values():
+        assert {k: c[k] for k in r7.FROZEN} == r7.FROZEN
+        assert set(c) == {"name", "k_bits", *r7.FROZEN}  # every field recorded explicitly
+    tol = p["control_reproduction"]["tolerances"]
+    assert tol["continuation_ppl.ppl"] == {"relative": 0.005} and tol["avg_logical_kv_mb"] == {"relative": 0.001}
+    for k in ("niah.accuracy_pct", "passage_retrieval.accuracy_pct", "hotpotqa.f1_pct", "qasper.f1_pct"):
+        assert tol[k] == {"absolute_points": 1.0}
+    assert (e1.PPL_RELATIVE_TOLERANCE, e1.PERCENTAGE_ABSOLUTE_TOLERANCE, e1.KV_MB_RELATIVE_TOLERANCE) == (0.005, 1.0, 0.001)
+    counts = {b: p["benchmarks"][b].get("samples", p["benchmarks"][b].get("cases")) for b in gen.BENCHMARKS}
+    assert counts == {"continuation_ppl": 8, "niah": 15, "passage_retrieval": 10, "hotpotqa": 20, "qasper": 24}
+    for b in gen.BENCHMARKS:  # counts agree with the executed arguments
+        args = p["benchmarks"][b]["args"]
+        if "--samples" in args:
+            assert int(args[args.index("--samples") + 1]) == counts[b]
+        assert len(r7.quantized_prefixes(b)) == counts[b]
+    assert p["benchmarks"]["continuation_ppl"]["scored_tokens_per_method"] == 8 * 128
+    exp = p["logical_storage_expectations"]["expected_avg_logical_kv_mb"]
+    targets = p["control_reproduction"]["canonical_targets"]
+    for b in gen.BENCHMARKS:  # the frozen formula reproduces every canonical K3 and bf16 logical MB exactly
+        assert exp[b]["rabit2"] == targets[b]["rabit2_K3"]["avg_logical_kv_mb"], b
+        assert exp[b]["bf16_reference"] == targets[b]["bf16"]["avg_logical_kv_mb"], b
+        assert exp[b]["rabit2_k2"] < exp[b]["rabit2"] < exp[b]["rabit2_k4"]
+        assert abs((exp[b]["rabit2_k4"] - exp[b]["rabit2"]) - (exp[b]["rabit2"] - exp[b]["rabit2_k2"])) <= 0.002
+    assert "NOT physical allocator capacity" in p["logical_storage_expectations"]["label"]
+    try:
+        r7.main(["--write-protocol"])
+    except SystemExit as e:
+        assert "never overwritten" in str(e)
+    else:
+        raise AssertionError("protocol overwritten")
+    json.dumps(p)
+
+
+def test_expected_storage_gate_fails_on_mismatch():
+    good = "\n".join(["bf16 8.5020 0.0 1.00x 128.000", "rabit2_k2 9.1000 7.0 6.18x 20.710",
+                      "rabit2 8.6317 1.5 5.18x 24.710", "rabit2_k4 8.5500 0.6 4.46x 28.710"])
+    assert r7.integrity("continuation_ppl", 0, good)["checks"]["kv_mb_matches_expected"]
+    bad = good.replace("rabit2_k4 8.5500 0.6 4.46x 28.710", "rabit2_k4 8.5500 0.6 4.46x 28.900")
+    res = r7.integrity("continuation_ppl", 0, bad)
+    assert not res["checks"]["kv_mb_matches_expected"] and not res["passed"]
+
+
 def test_exp6_evidence_frozen():
     assert e1.run_git("diff", "--name-only", r7.EXP6_FROZEN_COMMIT, "--", "results/mlsys2027/concurrency_scaling") == ""
 
