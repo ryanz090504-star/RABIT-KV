@@ -1,0 +1,141 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-pno0qDMOBQfTzRVAgCAkUL
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp10_residual\passage_retrieval.py
+└── 🔨 Created function run_longbench.
+GPU: NVIDIA H100 80GB HBM3
+Model: LLM-Research/Meta-Llama-3.1-8B-Instruct
+Dataset: LongBench passage_retrieval_en
+Samples: 10, starting at index 0
+Maximum input length: 16384 tokens
+Methods: ['bf16', 'rabit2_r0', 'rabit2_r2', 'rabit2', 'rabit2_r8']
+Metric: official LongBench passage retrieval score
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+
+2026-09-29 18:16:44,607 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  44%|████▍     | 8/18 [00:08<00:10,  1.08s/file]
+[1ADownloading:  56%|█████▌    | 10/18 [00:22<00:20,  2.59s/file]
+[1ADownloading:  78%|███████▊  | 14/18 [00:22<00:05,  1.49s/file]
+[1ADownloading:  94%|█████████▍| 17/18 [00:22<00:01,  1.06s/file]
+[1ADownloading: 100%|██████████| 18/18 [00:37<00:00,  2.08s/file]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  6.81it/s]
+[1ALoading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  6.88it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00,  6.93it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  6.98it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  6.94it/s]
+
+[1AGenerating test split: 0 examples [00:00, ? examples/s]
+[1AGenerating test split: 200 examples [00:00, 5528.39 examples/s]
+Configurations:
+  bf16: BF16 baseline
+  rabit2_r0: K3V2 META8g64 G32 R0 (residual-window ablation of rabit2)
+  rabit2_r2: K3V2 META8g64 G32 R2 (residual-window ablation of rabit2)
+  rabit2: 2b META8g64 K3V2 G32 R4
+  rabit2_r8: K3V2 META8g64 G32 R8 (residual-window ablation of rabit2)
+
+Sample 1/10 (dataset index 0): 11210 original tokens, 11210 used tokens
+Ground truth: ['Paragraph 15']
+  bf16     score=1.000 KV=1401.125 MB answer='Paragraph 15'
+  rabit2_r0 score=1.000 KV=265.767 MB answer='Paragraph 15'
+  rabit2_r2 score=1.000 KV=265.997 MB answer='Paragraph 15'
+  rabit2   score=1.000 KV=266.227 MB answer='Paragraph 15'
+  rabit2_r8 score=1.000 KV=266.688 MB answer='Paragraph 15'
+
+Sample 2/10 (dataset index 1): 11620 original tokens, 11620 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=1452.375 MB answer='Paragraph 8'
+  rabit2_r0 score=1.000 KV=275.559 MB answer='Paragraph 8.'
+  rabit2_r2 score=1.000 KV=275.789 MB answer='Paragraph 8.'
+  rabit2   score=1.000 KV=275.578 MB answer='Paragraph 8.'
+  rabit2_r8 score=1.000 KV=276.039 MB answer='Paragraph 8.'
+
+Sample 3/10 (dataset index 2): 12980 original tokens, 12980 used tokens
+Ground truth: ['Paragraph 18']
+  bf16     score=1.000 KV=1622.375 MB answer='Paragraph 18'
+  rabit2_r0 score=1.000 KV=307.545 MB answer='Paragraph 18.'
+  rabit2_r2 score=1.000 KV=307.776 MB answer='Paragraph 18.'
+  rabit2   score=1.000 KV=308.006 MB answer='Paragraph 18.'
+  rabit2_r8 score=1.000 KV=308.466 MB answer='Paragraph 18.'
+
+Sample 4/10 (dataset index 3): 12665 original tokens, 12665 used tokens
+Ground truth: ['Paragraph 17']
+  bf16     score=1.000 KV=1583.000 MB answer='Paragraph 17'
+  rabit2_r0 score=1.000 KV=300.015 MB answer='Paragraph 17.'
+  rabit2_r2 score=1.000 KV=300.245 MB answer='Paragraph 17.'
+  rabit2   score=1.000 KV=300.475 MB answer='Paragraph 17.'
+  rabit2_r8 score=1.000 KV=300.936 MB answer='Paragraph 17.'
+
+Sample 5/10 (dataset index 4): 12379 original tokens, 12379 used tokens
+Ground truth: ['Paragraph 14']
+  bf16     score=1.000 KV=1547.250 MB answer='Paragraph 14'
+  rabit2_r0 score=1.000 KV=293.214 MB answer='Paragraph 14'
+  rabit2_r2 score=1.000 KV=293.444 MB answer='Paragraph 14'
+  rabit2   score=1.000 KV=293.675 MB answer='Paragraph 14'
+  rabit2_r8 score=1.000 KV=294.135 MB answer='Paragraph 14'
+
+Sample 6/10 (dataset index 5): 12137 original tokens, 12137 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=1517.000 MB answer='Paragraph 3'
+  rabit2_r0 score=1.000 KV=287.731 MB answer='Paragraph 3'
+  rabit2_r2 score=1.000 KV=287.962 MB answer='Paragraph 3'
+  rabit2   score=1.000 KV=288.192 MB answer='Paragraph 3'
+  rabit2_r8 score=1.000 KV=288.211 MB answer='Paragraph 3'
+
+Sample 7/10 (dataset index 6): 11801 original tokens, 11801 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=1475.000 MB answer='Paragraph 24'
+  rabit2_r0 score=1.000 KV=279.554 MB answer='Paragraph 24'
+  rabit2_r2 score=1.000 KV=279.784 MB answer='Paragraph 24'
+  rabit2   score=1.000 KV=280.014 MB answer='Paragraph 24'
+  rabit2_r8 score=1.000 KV=280.475 MB answer='Paragraph 24'
+
+Sample 8/10 (dataset index 7): 11931 original tokens, 11931 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=1491.250 MB answer='Paragraph 27'
+  rabit2_r0 score=1.000 KV=282.605 MB answer='Paragraph 27'
+  rabit2_r2 score=1.000 KV=282.835 MB answer='Paragraph 27'
+  rabit2   score=1.000 KV=283.065 MB answer='Paragraph 27'
+  rabit2_r8 score=1.000 KV=283.526 MB answer='Paragraph 27'
+
+Sample 9/10 (dataset index 8): 10547 original tokens, 10547 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=1318.250 MB answer='Paragraph 30'
+  rabit2_r0 score=1.000 KV=249.940 MB answer='Paragraph 30'
+  rabit2_r2 score=1.000 KV=250.170 MB answer='Paragraph 30'
+  rabit2   score=1.000 KV=250.400 MB answer='Paragraph 30'
+  rabit2_r8 score=1.000 KV=250.861 MB answer='Paragraph 30'
+
+Sample 10/10 (dataset index 9): 14130 original tokens, 14130 used tokens
+Ground truth: ['Paragraph 12']
+  bf16     score=1.000 KV=1766.125 MB answer='Paragraph 12'
+  rabit2_r0 score=1.000 KV=334.807 MB answer='Paragraph 12'
+  rabit2_r2 score=1.000 KV=335.037 MB answer='Paragraph 12'
+  rabit2   score=1.000 KV=335.267 MB answer='Paragraph 12'
+  rabit2_r8 score=1.000 KV=335.728 MB answer='Paragraph 12'
+
+==================================================================================================
+LongBench Passage Retrieval Results
+==================================================================================================
+Method        Accuracy %    Correct-equiv.Avg KV MB     Samples   
+--------------------------------------------------------------------------------------------------
+bf16          100.0         10.00         1517.375      10        
+rabit2_r0     100.0         10.00         287.674       10        
+rabit2_r2     100.0         10.00         287.904       10        
+rabit2        100.0         10.00         288.090       10        
+rabit2_r8     100.0         10.00         288.506       10        
+
+Important: the reported run time is only for experiment planning. It is not deployment latency.
+Stopping app - local entrypoint completed.
+Runner terminated.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-pno0qDMOBQfTzRVAgCAkUL
