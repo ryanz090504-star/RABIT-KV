@@ -1,0 +1,24 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis",
+  "non_evidence": true,
+  "status": "failed",
+  "started_utc": "2026-09-30T11:47:45.001257+00:00",
+  "git_head": "e6361ebe3e3fb62ce79719084db9f52630a55b35",
+  "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+  "harness_sha256": {
+    "run_exp14_shape_gate_numdiag.py": "86b47a1aa17cacb29127ded6a7b6acdbe5a5e9f1cf7fce8814cc3c2083e576ce",
+    "exp14_shape_gate_numdiag_modal.py": "e469a8bd78bf00961f2e00456a0309857ab0517126d39b3b810a708ef932c31a",
+    "exp14_shape_gate_numdiag.py": "d0974332dc09d2dc4e3c6433c47816381f7fb16a6a649405e2aa7cfabd1f6fe1",
+    "exp14_shape_gate.py": "12c4e23db61e39c119dc70851efbdebc8e1cf9a1d89a91a02623c6694b8d9442",
+    "exp14_deployment_modal.py": "33eab0ad7588d58c8782107215a5a433ebb48fbff102dc13bcb892ddab4ec7c6"
+  },
+  "uncommitted_files": null,
+  "modal_returncode": 1,
+  "completed_utc": "2026-09-30T16:33:50.047678+00:00",
+  "modal_app_ids": [
+    "ap-pyYiSYIKytyO8KOu9mG8vX"
+  ],
+  "session_log_sha256": "f15bbfb57aa8729626524d6a38470cfac0859cf7dc46ccdc5743789007f9f80b",
+  "summary_sha256": null
+}

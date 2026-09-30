@@ -1,0 +1,35 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis",
+  "non_evidence": true,
+  "attempt": 1,
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "execution_commit": "e6361ebe3e3fb62ce79719084db9f52630a55b35",
+  "modal_app_id": "ap-pyYiSYIKytyO8KOu9mG8vX",
+  "started_utc": "2026-09-30T11:47:45.001257+00:00",
+  "completed_utc": "2026-09-30T16:33:50.047678+00:00",
+  "what_ran": {
+    "image_build": "completed ('Created objects')",
+    "diagnostic_code": "never executed: every container failed while importing the wrapper module",
+    "numerical_results": "none (no EXP14_NUMDIAG_SUMMARY line)",
+    "model_or_engine": "none (the diagnosis never uses a model or engine)"
+  },
+  "failure": {
+    "error": "ModuleNotFoundError: No module named 'exp14_deployment_modal' at /root/exp14_shape_gate_numdiag_modal.py line 16",
+    "classification": "HARNESS DEFECT in exp14_shape_gate_numdiag_modal.py: it imported the Exp14 image from exp14_deployment_modal at module level; Modal re-imports the wrapper module inside the container, where that sibling module is not present",
+    "container_start_attempts_logged": 39,
+    "termination": "the local Modal client lost DNS resolution (getaddrinfo failed) while awaiting the function; the app is 'stopped' with 0 tasks",
+    "duration_note": "about 4.8 h between start and the local client's failure; each logged attempt failed at import, before any diagnostic code"
+  },
+  "actions_not_taken": ["no re-run", "no wrapper fix applied", "no gate change", "no probe attempt 2", "no serving",
+                        "no quality"],
+  "files_sha256": {
+    "numdiag_session.log": "f15bbfb57aa8729626524d6a38470cfac0859cf7dc46ccdc5743789007f9f80b",
+    "record.json": "5f1adf9e5e77e552f45ec56948fac2be33608652b28fc56617f55eeb87b9d9f9"
+  },
+  "files_sha256_lf_normalized": {
+    "numdiag_session.log": "c8c47d0d1650cb80308c11a0906a1deba32d65f22224ff35b35f9eeb9d9e41c3",
+    "record.json": "01a9be63a455af95291bc3c3343ec71c3b4eb72ffbdc448b52de818a1c0cfb51"
+  }
+}
