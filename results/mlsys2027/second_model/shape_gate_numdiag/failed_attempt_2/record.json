@@ -1,0 +1,88 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis",
+  "attempt": 2,
+  "non_evidence": true,
+  "status": "failed",
+  "started_utc": "2026-09-30T17:03:42.648649+00:00",
+  "git_head": "d67ffcec7ce128010c723e2c59a9a348555e46ca",
+  "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+  "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+  "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+  "checks": {
+    "clean_tree": true,
+    "wrapper_self_contained": true,
+    "image_expression_equal_to_frozen_exp14": true,
+    "isolated_remote_import_simulation": true,
+    "diagnostic_unchanged_since_e6361eb": true,
+    "shape_gate_unchanged": true,
+    "vllm_kvquant_tree_unchanged": true,
+    "vllm_kvquant_unchanged_since_backport": true,
+    "rabit_source_unchanged": true,
+    "qwen_revision_unchanged": true,
+    "exp13_evidence_unchanged": true,
+    "exp1_12_evidence_unchanged": true,
+    "attempt1_archive_unchanged": true,
+    "protected_paths_clean": true,
+    "attempt2_not_already_run": true
+  },
+  "self_contained": {
+    "wrapper_imports": [
+      "__future__",
+      "modal",
+      "os",
+      "pathlib",
+      "subprocess",
+      "sys"
+    ],
+    "wrapper_imports_only_stdlib_and_modal": true,
+    "wrapper_imports_no_sibling_module": true,
+    "payload_files": {
+      "exp14_shape_gate.py": "/opt/exp14/exp14_shape_gate.py",
+      "exp14_shape_gate_numdiag.py": "/opt/exp14/exp14_shape_gate_numdiag.py"
+    },
+    "payload_exactly_expected": true,
+    "payload_sibling_imports": {
+      "exp14_shape_gate.py": [],
+      "exp14_shape_gate_numdiag.py": [
+        "exp14_shape_gate"
+      ]
+    },
+    "payload_sibling_imports_all_shipped": true,
+    "diagnostic_is_the_only_diagnostic_payload": true
+  },
+  "isolated_import": {
+    "deployment_module_importable": false,
+    "any_exp14_sibling_importable": false,
+    "import_ok": true,
+    "has_app_function_entrypoint": true,
+    "loaded_sibling_modules": [],
+    "returncode": 0,
+    "stderr_tail": "",
+    "passed": true
+  },
+  "wall_clock_limit_s": 2700,
+  "harness_sha256": {
+    "run_exp14_shape_gate_numdiag.py": "6f429fd2da4c3ff5a7f1e3b8208b60e3d847aa297ee1f3bc9a9595d81fe47e92",
+    "exp14_shape_gate_numdiag_modal.py": "b9967f2989b7634be0cca8fca609bda310cbba7fb052cec2329ca4bf167fa0f7",
+    "exp14_shape_gate_numdiag.py": "d0974332dc09d2dc4e3c6433c47816381f7fb16a6a649405e2aa7cfabd1f6fe1",
+    "exp14_shape_gate.py": "12c4e23db61e39c119dc70851efbdebc8e1cf9a1d89a91a02623c6694b8d9442",
+    "test_exp14_shape_gate_numdiag.py": "20c384385ee96d300bbd76c70b1100c5cd5528b8f18cef7314d258fc32a71fdf"
+  },
+  "tree_clean_at_launch": true,
+  "completed_utc": "2026-09-30T17:03:46.280561+00:00",
+  "run": {
+    "returncode": 1,
+    "timed_out": false,
+    "elapsed_s": 1.4,
+    "app_id": null,
+    "app_stop": {
+      "attempted": false,
+      "reason": "no app id captured"
+    },
+    "final_app_state": null
+  },
+  "modal_app_ids": [],
+  "session_log_sha256": "7a53024de1973cb8f92289556f6ace100ddacf06c15eb745dfc51057bd6d2d92",
+  "summary_sha256": null
+}
