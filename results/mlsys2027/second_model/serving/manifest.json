@@ -1,0 +1,505 @@
+{
+  "experiment": 14,
+  "part": "serving",
+  "status": "passed",
+  "started_utc": "2026-09-30T21:48:06.247119+00:00",
+  "provenance": {
+    "git_head": "5d7fae28358f918987122a5da9f2be8fff98bb45",
+    "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+    "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+    "equivalence": {
+      "image_expression_identical_to_exp4": true,
+      "base_engine_kwargs_identical_to_exp13": true,
+      "context_output_tokens_identical": true,
+      "timed_region_identical_to_exp13": true,
+      "allowed_dtypes": true,
+      "backend_pin_never_removed": true
+    },
+    "protocol_sha256": "7ebb7a44a180b7cfabb9703b95c20f0a8618b90282cd25166a17df7597a2cfb3",
+    "harness_sha256": {
+      "run_experiment14_second_model.py": "f4f075b9856bce40987949454a1cf777aafdc75a6c97dd16e4290eab2e025ebc",
+      "exp14_deployment_modal.py": "76d6ef9030960d34df663d1d803a4771493258cf9a9f89c667e08f6b515defcb",
+      "exp14_engine_worker.py": "80297e4569846388229fd7a8ab32579a376a7223f15885161f86a120957be7bc",
+      "exp14_probe_worker.py": "b6651c24f4dc1bc8bf28e5fb288e75944a3cdfc4166c5e98361717f8df8475b9",
+      "exp14_shape_gate.py": "a6054a3b73b217895f6d6fcc818f2d09868ac9801dd78a2c2ef78a12fbc64398",
+      "exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+      "exp14_model_snapshot_modal.py": "ee691d7e9963f042939cf06d5ea3d5b691b6ad7643219a7575d08f0f51ee7f09",
+      "exp14_second_model_protocol.json": "7ebb7a44a180b7cfabb9703b95c20f0a8618b90282cd25166a17df7597a2cfb3",
+      "test_experiment14_second_model.py": "ca7ab1b37433ebd871ecc822601e7cb5d5ad02b2a7dcf0879efa5ce1cfcd0b5a",
+      "exp3_correctness_gate.py": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce",
+      "exp3_watchdog.py": "05e6472e8172a0b7e264ecf7509752bb9a70818f08ba67da476c69db38164d21"
+    },
+    "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+    "model_manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+    "probe_git_head": "c05eb401c086af88a71ed9b7df197dedaeb42cf5",
+    "protocol": {
+      "experiment": 14,
+      "type": "generalization of the FROZEN RABIT policy to a second model: physical serving (capacity + single-request latency) and logical fake-quant quality, reported separately",
+      "plan": "docs/MLSYS_EXPERIMENT_PLAN.md Experiment 14 (one additional compatible model); the plan defers the model choice to a compatibility check",
+      "model_b": {
+        "id": "Qwen/Qwen2.5-7B-Instruct",
+        "revision": "16c174980d8a1492910551634b4969e69cdc2444",
+        "revision_resolution": "git ls-remote of the ModelScope repository during preparation: refs/heads/master = 16c174980d8a1492910551634b4969e69cdc2444 (no tags exist); the file API returns the identical manifest for Revision=<commit> and Revision=master",
+        "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+        "manifest_rule": "sha256 of sorted 'path<TAB>size<TAB>sha256' lines of all 15 files",
+        "files": [
+          [
+            ".gitattributes",
+            1519,
+            "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+          ],
+          [
+            "LICENSE",
+            11343,
+            "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e"
+          ],
+          [
+            "README.md",
+            6240,
+            "f366f33bbf6bcadbb7d87f0a21a7b65584a56b8d58b0743c77c88bee625b93a6"
+          ],
+          [
+            "config.json",
+            663,
+            "7463bb0ea78315365e6c6b74de4e73bbcc8359dfb0c5a737584e077d42c0b03c"
+          ],
+          [
+            "configuration.json",
+            2,
+            "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+          ],
+          [
+            "generation_config.json",
+            243,
+            "3a8f9087e486054c8a4a08dae2e5a3ba62e23da212b5b8c08bc42cb983c3459f"
+          ],
+          [
+            "merges.txt",
+            1671839,
+            "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3"
+          ],
+          [
+            "model-00001-of-00004.safetensors",
+            3945441440,
+            "a1333e6293854747c481288ea83b348226af178dd565c49b6f9495ba1966aba7"
+          ],
+          [
+            "model-00002-of-00004.safetensors",
+            3864726352,
+            "f5d25a2772cb825164a2a2c0fb6d51a87e282abf21e4dd75bc5cfb3cd0ea6185"
+          ],
+          [
+            "model-00003-of-00004.safetensors",
+            3864726424,
+            "8efdec4c1bc12317ae1a38dc42b595ce777738a64deea3fcb8a0a91381bcdfd5"
+          ],
+          [
+            "model-00004-of-00004.safetensors",
+            3556377672,
+            "1a72d403cdf0c1ec3cb7f289f17b394a01e64394c2e9b3c0f94dbce3faf879bd"
+          ],
+          [
+            "model.safetensors.index.json",
+            27752,
+            "624bf7c47cd12468fdc16e38a47cf4f19e0415b859a223ba3c027eed2f0e1028"
+          ],
+          [
+            "tokenizer.json",
+            7031645,
+            "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539"
+          ],
+          [
+            "tokenizer_config.json",
+            7305,
+            "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583"
+          ],
+          [
+            "vocab.json",
+            2776833,
+            "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+          ]
+        ],
+        "key_file_sha256": {
+          "config.json": "7463bb0ea78315365e6c6b74de4e73bbcc8359dfb0c5a737584e077d42c0b03c",
+          "generation_config.json": "3a8f9087e486054c8a4a08dae2e5a3ba62e23da212b5b8c08bc42cb983c3459f",
+          "model.safetensors.index.json": "624bf7c47cd12468fdc16e38a47cf4f19e0415b859a223ba3c027eed2f0e1028",
+          "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+          "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583"
+        },
+        "enforcement": {
+          "probe_and_serving": "snapshot_download(model, revision=<commit>) in the container, then every frozen file verified (size + sha256, no extra file) before any engine starts; the session records revision, manifest hash and verification",
+          "quality": "the canonical scripts (unmodifiable) download without a revision: before the runs ModelScope master must resolve to <commit> with the identical file manifest; after the runs master must still resolve to <commit> and EVERY Qwen2.5-7B-Instruct snapshot directory in the model volume must match the frozen manifest (exp14_model_snapshot_modal.py, CPU only); otherwise the quality part is invalid",
+          "binding": "probe, serving and quality must all record the same revision and manifest hash"
+        },
+        "geometry": {
+          "architectures": [
+            "Qwen2ForCausalLM"
+          ],
+          "num_hidden_layers": 28,
+          "num_attention_heads": 28,
+          "num_kv_heads": 4,
+          "head_dim": 128,
+          "sliding_window": null,
+          "rabit_gqa4_decode_engaged": false,
+          "rabit_fast_append_engaged": false
+        },
+        "context": "max_position_embeddings 32768, rope_theta 1e6, use_sliding_window false, BF16 weights",
+        "tokenizer": "no BOS token (bos_token null, add_bos_token false); eos <|im_end|>",
+        "selection": "user decision after the compatibility audit: tests a different GQA geometry (the plan's question) with no source change; Llama-3.1-8B is 32:8 (ratio 4)"
+      },
+      "policy": {
+        "frozen": "K3/V2/G32/R4/META8g64",
+        "serving_kv_cache_dtype": "rabit_kv2",
+        "quality_config": {
+          "name": "2b META8g64 K3V2 G32 R4",
+          "k_bits": 3,
+          "v_bits": 2,
+          "k_style": "seq_affine",
+          "v_style": "group_affine",
+          "k_group": 32,
+          "v_group": 32,
+          "residual": 4,
+          "metadata_mode": "int8",
+          "metadata_group_size": 64
+        },
+        "retuning": "none (Exp14 tests the frozen policy, not a new search)"
+      },
+      "compatibility_audit": {
+        "source_change_required": false,
+        "layout": "rabit2_page_layout and Rabit2OnlineStateRef invariants hold: head_dim 128 % 64 == 0; 4 x 128 = 512 K primaries and 32 x 4 x 4 = 512 V primaries per page are multiples of 64",
+        "backend_guards": "no sliding window / softcap / ALiBi / sinks (Qwen2.5 sliding_window resolves to None)",
+        "dispatch_at_model_b": {
+          "decode_attention": "Stage4B3 GQA4 entry -> exact Stage4B2 fallback (ratio 7)",
+          "one_token_append": "final fast append -> _rabit2_final_old_append (needs 8 x 128)",
+          "v2_quantizer": "compiled (1, 8, 128) path -> exact reference quantizer",
+          "prefill": "rabit2_bulk_append_exact (shape-general) + dense context attention"
+        },
+        "vllm_support": "Qwen2ForCausalLM is registered in the vendored snapshot"
+      },
+      "snapshot": {
+        "vllm_kvquant": "the committed tree (unchanged since backport commit 611a4ffc96c70c81529978dc01a290e87ccf76e9)",
+        "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+        "no_source_change": true
+      },
+      "gates": {
+        "rabit_gate": "exp3_correctness_gate.py, unchanged (Llama shape)",
+        "shape_gate": {
+          "script": "benchmarks/mlsys2027/exp14_shape_gate.py",
+          "geometries": {
+            "model_b": "28 / 4 / 128",
+            "positive_control": "32 / 8 / 128 (Llama)"
+          },
+          "replays": "exact serving call sequence: 2048-token bulk prefill + 31 decode steps (2 seeds) and boundary prefills 1, 4, 5, 35, 36, 37, 68 + 8 decode steps",
+          "criteria": [
+            "page bytes / alignment invariants",
+            "closed pages byte-identical to Rabit2OnlineStateRef",
+            "token counts and page transitions identical",
+            "attention: fixed dtype-aware numerical conformance checks C1 and C2 (see attention_conformance)",
+            "fallback call counts match the predicates"
+          ],
+          "exact_checks_dominate": "any exact-invariant failure fails the gate regardless of C1 / C2",
+          "attention_conformance": {
+            "kind": "fixed dtype-aware numerical conformance checks (NOT a rigorous worst-case floating-point theorem, NOT a universal error bound, NOT a proof of arbitrary-input Triton attention correctness)",
+            "r": "UNROUNDED FP32 kernel-semantics attention output computed from the INDEPENDENT Rabit2OnlineStateRef state: closed pages dequantized in FP32; open-group K / V rounded to BF16 as the runtime does; residual tokens exact BF16; PyTorch FP32 GQA attention (_gqa_ref)",
+            "y": "runtime BF16 decode output converted to FP32 for comparison",
+            "u": "2^-8 (BF16 unit roundoff)",
+            "floor": "0.01 * max|r|",
+            "C1": "max|y - r| <= u * max|r|; if max|r| == 0, y must be exactly 0",
+            "C2": "|y_i - r_i| / |r_i| <= u for every element with |r_i| >= 0.01 * max|r|",
+            "applies_to": "identically to Qwen 28Q / 4KV / D128 and the Llama 32Q / 8KV / D128 positive control, every frozen replay and checkpoint",
+            "justification": [
+              "the runtime attention output is stored in BF16",
+              "the independent reference represents the same intended numerical semantics in FP32",
+              "u = 2^-8 is the BF16 unit-roundoff scale",
+              "the normwise test C1 handles near-zero values",
+              "the pre-existing 1 % floor makes relative error meaningful away from zero"
+            ],
+            "diagnostics_not_gating": [
+              "old 5e-3 error vs the Attempt-1 FP32 references",
+              "error vs the BF16-rounded reference",
+              "BF16 ULP histogram / max ULP",
+              "C1 / C2 against the runtime-state materialization"
+            ]
+          }
+        },
+        "order": "probe, serving and quality each run their gates / validity checks before any interpretation"
+      },
+      "amendments": [
+        {
+          "kind": "post-failure CORRECTNESS-CRITERION amendment",
+          "replaces": "the shape gate's inherited fixed attention criterion: max |runtime - FP32 reference| < 5e-3 over the runtime-state and reference-state FP32 references (from the single 70-token case of test_rabit_kv2_stage3c.py)",
+          "by": "attention_conformance C1 / C2 (above)",
+          "criterion_diff": {
+            "old": "e_rt < 5e-3 and e_ref < 5e-3 (FP32 references, FP32 open-group dequantization)",
+            "new": "C1 and C2 vs r (independent reference state, kernel semantics, unrounded FP32)"
+          },
+          "reason": [
+            "feasibility-probe Attempt 1 failed the inherited fixed 5e-3 attention threshold at BOTH geometries (including the Llama positive control) on short-prefix replays",
+            "the valid non-evidence numerical diagnostic (Attempt 4) showed that threshold can be violated by BF16 output rounding alone while page-byte and state correctness are exact",
+            "the replacement criterion was fixed from BF16 numerical semantics (u = 2^-8) and the pre-existing 1 % floor, not from observed maxima",
+            "no capacity, latency, quality or model-engine result had been exposed by the failed Exp14 probe"
+          ],
+          "old_protocol_sha256": "bea4003ebcb75d54ede04eea2eea4c3ba26f341743d4c6a89e3ae0a069f0b43a",
+          "new_protocol_sha256": "recorded in results/mlsys2027/second_model/criterion_amendment_record.json (a protocol cannot contain its own hash)",
+          "numerical_diagnostic_commit": "4947050bf42d1f1d72ce1096f9c473ea8b2be9f8",
+          "offline_evaluation_commit": "f909bc7ad814efd1c76119d90587c2c2c593cece",
+          "offline_evaluation": "254 total checkpoints (127 Llama + 127 Qwen): C1 and C2 pass at every checkpoint",
+          "failed_probe_attempt_1_archive_commit": "28d83ba1e82582e07d8b4ce0f6fe0cf22ddb2923",
+          "excluded": [
+            "probe Attempt 1",
+            "numerical-diagnostic Attempts 1-3"
+          ],
+          "unchanged": [
+            "exact checks (page bytes, state, token counts, page transitions, dispatch)",
+            "seeds / replays / prefixes / geometries",
+            "model / revision",
+            "policy",
+            "RABIT / vLLM source",
+            "serving and quality protocols"
+          ]
+        }
+      ],
+      "feasibility_probe": {
+        "status": "NON-EVIDENCE; requires explicit approval; must pass before --part serving / quality",
+        "runs": "same image, RABIT gate, shape gate, model provenance, then one fresh engine per dtype (bfloat16, rabit_kv2): capacity, geometry, backend, physical-layout consistency, one 2048-token / 32-token generation, one chat sanity generation; NO timing emitted",
+        "output": "results/mlsys2027/second_model/feasibility_probe",
+        "binding": "the measured parts run only if a PASSED probe record matches the current harness hashes, protocol hash, vllm-kvquant tree and model revision / manifest hash (check_probe_prerequisite; tested offline)"
+      },
+      "serving": {
+        "engine": {
+          "worker_base_engine_kwargs": {
+            "dtype": "bfloat16",
+            "block_size": 32,
+            "max_model_len": 32768,
+            "max_num_batched_tokens": 16384,
+            "max_num_seqs": 32,
+            "enable_prefix_caching": false,
+            "enable_chunked_prefill": true,
+            "gpu_memory_utilization": 0.82,
+            "enforce_eager": true,
+            "trust_remote_code": true,
+            "disable_log_stats": false,
+            "attention_config": {
+              "backend": "TRITON_ATTN"
+            }
+          },
+          "model_runner": "default V2; 'Using V2 Model Runner' required in every leg",
+          "process_topology": "vLLM default multiprocess engine core (Exp4 / Exp13 topology)"
+        },
+        "workload": {
+          "prompt": "filler x 2048 (no BOS token) (Model B has no BOS; the Exp13 [BOS] + ' the' x 2047 rule is unchanged for tokenizers with BOS)",
+          "context_tokens": 2048,
+          "output_tokens": 32,
+          "decoding": "greedy",
+          "ignore_eos": true,
+          "requests": "single request per generate call"
+        },
+        "session": {
+          "gpu": "one NVIDIA H100 80GB HBM3 (recorded; must be H100 80GB)",
+          "legs": [
+            {
+              "index": 1,
+              "label": "A1",
+              "kv_cache_dtype": "bfloat16"
+            },
+            {
+              "index": 2,
+              "label": "B1",
+              "kv_cache_dtype": "rabit_kv2"
+            },
+            {
+              "index": 3,
+              "label": "B2",
+              "kv_cache_dtype": "rabit_kv2"
+            },
+            {
+              "index": 4,
+              "label": "A2",
+              "kv_cache_dtype": "bfloat16"
+            }
+          ],
+          "order": "A B B A (Exp3 counterbalancing)",
+          "warmups_per_leg": 5,
+          "reps_per_leg": 30,
+          "samples_per_condition": 60,
+          "fresh_engine_process_per_leg": true,
+          "failure_rule": "any gate / leg failure, watchdog timeout or unclean GPU aborts; no retry"
+        },
+        "capacity": {
+          "primary": "OBSERVED PHYSICAL vLLM allocator KV capacity (num_gpu_blocks x block_size) from the live engine",
+          "ratio": "rabit / bf16",
+          "secondary_labelled_theoretical": {
+            "bfloat16": {
+              "bytes": 57344,
+              "formula": "28 layers x (K,V) x 4 heads x 128 x 2 B (BF16)"
+            },
+            "rabit_kv2": {
+              "bytes": 10864,
+              "formula": "28 layers x 388 B (RABIT physical page 12,416 B per 32-token block per layer: K3 payload 6,144 + V2 payload 4,096 + META8g64 K min/scale 2 x 544 + V min/scale 2 x 544)"
+            }
+          },
+          "implied_bytes_per_token": "reported KV GiB x 2^30 / observed capacity (derived; layout consistency check within 1 %)"
+        },
+        "latency": {
+          "per_leg": [
+            "median_tpot_ms",
+            "p90_tpot_ms",
+            "median_ttft_ms",
+            "median_wall_ms"
+          ],
+          "cross_leg": "median of the two leg-level values",
+          "secondary": "pooled 60-sample median / p90 TPOT (descriptive; not 60 independent replicates)",
+          "drift": "leg 2 - leg 1 per condition (TPOT abs / %, p90 TPOT, TTFT, wall)",
+          "comparison": "RABIT vs BF16 on the cross-leg summaries",
+          "no_inference": true,
+          "jit_warnings": "Triton JIT-during-inference warnings inside measured samples are counted and reported (descriptive, as in the Exp13 acceptance record)"
+        },
+        "integrity_gates": [
+          "RABIT gate and shape gate pass",
+          "4 legs exit 0, no watchdog timeout, GPU clean before each",
+          "every leg: V2 runner, block_size 32, 5 warmups + 30 samples, prompt 2048 / output 32 in every sample, prompt rule 'filler x 2048 (no BOS token)'",
+          "every leg: served geometry == the frozen Model-B geometry (incl. sliding_window None and the two fallback predicates false)",
+          "every leg: backend TRITON_ATTN",
+          "every leg: implied bytes / token within 1 % of the theoretical layout",
+          "RABIT legs: frozen markers present",
+          "identical capacity and config within a condition; only dtype-induced fields differ across conditions"
+        ],
+        "dtype_induced_allowlist": [
+          "requested.kv_cache_dtype",
+          "kv_dtype.requested_kv_cache_dtype",
+          "kv_dtype.engine_cache_dtype",
+          "kv_dtype.resolved_kv_torch_dtype",
+          "kv_dtype.kv_quant_mode"
+        ]
+      },
+      "quality": {
+        "kind": "LOGICAL fake-quant (HF transformers, unchanged benchmarks/quality/*.py; KV MB is logical)",
+        "methods": "bf16,rabit2",
+        "model_arg": [
+          "--model-name",
+          "Qwen/Qwen2.5-7B-Instruct"
+        ],
+        "selection": {
+          "continuation_ppl": {
+            "units": 32,
+            "canonical_subset": 8,
+            "args": [
+              "--context-tokens",
+              "1024",
+              "--eval-tokens",
+              "128",
+              "--samples",
+              "32"
+            ]
+          },
+          "niah": {
+            "units": 57,
+            "canonical_subset": 15,
+            "args": [
+              "--context-lengths",
+              "4096,8192,16384",
+              "--needle-depths",
+              "0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95",
+              "--max-new-tokens",
+              "16"
+            ]
+          },
+          "passage_retrieval": {
+            "units": 200,
+            "canonical_subset": 10,
+            "args": [
+              "--sample-start",
+              "0",
+              "--samples",
+              "200",
+              "--max-input-tokens",
+              "16384",
+              "--max-new-tokens",
+              "32"
+            ]
+          },
+          "hotpotqa": {
+            "units": 100,
+            "canonical_subset": 20,
+            "args": [
+              "--sample-start",
+              "0",
+              "--samples",
+              "100",
+              "--length-bucket",
+              "8k+",
+              "--max-input-tokens",
+              "16384",
+              "--max-new-tokens",
+              "32"
+            ]
+          },
+          "qasper": {
+            "units": 24,
+            "canonical_subset": 24,
+            "args": [
+              "--sample-start",
+              "0",
+              "--samples",
+              "24",
+              "--length-bucket",
+              "8k+",
+              "--max-input-tokens",
+              "16384",
+              "--max-new-tokens",
+              "32"
+            ]
+          }
+        },
+        "why_exp12_selection": "the accepted Exp12 methodology (superset of the Exp1 canonical units) gives both Exp1-count subset aggregates and paired bootstrap CIs in one run",
+        "statistics": "paired_bootstrap_ci.py unchanged (10,000 paired resamples; 95 % percentile CI); canonical subset aggregates on the canonical unit keys",
+        "validity": [
+          "exit 0, no traceback",
+          "log names Model B",
+          "summary counts exact",
+          "per-unit rows paired, count == Exp12 units",
+          "unit identity equals the accepted Exp12 log (unit keys, dataset header, ground truths)",
+          "every per-unit logical KV MB equals the Model-B geometry accounting within 0.001 MB"
+        ],
+        "not_applicable": "the Exp10 per-example QA control gate and the Exp12 control-reproduction targets are Llama reference values; no Model-B reference exists, so the within-run bf16 is the control"
+      },
+      "fairness": {
+        "MATCHED": [
+          "GPU class / container / session per part",
+          "model weights and tokenizer across conditions",
+          "vLLM snapshot",
+          "engine settings (block 32, gpu_memory_utilization 0.82, eager, prefix caching off, chunked prefill on, max_model_len 32768)",
+          "prompt / output length",
+          "warmups",
+          "measurement code (timed region AST-identical to Exp13 / Exp4)",
+          "counterbalanced order",
+          "quality units, prompts and scoring across bf16 / rabit2"
+        ],
+        "METHOD_INHERENT": [
+          "KV representation, metadata and R4 residual"
+        ],
+        "LIMITATIONS": [
+          "RABIT serves through untuned exact fallback kernels at Model B's geometry (BF16 uses the standard TRITON_ATTN path)",
+          "prompt has no BOS token (Model B convention), unlike Exp13",
+          "Model B differs from Llama in size, tokenizer and training; cross-model numbers are descriptive context only",
+          "one additional model; no universality claim",
+          "no Model-B quality reference: no control-reproduction gate"
+        ]
+      },
+      "claim_boundary": "Generalization of the FROZEN RABIT policy (K3/V2/G32/R4/META8g64, no retuning) to ONE additional model, Qwen2.5-7B-Instruct (GQA 28:4, head_dim 128). Serving: observed physical allocator capacity and single-request latency in one H100 session (default V2 runner, eager, 2048-token prompt, 32 output tokens); no throughput claim. At this geometry the frozen RABIT source serves through its exact FALLBACK paths (GQA ratio 7 is not a multiple of 4; the final fast append and the compiled V2 quantizer require 8 KV heads x head_dim 128), so RABIT latency on Model B measures those untuned paths -- it is NOT a measurement of how the Llama-tuned kernels transfer. Quality: LOGICAL fake-quant evaluation (HF transformers), separate from physical serving; neither validates the other. Cross-model comparisons with Exp12 / Exp13 (Llama-3.1-8B) are descriptive context from different sessions, never pooled. No universality claim beyond these two models.",
+      "exp13_correctness_wording_for_paper": "The upstream TurboQuant suite passed under the frozen item-level gate. The exact turboquant_k3v4_nc configuration was separately validated in the physical feasibility probe for cache initialization, backend routing and sanity generation.",
+      "outputs": {
+        "probe": "results/mlsys2027/second_model/feasibility_probe",
+        "serving": "results/mlsys2027/second_model/serving",
+        "quality": "results/mlsys2027/second_model/quality"
+      }
+    },
+    "uncommitted_files": null
+  },
+  "modal_returncode": 0,
+  "completed_utc": "2026-09-30T22:03:17.676780+00:00",
+  "modal_app_ids": [
+    "ap-9G9Z3oDvvGWTtwpRwZuJZI"
+  ],
+  "session_log_sha256": "0ceb853965b443508ebc1cc241c20a86d80b40bea7b808c24a573e1be45ce1a0"
+}
