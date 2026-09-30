@@ -1,0 +1,753 @@
+{
+  "experiment": "Experiment 12 -- larger samples + paired bootstrap CIs",
+  "methods": "bf16,rabit2",
+  "status": "passed",
+  "started_utc": "2026-09-30T00:37:26.468843+00:00",
+  "provenance": {
+    "git_head": "9b52665c916bb5ab2b52e65a1995cb7fb756559f",
+    "exp11_evidence_commit": "ef41a160e6f04aa563ed1d214819b93962ee8db0",
+    "amendment_commit": "86b03eabaecfed0a838cabd7a7d1cce2f0a2fa38",
+    "amendment_sha256_lf": "eaf28d66f38eedc13f447eb9776cd6affd2abb06dc2c64dec8d7e7d2a1a2e10c",
+    "canonical_script_sha256": {
+      "continuation_ppl": "4f1385a6dfee1e4f75b93c9e61bd90ff8bf86d6c038a4e4b01b568b61ff793d9",
+      "niah": "845e58c018859554400c6c2a239b160320e6fae8fe3089d050a3de53cbdd3c9e",
+      "passage_retrieval": "d9835832b586a7a6c09118436694ad028f7f32473573ca952523cf6fa013dbee",
+      "hotpotqa": "67c9b5754bced90a0dc0cac5cbacc748566ad28005eefb5d2dd2ae95696d7288",
+      "qasper": "62667cda5993b02845139d394e5726b5170da012e993f42756cd4c8b9345b424"
+    },
+    "runner_script_sha256": "9b7112a45e0ae00a767ee7dfc6d7ef533bfe278a973de4210acddb689b36fe8d",
+    "analysis_sha256": "cce672924dbb6e8b6206d1eb982b9e55b0374ad7da1be706cfcfeafb3013f3f1",
+    "protocol_sha256": "1bd9fafa5bae3323b70a75c38ea2a321a7c4ec1a5c8c70434c7e245d561137b8",
+    "protocol": {
+      "experiment": 12,
+      "type": "logical fake-quant quality: larger samples + paired per-example bootstrap CIs (NOT a physical serving benchmark)",
+      "question": "Are the canonical quality deltas (bf16 vs rabit2; in particular HotpotQA 60.6 -> 55.2 F1) statistically robust, or within noise given the current small sample counts (8/10/15/20/24)?",
+      "plan_hypothesis_reported_not_presupposed": "with paired per-example CIs and larger N, the core directional findings (small PPL degradation; larger HotpotQA regression) hold, and the HotpotQA delta's CI excludes zero",
+      "purpose_separation": {
+        "addresses": "SAMPLING uncertainty of the reported bf16-vs-rabit2 quality deltas: more independent units and a paired example / window bootstrap CI on each delta",
+        "does_not_address": "run-to-run generation variability of identical configs (fresh-GPU non-bit-exact greedy decoding) -- quantified by the control reproducibility audit and handled for validity by the frozen QA control gate; the bootstrap is conditional on this run's generations and never used to smooth or hide control instability",
+        "treatment_vs_control": "the paired bootstrap CI is on the within-run rabit2 - bf16 delta on identical units; run-to-run variability is an additional, unmodelled component"
+      },
+      "conditions": {
+        "bf16": {
+          "role": "reference (uncompressed)"
+        },
+        "rabit2": {
+          "role": "final RABIT policy (canonical, unchanged)",
+          "config": {
+            "name": "2b META8g64 K3V2 G32 R4",
+            "k_bits": 3,
+            "v_bits": 2,
+            "k_style": "seq_affine",
+            "v_style": "group_affine",
+            "k_group": 32,
+            "v_group": 32,
+            "residual": 4,
+            "metadata_mode": "int8",
+            "metadata_group_size": 64
+          },
+          "shorthand": "K3/V2/G32/R4/META8g64"
+        }
+      },
+      "frontier_methods": "not run (the plan marks them optional; smallest design answering the question)",
+      "scope": {
+        "benchmarks": [
+          "continuation_ppl",
+          "niah",
+          "passage_retrieval",
+          "hotpotqa",
+          "qasper"
+        ],
+        "multilingual_ppl": "not included: the plan's question names the canonical counts 8/10/15/20/24 (the five Exp1 benchmarks); multilingual PPL (Exp2) is out of scope here"
+      },
+      "code": "the unchanged canonical benchmarks/quality/*.py; only CLI sample-count / NIAH-depth arguments differ; per-example logging already exists in all five scripts",
+      "common": {
+        "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct (modelscope snapshot_download)",
+        "model_dtype": "bfloat16",
+        "attention": "sdpa",
+        "seed": "torch.manual_seed(0) and torch.cuda.manual_seed_all(0) in every script",
+        "tf32": "enabled (matmul and cudnn)",
+        "gpu": "NVIDIA H100 via Modal"
+      },
+      "gpu_note": "scripts request gpu='H100'; Modal has previously assigned an H200 for some runs -- the GPU of each run is recorded from its log",
+      "selection": {
+        "continuation_ppl": {
+          "canonical_units": 8,
+          "exp12_units": 32,
+          "unit": "independent consecutive 1152-token WikiText-2 window (1024 context + 128 scored)",
+          "expansion": "4x (the plan's documented example factor)",
+          "rule": "the first 32 x (1024 + 128) tokens of the tokenized WikiText-2 test stream, split into consecutive non-overlapping windows; windows 1-8 are the canonical windows",
+          "args": [
+            "--context-tokens",
+            "1024",
+            "--eval-tokens",
+            "128",
+            "--samples",
+            "32"
+          ]
+        },
+        "niah": {
+          "canonical_units": 15,
+          "exp12_units": 57,
+          "unit": "(context length, needle depth) case",
+          "expansion": "denser depth grid 0.05..0.95 step 0.05 (19 depths) x the same 3 context lengths",
+          "rule": "every (context length, depth) pair; needle at round(filler x depth); the 15 canonical cases are the depths 0.10 / 0.25 / 0.50 / 0.75 / 0.90",
+          "independence_caveat": "cases share the same needle and WikiText-2 filler; denser depths are not fully independent draws -- the CI is descriptive of this case set",
+          "args": [
+            "--context-lengths",
+            "4096,8192,16384",
+            "--needle-depths",
+            "0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95",
+            "--max-new-tokens",
+            "16"
+          ]
+        },
+        "passage_retrieval": {
+          "canonical_units": 10,
+          "exp12_units": 200,
+          "unit": "LongBench passage_retrieval_en example",
+          "expansion": "the full pinned pool (200 rows); canonical = rows [0, 10)",
+          "rule": "dataset rows [0, 200) of passage_retrieval_en @ 915b0c6 (test split), no filter",
+          "args": [
+            "--sample-start",
+            "0",
+            "--samples",
+            "200",
+            "--max-input-tokens",
+            "16384",
+            "--max-new-tokens",
+            "32"
+          ]
+        },
+        "hotpotqa": {
+          "canonical_units": 20,
+          "exp12_units": 100,
+          "unit": "LongBench-E hotpotqa example",
+          "expansion": "the full 8k+ bucket (100 examples; dataset rows 200-299); canonical = filtered [0, 20)",
+          "rule": "filtered positions [0, 100) of hotpotqa_e @ 92b6c5f (test split) with length >= 8000",
+          "args": [
+            "--sample-start",
+            "0",
+            "--samples",
+            "100",
+            "--length-bucket",
+            "8k+",
+            "--max-input-tokens",
+            "16384",
+            "--max-new-tokens",
+            "32"
+          ]
+        },
+        "qasper": {
+          "canonical_units": 24,
+          "exp12_units": 24,
+          "unit": "LongBench-E qasper example",
+          "expansion": "none possible: the 8k+ bucket has exactly 24 examples and the canonical slice is the full bucket (the plan: use the full available 8k+ bucket)",
+          "rule": "filtered positions [0, 24) of qasper_e @ 52edb9d (test split) with length >= 8000 -- identical to canonical",
+          "args": [
+            "--sample-start",
+            "0",
+            "--samples",
+            "24",
+            "--length-bucket",
+            "8k+",
+            "--max-input-tokens",
+            "16384",
+            "--max-new-tokens",
+            "32"
+          ]
+        }
+      },
+      "pool_facts": {
+        "hotpotqa": {
+          "rows": 300,
+          "bucket_8k_plus": 100
+        },
+        "qasper": {
+          "rows": 224,
+          "bucket_8k_plus": 24
+        },
+        "passage_retrieval": {
+          "rows": 200
+        }
+      },
+      "benchmark_facts_canonical": {
+        "continuation_ppl": {
+          "dataset": "WikiText-2 test (raw text: https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt), non-empty stripped lines joined in blocks of 64",
+          "selection": "deterministic: the first samples x (context + eval) tokens of the tokenized stream, split into consecutive non-overlapping spans",
+          "samples": 8,
+          "context_tokens": 1024,
+          "eval_tokens_per_sample": 128,
+          "scored_tokens_per_method": 1024,
+          "quantized_prefix_tokens": "context (1024)",
+          "procedure": "teacher-forced: prefill the 1024-token context, quantize/dequantize its KV once, score the 128 continuation tokens (first logit from the prefill)",
+          "metric": "PPL (exp of mean token cross-entropy) and PPL delta % vs bf16"
+        },
+        "niah": {
+          "dataset": "synthetic needle-in-a-haystack: WikiText-2 test as distractor filler; needle 'The hidden secret code is RABIT-7291'",
+          "selection": "deterministic: every (context length, depth) pair; needle inserted at round(filler x depth)",
+          "cases": 15,
+          "context_lengths": [
+            4096,
+            8192,
+            16384
+          ],
+          "needle_depths": [
+            0.1,
+            0.25,
+            0.5,
+            0.75,
+            0.9
+          ],
+          "quantized_prefix_tokens": "prompt length - 1 (the last prompt token is fed at the first decode step)",
+          "generation": {
+            "decoding": "greedy argmax",
+            "max_new_tokens": 16,
+            "stop": "eos"
+          },
+          "metric": "exact-match accuracy: regex RABIT-\\d{4} on the decoded answer equals RABIT-7291",
+          "warmup": "one BF16 warm-up case at 4096 tokens, not reported"
+        },
+        "passage_retrieval": {
+          "dataset": "LongBench passage_retrieval_en (zai-org/LongBench @ 915b0c6ec0b6dfae1cd44224b7d8995317837f27, passage_retrieval_en/test-00000-of-00001.parquet, split test)",
+          "selection": "deterministic: dataset indices [0, 10)",
+          "samples": 10,
+          "sample_start": 0,
+          "max_input_tokens": 16384,
+          "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+          "prompt": "LongBench official template via the tokenizer chat template",
+          "quantized_prefix_tokens": "prompt length - 1",
+          "generation": {
+            "decoding": "greedy argmax",
+            "max_new_tokens": 32,
+            "stop": "eos"
+          },
+          "metric": "LongBench official retrieval score (fraction of numbers in the prediction equal to the target paragraph id), mean x 100"
+        },
+        "hotpotqa": {
+          "dataset": "LongBench-E hotpotqa (zai-org/LongBench @ 92b6c5fbfb0c97b91e92d9ef79802f95ce74b05e, hotpotqa_e/test-00000-of-00001.parquet, split test)",
+          "selection": "deterministic: examples with length >= 8000 (bucket 8k+), filtered positions [0, 20)",
+          "samples": 20,
+          "sample_start": 0,
+          "length_bucket": "8k+",
+          "max_input_tokens": 16384,
+          "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+          "prompt": "LongBench official template via the tokenizer chat template",
+          "quantized_prefix_tokens": "prompt length - 1",
+          "generation": {
+            "decoding": "greedy argmax",
+            "max_new_tokens": 32,
+            "stop": "eos"
+          },
+          "metric": "LongBench qa_f1_score (max over reference answers), mean x 100"
+        },
+        "qasper": {
+          "dataset": "LongBench-E qasper (zai-org/LongBench @ 52edb9d18ea01d49ec7580fefcfe6b9d97a0fa96, qasper_e/test-00000-of-00001.parquet, split test)",
+          "selection": "deterministic: examples with length >= 8000 (bucket 8k+), filtered positions [0, 24)",
+          "samples": 24,
+          "sample_start": 0,
+          "length_bucket": "8k+",
+          "max_input_tokens": 16384,
+          "truncation": "if longer, keep the first 8192 and last 8192 tokens",
+          "prompt": "LongBench official template via the tokenizer chat template",
+          "quantized_prefix_tokens": "prompt length - 1",
+          "generation": {
+            "decoding": "greedy argmax",
+            "max_new_tokens": 32,
+            "stop": "eos"
+          },
+          "metric": "LongBench qa_f1_score (max over reference answers), mean x 100"
+        }
+      },
+      "runs": [
+        {
+          "name": "continuation_ppl",
+          "script": "benchmarks/quality/continuation_ppl.py",
+          "args": [
+            "--context-tokens",
+            "1024",
+            "--eval-tokens",
+            "128",
+            "--samples",
+            "32",
+            "--methods",
+            "bf16,rabit2"
+          ]
+        },
+        {
+          "name": "niah",
+          "script": "benchmarks/quality/niah.py",
+          "args": [
+            "--context-lengths",
+            "4096,8192,16384",
+            "--needle-depths",
+            "0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95",
+            "--max-new-tokens",
+            "16",
+            "--methods",
+            "bf16,rabit2"
+          ]
+        },
+        {
+          "name": "passage_retrieval",
+          "script": "benchmarks/quality/passage_retrieval.py",
+          "args": [
+            "--sample-start",
+            "0",
+            "--samples",
+            "200",
+            "--max-input-tokens",
+            "16384",
+            "--max-new-tokens",
+            "32",
+            "--methods",
+            "bf16,rabit2"
+          ]
+        },
+        {
+          "name": "hotpotqa",
+          "script": "benchmarks/quality/hotpotqa.py",
+          "args": [
+            "--sample-start",
+            "0",
+            "--samples",
+            "100",
+            "--length-bucket",
+            "8k+",
+            "--max-input-tokens",
+            "16384",
+            "--max-new-tokens",
+            "32",
+            "--methods",
+            "bf16,rabit2"
+          ]
+        },
+        {
+          "name": "qasper",
+          "script": "benchmarks/quality/qasper.py",
+          "args": [
+            "--sample-start",
+            "0",
+            "--samples",
+            "24",
+            "--length-bucket",
+            "8k+",
+            "--max-input-tokens",
+            "16384",
+            "--max-new-tokens",
+            "32",
+            "--methods",
+            "bf16,rabit2"
+          ]
+        }
+      ],
+      "expected_count_per_method": {
+        "continuation_ppl": 4096,
+        "niah": 57,
+        "passage_retrieval": 200,
+        "hotpotqa": 100,
+        "qasper": 24
+      },
+      "metrics": {
+        "continuation_ppl": "PPL delta % (rabit2 vs bf16)",
+        "niah": "accuracy delta (points)",
+        "passage_retrieval": "retrieval score delta (points)",
+        "hotpotqa": "F1 delta (points)",
+        "qasper": "F1 delta (points)"
+      },
+      "statistical_procedure": {
+        "resamples": 10000,
+        "confidence": 0.95,
+        "method": "paired percentile bootstrap",
+        "seed_by_benchmark": {
+          "continuation_ppl": 20270929,
+          "passage_retrieval": 20270931,
+          "hotpotqa": 20270932,
+          "qasper": 20270933
+        },
+        "index_draw": "int(rng.random() * n) with rng = random.Random(seed_by_benchmark[benchmark]) (Python Mersenne Twister)",
+        "percentiles": "sorted replicate deltas; lower = s[floor(0.025*B)], upper = s[ceil(0.975*B) - 1]",
+        "niah": {
+          "inferential_statistics": null,
+          "reason": "the 57 cases (19 depths x 3 context lengths) reuse one synthetic needle / filler construction and are not 57 independent draws; no bootstrap and no pseudo-CI",
+          "report": [
+            "overall exact retrieval count / 57 and accuracy per method",
+            "19-case result separately at 4k, 8k and 16k",
+            "failed (context, depth) coordinates, if any",
+            "if both methods are 57/57: the expanded robustness grid did not distinguish them"
+          ]
+        },
+        "inferential_benchmarks": [
+          "continuation_ppl",
+          "passage_retrieval",
+          "hotpotqa",
+          "qasper"
+        ],
+        "unit": {
+          "continuation_ppl": "selected WikiText-2 evaluation window (32 deterministic consecutive windows; each scores 128 tokens)",
+          "passage_retrieval": "example",
+          "hotpotqa": "example",
+          "qasper": "example"
+        },
+        "ci_description": {
+          "continuation_ppl": "paired bootstrap uncertainty over the selected WikiText-2 evaluation windows (32 deterministic consecutive windows of one test stream -- not independently sampled documents; no population-level inference beyond these windows)",
+          "passage_retrieval": "paired example-level bootstrap over the 200 pinned passage_retrieval_en examples",
+          "hotpotqa": "paired example-level bootstrap over the 100 examples of the pinned hotpotqa_e 8k+ bucket",
+          "qasper": "paired example-level bootstrap over the complete pinned qasper_e 8k+ bucket (24 examples). Exp12 does NOT increase Qasper sample coverage; it only quantifies uncertainty on the complete available 8k+ bucket"
+        },
+        "paired": "each replicate resamples unit indices once and applies them to both bf16 and rabit2",
+        "statistic": {
+          "qa_retrieval": "100 * (mean rabit2 unit score - mean bf16 unit score)",
+          "continuation_ppl": "100 * (exp(mean ln PPL_rabit2 - mean ln PPL_bf16) - 1)"
+        },
+        "inputs": "per-example values as logged by the canonical scripts (F1 / retrieval score 3 decimals, per-window PPL 4 decimals); no re-generation",
+        "robustness_descriptive": [
+          "per-unit delta distribution (min / q25 / median / q75 / max / mean)",
+          "counts rabit2 better / worse / equal",
+          "largest absolute per-unit delta / contribution",
+          "share of the aggregate delta explained by the top-1 and top-3 units by |contribution| (and share of total |contribution|)",
+          "share of the aggregate delta explained by the worst-1 and worst-3 units (most negative rabit2 - bf16 contributions)"
+        ],
+        "qasper_coverage": "Exp12 does NOT increase Qasper sample coverage (N = 24 = the complete pinned 8k+ bucket); it only quantifies uncertainty on that complete bucket",
+        "qa_validity_gate_independent_of_statistics": "the frozen QA control gate is a validity check only; it never enters the bootstrap / effect analysis",
+        "no_outlier_removal": true,
+        "interpretation": "report the delta, its CI and N; a CI containing 0 is not evidence of no effect; descriptive, cautious wording; QA deltas are also compared with the observed identical-config generation variability (report-only)"
+      },
+      "validity": {
+        "separate_from_statistics": true,
+        "canonical_subset": {
+          "continuation_ppl": 8,
+          "niah": 15,
+          "passage_retrieval": 10,
+          "hotpotqa": 20,
+          "qasper": 24
+        },
+        "continuation_ppl_niah_passage_retrieval": {
+          "rule": "on the canonical subset, bf16 and rabit2 reproduce the canonical targets within the original Exp1 tolerances",
+          "tolerances": {
+            "ppl": {
+              "relative": 0.005
+            },
+            "accuracy_pct": {
+              "absolute_points": 1.0
+            }
+          },
+          "targets": {
+            "continuation_ppl": {
+              "bf16": {
+                "ppl": 8.502,
+                "avg_kv_mb": 128.0
+              },
+              "rabit2": {
+                "ppl": 8.6317,
+                "avg_kv_mb": 24.71
+              }
+            },
+            "niah": {
+              "bf16": {
+                "accuracy_pct": 100.0,
+                "avg_kv_mb": 1194.542
+              },
+              "rabit2": {
+                "accuracy_pct": 100.0,
+                "avg_kv_mb": 226.786
+              }
+            },
+            "passage_retrieval": {
+              "bf16": {
+                "accuracy_pct": 100.0,
+                "avg_kv_mb": 1517.375
+              },
+              "rabit2": {
+                "accuracy_pct": 100.0,
+                "avg_kv_mb": 288.09
+              }
+            }
+          }
+        },
+        "hotpotqa_qasper": {
+          "rule": "on the canonical subset (hotpotqa first 20, qasper all 24), bf16 and rabit2 must pass the FROZEN post-failure per-example QA control gate against results/quality/<benchmark>.log (identical dataset indices, token counts and ground truths; score mismatches and L1 within the frozen maxima). Units beyond the canonical subset have no control reference",
+          "amendment": "results/mlsys2027/control_reproducibility_audit/qa_control_gate_amendment.json",
+          "amendment_sha256_lf": "eaf28d66f38eedc13f447eb9776cd6affd2abb06dc2c64dec8d7e7d2a1a2e10c",
+          "amendment_commit": "86b03eabaecfed0a838cabd7a7d1cce2f0a2fa38",
+          "thresholds": {
+            "hotpotqa": {
+              "bf16": {
+                "historical_max_score_mismatch_count": 1,
+                "historical_max_l1_score_distance": 0.065
+              },
+              "rabit2": {
+                "historical_max_score_mismatch_count": 1,
+                "historical_max_l1_score_distance": 0.5
+              }
+            },
+            "qasper": {
+              "bf16": {
+                "historical_max_score_mismatch_count": 1,
+                "historical_max_l1_score_distance": 0.096
+              },
+              "rabit2": {
+                "historical_max_score_mismatch_count": 2,
+                "historical_max_l1_score_distance": 0.185
+              }
+            }
+          },
+          "new_thresholds_derived": false,
+          "exp12_data_can_modify_thresholds": false
+        },
+        "storage": {
+          "rule": "every unit's printed logical KV MB within 0.001 MB of the exact model: rabit2 = the accepted canonical accounting at prefix T; bf16 = 32*2*T*8*128*2 bytes; on the canonical subset also equal to the canonical per-unit values",
+          "prefix": "continuation 1024; NIAH context - 1; LongBench used tokens - 1",
+          "absolute_mb": 0.001
+        },
+        "structure": [
+          "exit code 0 and no traceback",
+          "bf16 and rabit2 summary rows present with the expected counts",
+          "per-unit bf16 / rabit2 rows complete, identical unit keys, in order",
+          "canonical subset units identical (keys / indices) to the canonical run"
+        ]
+      },
+      "outputs": {
+        "per benchmark log": "results/mlsys2027/variance/<benchmark>.log",
+        "integrity": "results/mlsys2027/variance/integrity_results.json",
+        "statistics": "results/mlsys2027/variance/variance_results.json (schema: bootstrap spec; per benchmark: metric, delta_definition, n_units, bf16_aggregate, rabit2_aggregate, delta, ci_low, ci_high, confidence, resamples, seed, ci_contains_zero, robustness, per_unit)",
+        "manifest": "results/mlsys2027/variance/manifest.json"
+      },
+      "compute_plan": {
+        "gpu_runs": "5 Modal apps (one per benchmark), 2 methods each, sequential",
+        "method_unit_evaluations": 826,
+        "expected_wall_minutes": "25-45",
+        "expected_h100_hours": "about 0.5-0.8",
+        "offline": "bootstrap and robustness analysis on CPU from the logs; no GPU re-run"
+      },
+      "completion_criterion": "all five benchmarks valid; paired bootstrap 95% CI computed for the bf16-vs-rabit2 delta of continuation_ppl, passage_retrieval, hotpotqa and qasper, with overlap or non-overlap with zero explicitly reported; NIAH reported as the complete 57-case deterministic robustness grid (no inferential statistics)",
+      "not_reported": [
+        "physical allocator capacity",
+        "throughput",
+        "latency"
+      ]
+    },
+    "amendment": {
+      "label": "transparent post-failure methodological amendment",
+      "pre_registered": false,
+      "written_after": "Experiment 10 Attempt 1 failed the HotpotQA R4 control-reproduction gate (results/mlsys2027/ablations/residual_window/failed_attempt_1/, archived at 9889e33)",
+      "motivation": "repeated identical-config generated-QA control instability (HotpotQA rabit2 55.2 / 57.7 from one example's greedy answer; Qasper rabit2 34.8-36.2 from three examples)",
+      "derived_from": {
+        "audit": "results/mlsys2027/control_reproducibility_audit/qa_control_audit.json",
+        "audit_sha256_lf": "a5443863381a80708b6aaa88e45a48bde69542cf2b8e8cbca968d30a5d046e6b",
+        "rows_used": "bf16 and canonical rabit2 control rows only",
+        "treatment_quality_used": false
+      },
+      "status_of_prior_attempts": {
+        "exp10_attempt1": "remains invalid_control_reproduction (excluded)",
+        "exp9_attempt1": "remains invalid_control_reproduction (excluded)",
+        "prior_accepted_experiments": "unchanged; none relabeled"
+      },
+      "unchanged": [
+        "LongBench scorer (qa_f1_score)",
+        "prompts",
+        "generation settings",
+        "datasets",
+        "sample selection and counts",
+        "configs",
+        "logical-storage accounting",
+        "official aggregate F1 metric and its reporting",
+        "continuation_ppl / NIAH / passage-retrieval control-reproduction rules",
+        "original frozen Exp10 protocol file (benchmarks/mlsys2027/exp10_residual_protocol.json, sha256 171cdbcab5c57137edda12ad044e038a52c722f32b740b26cc084ff0539c53d4) -- not modified; this amendment overlays it"
+      ],
+      "changes": "ONLY the QA control-validity rule, prospectively: for hotpotqa and qasper the aggregate +/-1.0-point F1 control-reproduction pass/fail gate (bf16 and canonical control) is superseded by the per-example gate below; the bf16 / control logical KV MB reproduction checks keep their original tolerance",
+      "applies_to": [
+        "Experiment 10 Attempt 2",
+        "Experiment 11"
+      ],
+      "reference": "the frozen canonical run results/quality/<benchmark>.log (per-example scores, dataset indices, ordering and ground truths)",
+      "gate": {
+        "mandatory": [
+          "exact canonical config equality (existing protocol gates)",
+          "exact dataset identity: the Dataset / Length bucket / Samples / Maximum input length / Metric header lines equal the reference's",
+          "exact sample indices, ordering, token counts and ground truths: every 'Sample i/N (dataset index d): ...' and 'Ground truth: ...' line equals the reference's, in order",
+          "exact sample count: one parsed row per sample for bf16 and for the control",
+          "exact logical-storage accounting (existing protocol gates)",
+          "no missing / malformed per-example rows"
+        ],
+        "per_example_bound": "independently for bf16 and for the canonical control: score_mismatch_count <= historical_max_score_mismatch_count AND l1_score_distance <= historical_max_l1_score_distance",
+        "definitions": {
+          "score_mismatch": "an example whose logged official F1 (3 decimals) differs from the reference's",
+          "l1_score_distance": "sum over examples of |run F1 - reference F1| using the logged per-example scores (0-1 scale), computed exactly in integer thousandths",
+          "text_only_differences": "answer-text differences with an identical logged F1 are recorded, not counted"
+        },
+        "numerical_tolerance": "none needed: scores are compared as exact integer thousandths of the printed values",
+        "slack": "none: thresholds equal the historical maxima"
+      },
+      "thresholds": {
+        "hotpotqa": {
+          "bf16": {
+            "historical_max_score_mismatch_count": 1,
+            "historical_max_l1_score_distance": 0.065,
+            "historical_max_l1_score_distance_milli": 65,
+            "per_run": {
+              "exp1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 35
+              },
+              "exp7": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 65
+              },
+              "exp8": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp9_attempt1": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp9_attempt2": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 35
+              },
+              "exp10_attempt1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 35
+              }
+            },
+            "n_historical_runs_excluding_reference": 6,
+            "aggregate_f1_envelope_report_only": [
+              60.2,
+              60.7
+            ]
+          },
+          "rabit2": {
+            "historical_max_score_mismatch_count": 1,
+            "historical_max_l1_score_distance": 0.5,
+            "historical_max_l1_score_distance_milli": 500,
+            "per_run": {
+              "exp1": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp7": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp8": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp9_attempt1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 500
+              },
+              "exp9_attempt2": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp10_attempt1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 500
+              }
+            },
+            "n_historical_runs_excluding_reference": 6,
+            "aggregate_f1_envelope_report_only": [
+              55.2,
+              57.7
+            ]
+          }
+        },
+        "qasper": {
+          "bf16": {
+            "historical_max_score_mismatch_count": 1,
+            "historical_max_l1_score_distance": 0.096,
+            "historical_max_l1_score_distance_milli": 96,
+            "per_run": {
+              "exp1": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 96
+              },
+              "exp7": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 96
+              },
+              "exp8": {
+                "score_mismatch_count": 0,
+                "l1_score_distance_milli": 0
+              },
+              "exp9_attempt2": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 96
+              }
+            },
+            "n_historical_runs_excluding_reference": 4,
+            "aggregate_f1_envelope_report_only": [
+              35.5,
+              35.9
+            ]
+          },
+          "rabit2": {
+            "historical_max_score_mismatch_count": 2,
+            "historical_max_l1_score_distance": 0.185,
+            "historical_max_l1_score_distance_milli": 185,
+            "per_run": {
+              "exp1": {
+                "score_mismatch_count": 2,
+                "l1_score_distance_milli": 185
+              },
+              "exp7": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 140
+              },
+              "exp8": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 174
+              },
+              "exp9_attempt2": {
+                "score_mismatch_count": 1,
+                "l1_score_distance_milli": 11
+              }
+            },
+            "n_historical_runs_excluding_reference": 4,
+            "aggregate_f1_envelope_report_only": [
+              34.8,
+              36.2
+            ]
+          }
+        }
+      },
+      "aggregate_f1": "reported exactly as before (official LongBench aggregate); whether it lies inside aggregate_f1_envelope_report_only is REPORT-ONLY and never a pass/fail gate"
+    },
+    "uncommitted_files": null
+  },
+  "runs": [
+    {
+      "name": "continuation_ppl",
+      "returncode": 0,
+      "passed": true,
+      "log_sha256": "f1164aec3ba036cf55c9061e32b482b07881a59c6539cc52e940e4a5d0ef4841"
+    },
+    {
+      "name": "niah",
+      "returncode": 0,
+      "passed": true,
+      "log_sha256": "4c8850dea48be4b142e7e450e40023d50dac228a717c16aa5aee70d020e4121a"
+    },
+    {
+      "name": "passage_retrieval",
+      "returncode": 0,
+      "passed": true,
+      "log_sha256": "a538513925d859114bf3b047ce65f5bda5b4c4ee40b4f093c098343cbbe8e4d3"
+    },
+    {
+      "name": "hotpotqa",
+      "returncode": 0,
+      "passed": true,
+      "log_sha256": "26408a25f41299658a9e61ffefeb1e36ee61566b696e2ee0f64a07afdf0f2eee"
+    },
+    {
+      "name": "qasper",
+      "returncode": 0,
+      "passed": true,
+      "log_sha256": "0b9c175391837f4878014fec3b569230ba6a42d53e5985b3383cfc8ba88fd27b"
+    }
+  ],
+  "completed_utc": "2026-09-30T00:54:58.175753+00:00"
+}

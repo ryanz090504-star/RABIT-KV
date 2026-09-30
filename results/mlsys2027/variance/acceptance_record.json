@@ -1,0 +1,60 @@
+{
+  "experiment": 12,
+  "type": "logical fake-quant quality: larger samples + paired per-example bootstrap CIs (NOT a physical serving benchmark)",
+  "status": "accepted",
+  "attempt": 1,
+  "execution_commit": "9b52665c916bb5ab2b52e65a1995cb7fb756559f",
+  "prep_commit": "5d53a9b0d4ce82a9c49bd1bc99af827c48fcf453",
+  "protocol": "benchmarks/mlsys2027/exp12_variance_protocol.json",
+  "protocol_sha256": "1bd9fafa5bae3323b70a75c38ea2a321a7c4ec1a5c8c70434c7e245d561137b8",
+  "conditions": {"bf16": "reference", "rabit2": "canonical K3/V2/G32/R4/META8g64 (unchanged canonical scripts)"},
+  "units": {"continuation_ppl": 32, "niah": 57, "passage_retrieval": 200, "hotpotqa": 100, "qasper": 24},
+  "started_utc": "2026-09-30T00:37:26.468843+00:00",
+  "completed_utc": "2026-09-30T00:54:58.175753+00:00",
+  "validity_before_statistics": {
+    "all_benchmarks_valid": true,
+    "statistics_generated_only_after_validity": true,
+    "continuation_ppl": "canonical 8-window subset: bf16 8.5020, rabit2 8.6317 (targets 8.502 / 8.6317)",
+    "niah": "canonical 15-case subset 100 / 100",
+    "passage_retrieval": "canonical 10-example subset 100 / 100",
+    "hotpotqa": "frozen per-example QA gate on the canonical 20: bf16 1 mismatch (index 3, L1 0.035; bound 1 / 0.065), rabit2 0 mismatches",
+    "qasper": "frozen per-example QA gate on all 24: bf16 1 mismatch (index 7, L1 0.096; bound 1 / 0.096 -- at bound), rabit2 1 mismatch (index 20, L1 0.174; bound 2 / 0.185)",
+    "storage": "every unit's logical KV MB equals the exact accounting model; canonical-subset units identical to canonical",
+    "qa_gate_role": "validity only; never enters the bootstrap / effect analysis",
+    "amendment_sha256_lf": "eaf28d66f38eedc13f447eb9776cd6affd2abb06dc2c64dec8d7e7d2a1a2e10c",
+    "amendment_commit": "86b03eabaecfed0a838cabd7a7d1cce2f0a2fa38"
+  },
+  "bootstrap": {"resamples": 10000, "confidence": 0.95, "method": "paired percentile bootstrap",
+                "seed_by_benchmark": {"continuation_ppl": 20270929, "passage_retrieval": 20270931,
+                                      "hotpotqa": 20270932, "qasper": 20270933},
+                "niah": "no inferential statistics (deterministic robustness grid)"},
+  "gpu": "NVIDIA H100 80GB HBM3 for all five runs",
+  "modal_app_ids": {
+    "continuation_ppl": "ap-efwHixlw6Tr1aZCHUCxH8J",
+    "niah": "ap-K89chomFNRI2X7pqpjxk1k",
+    "passage_retrieval": "ap-BrNMzDtrB6i8XZN197Zt8B",
+    "hotpotqa": "ap-xCjSCCQYj9ULwhGs5HPLhz",
+    "qasper": "ap-Y0Q8d5Qi7jc6oXbXsfDx4E"
+  },
+  "files_sha256": {
+    "continuation_ppl.log": "f1164aec3ba036cf55c9061e32b482b07881a59c6539cc52e940e4a5d0ef4841",
+    "niah.log": "4c8850dea48be4b142e7e450e40023d50dac228a717c16aa5aee70d020e4121a",
+    "passage_retrieval.log": "a538513925d859114bf3b047ce65f5bda5b4c4ee40b4f093c098343cbbe8e4d3",
+    "hotpotqa.log": "26408a25f41299658a9e61ffefeb1e36ee61566b696e2ee0f64a07afdf0f2eee",
+    "qasper.log": "0b9c175391837f4878014fec3b569230ba6a42d53e5985b3383cfc8ba88fd27b",
+    "manifest.json": "08f9be8e694a18657424276f54c8e35c8aa2738be87c307c74860e3ef33f54e3",
+    "integrity_results.json": "fc40ed7a6fe5c25bca5548f503727e02a3095b4ae7380723bd566e26bdff25c7",
+    "variance_results.json": "725d4208ffc4008eac6abfcd12d2e62ecd5ee2c970812fb06a918dda54091bcf"
+  },
+  "files_sha256_lf_normalized": {
+    "note": "sha256 with CR removed = the committed git blob (core.autocrlf=true); files_sha256 are the raw bytes as written (= manifest log_sha256 for the logs)",
+    "continuation_ppl.log": "7374f5e931d7b38a0bddce40c1a8547a5193780604fd5e0197f5e34c1c427ee6",
+    "niah.log": "d944cc4a766c0a1880e0d2d40c18cc1cb740353acb3402bdbb5acc55fbcad352",
+    "passage_retrieval.log": "570136f925a21b7487cfce884f1df523f9f9805a4aaee863726820c8d4c2ee80",
+    "hotpotqa.log": "4217375cc10b428af1dfb54bcd54bda1db74a32b54132be67c5f2e8ce0df172c",
+    "qasper.log": "b223a2f632eb05b681e1d038a9e745a81ebb6fe472ce16f531c04c963fa42708",
+    "manifest.json": "d0fa48e9cd35a670e478593d2fc647b79db093a2834eae57e3c73c9b0d6acc5e",
+    "integrity_results.json": "9e76b3708872eed6cdb028fd1c373a397e1b025490ee772a4bbda0ebfc0f0dd4",
+    "variance_results.json": "f4c5202c71f172026458f25cc3f716c4b638b4a6b7b27eb16cd7b1b6e8350a40"
+  }
+}

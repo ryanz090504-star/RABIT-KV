@@ -1,0 +1,397 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-K89chomFNRI2X7pqpjxk1k
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\quality\niah.py
+└── 🔨 Created function run_niah.
+GPU: NVIDIA H100 80GB HBM3
+Model: LLM-Research/Meta-Llama-3.1-8B-Instruct
+Context lengths: [4096, 8192, 16384]
+Needle depths: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
+Methods: ['bf16', 'rabit2']
+Metric: exact retrieval of the hidden code
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+Memory: logical packed prefix-KV storage, including metadata and residuals
+
+2026-09-30 00:38:47,494 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  44%|████▍     | 8/18 [00:01<00:01,  5.89file/s]
+[1ADownloading:  56%|█████▌    | 10/18 [00:05<00:05,  1.52file/s]
+[1ADownloading:  94%|█████████▍| 17/18 [00:05<00:00,  3.39file/s]Downloading: 100%|██████████| 18/18 [00:18<00:00,  1.04s/file]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  9.95it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00, 11.21it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 12.04it/s]
+Token indices sequence length is longer than the specified maximum sequence length for this model (296960 > 131072). Running this sequence through the model will result in indexing errors
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Running one BF16 warm-up at 4096 tokens...
+
+Case 1/57: context=4096, depth=5%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 2/57: context=4096, depth=10%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not hidden in'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 3/57: context=4096, depth=15%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291. (Note: The code is not hidden in'
+
+Case 4/57: context=4096, depth=20%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 5/57: context=4096, depth=25%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is hidden in the'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 6/57: context=4096, depth=30%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 7/57: context=4096, depth=35%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 8/57: context=4096, depth=40%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 9/57: context=4096, depth=45%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 10/57: context=4096, depth=50%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291. (Note: The code is not hidden in'
+
+Case 11/57: context=4096, depth=55%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 12/57: context=4096, depth=60%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 13/57: context=4096, depth=65%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 14/57: context=4096, depth=70%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 15/57: context=4096, depth=75%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 16/57: context=4096, depth=80%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 17/57: context=4096, depth=85%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 18/57: context=4096, depth=90%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 19/57: context=4096, depth=95%
+  bf16     PASS  KV=511.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=97.453 MB Comp=5.253x answer='RABIT-7291.'
+
+Case 20/57: context=8192, depth=5%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not hidden in'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is not hidden in'
+
+Case 21/57: context=8192, depth=10%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 22/57: context=8192, depth=15%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is hidden in the'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 23/57: context=8192, depth=20%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 24/57: context=8192, depth=25%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 25/57: context=8192, depth=30%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is not related to'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 26/57: context=8192, depth=35%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 27/57: context=8192, depth=40%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291. (Note: The code is hidden in the'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 28/57: context=8192, depth=45%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291.'
+
+Case 29/57: context=8192, depth=50%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 30/57: context=8192, depth=55%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 31/57: context=8192, depth=60%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291.'
+
+Case 32/57: context=8192, depth=65%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 33/57: context=8192, depth=70%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 34/57: context=8192, depth=75%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 35/57: context=8192, depth=80%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291.'
+
+Case 36/57: context=8192, depth=85%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291.'
+
+Case 37/57: context=8192, depth=90%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291.'
+
+Case 38/57: context=8192, depth=95%
+  bf16     PASS  KV=1023.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=194.453 MB Comp=5.265x answer='RABIT-7291.'
+
+Case 39/57: context=16384, depth=5%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 40/57: context=16384, depth=10%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291. (Note: The code is not related to'
+
+Case 41/57: context=16384, depth=15%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 42/57: context=16384, depth=20%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291. 7291 is the year in which Du'
+
+Case 43/57: context=16384, depth=25%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 44/57: context=16384, depth=30%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 45/57: context=16384, depth=35%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291..........'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291..........'
+
+Case 46/57: context=16384, depth=40%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 47/57: context=16384, depth=45%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291. 7291 is the year in which Du'
+
+Case 48/57: context=16384, depth=50%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 49/57: context=16384, depth=55%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291. (Note: The code is hidden in the'
+
+Case 50/57: context=16384, depth=60%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 51/57: context=16384, depth=65%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 52/57: context=16384, depth=70%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291. END. END. END. END. END'
+
+Case 53/57: context=16384, depth=75%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 54/57: context=16384, depth=80%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 55/57: context=16384, depth=85%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 56/57: context=16384, depth=90%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+Case 57/57: context=16384, depth=95%
+  bf16     PASS  KV=2047.875 MB Comp=1.000x answer='RABIT-7291.'
+  rabit2   PASS  KV=388.453 MB Comp=5.272x answer='RABIT-7291.'
+
+====================================================================================================================================
+RABIT-KV NEEDLE-IN-A-HAYSTACK RESULTS
+====================================================================================================================================
+Context   Depth     Method    Result    KV MB         Compression   Extracted code      Answer                              
+------------------------------------------------------------------------------------------------------------------------------------
+4096      0.05      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291.                         
+4096      0.05      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.10      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.10      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.15      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.15      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.20      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.20      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291. (Note: The code is hid  
+4096      0.25      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is hid  
+4096      0.25      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.30      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.30      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.35      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.35      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.40      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.40      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.45      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.45      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.50      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.50      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.55      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.55      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.60      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291.                         
+4096      0.60      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.65      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291.                         
+4096      0.65      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.70      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291.                         
+4096      0.70      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.75      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291.                         
+4096      0.75      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291. (Note: The code is not  
+4096      0.80      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291.                         
+4096      0.80      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.85      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291.                         
+4096      0.85      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.90      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291.                         
+4096      0.90      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+4096      0.95      bf16      PASS      511.875       1.000         RABIT-7291          RABIT-7291.                         
+4096      0.95      rabit2    PASS      97.453        5.253         RABIT-7291          RABIT-7291.                         
+8192      0.05      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.05      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.10      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.10      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is hid  
+8192      0.15      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291. (Note: The code is hid  
+8192      0.15      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is hid  
+8192      0.20      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.20      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is hid  
+8192      0.25      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.25      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is hid  
+8192      0.30      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.30      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.35      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.35      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.40      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291. (Note: The code is hid  
+8192      0.40      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is hid  
+8192      0.45      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.45      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291.                         
+8192      0.50      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.50      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is hid  
+8192      0.55      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.55      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.60      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.60      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291.                         
+8192      0.65      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.65      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.70      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.70      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is not  
+8192      0.75      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.75      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291. (Note: The code is hid  
+8192      0.80      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.80      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291.                         
+8192      0.85      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.85      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291.                         
+8192      0.90      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.90      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291.                         
+8192      0.95      bf16      PASS      1023.875      1.000         RABIT-7291          RABIT-7291.                         
+8192      0.95      rabit2    PASS      194.453       5.265         RABIT-7291          RABIT-7291.                         
+16384     0.05      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.05      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291. (Note: The code is hid  
+16384     0.10      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.10      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291. (Note: The code is not  
+16384     0.15      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.15      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.20      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.20      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291. 7291 is the year in wh  
+16384     0.25      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.25      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291. (Note: The code is hid  
+16384     0.30      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.30      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.35      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291..........                
+16384     0.35      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291..........                
+16384     0.40      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.40      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.45      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.45      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291. 7291 is the year in wh  
+16384     0.50      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.50      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.55      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+Stopping app - local entrypoint completed.
+16384     0.55      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291. (Note: The code is hid  
+16384     0.60      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.60      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.65      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.65      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.70      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.70      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291. END. END. END. END. EN  
+16384     0.75      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.75      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.80      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.80      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.85      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.85      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.90      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.90      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+16384     0.95      bf16      PASS      2047.875      1.000         RABIT-7291          RABIT-7291.                         
+16384     0.95      rabit2    PASS      388.453       5.272         RABIT-7291          RABIT-7291.                         
+
+AGGREGATE ACCURACY
+--------------------------------------------------------------------------------------
+Method      Passed      Total       Accuracy      Avg KV MB       Avg Compression   
+--------------------------------------------------------------------------------------
+bf16        57          57          100.0         1194.542        1.000             
+rabit2      57          57          100.0         226.786         5.263             
+
+Important: reported run time is for experiment planning only. It is not deployment latency.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-K89chomFNRI2X7pqpjxk1k
