@@ -1,0 +1,34 @@
+{
+  "experiment": 13,
+  "attempt": 1,
+  "status": "invalid_gate_harness_failure",
+  "excluded_from_accepted_results": true,
+  "execution_commit": "72e51254c8f42325335d1ae9fb4adc6e77e0307d",
+  "protocol_sha256": "10de3e0a73ff769ae67585d4397b74f96662a6c059766053609887c623ea2d06",
+  "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+  "modal_app_id": "ap-suyS4KboK9IsUYzHQ9vLQp",
+  "started_utc": "2026-09-30T03:39:24.978309+00:00",
+  "completed_utc": "2026-09-30T03:43:06.104718+00:00",
+  "what_ran": {
+    "rabit_correctness_gate": "PASSED (EXP3_GATE_RESULT passed; exit 0, 57.8 s)",
+    "turboquant_correctness_gate": "FAILED before running any test: pytest exit code 4 (usage / collection error), 0.42 s",
+    "measured_legs": "none (the Modal function aborts on a gate failure; no latency or capacity sample was collected)"
+  },
+  "failure": {
+    "gate_command": "python -m pytest -q -p no:cacheprovider tests/quantization/test_turboquant.py (cwd /root/vllm-kvquant)",
+    "error": "ImportError while loading conftest '/root/vllm-kvquant/tests/conftest.py': tests/conftest.py:7 'from tblib import pickling_support' -> ModuleNotFoundError: No module named 'tblib'",
+    "classification": "HARNESS DEFECT in the Exp13 TurboQuant gate invocation (it loaded vLLM's repository-level test conftest, whose optional test dependency tblib is not in the Exp4-verbatim image). It is NOT a TurboQuant correctness result: zero TurboQuant tests were collected or executed",
+    "contrast": "the accepted RABIT gate (exp3_correctness_gate.py) invokes pytest with --confcutdir=/root/vllm-kvquant/tests/quantization, which does not load tests/conftest.py; test_turboquant.py (45 tests) uses only parametrize and pytest's built-in monkeypatch fixture and there is no tests/quantization/conftest.py"
+  },
+  "actions_not_taken": ["no retry", "no patch", "no second run", "no partial benchmark evidence"],
+  "files_sha256": {
+    "integrity_check.json": "438ef4198a5931ac597d624f03c15c93b73326e5cbbbba52874ff223e0448fef",
+    "manifest.json": "5c546f6518f3303bd22b2c346fcba5e07962ac750f6823af366256a0dcbb1d53",
+    "modal_session.log": "8fbf91c3f460359eab5381986f58b424f8ef3556ed1fcfbac579b72ddfed0b31"
+  },
+  "files_sha256_lf_normalized": {
+    "integrity_check.json": "e83dc8ba33af1e6fd7c49d37a7c4997fe09dda761feb72c461d8dcc9a7862c9e",
+    "manifest.json": "66030c7ff61358544f0549d47838b7003a1140721fb810d79bf32d627b14c63a",
+    "modal_session.log": "b9ea06876b8d7cd9c11df414d3a25fe1b09647bacaa892c39afbf8169ff764f0"
+  }
+}

@@ -1,0 +1,298 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-suyS4KboK9IsUYzHQ9vLQp
+Building image im-nkfSPbE8U46xauRYwVx6VG
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.89s
+
+Built image im-nkfSPbE8U46xauRYwVx6VG in 6.09s
+
+
+Building image im-vnutaTLijCtVDXdMTaZCZn
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_final_fast_decode_append_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 804.57ms
+
+Built image im-vnutaTLijCtVDXdMTaZCZn in 4.03s
+
+
+Building image im-MJHITdSJ2lAiUIbEYAWsMb
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 597.10ms
+
+Built image im-MJHITdSJ2lAiUIbEYAWsMb in 1.83s
+
+
+Building image im-n1fkEZ7UBo1W2kSZozcgq9
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm.log 2>&1 || (tail -n 250 /tmp/vllm.log; exit 1))
+Saving image...
+Image saved, took 7.06s
+
+Built image im-n1fkEZ7UBo1W2kSZozcgq9 in 101.53s
+
+
+Building image im-hrINfxjMDoJtLy6Nx0M47B
+
+=> Step 0: FROM base
+
+=> Step 1: RUN python -m pip install modelscope pytest
+Looking in indexes: http://pypi-mirror.modal.local:5555/simple
+Collecting modelscope
+  Downloading modelscope-1.40.1-py3-none-any.whl.metadata (43 kB)
+Collecting pytest
+  Downloading pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+Requirement already satisfied: filelock in ./usr/local/lib/python3.11/site-packages (from modelscope) (3.29.0)
+Collecting modelscope-hub>=0.4.2 (from modelscope)
+  Downloading modelscope_hub-0.4.5-py3-none-any.whl.metadata (47 kB)
+Requirement already satisfied: packaging in ./usr/local/lib/python3.11/site-packages (from modelscope) (26.3)
+Requirement already satisfied: requests>=2.25 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.34.2)
+Requirement already satisfied: setuptools in ./usr/local/lib/python3.11/site-packages (from modelscope) (80.10.2)
+Requirement already satisfied: tqdm>=4.64.0 in ./usr/local/lib/python3.11/site-packages (from modelscope) (4.70.1)
+Requirement already satisfied: urllib3>=1.26 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.8.0)
+Collecting iniconfig>=1.0.1 (from pytest)
+  Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting pluggy<2,>=1.5 (from pytest)
+  Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Requirement already satisfied: pygments>=2.7.2 in ./usr/local/lib/python3.11/site-packages (from pytest) (2.21.0)
+Requirement already satisfied: cryptography>=41 in ./usr/local/lib/python3.11/site-packages (from modelscope-hub>=0.4.2->modelscope) (50.0.1)
+Requirement already satisfied: cffi>=2.0.0 in ./usr/local/lib/python3.11/site-packages (from cryptography>=41->modelscope-hub>=0.4.2->modelscope) (2.1.1)
+Requirement already satisfied: pycparser in ./usr/local/lib/python3.11/site-packages (from cffi>=2.0.0->cryptography>=41->modelscope-hub>=0.4.2->modelscope) (3.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.5.1)
+Requirement already satisfied: idna<4,>=2.5 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.20)
+Requirement already satisfied: certifi>=2023.5.7 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (2026.7.22)
+Downloading modelscope-1.40.1-py3-none-any.whl (6.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.1/6.1 MB 809.8 MB/s  0:00:00
+Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Downloading modelscope_hub-0.4.5-py3-none-any.whl (236 kB)
+Installing collected packages: pluggy, iniconfig, pytest, modelscope-hub, modelscope
+
+Successfully installed iniconfig-2.3.0 modelscope-1.40.1 modelscope-hub-0.4.5 pluggy-1.6.0 pytest-9.1.1
+Saving image...
+Image saved, took 1.86s
+
+Built image im-hrINfxjMDoJtLy6Nx0M47B in 9.06s
+
+
+Building image im-Sith7uoxu6E0HeCXDUHsvK
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.87s
+
+Built image im-Sith7uoxu6E0HeCXDUHsvK in 4.06s
+
+
+Building image im-a0yChfq1vWRRVQyneScmtw
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 3.55s
+
+Built image im-a0yChfq1vWRRVQyneScmtw in 5.58s
+
+
+Building image im-6tgaQeP4uDmfo6aU0h4uxi
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.77s
+
+Built image im-6tgaQeP4uDmfo6aU0h4uxi in 3.59s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp13_deployment_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\exp13_vllm_snapshot_ej4540_a\vllm_kvquant
+│   _snapshot.zip
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp13_engine_worker.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp3_correctness_gate.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp3_watchdog.py
+└── 🔨 Created function mirrored.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+EXP13_GPU_BASELINE={"compute_apps": [], "max_wait_s": 60, "memory_used_mib": [4], "t": 1790739725.3373535, "tolerance_mib": 256}
+EXP13_ENVIRONMENT={"gpus": [{"clocks.max.sm": "1980", "driver_version": "580.95.05", "index": "0", "memory.total": "81559", "memory.used": "4", "name": "NVIDIA H100 80GB HBM3", "power.limit": "700.00", "uuid": "GPU-f93999f3-450b-dc8e-de2c-6cb2d6a8f620"}], "leg_dtypes": ["bfloat16", "fp8_e4m3", "rabit_kv2", "turboquant_k3v4_nc", "turboquant_k3v4_nc", "rabit_kv2", "fp8_e4m3", "bfloat16"], "leg_labels": ["A1", "B1", "C1", "D1", "D2", "C2", "B2", "A2"], "packages": {"modelscope": "1.40.1", "pytest": "9.1.1", "torch": "2.11.0+cu130", "transformers": "5.17.0", "triton": "3.6.0", "vllm": "0.10.0+kvquant"}, "python": "3.11.5", "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae", "reps_per_leg": 30, "vllm_precompiled_wheel_commit": "f329ce405b12623fb8b1cf1830f12e5a712523be", "warmups": 5}
+EXP13_GATE_START={"cmd": ["/usr/local/bin/python", "/opt/exp13/exp3_correctness_gate.py"], "timeout_s": 600}
+[gate] EXP3_GATE_BEGIN={"pytest_command": ["/usr/local/bin/python", "-m", "pytest", "-q", "--tb=short", "--confcutdir=/root/vllm-kvquant/tests/quantization", "/root/vllm-kvquant/tests/quantization/test_kvquant_k3.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_layout.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_physical.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b1.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b2.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_fixed.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py"], "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"}
+[gate] ====================================================================================================================
+[gate] RABIT-2 FINAL targeted decode-append regression
+[gate] ====================================================================================================================
+[gate] Dispatch preflight: PASSED
+[gate] Stage4D3.4 prep exactness: PASSED (62/62)
+[gate] Stage4D3.4 full attention exactness: PASSED (torch.equal)
+[gate] Stage4D3.4 scratch_bytes_per_stream=57600
+[gate] FINAL fast decode append exactness: PASSED (202 state/byte steps + attention checkpoints)
+[gate] ........................................................................ [ 68%]
+[gate] .................................                                        [100%]
+[gate] =============================== warnings summary ===============================
+[gate] tests/quantization/test_kvquant_k3.py: 14 warnings
+[gate]   /usr/local/lib/python3.11/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+[gate]     warnings.warn(
+[gate] 
+[gate] -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[gate] 105 passed, 14 warnings in 33.84s
+[gate] 
+[gate] pytest exit=0
+[gate] RABIT-2 FINAL TARGETED REGRESSION PASSED
+[gate] EXP3_GATE_RESULT={"passed": true}
+EXP13_PROCESS_EXIT={"cmd": ["/usr/local/bin/python", "/opt/exp13/exp3_correctness_gate.py"], "elapsed_s": 57.8, "grace_s": 10.0, "group_processes_after_leader_exit": [], "group_processes_remaining": [], "label": "gate", "own_session": true, "pgid": 32, "pid": 32, "reader_finished": true, "returncode": 0, "signals_sent": [], "timed_out": false, "timeout_s": 600}
+EXP13_GATE_EXIT={"returncode": 0}
+EXP13_TQ_GATE_START={"cmd": ["/usr/local/bin/python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/quantization/test_turboquant.py"], "cwd": "/root/vllm-kvquant", "timeout_s": 900}
+[tqgate] ImportError while loading conftest '/root/vllm-kvquant/tests/conftest.py'.
+[tqgate] tests/conftest.py:7: in <module>
+[tqgate]     from tblib import pickling_support
+[tqgate] E   ModuleNotFoundError: No module named 'tblib'
+EXP13_PROCESS_EXIT={"cmd": ["/usr/local/bin/python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/quantization/test_turboquant.py"], "elapsed_s": 0.422, "grace_s": 10.0, "group_processes_after_leader_exit": [], "group_processes_remaining": [], "label": "tq_gate", "own_session": true, "pgid": 318, "pid": 318, "reader_finished": true, "returncode": 4, "signals_sent": [], "timed_out": false, "timeout_s": 900}
+EXP13_TQ_GATE_EXIT={"returncode": 4}
+Traceback (most recent call last):
+  File "/pkg/modal/_runtime/container_io_manager.py", line 945, in handle_input_exception
+    yield
+  File "/pkg/modal/_container_entrypoint.py", line 189, in run_input_sync
+    values = io_context.call_function_sync()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pkg/modal/_runtime/container_io_manager.py", line 225, in call_function_sync
+    expected_value_or_values = self.finalized_function.callable(*args, **kwargs)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/exp13_deployment_modal.py", line 272, in mirrored
+    raise RuntimeError(f"TurboQuant correctness gate failed with exit code {code}; no measurement run")
+RuntimeError: TurboQuant correctness gate failed with exit code 4; no measurement run
+Stopping app - uncaught exception raised locally: RuntimeError('TurboQuant correctness gate failed with exit code 4; no measurement run').
+┌───────────────────── Traceback (most recent call last) ─────────────────────┐
+│ C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben │
+│ chmarks\mlsys2027\exp13_deployment_modal.py:312 in main                     │
+│                                                                             │
+│   311 def main(legs: str, warmups: int, reps_per_leg: int):                 │
+│ > 312 │   mirrored.remote(legs=legs, warmups=warmups, reps_per_leg=reps_per │
+│   313                                                                       │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_object.py:46 in wrapped                                                │
+│                                                                             │
+│    45 │   │   await self.hydrate()                                          │
+│ >  46 │   │   return await method(self, *args, **kwargs)                    │
+│    47                                                                       │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_functions.py:1696 in remote                                            │
+│                                                                             │
+│   1695 │   │                                                                │
+│ > 1696 │   │   return await self._call_function(args, kwargs)               │
+│   1697                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_functions.py:1640 in _call_function                                    │
+│                                                                             │
+│   1639 │   │                                                                │
+│ > 1640 │   │   return await invocation.run_function()                       │
+│   1641                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_functions.py:493 in run_function                                       │
+│                                                                             │
+│    492 │   │   │   # No more retries left.                                  │
+│ >  493 │   │   │   return await _process_result(                            │
+│    494 │   │   │   │   await_response.output.result, await_response.output. │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_utils\function_utils.py:548 in _process_result                         │
+│                                                                             │
+│   547 │   │   │                                                             │
+│ > 548 │   │   │   raise exc_with_hints(exc)                                 │
+│   549                                                                       │
+│                                                                             │
+│     ...Remote call to Modal Function (ta-01M3R6F8KG405PZATK64AV32GR)...     │
+│                                                                             │
+│ /root/exp13_deployment_modal.py:272 in mirrored                             │
+│                                                                             │
+│ > 272 raise RuntimeError(f"TurboQuant correctness gate failed with exit cod │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+RuntimeError: TurboQuant correctness gate failed with exit code 4; no 
+measurement run
