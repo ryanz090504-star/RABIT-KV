@@ -9,7 +9,8 @@ predicates, so serving dispatches to the source's own exact fallbacks:
     _rabit2_online_decode_attention_triton_stage4b2_exact when (q_heads // kv_heads) % 4 != 0;
   * one-token append: Rabit2SingleSequenceRuntime.append (= _rabit2_final_fast_decode_append) falls back to
     _rabit2_final_old_append unless num_kv_heads == 8 and head_size == 128;
-  * the compiled (1, 8, 128) V2 quantizer falls back to the exact reference quantizer.
+  * the compiled (1, 8, 128) V2 quantizer (_quantize_v2_primary_ref) falls back to
+    _quantize_v2_primary_ref_stage4b1_exact (the exact reference quantizer).
 This gate proves those paths at Model B's shape BEFORE any measurement, with the Llama shape as a POSITIVE CONTROL
 (same checks, same tolerances; it must also pass, which shows the checks themselves are valid).
 
@@ -23,8 +24,10 @@ made by TritonAttentionImpl._forward_rabit_kv2), plus short-prefix boundary repl
   3. attention: after every step, the decode output is within MAX_ABS_TOL of the fp32 GQA reference over
      (a) the runtime's own decoded state (tests/quantization/test_rabit_kv2_stage3c.py::_materialize / _gqa_ref) and
      (b) the reference state's materialize() (equal to the quality oracle by test_rabit_kv2_physical.py);
-  4. dispatch: call counters on the two fallback functions match the frozen predicates (Model B: every decode and
-     append uses the fallback; control: none does on the 2048-token replay).
+  4. dispatch: call counters on the three fallback functions match the frozen predicates on the 2048-token replay
+     (Model B: every decode call uses the exact decode fallback, every decode-step append uses the exact append
+     fallback and invokes the exact V2 quantizer fallback at least once; control: none of them during decode steps
+     -- bulk prefill uses the exact batched quantizer at BOTH shapes and is therefore excluded from that count).
 Tolerance MAX_ABS_TOL = 5e-3 is the established tolerance of test_rabit_kv2_stage3c.py (no new criterion).
 Emits EXP14_SHAPE_GATE_SUMMARY=<json>; exit 0 only if every check passes. Imports vllm-kvquant; never modifies it
 (the counters wrap module attributes in THIS process only and are restored).
@@ -93,7 +96,7 @@ class _Counter:
         return self.fn(*a, **kw)
 
 
-def replay(r, torch, geom: dict, prefill: int, steps: int, seed: int) -> dict:
+def replay(r, torch, geom: dict, prefill: int, steps: int, seed: int, quant=None) -> dict:
     """One serving-sequence replay: bulk prefill, then `steps` decode steps; checks after the prefill and every step."""
     qh, h, d = geom["q_heads"], geom["kv_heads"], geom["head_dim"]
     dev, dt = torch.device("cuda"), torch.bfloat16
@@ -108,7 +111,7 @@ def replay(r, torch, geom: dict, prefill: int, steps: int, seed: int) -> dict:
     bt = torch.arange(pages, dtype=torch.int32, device=dev)
     scale = d ** -0.5
     out = {"prefill": prefill, "steps": steps, "seed": seed, "checkpoints": 0, "max_abs_vs_runtime_state": 0.0,
-           "max_abs_vs_reference_state": 0.0, "failures": []}
+           "max_abs_vs_reference_state": 0.0, "failures": [], "decode_step_quant_fallback_calls": []}
 
     def check(t: int) -> None:
         if rt.total_tokens != t or ref.total_tokens != t:
@@ -137,7 +140,10 @@ def replay(r, torch, geom: dict, prefill: int, steps: int, seed: int) -> dict:
     torch.cuda.synchronize()
     check(prefill)
     for i in range(prefill, total):  # decode path: runtime.append + online decode attention
+        q0 = quant.calls if quant is not None else 0
         rt.append(k_all[i:i + 1], v_all[i:i + 1], cache, bt)
+        if quant is not None:
+            out["decode_step_quant_fallback_calls"].append(quant.calls - q0)
         ref.append(k_all[i:i + 1], v_all[i:i + 1])
         torch.cuda.synchronize()
         check(i + 1)
@@ -162,23 +168,31 @@ def run_geometry(r, torch, name: str, geom: dict) -> dict:
 
     dec = _Counter(r._rabit2_online_decode_attention_triton_stage4b2_exact)
     app = _Counter(r._rabit2_final_old_append)
+    qnt = _Counter(r._quantize_v2_primary_ref_stage4b1_exact)
     r._rabit2_online_decode_attention_triton_stage4b2_exact, r._rabit2_final_old_append = dec, app
+    r._quantize_v2_primary_ref_stage4b1_exact = qnt
     try:
-        main = [replay(r, torch, geom, MAIN_PREFILL, MAIN_DECODE_STEPS, s) for s in MAIN_SEEDS]
+        main = [replay(r, torch, geom, MAIN_PREFILL, MAIN_DECODE_STEPS, s, qnt) for s in MAIN_SEEDS]
+        step_q = [c for x in main for c in x["decode_step_quant_fallback_calls"]]
         main_counts = {"decode_calls": len(MAIN_SEEDS) * (MAIN_DECODE_STEPS + 1),
                        "append_calls": len(MAIN_SEEDS) * MAIN_DECODE_STEPS,
-                       "decode_fallback_calls": dec.calls, "append_fallback_calls": app.calls}
+                       "decode_fallback_calls": dec.calls, "append_fallback_calls": app.calls,
+                       "decode_step_quant_fallback_calls_total": sum(step_q),
+                       "decode_steps_with_quant_fallback": sum(1 for c in step_q if c >= 1)}
         boundary = [replay(r, torch, geom, p, BOUNDARY_DECODE_STEPS, BOUNDARY_SEED + p) for p in BOUNDARY_PREFILLS]
     finally:
         r._rabit2_online_decode_attention_triton_stage4b2_exact, r._rabit2_final_old_append = dec.fn, app.fn
+        r._quantize_v2_primary_ref_stage4b1_exact = qnt.fn
     res["main_workload_replays"], res["boundary_replays"], res["main_dispatch_counts"] = main, boundary, main_counts
     if geom["expect_gqa4"]:
         res["checks"]["dispatch_matches_predicates"] = (main_counts["decode_fallback_calls"] == 0 and
-                                                        main_counts["append_fallback_calls"] == 0)
+                                                        main_counts["append_fallback_calls"] == 0 and
+                                                        main_counts["decode_step_quant_fallback_calls_total"] == 0)
     else:
         res["checks"]["dispatch_matches_predicates"] = (
             main_counts["decode_fallback_calls"] == main_counts["decode_calls"] and
-            main_counts["append_fallback_calls"] == main_counts["append_calls"])
+            main_counts["append_fallback_calls"] == main_counts["append_calls"] and
+            main_counts["decode_steps_with_quant_fallback"] == main_counts["append_calls"])
     res["checks"]["main_workload_state_and_attention"] = all(not x["failures"] for x in main)
     res["checks"]["boundary_state_and_attention"] = all(not x["failures"] for x in boundary)
     res["max_abs"] = max(max(x["max_abs_vs_runtime_state"], x["max_abs_vs_reference_state"]) for x in main + boundary)

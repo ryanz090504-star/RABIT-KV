@@ -40,7 +40,13 @@ def main() -> int:
     args = ap.parse_args()
 
     from vllm import LLM, SamplingParams
+    import vllm.v1.kv_cache_interface as kci
     from vllm.v1.kv_cache_interface import get_kv_quant_mode
+
+    # The frozen RABIT policy constants of the imported source (K3 / V2 / G32 / R4 / META8g64).
+    emit("EXP14P_RABIT_POLICY", {"k_bits": kci.RABIT2_K_BITS, "v_bits": kci.RABIT2_V_BITS,
+                                 "group_size": kci.RABIT2_GROUP_SIZE, "residual_tokens": kci.RABIT2_RESIDUAL_TOKENS,
+                                 "metadata_group_size": kci.RABIT2_METADATA_GROUP_SIZE})
 
     kwargs = {"model": args.model_dir, **BASE_ENGINE_KWARGS, "kv_cache_dtype": args.kv_cache_dtype}
     emit("EXP14P_REQUESTED_ENGINE_KWARGS", kwargs)

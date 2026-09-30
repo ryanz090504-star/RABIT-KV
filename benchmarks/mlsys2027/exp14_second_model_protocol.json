@@ -4,7 +4,99 @@
   "plan": "docs/MLSYS_EXPERIMENT_PLAN.md Experiment 14 (one additional compatible model); the plan defers the model choice to a compatibility check",
   "model_b": {
     "id": "Qwen/Qwen2.5-7B-Instruct",
-    "source": "ModelScope snapshot_download (revision master; file hashes recorded in the session log)",
+    "revision": "16c174980d8a1492910551634b4969e69cdc2444",
+    "revision_resolution": "git ls-remote of the ModelScope repository during preparation: refs/heads/master = 16c174980d8a1492910551634b4969e69cdc2444 (no tags exist); the file API returns the identical manifest for Revision=<commit> and Revision=master",
+    "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+    "manifest_rule": "sha256 of sorted 'path<TAB>size<TAB>sha256' lines of all 15 files",
+    "files": [
+      [
+        ".gitattributes",
+        1519,
+        "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+      ],
+      [
+        "LICENSE",
+        11343,
+        "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e"
+      ],
+      [
+        "README.md",
+        6240,
+        "f366f33bbf6bcadbb7d87f0a21a7b65584a56b8d58b0743c77c88bee625b93a6"
+      ],
+      [
+        "config.json",
+        663,
+        "7463bb0ea78315365e6c6b74de4e73bbcc8359dfb0c5a737584e077d42c0b03c"
+      ],
+      [
+        "configuration.json",
+        2,
+        "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      ],
+      [
+        "generation_config.json",
+        243,
+        "3a8f9087e486054c8a4a08dae2e5a3ba62e23da212b5b8c08bc42cb983c3459f"
+      ],
+      [
+        "merges.txt",
+        1671839,
+        "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3"
+      ],
+      [
+        "model-00001-of-00004.safetensors",
+        3945441440,
+        "a1333e6293854747c481288ea83b348226af178dd565c49b6f9495ba1966aba7"
+      ],
+      [
+        "model-00002-of-00004.safetensors",
+        3864726352,
+        "f5d25a2772cb825164a2a2c0fb6d51a87e282abf21e4dd75bc5cfb3cd0ea6185"
+      ],
+      [
+        "model-00003-of-00004.safetensors",
+        3864726424,
+        "8efdec4c1bc12317ae1a38dc42b595ce777738a64deea3fcb8a0a91381bcdfd5"
+      ],
+      [
+        "model-00004-of-00004.safetensors",
+        3556377672,
+        "1a72d403cdf0c1ec3cb7f289f17b394a01e64394c2e9b3c0f94dbce3faf879bd"
+      ],
+      [
+        "model.safetensors.index.json",
+        27752,
+        "624bf7c47cd12468fdc16e38a47cf4f19e0415b859a223ba3c027eed2f0e1028"
+      ],
+      [
+        "tokenizer.json",
+        7031645,
+        "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539"
+      ],
+      [
+        "tokenizer_config.json",
+        7305,
+        "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583"
+      ],
+      [
+        "vocab.json",
+        2776833,
+        "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+      ]
+    ],
+    "key_file_sha256": {
+      "config.json": "7463bb0ea78315365e6c6b74de4e73bbcc8359dfb0c5a737584e077d42c0b03c",
+      "generation_config.json": "3a8f9087e486054c8a4a08dae2e5a3ba62e23da212b5b8c08bc42cb983c3459f",
+      "model.safetensors.index.json": "624bf7c47cd12468fdc16e38a47cf4f19e0415b859a223ba3c027eed2f0e1028",
+      "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "tokenizer_config.json": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583"
+    },
+    "enforcement": {
+      "probe_and_serving": "snapshot_download(model, revision=<commit>) in the container, then every frozen file verified (size + sha256, no extra file) before any engine starts; the session records revision, manifest hash and verification",
+      "quality": "the canonical scripts (unmodifiable) download without a revision: before the runs ModelScope master must resolve to <commit> with the identical file manifest; after the runs master must still resolve to <commit> and EVERY Qwen2.5-7B-Instruct snapshot directory in the model volume must match the frozen manifest (exp14_model_snapshot_modal.py, CPU only); otherwise the quality part is invalid",
+      "binding": "probe, serving and quality must all record the same revision and manifest hash"
+    },
     "geometry": {
       "architectures": [
         "Qwen2ForCausalLM"
@@ -77,7 +169,7 @@
     "status": "NON-EVIDENCE; requires explicit approval; must pass before --part serving / quality",
     "runs": "same image, RABIT gate, shape gate, model provenance, then one fresh engine per dtype (bfloat16, rabit_kv2): capacity, geometry, backend, physical-layout consistency, one 2048-token / 32-token generation, one chat sanity generation; NO timing emitted",
     "output": "results/mlsys2027/second_model/feasibility_probe",
-    "binding": "the measured parts run only at a commit whose harness files are identical to the probe commit"
+    "binding": "the measured parts run only if a PASSED probe record matches the current harness hashes, protocol hash, vllm-kvquant tree and model revision / manifest hash (check_probe_prerequisite; tested offline)"
   },
   "serving": {
     "engine": {

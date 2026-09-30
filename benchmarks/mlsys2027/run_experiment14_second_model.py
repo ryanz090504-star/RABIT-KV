@@ -31,12 +31,15 @@ import math
 import os
 import re
 import statistics
+import subprocess
 import sys
+import urllib.request
 import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import exp14_model_snapshot as ms  # noqa: E402  (frozen Model-B identity)
 import qa_control_gate as qg  # noqa: E402  (read-only: identity-line regexes)
 import run_exp13_turboquant_probe as p1  # noqa: E402  (read-only: image-expression extractor)
 import run_experiment1_quality_frontier as e1  # noqa: E402  (accepted; read-only helpers)
@@ -53,6 +56,8 @@ MODAL_APP = HERE / "exp14_deployment_modal.py"
 WORKER = HERE / "exp14_engine_worker.py"
 PROBE_WORKER = HERE / "exp14_probe_worker.py"
 SHAPE_GATE = HERE / "exp14_shape_gate.py"
+MODEL_SNAPSHOT = HERE / "exp14_model_snapshot.py"
+MODEL_SCAN_APP = HERE / "exp14_model_snapshot_modal.py"
 EXP13_WORKER = HERE / "exp13_engine_worker.py"
 EXP4_MODAL = HERE / "exp4_deployment_modal.py"
 PROTOCOL = HERE / "exp14_second_model_protocol.json"
@@ -60,17 +65,21 @@ TEST_FILE = HERE / "test_experiment14_second_model.py"
 QUALITY_DIR = ROOT / "benchmarks" / "quality"
 OUT_DIR = ROOT / "results" / "mlsys2027" / "second_model"
 PROBE_DIR, SERVING_DIR, QUALITY_OUT = OUT_DIR / "feasibility_probe", OUT_DIR / "serving", OUT_DIR / "quality"
-HARNESS_FILES = [RUNNER_SCRIPT, MODAL_APP, WORKER, PROBE_WORKER, SHAPE_GATE, PROTOCOL, TEST_FILE, r13.GATE, r13.WATCHDOG]
+HARNESS_FILES = [RUNNER_SCRIPT, MODAL_APP, WORKER, PROBE_WORKER, SHAPE_GATE, MODEL_SNAPSHOT, MODEL_SCAN_APP, PROTOCOL,
+                 TEST_FILE, r13.GATE, r13.WATCHDOG]
 
 EXP13_EVIDENCE_COMMIT = "42c2799f4e7393c6270193a1c852af90eaf7d402"
 EXP13_OUT = ROOT / "results" / "mlsys2027" / "external_baseline"
 PROTECTED_PATHS = [*r13.PROTECTED_PATHS, EXP13_OUT, *r13.MUST_BE_COMMITTED, QUALITY_DIR, r12.REFERENCE_DIR]
 
-MODEL_B = "Qwen/Qwen2.5-7B-Instruct"
+MODEL_B = ms.MODEL_ID
+MODEL_REVISION = ms.MODEL_REVISION  # immutable ModelScope commit, required by probe, serving and quality
 GEOMETRY = {"architectures": ["Qwen2ForCausalLM"], "num_hidden_layers": 28, "num_attention_heads": 28,
             "num_kv_heads": 4, "head_dim": 128, "sliding_window": None,
             "rabit_gqa4_decode_engaged": False, "rabit_fast_append_engaged": False}
 LAYERS, KV_HEADS, HEAD_DIM = 28, 4, 128
+FROZEN_RABIT_POLICY = {"k_bits": 3, "v_bits": 2, "group_size": 32, "residual_tokens": 4, "metadata_group_size": 64}
+EXPECTED_KV_QUANT_MODE = {"bfloat16": "NONE", "rabit_kv2": "RABIT_KV2"}
 RABIT_PAGE_BYTES = 12416  # rabit2_page_layout(block 32, 4 KV heads, head_dim 128)
 
 A, B = "bfloat16", "rabit_kv2"
@@ -190,8 +199,27 @@ def build_protocol() -> dict:
                 "request latency) and logical fake-quant quality, reported separately",
         "plan": "docs/MLSYS_EXPERIMENT_PLAN.md Experiment 14 (one additional compatible model); the plan defers the "
                 "model choice to a compatibility check",
-        "model_b": {"id": MODEL_B, "source": "ModelScope snapshot_download (revision master; file hashes recorded "
-                                              "in the session log)", "geometry": GEOMETRY,
+        "model_b": {"id": MODEL_B, "revision": MODEL_REVISION,
+                    "revision_resolution": "git ls-remote of the ModelScope repository during preparation: "
+                                           "refs/heads/master = " + MODEL_REVISION + " (no tags exist); the file API "
+                                           "returns the identical manifest for Revision=<commit> and Revision=master",
+                    "manifest_sha256": ms.MODEL_MANIFEST_SHA256,
+                    "manifest_rule": "sha256 of sorted 'path<TAB>size<TAB>sha256' lines of all 15 files",
+                    "files": ms.FROZEN_FILES,
+                    "key_file_sha256": {f[0]: f[2] for f in ms.FROZEN_FILES if f[0] in (
+                        "config.json", "tokenizer_config.json", "tokenizer.json", "generation_config.json",
+                        "model.safetensors.index.json")},
+                    "enforcement": {
+                        "probe_and_serving": "snapshot_download(model, revision=<commit>) in the container, then every "
+                                             "frozen file verified (size + sha256, no extra file) before any engine "
+                                             "starts; the session records revision, manifest hash and verification",
+                        "quality": "the canonical scripts (unmodifiable) download without a revision: before the runs "
+                                   "ModelScope master must resolve to <commit> with the identical file manifest; after "
+                                   "the runs master must still resolve to <commit> and EVERY Qwen2.5-7B-Instruct "
+                                   "snapshot directory in the model volume must match the frozen manifest "
+                                   "(exp14_model_snapshot_modal.py, CPU only); otherwise the quality part is invalid",
+                        "binding": "probe, serving and quality must all record the same revision and manifest hash"},
+                    "geometry": GEOMETRY,
                     "context": "max_position_embeddings 32768, rope_theta 1e6, use_sliding_window false, BF16 weights",
                     "tokenizer": "no BOS token (bos_token null, add_bos_token false); eos <|im_end|>",
                     "selection": "user decision after the compatibility audit: tests a different GQA geometry (the "
@@ -227,7 +255,9 @@ def build_protocol() -> dict:
                     "(bfloat16, rabit_kv2): capacity, geometry, backend, physical-layout consistency, one "
                     "2048-token / 32-token generation, one chat sanity generation; NO timing emitted",
             "output": PROBE_DIR.relative_to(ROOT).as_posix(),
-            "binding": "the measured parts run only at a commit whose harness files are identical to the probe commit"},
+            "binding": "the measured parts run only if a PASSED probe record matches the current harness hashes, "
+                       "protocol hash, vllm-kvquant tree and model revision / manifest hash "
+                       "(check_probe_prerequisite; tested offline)"},
         "serving": {
             "engine": {"worker_base_engine_kwargs": r13._const(_module(WORKER), "BASE_ENGINE_KWARGS"),
                        "model_runner": "default V2; 'Using V2 Model Runner' required in every leg",
@@ -312,6 +342,29 @@ def _manifest_passed(path: Path) -> bool:
     return path.exists() and json.loads(path.read_text(encoding="utf-8")).get("status") == "passed"
 
 
+PROBE_BINDING_KEYS = ("harness_sha256", "protocol_sha256", "vllm_kvquant_tree", "model_revision",
+                      "model_manifest_sha256")
+
+
+PROBE_RECORD = PROBE_DIR / "probe_record.json"
+
+
+def load_probe_record() -> dict | None:
+    return json.loads(PROBE_RECORD.read_text(encoding="utf-8")) if PROBE_RECORD.exists() else None
+
+
+def check_probe_prerequisite(record: dict | None, prov: dict) -> None:
+    """--part serving / quality may run only after a PASSED non-evidence probe whose harness hashes, protocol hash,
+    vllm-kvquant tree and frozen model revision / manifest hash equal the current ones. Raises RuntimeError."""
+    if not record:
+        raise RuntimeError("no Exp14 feasibility probe record: the probe must pass before serving / quality")
+    if record.get("status") != "passed" or record.get("non_evidence") is not True:
+        raise RuntimeError(f"the Exp14 feasibility probe has not passed (status={record.get('status')!r})")
+    for k in PROBE_BINDING_KEYS:
+        if record.get(k) != prov.get(k):
+            raise RuntimeError(f"Exp14 probe record does not match the current state: {k}")
+
+
 def preflight(part: str | None, dry_run: bool) -> dict:
     status = protected_status()
     if status:
@@ -338,29 +391,26 @@ def preflight(part: str | None, dry_run: bool) -> dict:
     if os.environ.get("VLLM_USE_V2_MODEL_RUNNER") is not None:
         raise RuntimeError("VLLM_USE_V2_MODEL_RUNNER must be unset (default V2 runner)")
     protocol = load_protocol()
+    head = e1.run_git("rev-parse", "HEAD")
+    prov = {"git_head": head, "vllm_kvquant_tree": e1.run_git("rev-parse", "HEAD:vllm-kvquant"),
+            "rabit_kv2_sha256_lf": rabit, "equivalence": eq, "protocol_sha256": e1.sha256(PROTOCOL),
+            "harness_sha256": {p.name: e1.sha256(p) for p in HARNESS_FILES}, "model_revision": MODEL_REVISION,
+            "model_manifest_sha256": ms.MODEL_MANIFEST_SHA256}
+    probe_ok = None
+    if part in ("serving", "quality") and not dry_run:
+        record = load_probe_record()
+        check_probe_prerequisite(record, prov)
+        e1.run_git("merge-base", "--is-ancestor", record["git_head"], "HEAD")
+        probe_ok = record["git_head"]
     uncommitted = e1.run_git("status", "--short", "--", *[str(p.relative_to(ROOT)) for p in HARNESS_FILES])
     if uncommitted and not dry_run:
         raise RuntimeError("Refusing to run: Experiment 14 harness has uncommitted changes:\n" + uncommitted)
-    head = e1.run_git("rev-parse", "HEAD")
-    probe_ok = None
-    if part in ("serving", "quality") and not dry_run:
-        rec = PROBE_DIR / "probe_record.json"
-        if not _manifest_passed(rec):
-            raise RuntimeError("the non-evidence feasibility probe has not passed; measured parts may not run")
-        probe_head = json.loads(rec.read_text(encoding="utf-8"))["git_head"]
-        e1.run_git("merge-base", "--is-ancestor", probe_head, "HEAD")
-        if e1.run_git("diff", "--name-only", probe_head, "HEAD", "--", *[str(p.relative_to(ROOT)) for p in HARNESS_FILES]):
-            raise RuntimeError("harness changed after the feasibility probe")
-        probe_ok = probe_head
     if part:
         m = {"probe": PROBE_DIR / "probe_record.json", "serving": SERVING_DIR / "manifest.json",
              "quality": QUALITY_OUT / "manifest.json"}[part]
         if _manifest_passed(m):
             raise RuntimeError(f"{m} already records a passed run; refusing to overwrite")
-    return {"git_head": head, "vllm_kvquant_tree": e1.run_git("rev-parse", "HEAD:vllm-kvquant"),
-            "rabit_kv2_sha256_lf": rabit, "equivalence": eq, "protocol_sha256": e1.sha256(PROTOCOL),
-            "harness_sha256": {p.name: e1.sha256(p) for p in HARNESS_FILES}, "probe_git_head": probe_ok,
-            "protocol": protocol, "uncommitted_files": uncommitted or None}
+    return {**prov, "probe_git_head": probe_ok, "protocol": protocol, "uncommitted_files": uncommitted or None}
 
 
 # ---------------------------------------------------------------------------------------------- serving parse
@@ -455,6 +505,15 @@ def parse_top(lines: list[str]) -> dict:
     return out
 
 
+def model_checks(top: dict) -> dict:
+    m = top.get("model") or {}
+    v = m.get("verification") or {}
+    return {"model_is_model_b": m.get("model") == MODEL_B,
+            "model_revision_frozen": m.get("revision") == MODEL_REVISION and v.get("model_revision") == MODEL_REVISION,
+            "model_snapshot_verified": v.get("passed") is True and v.get("files_checked") == len(ms.FROZEN_FILES)
+                                       and m.get("manifest_sha256") == ms.MODEL_MANIFEST_SHA256}
+
+
 def capacity(tags: dict, tag: str = "EXP14_CAPACITY") -> int | None:
     c = tags.get(tag)
     if not c or c.get("num_gpu_blocks") is None or c.get("block_size") is None:
@@ -502,7 +561,7 @@ def serving_integrity(parsed: dict, gates: dict, top: dict, diff: dict) -> dict:
               "shape_gate_passed": gates["shape_gate_passed"] and top["shape_gate_exit"] == 0,
               "no_watchdog_timeout": not top["timeouts"], "session_complete": top["complete"],
               "gpu_is_h100_80gb": any("H100 80GB" in g.get("name", "") for g in ((top.get("environment") or {}).get("gpus") or [])),
-              "model_is_model_b": (top.get("model") or {}).get("model") == MODEL_B}
+              **model_checks(top)}
     for k, label, d in LEGS:
         p = parsed[k]
         eff = p["tags"].get("EXP14_EFFECTIVE_ENGINE_CONFIG") or {}
@@ -572,6 +631,7 @@ def build_serving_summary(parsed: dict, top: dict) -> dict:
                               "capacity_ratio": ratio, "rabit_serving_path": "exact fallback paths (see claim boundary)"},
             "jit_warnings_in_measured_samples": {label: parsed[k]["jit_warnings_in_measurement"] for k, label, _ in LEGS},
             "statistics_note": "descriptive only: two fresh-engine legs per condition; no significance tests or CIs",
+            "model_revision": MODEL_REVISION, "model_manifest_sha256": ms.MODEL_MANIFEST_SHA256,
             "claim_boundary": CLAIM_BOUNDARY, "gpu": (top.get("environment") or {}).get("gpus")}
 
 
@@ -592,7 +652,7 @@ def analyze_probe(session_text: str) -> dict:
               "shape_gate_passed": gates["shape_gate_passed"] and top["shape_gate_exit"] == 0,
               "no_watchdog_timeout": not top["timeouts"], "session_complete": top["complete"],
               "gpu_is_h100_80gb": any("H100 80GB" in g.get("name", "") for g in ((top.get("environment") or {}).get("gpus") or [])),
-              "model_is_model_b": (top.get("model") or {}).get("model") == MODEL_B}
+              **model_checks(top)}
     facts = {}
     for k, label, d in PROBE_LEGS:
         p = parse_worker(legs[k])
@@ -605,6 +665,8 @@ def analyze_probe(session_text: str) -> dict:
         checks[f"{label}_v2_runner"] = p["v2_runner"]
         checks[f"{label}_block_size_32"] = kv.get("block_size") == REQUESTED_BLOCK_SIZE
         checks[f"{label}_engine_cache_dtype"] = kv.get("engine_cache_dtype") == d
+        checks[f"{label}_kv_quant_mode"] = kv.get("kv_quant_mode") == EXPECTED_KV_QUANT_MODE[d]
+        checks[f"{label}_rabit_policy_frozen"] = p["tags"].get("EXP14P_RABIT_POLICY") == FROZEN_RABIT_POLICY
         checks[f"{label}_geometry"] = p["tags"].get("EXP14P_MODEL_GEOMETRY") == GEOMETRY
         checks[f"{label}_backend_evidence"] = set(p["backend_evidence"]) == EXPECTED_BACKEND_EVIDENCE
         checks[f"{label}_physical_layout_consistent"] = ib is not None and abs(
@@ -615,7 +677,8 @@ def analyze_probe(session_text: str) -> dict:
         facts[label] = {"kv_cache_dtype": d, "capacity_tokens": cap, "kv": kv, "reported_kv_cache_gib": p["kv_log_gib"],
                         "implied_bytes_per_token": ib, "geometry": p["tags"].get("EXP14P_MODEL_GEOMETRY"),
                         "workload_generation": wg, "sanity_generation": p["tags"].get("EXP14P_SANITY_GENERATION")}
-    return {"checks": checks, "passed": all(checks.values()), "gates": gates, "facts": facts}
+    return {"checks": checks, "passed": all(checks.values()), "gates": gates, "facts": facts,
+            "model": top.get("model")}
 
 
 # ---------------------------------------------------------------------------------------------- quality
@@ -709,7 +772,7 @@ def run_probe(prov: dict) -> int:
     PROBE_DIR.mkdir(parents=True, exist_ok=True)
     log = PROBE_DIR / "probe_session.log"
     rec = {"experiment": 14, "kind": "feasibility_probe", "non_evidence": True, "status": "running",
-           "git_head": prov["git_head"], "started_utc": _now()}
+           "git_head": prov["git_head"], "started_utc": _now(), **{k: prov[k] for k in PROBE_BINDING_KEYS}}
     _write(PROBE_DIR / "probe_record.json", rec)
     rc = _modal_session(legs_arg(PROBE_LEGS), log, probe=True)
     res = analyze_probe(log.read_text(encoding="utf-8", errors="replace"))
@@ -739,10 +802,26 @@ def run_serving(prov: dict) -> int:
     return 0 if ok else 1
 
 
+def remote_model_identity() -> dict:
+    """ModelScope master must resolve to the frozen commit with the identical file manifest (read-only)."""
+    refs = subprocess.run(["git", "ls-remote", ms.MODEL_GIT_URL, "refs/heads/master"], capture_output=True, text=True,
+                          timeout=120).stdout.split()
+    master = refs[0] if refs else None
+    with urllib.request.urlopen(ms.MODEL_FILES_API.format(revision="master"), timeout=120) as r:
+        listing = ms.listing_manifest(json.loads(r.read().decode("utf-8")))
+    return {"master_commit": master, "master_is_frozen_revision": master == MODEL_REVISION,
+            "master_manifest_sha256": ms.manifest_sha256(listing),
+            "manifest_identical": listing == sorted(ms.FROZEN_FILES),
+            "passed": master == MODEL_REVISION and listing == sorted(ms.FROZEN_FILES)}
+
+
 def run_quality(prov: dict) -> int:
+    pre = remote_model_identity()
+    if not pre["passed"]:
+        raise RuntimeError(f"ModelScope master no longer equals the frozen Model-B revision; quality refused: {pre}")
     QUALITY_OUT.mkdir(parents=True, exist_ok=True)
     manifest = {"experiment": 14, "part": "quality", "status": "running", "started_utc": _now(), "provenance": prov,
-                "runs": []}
+                "model_identity_pre": pre, "runs": []}
     _write(QUALITY_OUT / "manifest.json", manifest)
     results = []
     for r in quality_runs():
@@ -755,7 +834,15 @@ def run_quality(prov: dict) -> int:
         if not res["passed"]:  # no retry; stop at the first failing benchmark
             break
     _write(QUALITY_OUT / "integrity_results.json", results)
-    ok = len(results) == len(pb.BENCHMARKS) and all(r["passed"] for r in results) and not protected_status()
+    post = remote_model_identity()
+    scan_log = QUALITY_OUT / "model_snapshot_scan.log"
+    scan_rc = e1.stream_command([sys.executable, "-m", "modal", "run", str(MODEL_SCAN_APP)], scan_log)
+    scan = next((json.loads(ln.split("=", 1)[1]) for ln in scan_log.read_text(encoding="utf-8", errors="replace")
+                 .splitlines() if ln.strip().startswith("EXP14_MODEL_SCAN=")), None)
+    manifest.update(model_identity_post=post, model_snapshot_scan={"returncode": scan_rc, "result": scan})
+    model_ok = post["passed"] and scan_rc == 0 and bool(scan and scan.get("passed"))
+    ok = (len(results) == len(pb.BENCHMARKS) and all(r["passed"] for r in results) and model_ok
+          and not protected_status())
     if ok:  # statistics only after every benchmark is valid (offline, CPU)
         pb.main(["--results-dir", str(QUALITY_OUT), "--out", str(QUALITY_OUT / "variance_results.json")])
         _write(QUALITY_OUT / "canonical_subset_aggregates.json", canonical_subset_aggregates())

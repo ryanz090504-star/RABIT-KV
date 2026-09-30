@@ -7,11 +7,13 @@ import hashlib
 import json
 import math
 import sys
+import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import exp14_engine_worker as w14  # noqa: E402
+import exp14_model_snapshot as ms  # noqa: E402
 import exp14_shape_gate as sg  # noqa: E402
 import run_experiment1_quality_frontier as e1  # noqa: E402
 import run_experiment9_group_ablation as r9  # noqa: E402
@@ -137,7 +139,11 @@ def _synthetic_session(mutate=None, probe=False) -> str:
            '[gate] EXP3_GATE_RESULT={"passed": true}', "EXP14_GATE_EXIT={\"returncode\": 0}",
            '[shapegate] EXP14_SHAPE_GATE_SUMMARY=' + json.dumps(
                {"passed": True, "geometries": {"model_b_qwen2_5_7b": {}, "control_llama3_1_8b": {}}}),
-           'EXP14_SHAPE_GATE_EXIT={"returncode": 0}', 'EXP14_MODEL=' + json.dumps({"model": r14.MODEL_B})]
+           'EXP14_SHAPE_GATE_EXIT={"returncode": 0}',
+           'EXP14_MODEL=' + json.dumps({"model": r14.MODEL_B, "revision": ms.MODEL_REVISION,
+                                        "manifest_sha256": ms.MODEL_MANIFEST_SHA256,
+                                        "verification": {"passed": True, "model_revision": ms.MODEL_REVISION,
+                                                         "files_checked": 15}})]
     for k, label, d in legs:
         pre = f"[leg{k}:{d}] "
         gib = 48.0
@@ -148,7 +154,9 @@ def _synthetic_session(mutate=None, probe=False) -> str:
         if probe:
             lines += [f"{tag}_MODEL_GEOMETRY=" + json.dumps(geom),
                       f"{tag}_KV=" + json.dumps({"engine_cache_dtype": d, "block_size": 32, "num_gpu_blocks": cap // 32,
-                                                 "capacity_tokens": cap}),
+                                                 "capacity_tokens": cap,
+                                                 "kv_quant_mode": r14.EXPECTED_KV_QUANT_MODE[d]}),
+                      f"{tag}_RABIT_POLICY=" + json.dumps(r14.FROZEN_RABIT_POLICY),
                       f"{tag}_WORKLOAD_GENERATION=" + json.dumps({"prompt_tokens": 2048, "output_tokens": 32,
                                                                   "bos_token_id": None}),
                       f"{tag}_SANITY_GENERATION=" + json.dumps({"text": "Paris", "output_tokens": 2})]
@@ -232,6 +240,149 @@ def test_exp13_wording_preserved():
     w = r14.load_protocol()["exp13_correctness_wording_for_paper"]
     assert w.startswith("The upstream TurboQuant suite passed under the frozen item-level gate.")
     assert "physical feasibility probe" in w and "round-trip" not in w
+
+
+# ------------------------------------------------------------------ frozen Model-B snapshot identity
+def test_model_snapshot_identity_frozen():
+    assert ms.MODEL_ID == r14.MODEL_B == "Qwen/Qwen2.5-7B-Instruct"
+    assert ms.MODEL_REVISION == r14.MODEL_REVISION == "16c174980d8a1492910551634b4969e69cdc2444"
+    assert len(ms.FROZEN_FILES) == 15 and ms.FROZEN_FILES == sorted(ms.FROZEN_FILES)
+    assert ms.MODEL_MANIFEST_SHA256 == ms.manifest_sha256(ms.FROZEN_FILES)
+    cfg = dict((f[0], f[2]) for f in ms.FROZEN_FILES)
+    assert cfg["config.json"] == "7463bb0ea78315365e6c6b74de4e73bbcc8359dfb0c5a737584e077d42c0b03c"
+    prot = r14.load_protocol()["model_b"]
+    assert prot["revision"] == ms.MODEL_REVISION and prot["manifest_sha256"] == ms.MODEL_MANIFEST_SHA256
+    assert prot["files"] == ms.FROZEN_FILES
+    modal = (HERE / "exp14_deployment_modal.py").read_text(encoding="utf-8")
+    assert f'MODEL_REVISION = "{ms.MODEL_REVISION}"' in modal
+    assert "snapshot_download(MODEL, revision=MODEL_REVISION" in modal and "ms.verify_dir(model_dir)" in modal
+    # the verification runs BEFORE any engine / probe worker starts
+    assert modal.index("ms.verify_dir(model_dir)") < modal.index("for k, (label, dtype) in enumerate(plan")
+
+
+def test_verify_dir_and_volume_scan_offline():
+    small = [["config.json", 5, __import__("hashlib").sha256(b"abcde").hexdigest()],
+             ["tokenizer.json", 3, __import__("hashlib").sha256(b"xyz").hexdigest()]]
+    orig = ms.FROZEN_FILES
+    try:
+        ms.FROZEN_FILES = small
+        with tempfile.TemporaryDirectory() as t:
+            d = Path(t) / "models" / "Qwen--Qwen2.5-7B-Instruct" / "snapshots" / "master"
+            d.mkdir(parents=True)
+            (d / "config.json").write_bytes(b"abcde")
+            (d / "tokenizer.json").write_bytes(b"xyz")
+            (d / ".mdl").write_bytes(b"hidden metadata is ignored")
+            assert ms.verify_dir(d)["passed"]
+            assert ms.scan_volume(t)["passed"] and ms.scan_volume(t)["snapshot_dirs"] == [str(d)]
+            (d / "tokenizer.json").write_bytes(b"xyw")  # same size, different content
+            r = ms.verify_dir(d)
+            assert not r["passed"] and r["mismatches"][0]["file"] == "tokenizer.json"
+            assert not ms.scan_volume(t)["passed"]
+            (d / "tokenizer.json").write_bytes(b"xyz")
+            (d / "new_weights.safetensors").write_bytes(b"0")  # a file the frozen revision does not have
+            assert not ms.verify_dir(d)["passed"]
+        with tempfile.TemporaryDirectory() as t:
+            assert not ms.scan_volume(t)["passed"]  # no snapshot at all is a failure, not a vacuous pass
+    finally:
+        ms.FROZEN_FILES = orig
+
+
+def test_serving_and_probe_require_frozen_model_identity():
+    def other_revision(text):
+        return text.replace(ms.MODEL_REVISION, "0" * 40)
+
+    def unverified(text):
+        return text.replace('"passed": true, "model_revision"', '"passed": false, "model_revision"')
+
+    for f, key in ((other_revision, "model_revision_frozen"), (unverified, "model_snapshot_verified")):
+        r = r14.analyze_serving(f(_synthetic_session()))
+        assert not r["integrity"]["passed"] and not r["integrity"]["checks"][key], key
+        pr = r14.analyze_probe(f(_synthetic_session(probe=True)))
+        assert not pr["passed"] and not pr["checks"][key], key
+
+
+def test_probe_detects_bf16_fallback_or_policy_drift():
+    def mode_none(label, lines):
+        return [ln.replace('"kv_quant_mode": "RABIT_KV2"', '"kv_quant_mode": "NONE"') for ln in lines]
+
+    def policy_drift(label, lines):
+        return [ln.replace('"v_bits": 2', '"v_bits": 3') for ln in lines]
+
+    for mut, key in ((mode_none, "P2_kv_quant_mode"), (policy_drift, "P2_rabit_policy_frozen")):
+        r = r14.analyze_probe(_synthetic_session(probe=True, mutate=mut))
+        assert not r["passed"] and not r["checks"][key], key
+
+
+def test_shape_gate_counts_all_three_fallbacks():
+    src = (HERE / "exp14_shape_gate.py").read_text(encoding="utf-8")
+    for name in ("_rabit2_online_decode_attention_triton_stage4b2_exact", "_rabit2_final_old_append",
+                 "_quantize_v2_primary_ref_stage4b1_exact"):
+        assert f"_Counter(r.{name})" in src, name
+    assert '"decode_steps_with_quant_fallback"' in src and "decode_step_quant_fallback_calls_total" in src
+    rabit = (ROOT / "vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py").read_text(encoding="utf-8")
+    # the counted functions are resolved through module globals at call time (so the counters observe real dispatch)
+    assert "return _rabit2_online_decode_attention_triton_stage4b2_exact(" in rabit
+    assert "return _rabit2_final_old_append(" in rabit
+    assert "return _quantize_v2_primary_ref_stage4b1_exact(" in rabit
+
+
+# ------------------------------------------------------------------ probe prerequisite (offline; no Modal / GPU)
+PREREQ_ERRORS = ("no Exp14 feasibility probe record", "the Exp14 feasibility probe has not passed",
+                 "Exp14 probe record does not match")
+
+
+def _valid_record(prov: dict) -> dict:
+    return {"experiment": 14, "kind": "feasibility_probe", "non_evidence": True, "status": "passed",
+            "git_head": prov["git_head"], **{k: prov[k] for k in r14.PROBE_BINDING_KEYS}}
+
+
+def test_probe_prerequisite_function():
+    prov = r14.preflight(None, dry_run=True)  # read-only: no Modal, no GPU, no download
+    for rec in (None, {}, {**_valid_record(prov), "status": "failed"}, {**_valid_record(prov), "status": "running"},
+                {**_valid_record(prov), "non_evidence": False}):
+        try:
+            r14.check_probe_prerequisite(rec, prov)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError(f"accepted an invalid probe record: {rec}")
+    r14.check_probe_prerequisite(_valid_record(prov), prov)  # the synthetic valid record passes
+    for key, bad in (("protocol_sha256", "0" * 64), ("vllm_kvquant_tree", "0" * 40), ("model_revision", "0" * 40),
+                     ("model_manifest_sha256", "0" * 64),
+                     ("harness_sha256", {**prov["harness_sha256"], "exp14_shape_gate.py": "0" * 64})):
+        try:
+            r14.check_probe_prerequisite({**_valid_record(prov), key: bad}, prov)
+        except RuntimeError as e:
+            assert key in str(e)
+        else:
+            raise AssertionError(f"accepted a probe record with a mismatched {key}")
+
+
+def test_serving_and_quality_preflight_refuse_without_probe():
+    orig = r14.PROBE_RECORD
+    try:
+        with tempfile.TemporaryDirectory() as t:
+            r14.PROBE_RECORD = Path(t) / "probe_record.json"  # no probe record exists
+            for part in ("serving", "quality"):
+                try:
+                    r14.preflight(part, dry_run=False)
+                except RuntimeError as e:
+                    assert str(e).startswith("no Exp14 feasibility probe record"), str(e)
+                else:
+                    raise AssertionError(f"--part {part} preflight passed without a probe record")
+            # a synthetic VALID record lets the prerequisite check itself pass (later checks may still refuse,
+            # e.g. uncommitted harness files during development -- but never with a probe error)
+            prov = r14.preflight(None, dry_run=True)
+            r14.PROBE_RECORD.write_text(json.dumps(_valid_record(prov)), encoding="utf-8")
+            for part in ("serving", "quality"):
+                try:
+                    out = r14.preflight(part, dry_run=False)
+                    assert out["probe_git_head"] == prov["git_head"]
+                except RuntimeError as e:
+                    assert not str(e).startswith(PREREQ_ERRORS), str(e)
+    finally:
+        r14.PROBE_RECORD = orig
+    assert "modal" not in r14.preflight.__code__.co_names  # preflight never launches Modal
 
 
 if __name__ == "__main__":

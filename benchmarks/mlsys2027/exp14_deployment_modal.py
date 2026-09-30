@@ -30,6 +30,7 @@ from pathlib import Path
 import modal
 
 MODEL = "Qwen/Qwen2.5-7B-Instruct"
+MODEL_REVISION = "16c174980d8a1492910551634b4969e69cdc2444"  # immutable ModelScope commit (exp14_model_snapshot.py)
 BASE_COMMIT = "f329ce405b12623fb8b1cf1830f12e5a712523be"
 SNAP = Path(os.environ.get("EXP14_VLLM_SNAPSHOT", "/nonexistent/EXP14_VLLM_SNAPSHOT-not-set.zip"))
 WORKER_LOCAL = Path(__file__).resolve().parent / "exp14_engine_worker.py"
@@ -42,6 +43,8 @@ SHAPE_GATE_LOCAL = Path(__file__).resolve().parent / "exp14_shape_gate.py"
 SHAPE_GATE_REMOTE = "/opt/exp14/exp14_shape_gate.py"
 PROBE_WORKER_LOCAL = Path(__file__).resolve().parent / "exp14_probe_worker.py"  # non-evidence probe only
 PROBE_WORKER_REMOTE = "/opt/exp14/exp14_probe_worker.py"
+MODEL_SNAPSHOT_LOCAL = Path(__file__).resolve().parent / "exp14_model_snapshot.py"  # frozen Model-B identity
+MODEL_SNAPSHOT_REMOTE = "/opt/exp14/exp14_model_snapshot.py"
 RABIT_KV2_REMOTE = "/root/vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py"
 EXPECTED_RABIT_SHA256_LF = "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
 GPU_CLEAN_TOLERANCE_MIB = 256
@@ -114,6 +117,7 @@ image = (
     .add_local_file(str(WATCHDOG_LOCAL), WATCHDOG_REMOTE, copy=True)
     .add_local_file(str(SHAPE_GATE_LOCAL), SHAPE_GATE_REMOTE, copy=True)
     .add_local_file(str(PROBE_WORKER_LOCAL), PROBE_WORKER_REMOTE, copy=True)
+    .add_local_file(str(MODEL_SNAPSHOT_LOCAL), MODEL_SNAPSHOT_REMOTE, copy=True)
 )
 
 
@@ -274,19 +278,25 @@ def mirrored(legs: str, warmups: int, reps_per_leg: int, probe: bool = False) ->
         raise RuntimeError(f"Model-B shape gate failed with exit code {code}; no measurement run")
 
     os.environ["MODELSCOPE_CACHE"] = "/model_cache"
-    model_dir = snapshot_download(MODEL, cache_dir="/model_cache")
+    model_dir = snapshot_download(MODEL, revision=MODEL_REVISION, cache_dir="/model_cache")
     try:
         model_cache.commit()
     except Exception:  # noqa: BLE001
         pass
 
-    # Checkpoint provenance: every leg loads exactly this directory.
-    mdir = Path(model_dir)
-    files = {}
-    for p in sorted(mdir.iterdir()):
-        if p.is_file() and (p.suffix in {".json", ".safetensors"} or p.name == "tokenizer.model"):
-            files[p.name] = {"bytes": p.stat().st_size, "sha256": _sha256_file(p)}
-    _emit("EXP14_MODEL", {"model": MODEL, "snapshot_dir": model_dir, "files": files})
+    # Frozen Model-B identity: every leg loads exactly this directory, verified file-by-file (size + SHA-256) against
+    # the immutable revision's manifest BEFORE any engine starts.
+    sys.path.insert(0, str(Path(MODEL_SNAPSHOT_REMOTE).parent))
+    import exp14_model_snapshot as ms
+
+    if ms.MODEL_ID != MODEL or ms.MODEL_REVISION != MODEL_REVISION:
+        raise RuntimeError("model identity constants disagree")
+    verification = ms.verify_dir(model_dir)
+    _emit("EXP14_MODEL", {"model": MODEL, "revision": MODEL_REVISION, "snapshot_dir": model_dir,
+                          "manifest_sha256": ms.MODEL_MANIFEST_SHA256, "verification": verification})
+    if not verification["passed"]:
+        raise RuntimeError(f"downloaded Model-B snapshot differs from the frozen revision: {verification['mismatches']} "
+                           f"extra={verification['extra_files']}; no engine started")
 
     for k, (label, dtype) in enumerate(plan, start=1):
         _require_clean(label, baseline["memory_used_mib"])
