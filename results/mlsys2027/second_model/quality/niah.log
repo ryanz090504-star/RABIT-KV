@@ -1,0 +1,399 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-uIyf0hF17OxzZQr8HWInb1
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\quality\niah.py
+└── 🔨 Created function run_niah.
+GPU: NVIDIA H100 80GB HBM3
+Model: Qwen/Qwen2.5-7B-Instruct
+Context lengths: [4096, 8192, 16384]
+Needle depths: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
+Methods: ['bf16', 'rabit2']
+Metric: exact retrieval of the hidden code
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+Memory: logical packed prefix-KV storage, including metadata and residuals
+
+2026-09-30 22:18:40,315 | INFO    | modelscope_hub.download | Downloading 15 files from Qwen/Qwen2.5-7B-Instruct@master
+
+[1ADownloading:   0%|          | 0/15 [00:00<?, ?file/s]
+[1ADownloading:  20%|██        | 3/15 [00:00<00:01,  6.38file/s]
+[1ADownloading:  33%|███▎      | 5/15 [00:05<00:11,  1.19s/file]
+[1ADownloading:  53%|█████▎    | 8/15 [00:15<00:16,  2.39s/file]
+[1ADownloading:  87%|████████▋ | 13/15 [00:15<00:02,  1.10s/file]
+[1ADownloading: 100%|██████████| 15/15 [00:15<00:00,  1.06s/file]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  7.48it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00, 10.40it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 10.35it/s]
+Token indices sequence length is longer than the specified maximum sequence length for this model (305908 > 131072). Running this sequence through the model will result in indexing errors
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Running one BF16 warm-up at 4096 tokens...
+
+Case 1/57: context=4096, depth=5%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R the secret code is R R secret code R R R R R = R'
+
+Case 2/57: context=4096, depth=10%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact exact secret secret code code R R R R R R = = ='
+
+Case 3/57: context=4096, depth=15%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact R R R R R hidden secret code R R R R R R'
+
+Case 4/57: context=4096, depth=20%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact exact secret secret code code R R R R R R = R ='
+
+Case 5/57: context=4096, depth=25%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact exact secret secret code code hidden secret code is R R R = R'
+
+Case 6/57: context=4096, depth=30%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R hidden secret code is R R hidden secret code R R R R = R'
+
+Case 7/57: context=4096, depth=35%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. You'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact exact secret secret code R R R R R = R R = ='
+
+Case 8/57: context=4096, depth=40%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact exact secret secret code code hidden secret code is R R R = R'
+
+Case 9/57: context=4096, depth=45%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact exact secret secret code code code code R R R R = R ='
+
+Case 10/57: context=4096, depth=50%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R the secret code is R R secret code R R R R R = R'
+
+Case 11/57: context=4096, depth=55%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer=':\nRR - R R R secret secret code is R R R = ='
+
+Case 12/57: context=4096, depth=60%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291. Remember this exact code.Human'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact R\nR = R secret secret code R R R R = R'
+
+Case 13/57: context=4096, depth=65%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact exact secret code code R code secret code.\n\n RR code = R'
+
+Case 14/57: context=4096, depth=70%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact R\nR secret code code R R R R R = R ='
+
+Case 15/57: context=4096, depth=75%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact R the secret code R R secret is the secret is the secret is'
+
+Case 16/57: context=4096, depth=80%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact = R\nR R hidden\n 7\nR R R'
+
+Case 17/57: context=4096, depth=85%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact exact secret secret code code code code R R R R = R ='
+
+Case 18/57: context=4096, depth=90%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R the secret code is R R hidden\n R R R = R = ='
+
+Case 19/57: context=4096, depth=95%
+  bf16     PASS  KV=223.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=42.636 MB Comp=5.253x answer='R exact = R\nR R hidden\n = R R\n = = ='
+
+Case 20/57: context=8192, depth=5%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- R R R R R R R R - R R R R'
+
+Case 21/57: context=8192, depth=10%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R - R R R R R R R - R R R - * R'
+
+Case 22/57: context=8192, depth=15%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret code is R R R R R R R * R R R R'
+
+Case 23/57: context=8192, depth=20%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R - R - R R R R R R R - R - R R'
+
+Case 24/57: context=8192, depth=25%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret code is: R R R R R R R A * R R'
+
+Case 25/57: context=8192, depth=30%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- R R R R R R R R - - R R -'
+
+Case 26/57: context=8192, depth=35%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R - R R R R R R - R - R - R R R'
+
+Case 27/57: context=8192, depth=40%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291. Remember this exact code.Human'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret-7 R R R R R R - R R A * R'
+
+Case 28/57: context=8192, depth=45%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- R R R R R R R - - R - - -'
+
+Case 29/57: context=8192, depth=50%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- R R R R R R R - - R R R R'
+
+Case 30/57: context=8192, depth=55%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291. Remember this exact code.Human'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- R R R R R R R - R R - - -'
+
+Case 31/57: context=8192, depth=60%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret code is: R R R R / R R :\nR R R'
+
+Case 32/57: context=8192, depth=65%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret code is R R R R R R R R R A A R'
+
+Case 33/57: context=8192, depth=70%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- - R R R R R R R R R A A R'
+
+Case 34/57: context=8192, depth=75%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. You'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- R R R R R R R R R R A R R'
+
+Case 35/57: context=8192, depth=80%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. You'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- R R R R R R R R R R AAB R'
+
+Case 36/57: context=8192, depth=85%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the task definition'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- R R R R R R R R - R R R R'
+
+Case 37/57: context=8192, depth=90%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. You'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- code: is R R R R R R R R R R'
+
+Case 38/57: context=8192, depth=95%
+  bf16     PASS  KV=447.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. You'
+  rabit2   FAIL  KV=85.073 MB Comp=5.265x answer='R secret- R R R R R R R R - R R R R'
+
+Case 39/57: context=16384, depth=5%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer=':\n\n R R 1 ( R hidden secret code is R R R27'
+
+Case 40/57: context=16384, depth=10%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer=':\n R R the hang secret\nR7 the secret code code is RR'
+
+Case 41/57: context=16384, depth=15%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR Rabit- 7\n1 R 7 2'
+
+Case 42/57: context=16384, depth=20%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou can verify this by searching for'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR\nR\nR\nR\n Rabbit-\n-'
+
+Case 43/57: context=16384, depth=25%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are to trust that the document'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR Rabit- secret code is R Rabit IT IS7'
+
+Case 44/57: context=16384, depth=30%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. Provide'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR\nR\nR\nR\n Rabbit-\n7'
+
+Case 45/57: context=16384, depth=35%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR\nR\nR\nR\n Rabbit-\n7'
+
+Case 46/57: context=16384, depth=40%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret secret\nR secret secret\nR RABAB Rabbit-72'
+
+Case 47/57: context=16384, depth=45%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. Provide'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R Rabit-729919. The exact is contains the'
+
+Case 48/57: context=16384, depth=50%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291.Human: Read the following document'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR Rabit- secret\n1 7- 7'
+
+Case 49/57: context=16384, depth=55%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. Provide'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nRAB Rabititt-7 7Human'
+
+Case 50/57: context=16384, depth=60%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are to trust that the provided'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R R R 1 = R secret code is R R R R. R'
+
+Case 51/57: context=16384, depth=65%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. Provide'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR Rabit- code 7  7  7'
+
+Case 52/57: context=16384, depth=70%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. Provide'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR Rabit- secret code is is R R Rabit2'
+
+Case 53/57: context=16384, depth=75%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. Provide'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nRR the secret\nR secret\n0 R the secret'
+
+Case 54/57: context=16384, depth=80%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291.Human: Given the following context'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR Rabit- secret code is R the R R22'
+
+Case 55/57: context=16384, depth=85%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. Provide'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR Rabit- secret code is R R R Rabit2'
+
+Case 56/57: context=16384, depth=90%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291\nYou are an AI assistant. Provide'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R secret\nR Rabit- secret code is is R R Rabitit'
+
+Case 57/57: context=16384, depth=95%
+  bf16     PASS  KV=895.945 MB Comp=1.000x answer='RABIT-7291.Human: Please provide the name'
+  rabit2   FAIL  KV=169.948 MB Comp=5.272x answer='R R R 1  t 0 9 1 1'
+
+====================================================================================================================================
+RABIT-KV NEEDLE-IN-A-HAYSTACK RESULTS
+====================================================================================================================================
+Context   Depth     Method    Result    KV MB         Compression   Extracted code      Answer                              
+------------------------------------------------------------------------------------------------------------------------------------
+4096      0.05      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.05      rabit2    FAIL      42.636        5.253                             R the secret code is R R secret co  
+4096      0.10      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.10      rabit2    FAIL      42.636        5.253                             R exact exact secret secret code c  
+4096      0.15      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.15      rabit2    FAIL      42.636        5.253                             R exact R R R R R hidden secret co  
+4096      0.20      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.20      rabit2    FAIL      42.636        5.253                             R exact exact secret secret code c  
+4096      0.25      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.25      rabit2    FAIL      42.636        5.253                             R exact exact secret secret code c  
+4096      0.30      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.30      rabit2    FAIL      42.636        5.253                             R hidden secret code is R R hidden  
+4096      0.35      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+4096      0.35      rabit2    FAIL      42.636        5.253                             R exact exact secret secret code R  
+4096      0.40      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.40      rabit2    FAIL      42.636        5.253                             R exact exact secret secret code c  
+4096      0.45      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.45      rabit2    FAIL      42.636        5.253                             R exact exact secret secret code c  
+4096      0.50      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.50      rabit2    FAIL      42.636        5.253                             R the secret code is R R secret co  
+4096      0.55      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.55      rabit2    FAIL      42.636        5.253                             : RR - R R R secret secret code is  
+4096      0.60      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291. Remember this exact co  
+4096      0.60      rabit2    FAIL      42.636        5.253                             R exact R R = R secret secret code  
+4096      0.65      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.65      rabit2    FAIL      42.636        5.253                             R exact exact secret code code R c  
+4096      0.70      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.70      rabit2    FAIL      42.636        5.253                             R exact R R secret code code R R R  
+4096      0.75      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.75      rabit2    FAIL      42.636        5.253                             R exact R the secret code R R secr  
+4096      0.80      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.80      rabit2    FAIL      42.636        5.253                             R exact = R R R hidden  7 R R R     
+4096      0.85      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.85      rabit2    FAIL      42.636        5.253                             R exact exact secret secret code c  
+4096      0.90      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.90      rabit2    FAIL      42.636        5.253                             R the secret code is R R hidden  R  
+4096      0.95      bf16      PASS      223.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+4096      0.95      rabit2    FAIL      42.636        5.253                             R exact = R R R hidden  = R R  = =  
+8192      0.05      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.05      rabit2    FAIL      85.073        5.265                             R secret- R R R R R R R R - R R R   
+8192      0.10      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.10      rabit2    FAIL      85.073        5.265                             R - R R R R R R R - R R R - * R     
+8192      0.15      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.15      rabit2    FAIL      85.073        5.265                             R secret code is R R R R R R R * R  
+8192      0.20      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.20      rabit2    FAIL      85.073        5.265                             R - R - R R R R R R R - R - R R     
+8192      0.25      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.25      rabit2    FAIL      85.073        5.265                             R secret code is: R R R R R R R A   
+8192      0.30      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.30      rabit2    FAIL      85.073        5.265                             R secret- R R R R R R R R - - R R   
+8192      0.35      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.35      rabit2    FAIL      85.073        5.265                             R - R R R R R R - R - R - R R R     
+8192      0.40      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291. Remember this exact co  
+8192      0.40      rabit2    FAIL      85.073        5.265                             R secret-7 R R R R R R - R R A * R  
+8192      0.45      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.45      rabit2    FAIL      85.073        5.265                             R secret- R R R R R R R - - R - -   
+8192      0.50      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.50      rabit2    FAIL      85.073        5.265                             R secret- R R R R R R R - - R R R   
+8192      0.55      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291. Remember this exact co  
+8192      0.55      rabit2    FAIL      85.073        5.265                             R secret- R R R R R R R - R R - -   
+8192      0.60      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.60      rabit2    FAIL      85.073        5.265                             R secret code is: R R R R / R R :   
+8192      0.65      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.65      rabit2    FAIL      85.073        5.265                             R secret code is R R R R R R R R R  
+8192      0.70      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+8192      0.70      rabit2    FAIL      85.073        5.265                             R secret- - R R R R R R R R R A A   
+8192      0.75      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+8192      0.75      rabit2    FAIL      85.073        5.265                             R secret- R R R R R R R R R R A R   
+8192      0.80      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+8192      0.80      rabit2    FAIL      85.073        5.265                             R secret- R R R R R R R R R R AAB   
+8192      0.85      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291.Human: Given the task d  
+8192      0.85      rabit2    FAIL      85.073        5.265                             R secret- R R R R R R R R - R R R   
+8192      0.90      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+8192      0.90      rabit2    FAIL      85.073        5.265                             R secret- code: is R R R R R R R R  
+8192      0.95      bf16      PASS      447.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+8192      0.95      rabit2    FAIL      85.073        5.265                             R secret- R R R R R R R R - R R R   
+Stopping app - local entrypoint completed.
+16384     0.05      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+16384     0.05      rabit2    FAIL      169.948       5.272                             :   R R 1 ( R hidden secret code i  
+16384     0.10      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+16384     0.10      rabit2    FAIL      169.948       5.272                             :  R R the hang secret R7 the secr  
+16384     0.15      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+16384     0.15      rabit2    FAIL      169.948       5.272                             R secret R Rabit- 7 1 R 7 2         
+16384     0.20      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You can verify this by   
+16384     0.20      rabit2    FAIL      169.948       5.272                             R secret R R R R  Rabbit- -         
+16384     0.25      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are to trust that t  
+16384     0.25      rabit2    FAIL      169.948       5.272                             R secret R Rabit- secret code is R  
+16384     0.30      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+16384     0.30      rabit2    FAIL      169.948       5.272                             R secret R R R R  Rabbit- 7         
+16384     0.35      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+16384     0.35      rabit2    FAIL      169.948       5.272                             R secret R R R R  Rabbit- 7         
+16384     0.40      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+16384     0.40      rabit2    FAIL      169.948       5.272                             R secret secret R secret secret R   
+16384     0.45      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+16384     0.45      rabit2    FAIL      169.948       5.272         RABIT-7299          R Rabit-729919. The exact is conta  
+16384     0.50      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291.Human: Read the followi  
+16384     0.50      rabit2    FAIL      169.948       5.272                             R secret R Rabit- secret 1 7- 7     
+16384     0.55      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+16384     0.55      rabit2    FAIL      169.948       5.272                             R secret RAB Rabititt-7 7Human      
+16384     0.60      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are to trust that t  
+16384     0.60      rabit2    FAIL      169.948       5.272                             R R R 1 = R secret code is R R R R  
+16384     0.65      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+16384     0.65      rabit2    FAIL      169.948       5.272                             R secret R Rabit- code 7  7  7      
+16384     0.70      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+16384     0.70      rabit2    FAIL      169.948       5.272                             R secret R Rabit- secret code is i  
+16384     0.75      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+16384     0.75      rabit2    FAIL      169.948       5.272                             R secret RR the secret R secret 0   
+16384     0.80      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291.Human: Given the follow  
+16384     0.80      rabit2    FAIL      169.948       5.272                             R secret R Rabit- secret code is R  
+16384     0.85      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+16384     0.85      rabit2    FAIL      169.948       5.272                             R secret R Rabit- secret code is R  
+16384     0.90      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291 You are an AI assistant  
+16384     0.90      rabit2    FAIL      169.948       5.272                             R secret R Rabit- secret code is i  
+16384     0.95      bf16      PASS      895.945       1.000         RABIT-7291          RABIT-7291.Human: Please provide t  
+16384     0.95      rabit2    FAIL      169.948       5.272                             R R R 1  t 0 9 1 1                  
+
+AGGREGATE ACCURACY
+--------------------------------------------------------------------------------------
+Method      Passed      Total       Accuracy      Avg KV MB       Avg Compression   
+--------------------------------------------------------------------------------------
+bf16        57          57          100.0         522.612         1.000             
+rabit2      0           57          0.0           99.219          5.263             
+
+Important: reported run time is for experiment planning only. It is not deployment latency.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-uIyf0hF17OxzZQr8HWInb1

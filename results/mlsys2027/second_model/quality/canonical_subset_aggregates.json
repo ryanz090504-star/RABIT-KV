@@ -1,0 +1,42 @@
+{
+  "continuation_ppl": {
+    "n_canonical_units": 8,
+    "aggregate": {
+      "bf16": 6.393824975201968,
+      "rabit2": 377.6768909225167
+    },
+    "metric": "ppl"
+  },
+  "niah": {
+    "n_canonical_units": 15,
+    "aggregate": {
+      "bf16": 100.0,
+      "rabit2": 0.0
+    },
+    "metric": "accuracy_pct"
+  },
+  "passage_retrieval": {
+    "n_canonical_units": 10,
+    "aggregate": {
+      "bf16": 100.0,
+      "rabit2": 35.83
+    },
+    "metric": "accuracy_pct"
+  },
+  "hotpotqa": {
+    "n_canonical_units": 20,
+    "aggregate": {
+      "bf16": 53.87500000000001,
+      "rabit2": 41.915
+    },
+    "metric": "f1_pct"
+  },
+  "qasper": {
+    "n_canonical_units": 24,
+    "aggregate": {
+      "bf16": 34.55,
+      "rabit2": 7.666666666666668
+    },
+    "metric": "f1_pct"
+  }
+}

@@ -1,0 +1,173 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-G8dXYKuXMNusfPw6Gxgqhy
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\quality\qasper.py
+└── 🔨 Created function run_longbench.
+GPU: NVIDIA H100 80GB HBM3
+Model: Qwen/Qwen2.5-7B-Instruct
+Dataset: LongBench-E qasper_e
+Length bucket: 8k+
+Samples: 24, starting at filtered index 0
+Maximum input length: 16384 tokens
+Methods: ['bf16', 'rabit2']
+Metric: official LongBench QA token-level F1
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+
+2026-09-30 22:33:20,408 | INFO    | modelscope_hub.download | Downloading 15 files from Qwen/Qwen2.5-7B-Instruct@master
+
+[1ADownloading:   0%|          | 0/15 [00:00<?, ?file/s]
+[1ADownloading:  47%|████▋     | 7/15 [00:00<00:00, 37.39file/s]
+[1ADownloading:  73%|███████▎  | 11/15 [00:06<00:02,  1.38file/s]
+[1ADownloading:  87%|████████▋ | 13/15 [00:06<00:01,  1.68file/s]Downloading: 100%|██████████| 15/15 [00:06<00:00,  2.15file/s]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  4.72it/s]
+[1ALoading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  4.09it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00,  4.32it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  4.32it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  4.31it/s]
+
+[1AGenerating test split: 0 examples [00:00, ? examples/s]
+[1AGenerating test split: 224 examples [00:00, 8021.41 examples/s]
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Sample 1/24 (dataset index 200): 10740 original tokens, 10740 used tokens
+Ground truth: ['Domain experts and fellow researchers can provide feedback on questions and help with dynamically revising them., connect to multiple disciplines, dual use', "Modeling considerations:  the variables (both predictors and outcomes)  are rarely simply binary or categorical;  using a particular classification scheme means deciding which variations are visible,; Supervised and unsupervised learning are the most common approaches to learning from data;  the unit of text that we are labeling (or annotating, or coding), either automatic or manual, can sometimes be different than one's final unit of analysis."]
+  bf16     score=0.171 KV=587.289 MB answer='They use computational methods, supervised and unsupervised learning, topic modeling, and close reading.'
+  rabit2   score=0.143 KV=111.545 MB answer='They They use supervised and unsup'
+
+Sample 2/24 (dataset index 201): 10739 original tokens, 10739 used tokens
+Ground truth: ['Unanswerable']
+  bf16     score=1.000 KV=587.234 MB answer='unanswerable'
+  rabit2   score=0.000 KV=111.541 MB answer='unanswerableableable\nThe article article is is article use article article the article use dataset they is they they is is usedunanswerableablele'
+
+Sample 3/24 (dataset index 202): 15909 original tokens, 15909 used tokens
+Ground truth: ['Energy with accuracy of 0.538', 'Energy']
+  bf16     score=0.000 KV=869.969 MB answer='unanswerable'
+  rabit2   score=0.000 KV=164.996 MB answer='unanswerable'
+
+Sample 4/24 (dataset index 203): 10737 original tokens, 10737 used tokens
+Ground truth: ['Unanswerable']
+  bf16     score=1.000 KV=587.125 MB answer='unanswerable'
+  rabit2   score=0.000 KV=111.531 MB answer='unanswerableableableable'
+
+Sample 5/24 (dataset index 204): 20225 original tokens, 16384 used tokens
+Ground truth: ['Structural Support Vector Machine', 'SVMhmm ']
+  bf16     score=1.000 KV=895.945 MB answer='SVMhmm'
+  rabit2   score=0.000 KV=169.948 MB answer='S SVMh'
+
+Sample 6/24 (dataset index 205): 17942 original tokens, 16384 used tokens
+Ground truth: ['Yes', 'Yes']
+  bf16     score=1.000 KV=895.945 MB answer='yes'
+  rabit2   score=1.000 KV=169.948 MB answer='yes"'
+
+Sample 7/24 (dataset index 206): 17965 original tokens, 16384 used tokens
+Ground truth: ['ELIZA,  PARRY, A.L.I.C.E., Cleverbot']
+  bf16     score=0.000 KV=895.945 MB answer='The state of the art described in the paper includes both rule-oriented and data-oriented approaches for conversational systems, with a focus on creating multiparty-aware chatbots'
+  rabit2   score=0.000 KV=169.948 MB answer='Hybrid rule state state{2user\nYoustate Hybrid the statehybrid" conceptual architecture and its implementation of the Ccogniaia" finance conc'
+
+Sample 8/24 (dataset index 207): 11066 original tokens, 11066 used tokens
+Ground truth: ['corpus of state speeches delivered during the annual UN General Debate', 'corpus of state speeches delivered during the annual UN General Debate']
+  bf16     score=0.533 KV=605.117 MB answer='UN General Debate Corpus'
+  rabit2   score=0.111 KV=114.888 MB answer='UN\nUN UN UN\nuser\nWhich"\n\nunanswerableableunanswerableableunanswer'
+
+Sample 9/24 (dataset index 208): 11451 original tokens, 11451 used tokens
+Ground truth: ['Document to Vector (Doc2Vec)', 'Doc2Vec, PV-DBOW model']
+  bf16     score=0.500 KV=626.172 MB answer='Doc2Vec'
+  rabit2   score=0.222 KV=118.870 MB answer='Doc2 Vector the paragraph vector model'
+
+Sample 10/24 (dataset index 209): 20227 original tokens, 16384 used tokens
+Ground truth: ['claim, premise, backing, rebuttal, and refutation', 'claim, premise, backing, rebuttal, refutation']
+  bf16     score=0.600 KV=895.945 MB answer='claims, premises, backing, rebuttal, refutation'
+  rabit2   score=0.000 KV=169.948 MB answer='argument components:'
+
+Sample 11/24 (dataset index 210): 20225 original tokens, 16384 used tokens
+Ground truth: ['Yes', 'Yes']
+  bf16     score=0.000 KV=895.945 MB answer='unanswerable'
+  rabit2   score=0.000 KV=169.948 MB answer='unanswerableableable'
+
+Sample 12/24 (dataset index 211): 17958 original tokens, 16384 used tokens
+Ground truth: ['Custom dataset with user questions; set of documents, twitter posts and news articles, all related to finance.', 'a self-collected financial intents dataset in Portuguese']
+  bf16     score=0.000 KV=895.945 MB answer='unanswerable'
+  rabit2   score=0.000 KV=169.948 MB answer='unanswerable'
+
+Sample 13/24 (dataset index 212): 17945 original tokens, 16384 used tokens
+Ground truth: ['Yes', 'Yes']
+  bf16     score=0.000 KV=895.945 MB answer='unanswerable'
+  rabit2   score=0.000 KV=169.948 MB answer='unanswerableableable the informationunansweranswer:unanswerableable theyun"answer: un\nun"answeranswer'
+
+Sample 14/24 (dataset index 213): 11072 original tokens, 11072 used tokens
+Ground truth: ['Unanswerable', 'Unanswerable']
+  bf16     score=0.000 KV=605.445 MB answer='a state'
+  rabit2   score=0.000 KV=114.912 MB answer='A state'
+
+Sample 15/24 (dataset index 214): 20227 original tokens, 16384 used tokens
+Ground truth: ['user comments to newswire articles or to blog posts, forum posts, blog posts, newswire articles', 'refer to each article, blog post, comment, or forum posts as a document']
+  bf16     score=0.111 KV=895.945 MB answer='from a variety of sources'
+  rabit2   score=0.080 KV=169.948 MB answer='from a variety six controversial \nuser\nYoufrom a variety is incomplete, could'
+
+Sample 16/24 (dataset index 215): 17951 original tokens, 16384 used tokens
+Ground truth: ['act paragraphs containing any word from a predetermined list of LGTBQ terms ']
+  bf16     score=0.800 KV=895.945 MB answer='They extract paragraphs containing any word from a predetermined list of LGBTQ terms.'
+  rabit2   score=0.240 KV=169.948 MB answer='They authors extract paragraphs containing containing a target LGBTQ and other their contain'
+
+Sample 17/24 (dataset index 216): 10740 original tokens, 10740 used tokens
+Ground truth: ['No', 'No']
+  bf16     score=0.000 KV=587.289 MB answer='Yes'
+  rabit2   score=0.000 KV=111.545 MB answer='Yes Yes\nuser\nAnswerAnswer\n demonstrate why interdisciplinary insights are are important important important important'
+
+Sample 18/24 (dataset index 217): 10751 original tokens, 10751 used tokens
+Ground truth: ['identifying the questions we wish to explore, Can text analysis provide a new perspective on a “big question” that has been attracting interest for years?, How can we explain what we observe?, hope to connect to multiple disciplines']
+  bf16     score=0.115 KV=587.891 MB answer='thorny issues not always at the forefront of discussions about computational text analysis methods'
+  rabit2   score=0.000 KV=111.593 MB answer='thorny issuesthic social and cultural issues issues'
+
+Sample 19/24 (dataset index 218): 17960 original tokens, 16384 used tokens
+Ground truth: ['precision, recall, F1 and accuracy', 'Response time, resource consumption (memory, CPU, network bandwidth), precision, recall, F1, accuracy.']
+  bf16     score=0.300 KV=895.945 MB answer='Integrity, time taken to answer, resource consumption metrics'
+  rabit2   score=0.000 KV=169.948 MB answer='IntAccuracy\nIntuser\nYouAccuracy" WhatAccuracy"IntAccuracy"'
+
+Sample 20/24 (dataset index 219): 11072 original tokens, 11072 used tokens
+Ground truth: ['No', 'Yes']
+  bf16     score=0.000 KV=605.445 MB answer='unanswerable'
+  rabit2   score=0.000 KV=114.912 MB answer='unansweranswer'
+
+Sample 21/24 (dataset index 220): 20228 original tokens, 16384 used tokens
+Ground truth: ['linguistic variability']
+  bf16     score=0.000 KV=895.945 MB answer='Different registers and domains pose challenges in terms of persuasiveness, argument structure, and annotation reliability.'
+  rabit2   score=0.000 KV=169.948 MB answer='Different challenges include'
+
+Sample 22/24 (dataset index 221): 22071 original tokens, 16384 used tokens
+Ground truth: ['1. Each annotator must assign an integer score between 0 and 6 (inclusive) indicating how semantically similar the two words in a given pair are. A score of 6 indicates very high similarity (i.e., perfect synonymy), while zero indicates no similarity., 2. Each annotator must score the entire set of 1,888 pairs in the dataset.,  able to use external sources (e.g. dictionaries, thesauri, WordNet) if required, not able to communicate with each other during the annotation process']
+  bf16     score=0.162 KV=895.945 MB answer='Human raters scored each pair in the translated set as well as the English set using similar annotation guidelines as Simlex-999, SimVerb-3'
+  rabit2   score=0.044 KV=169.948 MB answer='Each datasets were were annotated by 1 following1145 human human 11\nuser\nYouAnswer\n"'
+
+Sample 23/24 (dataset index 222): 20232 original tokens, 16384 used tokens
+Ground truth: ['Unanswerable']
+  bf16     score=1.000 KV=895.945 MB answer='unanswerable'
+  rabit2   score=0.000 KV=169.948 MB answer='unanswerableableable'
+
+Sample 24/24 (dataset index 223): 22074 original tokens, 16384 used tokens
+Ground truth: ['Chinese Mandarin, Welsh, English, Estonian, Finnish, French, Hebrew, Polish, Russian, Spanish, Kiswahili, Yue Chinese', 'Chinese Mandarin, Welsh, English, Estonian, Finnish, French, Hebrew, Polish, Russian, Spanish, Kiswahili, Yue Chinese']
+  bf16     score=0.000 KV=895.945 MB answer='unanswerable'
+  rabit2   score=0.000 KV=169.948 MB answer='unanswerableable: un The The'
+
+==================================================================================================
+LongBench-E Qasper Results
+==================================================================================================
+Method        F1 %          F1 total      Avg KV MB     Samples   
+--------------------------------------------------------------------------------------------------
+bf16          34.6          8.29          783.009       24        
+rabit2        7.7           1.84          148.567       24        
+
+Important: the reported run time is only for experiment planning. It is not deployment latency.
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-G8dXYKuXMNusfPw6Gxgqhy

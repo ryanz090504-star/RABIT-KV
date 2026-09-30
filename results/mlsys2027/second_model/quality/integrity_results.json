@@ -1,0 +1,82 @@
+[
+  {
+    "benchmark": "continuation_ppl",
+    "storage_mismatches": [],
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "log_names_model_b": true,
+      "summary_rows_present": true,
+      "counts_exact": true,
+      "per_unit_rows_paired": true,
+      "unit_keys_identical_to_exp12": true,
+      "dataset_identity_identical_to_exp12": true,
+      "per_unit_kv_mb_matches_model_b_accounting": true
+    },
+    "passed": true
+  },
+  {
+    "benchmark": "niah",
+    "storage_mismatches": [],
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "log_names_model_b": true,
+      "summary_rows_present": true,
+      "counts_exact": true,
+      "per_unit_rows_paired": true,
+      "unit_keys_identical_to_exp12": true,
+      "dataset_identity_identical_to_exp12": true,
+      "per_unit_kv_mb_matches_model_b_accounting": true
+    },
+    "passed": true
+  },
+  {
+    "benchmark": "passage_retrieval",
+    "storage_mismatches": [],
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "log_names_model_b": true,
+      "summary_rows_present": true,
+      "counts_exact": true,
+      "per_unit_rows_paired": true,
+      "unit_keys_identical_to_exp12": true,
+      "dataset_identity_identical_to_exp12": true,
+      "per_unit_kv_mb_matches_model_b_accounting": true
+    },
+    "passed": true
+  },
+  {
+    "benchmark": "hotpotqa",
+    "storage_mismatches": [],
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "log_names_model_b": true,
+      "summary_rows_present": true,
+      "counts_exact": true,
+      "per_unit_rows_paired": true,
+      "unit_keys_identical_to_exp12": true,
+      "dataset_identity_identical_to_exp12": true,
+      "per_unit_kv_mb_matches_model_b_accounting": true
+    },
+    "passed": true
+  },
+  {
+    "benchmark": "qasper",
+    "storage_mismatches": [],
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "log_names_model_b": true,
+      "summary_rows_present": true,
+      "counts_exact": true,
+      "per_unit_rows_paired": true,
+      "unit_keys_identical_to_exp12": true,
+      "dataset_identity_identical_to_exp12": true,
+      "per_unit_kv_mb_matches_model_b_accounting": true
+    },
+    "passed": true
+  }
+]
