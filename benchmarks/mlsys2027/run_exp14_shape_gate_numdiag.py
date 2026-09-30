@@ -1,7 +1,15 @@
 """
-RABIT-KV MLSys 2027 -- Experiment 14 NON-EVIDENCE shape-gate numerical diagnosis runner, ATTEMPT 3. Attempts 1 and 2
-are permanently invalid (1: the wrapper imported a sibling module absent in the container; 2: the Modal client was
-spawned without UTF-8 process settings and crashed on '\u2713' under the GBK Windows console after 1.4 s).
+RABIT-KV MLSys 2027 -- Experiment 14 NON-EVIDENCE shape-gate numerical diagnosis runner, ATTEMPT 4 (CAPTURE-ONLY
+fix). Attempts 1-3 are permanently invalid (1: the wrapper imported a sibling module absent in the container; 2: the
+Modal client was spawned without UTF-8 process settings and crashed on '\u2713' under the GBK console; 3: the diagnostic
+completed but its one-line full summary was truncated at 61,515 characters by the Modal log stream).
+
+Attempt 4 transport: the remote function RETURNS the exact summary text (Modal RPC result); the local entrypoint writes
+it to the local file EXP14_NUMDIAG_RESULT_PATH; this runner re-reads it, applies the COMPLETENESS GATE (both frozen
+geometries, every frozen replay and checkpoint, every field the frozen diagnostic produces), and only then copies it
+byte-for-byte to attempt_4/numdiag_result.json. The runtime-output magnitude is NOT produced by the frozen diagnostic
+(e6361eb); by the reviewed decision it is excluded from the gate and reported only as a derived bound
+(ref_max_abs +/- max_abs_err_vs_fp32_ref, triangle inequality on the max norm).
 
 One Modal H100 session running the UNCHANGED exp14_shape_gate_numdiag.py (e6361eb) through the SELF-CONTAINED wrapper
 exp14_shape_gate_numdiag_modal.py; no model, no engine, no download, no serving, no quality.
@@ -17,7 +25,7 @@ Protections added after Attempt 1:
     the client exits / crashes / times out, new = (after - before) | (IDs parsed from stdout, minus pre-existing);
     every new app that is not stopped is stopped (`modal app stop -y`), then re-queried until stopped with 0 tasks;
     pre-existing apps are never stopped. Everything is recorded.
-Writes results/mlsys2027/second_model/shape_gate_numdiag/attempt_3/. Runs once; never overwrites.
+Writes results/mlsys2027/second_model/shape_gate_numdiag/attempt_4/. Runs once; never overwrites.
 
 Usage:
     python benchmarks/mlsys2027/run_exp14_shape_gate_numdiag.py --dry-run
@@ -33,6 +41,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -54,9 +63,10 @@ DIAG = HERE / "exp14_shape_gate_numdiag.py"
 DEPLOY_MODAL = HERE / "exp14_deployment_modal.py"
 TEST_FILE = HERE / "test_exp14_shape_gate_numdiag.py"
 BASE = ROOT / "results" / "mlsys2027" / "second_model" / "shape_gate_numdiag"
-OUT_DIR = BASE / "attempt_3"
+OUT_DIR = BASE / "attempt_4"
 ATTEMPT1_DIR = BASE / "failed_attempt_1"
 ATTEMPT2_DIR = BASE / "failed_attempt_2"
+ATTEMPT3_DIR = BASE / "failed_attempt_3"
 APP_NAME = "rabit-kv-mlsys2027-exp14-shape-gate-numdiag"
 WALL_CLOCK_LIMIT_S = 45 * 60
 DIAG_COMMIT = "e6361ebe3e3fb62ce79719084db9f52630a55b35"  # the diagnostic script must be byte-identical to this commit
@@ -64,6 +74,9 @@ SHAPE_GATE_COMMIT = "35344e0ac8ea5fc3bf4a81d3bc62dfcec2872fc4"  # shape gate as 
 MODEL_SNAPSHOT_COMMIT = "35344e0ac8ea5fc3bf4a81d3bc62dfcec2872fc4"
 ATTEMPT1_ARCHIVE_COMMIT = "f54df78fa5684cda6b7c03295bbf798729fb8d4f"
 ATTEMPT2_ARCHIVE_COMMIT = "e628dc1fb02458a2a1e9988add9b594714395244"
+ATTEMPT3_ARCHIVE_COMMIT = "e1ae27bc44fa04d7ee7591474803a3e1826fbe08"
+RESULT_PATH_ENV = "EXP14_NUMDIAG_RESULT_PATH"
+CAPTURE_RE = re.compile(r"^EXP14_NUMDIAG_CAPTURE=(\{.*\})\s*$")
 CLEANUP_POLL_S, CLEANUP_MAX_WAIT_S = 5, 120
 EXP13_EVIDENCE_COMMIT = "42c2799f4e7393c6270193a1c852af90eaf7d402"
 EXP12_EVIDENCE_COMMIT = "4f767ab03d83e043b2871dd0cd4cf2f8dc862e6b"
@@ -71,10 +84,9 @@ EXPECTED_RABIT_SHA256_LF = "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463ed
 EXPECTED_VLLM_TREE = "390fc793d47fb85321d80df03e50da96433e4a95"
 IMAGE_TAIL = '.pip_install("pytest", "modelscope")\n)'
 # Modules the wrapper may import (stdlib + modal); the payload files appended to the image after the frozen image.
-WRAPPER_ALLOWED_IMPORTS = {"__future__", "os", "subprocess", "sys", "pathlib", "modal"}
+WRAPPER_ALLOWED_IMPORTS = {"__future__", "hashlib", "json", "os", "subprocess", "sys", "pathlib", "modal"}
 EXPECTED_PAYLOAD = {"exp14_shape_gate_numdiag.py": "/opt/exp14/exp14_shape_gate_numdiag.py",
                     "exp14_shape_gate.py": "/opt/exp14/exp14_shape_gate.py"}
-SUMMARY_RE = re.compile(r"^EXP14_NUMDIAG_SUMMARY=(\{.*\})\s*$")
 APP_ID_RE = re.compile(r"ap-[A-Za-z0-9]{20,}")
 
 
@@ -182,7 +194,8 @@ PRERUN_TESTS = ("test_unicode_child_output_streams_and_child_sees_utf8_env",
                 "test_parent_with_strict_gbk_stdout_does_not_raise", "test_gbk_negative_control_attempt2_runner_fails",
                 "test_client_dies_before_printing_app_id_new_app_still_found_and_stopped",
                 "test_stdout_parsed_id_is_unioned_but_preexisting_never_stopped",
-                "test_timeout_kills_client_and_stops_discovered_app", "test_final_task_count_is_checked")
+                "test_timeout_kills_client_and_stops_discovered_app", "test_final_task_count_is_checked",
+                "test_large_result_capture_roundtrip", "test_completeness_gate_accepts_complete_and_rejects_gaps")
 PRERUN_CODE = """
 import json, sys
 sys.path.insert(0, sys.argv[1])
@@ -251,8 +264,12 @@ def preflight(dry_run: bool) -> dict:
                                                  *[(ATTEMPT2_DIR / f).relative_to(ROOT).as_posix()
                                                    for f in ("numdiag_session.log", "record.json",
                                                              "attempt_record.json")]) == "",
+        "attempt3_archive_unchanged": e1.run_git("diff", "--name-only", ATTEMPT3_ARCHIVE_COMMIT, "--",
+                                                 *[(ATTEMPT3_DIR / f).relative_to(ROOT).as_posix()
+                                                   for f in ("numdiag_session.log", "record.json",
+                                                             "attempt_record.json")]) == "",
         "protected_paths_clean": r14.protected_status() == "",
-        "attempt3_not_already_run": not OUT_DIR.exists(),
+        "attempt4_not_already_run": not OUT_DIR.exists(),
     }
     if dry_run:
         checks["clean_tree"] = True  # reported below; a dry run may be made before committing
@@ -343,13 +360,79 @@ def run_with_wall_clock(cmd: list[str], log: Path, limit_s: int) -> dict:
             "wall_clock_limit_s": limit_s, "apps": cleanup_new_apps(pre, parsed)}
 
 
+# ------------------------------------------------------------------------------------------ completeness gate
+EXPECTED_GEOMETRIES = ("control_llama3_1_8b", "model_b_qwen2_5_7b")
+REFERENCES = ("R_fp32", "R_sem", "R_bf16all")
+SIDES = ("runtime_state", "reference_state")
+ROW_FIELDS = ("T", "closed_pages", "open_tokens", "runtime_output_dtype", "bytes_identical",
+              "gate_attempt1_max_abs_runtime_state", "gate_attempt1_max_abs_reference_state", "gate_attempt1_would_fail")
+REF_FIELDS = ("reference_output_dtype", "states_identical", *SIDES)
+COMPARE_FIELDS = ("ref_max_abs", "max_abs_err_vs_fp32_ref", "max_rel_err", "max_err_in_bf16_ulp_at_ref",
+                  "max_abs_err_vs_dtype_rounded_ref", "exact_equal_elements", "elements", "max_ulp", "ulp_hist")
+ULP_KEYS = ("0", "1", "2", "3+")
+
+
+def expected_replays() -> dict:
+    """{replay name: [T, ...]} of the FROZEN diagnostic (seeds / prefixes from the unchanged exp14_shape_gate)."""
+    import exp14_shape_gate as sg  # noqa: PLC0415  (frozen; read-only)
+    out = {f"main_P{sg.MAIN_PREFILL}_seed{s}": list(range(sg.MAIN_PREFILL, sg.MAIN_PREFILL + sg.MAIN_DECODE_STEPS + 1))
+           for s in sg.MAIN_SEEDS}
+    for pre in sg.BOUNDARY_PREFILLS:
+        out[f"boundary_P{pre}"] = list(range(pre, pre + sg.BOUNDARY_DECODE_STEPS + 1))
+    return out
+
+
+def completeness_gate(summary: dict) -> dict:
+    """Every frozen geometry / replay / checkpoint present with every field the frozen diagnostic produces."""
+    missing = []
+    if summary.get("completed") is not True:
+        missing.append("summary.completed != true")
+    geos = summary.get("geometries") or {}
+    if sorted(geos) != sorted(EXPECTED_GEOMETRIES):
+        missing.append(f"geometries {sorted(geos)} != {sorted(EXPECTED_GEOMETRIES)}")
+    exp = expected_replays()
+    rows = 0
+    for g in EXPECTED_GEOMETRIES:
+        reps = (geos.get(g) or {}).get("replays") or {}
+        if sorted(reps) != sorted(exp):
+            missing.append(f"{g}: replays {sorted(reps)} != {sorted(exp)}")
+        for name, ts in exp.items():
+            cps = (reps.get(name) or {}).get("checkpoints") or []
+            if [c.get("T") for c in cps] != ts:
+                missing.append(f"{g}/{name}: checkpoint T sequence differs from the frozen {ts[0]}..{ts[-1]}")
+            for c in cps:
+                rows += 1
+                where = f"{g}/{name}/T={c.get('T')}"
+                missing += [f"{where}: {f}" for f in ROW_FIELDS if f not in c]
+                for ref in REFERENCES:
+                    r = c.get(ref)
+                    if not isinstance(r, dict):
+                        missing.append(f"{where}: {ref}")
+                        continue
+                    missing += [f"{where}/{ref}: {f}" for f in REF_FIELDS if f not in r]
+                    for side in SIDES:
+                        v = r.get(side) or {}
+                        missing += [f"{where}/{ref}/{side}: {f}" for f in COMPARE_FIELDS if f not in v]
+                        if set((v.get("ulp_hist") or {})) != set(ULP_KEYS):
+                            missing.append(f"{where}/{ref}/{side}: ulp_hist keys")
+    expected_rows = len(EXPECTED_GEOMETRIES) * sum(len(v) for v in exp.values())
+    return {"expected_rows": expected_rows, "rows": rows, "missing": missing[:50], "missing_count": len(missing),
+            "passed": not missing and rows == expected_rows}
+
+
+def validate_result_file(path: Path) -> dict:
+    data = path.read_bytes()
+    summary = json.loads(data.decode("utf-8"))
+    return {"bytes": len(data), "sha256": hashlib.sha256(data).hexdigest(), "completeness": completeness_gate(summary)}
+
+
 def main(argv=None) -> int:
     e1.make_console_encoding_safe()
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
     prov = preflight(a.dry_run)
-    print("Exp14 shape-gate numerical diagnosis ATTEMPT 3 (NON-EVIDENCE) -- pre-run validation passed:",
+    print("Exp14 shape-gate numerical diagnosis ATTEMPT 4 (NON-EVIDENCE) -- pre-run validation passed:",
           json.dumps(prov["checks"]))
     if a.dry_run:
         print(f"tree clean: {prov['tree_clean_at_launch']}; --dry-run: nothing executed.")
@@ -357,26 +440,37 @@ def main(argv=None) -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=False)
     log = OUT_DIR / "numdiag_session.log"
     started = dt.datetime.now(dt.timezone.utc).isoformat()
-    rec = {"experiment": 14, "kind": "shape_gate_numerical_diagnosis", "attempt": 3, "non_evidence": True,
+    rec = {"experiment": 14, "kind": "shape_gate_numerical_diagnosis", "attempt": 4, "non_evidence": True,
            "status": "running", "started_utc": started, **prov}
     (OUT_DIR / "record.json").write_text(json.dumps(rec, indent=2) + "\n", encoding="utf-8")
     os.environ["EXP14_VLLM_SNAPSHOT"] = str(r14.build_snapshot())
+    capture_dir = Path(tempfile.mkdtemp(prefix="exp14_numdiag_a4_"))
+    local_result = capture_dir / "numdiag_result.json"
+    os.environ[RESULT_PATH_ENV] = str(local_result)  # inherited by the modal client -> local entrypoint writes here
     run = run_with_wall_clock([sys.executable, "-m", "modal", "run", str(MODAL_APP)], log, WALL_CLOCK_LIMIT_S)
     text = log.read_text(encoding="utf-8", errors="replace")
-    summary = next((json.loads(m.group(1)) for ln in text.splitlines() if (m := SUMMARY_RE.match(ln.strip()))), None)
-    if summary is not None:
-        (OUT_DIR / "numdiag_summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
+    capture = next((json.loads(m.group(1)) for ln in text.splitlines() if (m := CAPTURE_RE.match(ln.strip()))), None)
+    validation, archived = None, None
+    if local_result.is_file():
+        validation = validate_result_file(local_result)
+        if validation["completeness"]["passed"] and capture and capture.get("sha256") == validation["sha256"]:
+            dst = OUT_DIR / "numdiag_result.json"
+            shutil.copyfile(local_result, dst)  # byte copy only after validation
+            archived = {"path": dst.relative_to(ROOT).as_posix(), "sha256": e1.sha256(dst),
+                        "bytes": dst.stat().st_size, "identical_to_capture": e1.sha256(dst) == validation["sha256"]}
     if run["timed_out"]:
         status = "timeout_harness_failure"
-    elif run["returncode"] == 0 and summary and summary.get("completed") and run["apps"]["cleanup_verified"]:
+    elif (run["returncode"] == 0 and capture and capture.get("completed") and capture.get("roundtrip_identical")
+          and validation and validation["completeness"]["passed"] and archived and archived["identical_to_capture"]
+          and run["apps"]["cleanup_verified"]):
         status = "completed"
     else:
         status = "failed"
     rec.update(status=status, completed_utc=dt.datetime.now(dt.timezone.utc).isoformat(), run=run,
-               modal_app_ids=sorted(set(APP_ID_RE.findall(text))), session_log_sha256=e1.sha256(log),
-               summary_sha256=e1.sha256(OUT_DIR / "numdiag_summary.json") if summary is not None else None)
+               capture=capture, local_result_path=str(local_result), validation=validation, archived_result=archived,
+               modal_app_ids=sorted(set(APP_ID_RE.findall(text))), session_log_sha256=e1.sha256(log))
     (OUT_DIR / "record.json").write_text(json.dumps(rec, indent=2) + "\n", encoding="utf-8")
-    print(f"\nEXP14 SHAPE-GATE NUMERICAL DIAGNOSIS ATTEMPT 3 {status.upper()} "
+    print(f"\nEXP14 SHAPE-GATE NUMERICAL DIAGNOSIS ATTEMPT 4 {status.upper()} "
           f"(new apps {run['apps']['new_app_ids']}, final {run['apps']['final_states']})")
     return 0 if status == "completed" else 1
 

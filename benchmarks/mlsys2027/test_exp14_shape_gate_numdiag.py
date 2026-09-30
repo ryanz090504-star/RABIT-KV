@@ -239,13 +239,107 @@ def test_final_task_count_is_checked():
     assert 'and run["apps"]["cleanup_verified"]' in runner  # 'completed' requires verified cleanup
 
 
+def _wrapper_module():
+    """Import the Attempt-4 wrapper in-process (dummy snapshot path; importing only builds lazy Modal objects)."""
+    import importlib.util
+    import os
+    import tempfile
+    dummy = Path(tempfile.mkdtemp()) / "dummy.zip"
+    dummy.write_bytes(b"PK\x05\x06" + b"\x00" * 18)
+    os.environ["EXP14_VLLM_SNAPSHOT"] = str(dummy)
+    spec = importlib.util.spec_from_file_location("exp14_numdiag_wrapper_under_test", nd.MODAL_APP)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _compare(x):
+    return {"ref_max_abs": 1.0 + x, "max_abs_err_vs_fp32_ref": 0.001, "max_rel_err": None if x < 0 else 0.01,
+            "max_err_in_bf16_ulp_at_ref": 0.5, "max_abs_err_vs_dtype_rounded_ref": 0.0, "exact_equal_elements": 3584,
+            "elements": 3584, "max_ulp": 0, "ulp_hist": {"0": 3584, "1": 0, "2": 0, "3+": 0}}
+
+
+def _synthetic_summary(pad_chars: int = 0) -> dict:
+    """A COMPLETE synthetic result in the frozen diagnostic's schema (all geometries / replays / checkpoints)."""
+    geos = {}
+    for g in nd.EXPECTED_GEOMETRIES:
+        reps = {}
+        for name, ts in nd.expected_replays().items():
+            rows = []
+            for t in ts:
+                row = {"T": t, "closed_pages": max(0, (t - 4) // 32), "open_tokens": (t - 4) % 32 if t > 4 else 0,
+                       "runtime_output_dtype": "torch.bfloat16", "bytes_identical": True,
+                       "gate_attempt1_max_abs_runtime_state": 0.001, "gate_attempt1_max_abs_reference_state": 0.001,
+                       "gate_attempt1_would_fail": False}
+                for ref in nd.REFERENCES:
+                    row[ref] = {"reference_output_dtype": "torch.float32", "states_identical": True,
+                                "runtime_state": _compare(t % 3), "reference_state": _compare(t % 3)}
+                rows.append(row)
+            reps[name] = {"summary": {"checkpoints": len(rows)}, "checkpoints": rows}
+        geos[g] = {"replays": reps, "overall": {"checkpoints": sum(len(r["checkpoints"]) for r in reps.values())}}
+    out = {"completed": True, "non_evidence": True, "rel_floor": 0.01, "geometries": geos}
+    if pad_chars:
+        out["unicode_padding_\u2713"] = ("\u2713\u4e2d\u00e9" * (pad_chars // 3 + 1))[:pad_chars]
+    return out
+
+
+def test_large_result_capture_roundtrip():
+    """>1 MB structured result through the SAME container-side split and local write path: no truncation, valid JSON,
+    exact content equality, matching SHA-256, Unicode-safe, no console output involved."""
+    import json
+    import tempfile
+    w = _wrapper_module()
+    src = _synthetic_summary(pad_chars=700_000)
+    text = json.dumps(src, sort_keys=True)  # the diagnostic's own serialisation (json.dumps(..., sort_keys=True))
+    assert len(text.encode("utf-8")) > 1_000_000
+    stdout = "model_b_qwen2_5_7b: {}\ncontrol_llama3_1_8b: {}\n" + w.SUMMARY_PREFIX + text + "\n"
+    got, rest = w.split_summary(stdout)
+    assert got == text and w.SUMMARY_PREFIX not in rest  # the summary is removed from what gets logged
+    with tempfile.TemporaryDirectory() as t:
+        path = Path(t) / "sub" / "numdiag_result.json"
+        meta = w.write_capture(got, str(path))
+        data = path.read_bytes()
+        assert data.decode("utf-8") == text and json.loads(data.decode("utf-8")) == src
+        assert meta["sha256"] == hashlib.sha256(text.encode("utf-8")).hexdigest() == hashlib.sha256(data).hexdigest()
+        assert meta["bytes"] == len(data) > 1_000_000 and meta["roundtrip_identical"] and meta["completed"]
+        assert meta["rows"] == nd.completeness_gate(src)["expected_rows"] == 254
+        v = nd.validate_result_file(path)
+        assert v["sha256"] == meta["sha256"] and v["completeness"]["passed"], v["completeness"]["missing"][:5]
+    wrapper_src = nd.MODAL_APP.read_text(encoding="utf-8")
+    assert "print(rest[-20000:]" in wrapper_src and "print(p.stdout" not in wrapper_src  # full summary never logged
+    assert 'print("EXP14_NUMDIAG_CAPTURE=" + json.dumps(meta, sort_keys=True)' in wrapper_src
+    assert '"summary_text": summary_text' in wrapper_src  # returned through the Modal result channel
+
+
+def test_completeness_gate_accepts_complete_and_rejects_gaps():
+    import copy
+    ok = _synthetic_summary()
+    r = nd.completeness_gate(ok)
+    assert r["passed"] and r["rows"] == r["expected_rows"] == 254
+    g0, rep0 = nd.EXPECTED_GEOMETRIES[1], "boundary_P4"
+    bad = copy.deepcopy(ok); bad["geometries"][g0]["replays"][rep0]["checkpoints"].pop(3)  # noqa: E702
+    assert not nd.completeness_gate(bad)["passed"]
+    bad = copy.deepcopy(ok); del bad["geometries"][g0]["replays"][rep0]["checkpoints"][2]["R_sem"]["runtime_state"]["max_ulp"]  # noqa: E702,E501
+    r = nd.completeness_gate(bad)
+    assert not r["passed"] and any("R_sem/runtime_state: max_ulp" in m for m in r["missing"])
+    bad = copy.deepcopy(ok); del bad["geometries"]["control_llama3_1_8b"]  # noqa: E702
+    assert not nd.completeness_gate(bad)["passed"]
+    bad = copy.deepcopy(ok); bad["geometries"][g0]["replays"]["main_P2048_seed140001"]["checkpoints"][0]["T"] = 2047  # noqa: E702,E501
+    assert not nd.completeness_gate(bad)["passed"]
+    bad = copy.deepcopy(ok); del bad["geometries"][g0]["replays"][rep0]["checkpoints"][0]["runtime_output_dtype"]  # noqa: E702,E501
+    assert not nd.completeness_gate(bad)["passed"]
+    bad = copy.deepcopy(ok); bad["completed"] = False  # noqa: E702
+    assert not nd.completeness_gate(bad)["passed"]
+
+
 def test_preflight_dry_run_validation():
     prov = nd.preflight(dry_run=True)  # read-only; no Modal call
     c = prov["checks"]
     for k in ("wrapper_self_contained", "image_expression_equal_to_frozen_exp14", "isolated_remote_import_simulation",
               "diagnostic_unchanged_since_e6361eb", "shape_gate_unchanged", "vllm_kvquant_tree_unchanged",
               "rabit_source_unchanged", "qwen_revision_unchanged", "exp13_evidence_unchanged",
-              "exp1_12_evidence_unchanged", "attempt1_archive_unchanged", "attempt2_archive_unchanged"):
+              "exp1_12_evidence_unchanged", "attempt1_archive_unchanged", "attempt2_archive_unchanged",
+              "attempt3_archive_unchanged"):
         assert c[k], k
 
 
