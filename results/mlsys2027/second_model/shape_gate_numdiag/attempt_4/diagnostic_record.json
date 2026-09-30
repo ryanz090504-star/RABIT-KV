@@ -1,0 +1,24 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis",
+  "attempt": 4,
+  "designation": "VALID NON-EVIDENCE NUMERICAL DIAGNOSTIC",
+  "execution_commit": "a634e465b3db92ee31418fa666bbaf6d7dfbc2d1",
+  "diagnostic_script": "benchmarks/mlsys2027/exp14_shape_gate_numdiag.py (byte-identical to e6361ebe3e3fb62ce79719084db9f52630a55b35)",
+  "result": {
+    "path": "results/mlsys2027/second_model/shape_gate_numdiag/attempt_4/numdiag_result.json",
+    "bytes": 705659,
+    "sha256": "10ce1ac0aa7073ce70e7fff747bf792bd81188a7cb6c3019080c70bbc0337f95",
+    "checkpoints": "254 / 254 (2 geometries x (2 x 32 main + 7 x 9 boundary))",
+    "completeness_gate": "passed (0 missing fields)",
+    "transport": "Modal RPC result -> local file; re-read, parsed, hashed; byte copy after validation"
+  },
+  "run": {"gpu": "NVIDIA H100 80GB HBM3", "modal_app_id": "ap-ZrunNcQJAe2iYTorsBPywp",
+          "final_state": "stopped", "tasks": "0", "timed_out": false, "wall_clock_limit_s": 2700,
+          "client_elapsed_s": 428.9},
+  "not_run": ["model download", "vLLM engine", "serving", "quality", "capacity", "latency"],
+  "supersedes": "the INDICATIVE aggregates of invalid Attempt 3 for all numerical conclusions",
+  "excluded_attempts": ["failed_attempt_1", "failed_attempt_2", "failed_attempt_3"],
+  "no_pooling_with_invalid_attempts": true,
+  "offline_analysis": "results/mlsys2027/second_model/shape_gate_numdiag/attempt_4_analysis.json (benchmarks/mlsys2027/analyze_exp14_shape_gate_numdiag.py; reads only the captured result)"
+}
