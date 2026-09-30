@@ -337,37 +337,59 @@
   },
   "statistical_procedure": {
     "resamples": 10000,
-    "base_seed": 20270929,
     "confidence": 0.95,
     "method": "paired percentile bootstrap",
-    "seed_offset_by_benchmark": {
-      "continuation_ppl": 0,
-      "niah": 1,
-      "passage_retrieval": 2,
-      "hotpotqa": 3,
-      "qasper": 4
+    "seed_by_benchmark": {
+      "continuation_ppl": 20270929,
+      "passage_retrieval": 20270931,
+      "hotpotqa": 20270932,
+      "qasper": 20270933
     },
-    "index_draw": "int(rng.random() * n) with rng = random.Random(base_seed + offset) (Mersenne Twister)",
+    "index_draw": "int(rng.random() * n) with rng = random.Random(seed_by_benchmark[benchmark]) (Python Mersenne Twister)",
     "percentiles": "sorted replicate deltas; lower = s[floor(0.025*B)], upper = s[ceil(0.975*B) - 1]",
+    "niah": {
+      "inferential_statistics": null,
+      "reason": "the 57 cases (19 depths x 3 context lengths) reuse one synthetic needle / filler construction and are not 57 independent draws; no bootstrap and no pseudo-CI",
+      "report": [
+        "overall exact retrieval count / 57 and accuracy per method",
+        "19-case result separately at 4k, 8k and 16k",
+        "failed (context, depth) coordinates, if any",
+        "if both methods are 57/57: the expanded robustness grid did not distinguish them"
+      ]
+    },
+    "inferential_benchmarks": [
+      "continuation_ppl",
+      "passage_retrieval",
+      "hotpotqa",
+      "qasper"
+    ],
     "unit": {
-      "continuation_ppl": "text window (all windows score 128 tokens)",
-      "niah": "case",
+      "continuation_ppl": "selected WikiText-2 evaluation window (32 deterministic consecutive windows; each scores 128 tokens)",
       "passage_retrieval": "example",
       "hotpotqa": "example",
       "qasper": "example"
     },
+    "ci_description": {
+      "continuation_ppl": "paired bootstrap uncertainty over the selected WikiText-2 evaluation windows (32 deterministic consecutive windows of one test stream -- not independently sampled documents; no population-level inference beyond these windows)",
+      "passage_retrieval": "paired example-level bootstrap over the 200 pinned passage_retrieval_en examples",
+      "hotpotqa": "paired example-level bootstrap over the 100 examples of the pinned hotpotqa_e 8k+ bucket",
+      "qasper": "paired example-level bootstrap over the complete pinned qasper_e 8k+ bucket (24 examples). Exp12 does NOT increase Qasper sample coverage; it only quantifies uncertainty on the complete available 8k+ bucket"
+    },
     "paired": "each replicate resamples unit indices once and applies them to both bf16 and rabit2",
     "statistic": {
-      "qa_retrieval_niah": "100 * (mean rabit2 unit score - mean bf16 unit score)",
+      "qa_retrieval": "100 * (mean rabit2 unit score - mean bf16 unit score)",
       "continuation_ppl": "100 * (exp(mean ln PPL_rabit2 - mean ln PPL_bf16) - 1)"
     },
-    "inputs": "per-example values as logged by the canonical scripts (F1 / retrieval score 3 decimals, PASS/FAIL, per-window PPL 4 decimals); no re-generation",
+    "inputs": "per-example values as logged by the canonical scripts (F1 / retrieval score 3 decimals, per-window PPL 4 decimals); no re-generation",
     "robustness_descriptive": [
       "per-unit delta distribution (min / q25 / median / q75 / max / mean)",
       "counts rabit2 better / worse / equal",
-      "largest absolute per-unit contribution",
-      "share of the aggregate delta explained by the top-1 and top-3 units by |contribution| (and share of total |contribution|)"
+      "largest absolute per-unit delta / contribution",
+      "share of the aggregate delta explained by the top-1 and top-3 units by |contribution| (and share of total |contribution|)",
+      "share of the aggregate delta explained by the worst-1 and worst-3 units (most negative rabit2 - bf16 contributions)"
     ],
+    "qasper_coverage": "Exp12 does NOT increase Qasper sample coverage (N = 24 = the complete pinned 8k+ bucket); it only quantifies uncertainty on that complete bucket",
+    "qa_validity_gate_independent_of_statistics": "the frozen QA control gate is a validity check only; it never enters the bootstrap / effect analysis",
     "no_outlier_removal": true,
     "interpretation": "report the delta, its CI and N; a CI containing 0 is not evidence of no effect; descriptive, cautious wording; QA deltas are also compared with the observed identical-config generation variability (report-only)"
   },
@@ -478,7 +500,7 @@
     "expected_h100_hours": "about 0.5-0.8",
     "offline": "bootstrap and robustness analysis on CPU from the logs; no GPU re-run"
   },
-  "completion_criterion": "all five benchmarks valid; paired bootstrap 95% CI computed for every headline delta (bf16 vs rabit2), with overlap or non-overlap with zero explicitly reported",
+  "completion_criterion": "all five benchmarks valid; paired bootstrap 95% CI computed for the bf16-vs-rabit2 delta of continuation_ppl, passage_retrieval, hotpotqa and qasper, with overlap or non-overlap with zero explicitly reported; NIAH reported as the complete 57-case deterministic robustness grid (no inferential statistics)",
   "not_reported": [
     "physical allocator capacity",
     "throughput",

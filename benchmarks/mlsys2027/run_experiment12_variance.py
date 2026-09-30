@@ -153,18 +153,34 @@ def build_protocol() -> dict:
         "metrics": {b: pb.METRIC[b][1] for b in pb.BENCHMARKS},
         "statistical_procedure": {
             **pb.BOOTSTRAP,
-            "unit": {"continuation_ppl": "text window (all windows score 128 tokens)", "niah": "case",
+            "inferential_benchmarks": list(pb.INFERENTIAL),
+            "unit": {"continuation_ppl": "selected WikiText-2 evaluation window (32 deterministic consecutive windows; "
+                                         "each scores 128 tokens)",
                      "passage_retrieval": "example", "hotpotqa": "example", "qasper": "example"},
+            "ci_description": pb.CI_DESCRIPTION,
             "paired": "each replicate resamples unit indices once and applies them to both bf16 and rabit2",
-            "statistic": {"qa_retrieval_niah": "100 * (mean rabit2 unit score - mean bf16 unit score)",
+            "statistic": {"qa_retrieval": "100 * (mean rabit2 unit score - mean bf16 unit score)",
                           "continuation_ppl": "100 * (exp(mean ln PPL_rabit2 - mean ln PPL_bf16) - 1)"},
             "inputs": "per-example values as logged by the canonical scripts (F1 / retrieval score 3 decimals, "
-                      "PASS/FAIL, per-window PPL 4 decimals); no re-generation",
+                      "per-window PPL 4 decimals); no re-generation",
             "robustness_descriptive": ["per-unit delta distribution (min / q25 / median / q75 / max / mean)",
                                        "counts rabit2 better / worse / equal",
-                                       "largest absolute per-unit contribution",
+                                       "largest absolute per-unit delta / contribution",
                                        "share of the aggregate delta explained by the top-1 and top-3 units by "
-                                       "|contribution| (and share of total |contribution|)"],
+                                       "|contribution| (and share of total |contribution|)",
+                                       "share of the aggregate delta explained by the worst-1 and worst-3 units "
+                                       "(most negative rabit2 - bf16 contributions)"],
+            "niah": {"inferential_statistics": None,
+                     "reason": "the 57 cases (19 depths x 3 context lengths) reuse one synthetic needle / filler "
+                               "construction and are not 57 independent draws; no bootstrap and no pseudo-CI",
+                     "report": ["overall exact retrieval count / 57 and accuracy per method",
+                                "19-case result separately at 4k, 8k and 16k",
+                                "failed (context, depth) coordinates, if any",
+                                "if both methods are 57/57: the expanded robustness grid did not distinguish them"]},
+            "qasper_coverage": "Exp12 does NOT increase Qasper sample coverage (N = 24 = the complete pinned 8k+ "
+                               "bucket); it only quantifies uncertainty on that complete bucket",
+            "qa_validity_gate_independent_of_statistics": "the frozen QA control gate is a validity check only; it "
+                                                          "never enters the bootstrap / effect analysis",
             "no_outlier_removal": True,
             "interpretation": "report the delta, its CI and N; a CI containing 0 is not evidence of no effect; "
                               "descriptive, cautious wording; QA deltas are also compared with the observed "
@@ -209,8 +225,10 @@ def build_protocol() -> dict:
                          "method_unit_evaluations": 2 * sum(SELECTION[b]["exp12_units"] for b in pb.BENCHMARKS),
                          "expected_wall_minutes": "25-45", "expected_h100_hours": "about 0.5-0.8",
                          "offline": "bootstrap and robustness analysis on CPU from the logs; no GPU re-run"},
-        "completion_criterion": "all five benchmarks valid; paired bootstrap 95% CI computed for every headline "
-                                "delta (bf16 vs rabit2), with overlap or non-overlap with zero explicitly reported",
+        "completion_criterion": "all five benchmarks valid; paired bootstrap 95% CI computed for the bf16-vs-rabit2 "
+                                "delta of continuation_ppl, passage_retrieval, hotpotqa and qasper, with overlap or "
+                                "non-overlap with zero explicitly reported; NIAH reported as the complete 57-case "
+                                "deterministic robustness grid (no inferential statistics)",
         "not_reported": ["physical allocator capacity", "throughput", "latency"],
     }
 

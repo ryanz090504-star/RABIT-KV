@@ -73,17 +73,81 @@ def test_extraction_reproduces_canonical_printed_aggregates():
         assert len(keys) == r12.SELECTION[b]["canonical_units"]
 
 
-def test_bootstrap_is_reproducible_and_seed_dependent():
-    bf = [0.1 * (i % 7) for i in range(50)]
-    rb = [0.1 * ((i * 3) % 7) for i in range(50)]
-    a = pb.paired_bootstrap("hotpotqa", bf, rb, 2000, 123)
-    assert a == pb.paired_bootstrap("hotpotqa", bf, rb, 2000, 123)
-    assert a != pb.paired_bootstrap("hotpotqa", bf, rb, 2000, 124)
+FROZEN_SEEDS = {"continuation_ppl": 20270929, "passage_retrieval": 20270931, "hotpotqa": 20270932, "qasper": 20270933}
+
+
+def test_exact_per_benchmark_seeds_are_frozen_and_niah_has_none():
+    assert pb.BOOTSTRAP["seed_by_benchmark"] == FROZEN_SEEDS
+    sp = r12.load_protocol()["statistical_procedure"]
+    assert sp["seed_by_benchmark"] == FROZEN_SEEDS and "niah" not in sp["seed_by_benchmark"]
+    assert sp["resamples"] == 10000 and sp["confidence"] == 0.95
+    assert sp["inferential_benchmarks"] == ["continuation_ppl", "passage_retrieval", "hotpotqa", "qasper"]
+    assert sp["niah"]["inferential_statistics"] is None
+    assert "not independently sampled documents" in sp["ci_description"]["continuation_ppl"]
+    assert "does NOT increase Qasper sample coverage" in sp["ci_description"]["qasper"]
+    assert "base_seed" not in json.dumps(sp)  # concrete integers only
+
+
+def test_bootstrap_is_reproducible_for_each_inferential_benchmark():
+    bf = [0.1 * (i % 7) + 0.05 for i in range(50)]
+    rb = [0.1 * ((i * 3) % 7) + 0.05 for i in range(50)]
+    for b, seed in FROZEN_SEEDS.items():
+        x, y = ([math.log(1 + v) for v in bf], [math.log(1 + v) for v in rb]) if b == "continuation_ppl" else (bf, rb)
+        a = pb.paired_bootstrap(b, x, y, 2000, seed)
+        assert a == pb.paired_bootstrap(b, x, y, 2000, seed)
+        assert a != pb.paired_bootstrap(b, x, y, 2000, seed + 1000)
     assert pb.bootstrap_indices(10, 3, 5) == pb.bootstrap_indices(10, 3, 5)
     assert all(0 <= i < 10 for row in pb.bootstrap_indices(10, 50, 1) for i in row)
-    assert pb.BOOTSTRAP["resamples"] == 10000 and pb.BOOTSTRAP["confidence"] == 0.95
-    assert pb.BOOTSTRAP["base_seed"] == 20270929
-    assert r12.load_protocol()["statistical_procedure"]["resamples"] == 10000
+
+
+def _niah_rows(contexts, depths, fail=()):
+    rows = {}
+    for m in ("bf16", "rabit2"):
+        rows[m] = [{"key": [c, d], "value": 0.0 if (m, c, d) in fail else 1.0, "kv_mb": 0.0, "prefix_tokens": c - 1}
+                   for c in contexts for d in depths]
+    return rows
+
+
+def test_niah_is_excluded_from_inferential_bootstrap():
+    try:
+        pb.analyze("niah", _ref("niah"))
+    except ValueError as e:
+        assert "no inferential bootstrap" in str(e)
+    else:
+        raise AssertionError("NIAH bootstrap computed")
+    assert "niah" not in pb.INFERENTIAL and "niah" not in pb.BOOTSTRAP["seed_by_benchmark"]
+    src = (HERE / "paired_bootstrap_ci.py").read_text(encoding="utf-8")
+    assert '"benchmarks": {b: analyze(b, read(b)) for b in INFERENTIAL}' in src
+
+
+def test_niah_deterministic_grid_is_complete_and_descriptive():
+    depths = [round(k * 0.05, 2) for k in range(1, 20)]
+    assert [f"{d:.2f}" for d in depths] == r12.NIAH_DEPTHS
+    g = pb.niah_grid(_niah_rows(r12.NIAH_CONTEXTS, depths), depths=depths)
+    assert g["grid_complete"] and g["methods_identical_outcomes"]
+    for m in ("bf16", "rabit2"):
+        assert (g[m]["passed"], g[m]["cases"], g[m]["accuracy_pct"]) == (57, 57, 100.0)
+        assert all(v == {"passed": 19, "cases": 19} for v in g[m]["per_context"].values())
+        assert g[m]["failed_coordinates"] == []
+    assert "ci_low" not in json.dumps(g) and "bootstrap or pseudo-CI" in g["statistics"]
+    g = pb.niah_grid(_niah_rows(r12.NIAH_CONTEXTS, depths, fail={("rabit2", 16384, 0.35)}), depths=depths)
+    assert g["rabit2"]["passed"] == 56 and g["rabit2"]["per_context"]["16384"] == {"passed": 18, "cases": 19}
+    assert g["rabit2"]["failed_coordinates"] == [[16384, 0.35]] and not g["methods_identical_outcomes"]
+    missing = _niah_rows(r12.NIAH_CONTEXTS, depths)
+    missing["bf16"].pop()
+    missing["rabit2"].pop()
+    assert not pb.niah_grid(missing, depths=depths)["grid_complete"]
+    canon = pb.niah_grid(pb.extract("niah", _ref("niah")), depths=[0.1, 0.25, 0.5, 0.75, 0.9])
+    assert canon["grid_complete"] and canon["bf16"]["cases"] == 15  # parser handles the real log format
+
+
+def test_worst_k_contributions_are_reported():
+    bf = [0.0, 0.5, 1.0, 0.2, 0.3, 0.9]
+    rb = [0.0, 0.0, 1.0, 0.4, 0.3, 0.6]
+    r = pb.robustness("hotpotqa", list(range(6)), bf, rb)
+    assert [u["key"] for u in r["worst1"]["units"]] == [1]
+    assert [u["key"] for u in r["worst3"]["units"]] == [1, 5, 0]
+    assert math.isclose(r["worst3"]["sum_contribution"], 100 * (-0.5 - 0.3) / 6)
 
 
 def test_paired_resampling_preserves_example_pairing():
@@ -112,8 +176,9 @@ def test_robustness_is_descriptive_and_removes_nothing():
     assert r["n"] == 5 and (r["n_rabit2_better"], r["n_rabit2_worse"], r["n_equal"]) == (1, 1, 3)
     assert r["largest_abs_contribution"]["key"] == 1 and math.isclose(r["largest_abs_contribution"]["contribution"], -10.0)
     agg = pb.delta("hotpotqa", bf, rb)
-    assert math.isclose(sum(c["contribution"] for c in r["top3"]["units"]), agg)  # only 2 non-zero units here
-    assert math.isclose(r["top1"]["share_of_aggregate_delta"], -10.0 / agg)
+    assert math.isclose(sum(c["contribution"] for c in r["top3_by_abs"]["units"]), agg)  # only 2 non-zero units here
+    assert math.isclose(r["top1_by_abs"]["share_of_aggregate_delta"], -10.0 / agg)
+    assert math.isclose(r["aggregate_delta_on_unit_scale"], agg)
 
 
 def test_qa_subset_gate_matches_frozen_gate_on_historical_runs():
