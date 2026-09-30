@@ -1,0 +1,291 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-fdA486bpPFwTj1p96HuSs7
+Building image im-IT8CD6c8ew6KARn2QxyzMH
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.51s
+
+Built image im-IT8CD6c8ew6KARn2QxyzMH in 4.03s
+
+
+Building image im-iVVYAZT0K1vbtXTxQLJjmL
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_final_fast_decode_append_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 1.38s
+
+Built image im-iVVYAZT0K1vbtXTxQLJjmL in 4.63s
+
+
+Building image im-jDcq4NHfWClnbJRMQjNYcO
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 697.99ms
+
+Built image im-jDcq4NHfWClnbJRMQjNYcO in 1.76s
+
+
+Building image im-HFUeoCZu0YTHka0hVUrooG
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm.log 2>&1 || (tail -n 250 /tmp/vllm.log; exit 1))
+Saving image...
+Image saved, took 10.50s
+
+Built image im-HFUeoCZu0YTHka0hVUrooG in 129.34s
+
+
+Building image im-ncXKElLM2X91Y3BKEKyvGk
+
+=> Step 0: FROM base
+
+=> Step 1: RUN python -m pip install modelscope pytest
+Looking in indexes: http://pypi-mirror.modal.local:5555/simple
+Collecting modelscope
+  Downloading modelscope-1.40.1-py3-none-any.whl.metadata (43 kB)
+Collecting pytest
+  Downloading pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+Requirement already satisfied: filelock in ./usr/local/lib/python3.11/site-packages (from modelscope) (3.29.0)
+Collecting modelscope-hub>=0.4.2 (from modelscope)
+  Downloading modelscope_hub-0.4.5-py3-none-any.whl.metadata (47 kB)
+Requirement already satisfied: packaging in ./usr/local/lib/python3.11/site-packages (from modelscope) (26.3)
+Requirement already satisfied: requests>=2.25 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.34.2)
+Requirement already satisfied: setuptools in ./usr/local/lib/python3.11/site-packages (from modelscope) (80.10.2)
+Requirement already satisfied: tqdm>=4.64.0 in ./usr/local/lib/python3.11/site-packages (from modelscope) (4.70.1)
+Requirement already satisfied: urllib3>=1.26 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.8.0)
+Collecting iniconfig>=1.0.1 (from pytest)
+  Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting pluggy<2,>=1.5 (from pytest)
+  Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Requirement already satisfied: pygments>=2.7.2 in ./usr/local/lib/python3.11/site-packages (from pytest) (2.21.0)
+Requirement already satisfied: cryptography>=41 in ./usr/local/lib/python3.11/site-packages (from modelscope-hub>=0.4.2->modelscope) (50.0.1)
+Requirement already satisfied: cffi>=2.0.0 in ./usr/local/lib/python3.11/site-packages (from cryptography>=41->modelscope-hub>=0.4.2->modelscope) (2.1.1)
+Requirement already satisfied: pycparser in ./usr/local/lib/python3.11/site-packages (from cffi>=2.0.0->cryptography>=41->modelscope-hub>=0.4.2->modelscope) (3.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.5.1)
+Requirement already satisfied: idna<4,>=2.5 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.20)
+Requirement already satisfied: certifi>=2023.5.7 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (2026.7.22)
+Downloading modelscope-1.40.1-py3-none-any.whl (6.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.1/6.1 MB 254.4 MB/s  0:00:00
+Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Downloading modelscope_hub-0.4.5-py3-none-any.whl (236 kB)
+Installing collected packages: pluggy, iniconfig, pytest, modelscope-hub, modelscope
+
+Successfully installed iniconfig-2.3.0 modelscope-1.40.1 modelscope-hub-0.4.5 pluggy-1.6.0 pytest-9.1.1
+Saving image...
+Image saved, took 2.78s
+
+Built image im-ncXKElLM2X91Y3BKEKyvGk in 17.14s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp13_tq_collect_probe_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\exp13_vllm_snapshot_u8ll34sg\vllm_kvquant
+│   _snapshot.zip
+└── 🔨 Created function collect.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+EXP13_TQCOLLECT_ENV={"scipy_importable": false, "scipy_version": null, "gpgpu_available_expr": "True", "gpgpu_stderr_tail": "", "gpus": "NVIDIA H100 80GB HBM3, GPU-7195c2df-0067-70b4-f2e7-17a9f8499aa8"}
+EXP13_TQCOLLECT_CMD={"cmd": ["/usr/local/bin/python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "--confcutdir=/root/vllm-kvquant/tests/quantization", "--collect-only", "tests/quantization/test_turboquant.py"], "cwd": "/root/vllm-kvquant", "returncode": 0}
+EXP13_TQCOLLECT_STDOUT_BEGIN
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_preset_parses[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_preset_parses[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_preset_parses[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_preset_parses[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_invalid_preset_raises
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_mode[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_mode[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_mode[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_mode[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_value_mode[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_value_mode[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_value_mode[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_value_mode[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_bits_and_centroids[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_bits_and_centroids[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_bits_and_centroids[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_bits_and_centroids[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_norm_correction[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_norm_correction[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_norm_correction[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_norm_correction[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_packed_sizes[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_packed_sizes[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_packed_sizes[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_packed_sizes[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_slot_equals_key_plus_value[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_slot_equals_key_plus_value[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_slot_equals_key_plus_value[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_slot_equals_key_plus_value[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_padded_slot_is_even[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_padded_slot_is_even[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_padded_slot_is_even[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_padded_slot_is_even[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_value_packed_sizes_positive[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_value_packed_sizes_positive[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_value_packed_sizes_positive[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_value_packed_sizes_positive[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_n_centroids_is_2_to_mse_bits[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_n_centroids_is_2_to_mse_bits[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_n_centroids_is_2_to_mse_bits[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_n_centroids_is_2_to_mse_bits[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_centroid_bits_always_positive[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_centroid_bits_always_positive[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_centroid_bits_always_positive[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_centroid_bits_always_positive[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_mse_key_or_fp8_exclusive[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_mse_key_or_fp8_exclusive[turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_mse_key_or_fp8_exclusive[turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_mse_key_or_fp8_exclusive[turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[64-turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[64-turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[64-turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[64-turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[96-turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[96-turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[96-turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[96-turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[128-turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[128-turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[128-turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[128-turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[256-turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[256-turboquant_4bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[256-turboquant_k3v4_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[256-turboquant_3bit_nc]
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_boundary_skip_layers_basic
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_boundary_skip_layers_zero
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_boundary_skip_layers_small_model
+tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_boundary_skip_layers_cap_at_half
+tests/quantization/test_turboquant.py::TestHybridAttentionIndices::test_layer_types_full_attention
+tests/quantization/test_turboquant.py::TestHybridAttentionIndices::test_layers_block_type_jamba
+tests/quantization/test_turboquant.py::TestHybridAttentionIndices::test_attn_type_list_minimax
+tests/quantization/test_turboquant.py::TestHybridAttentionIndices::test_no_hybrid_hints_returns_empty
+tests/quantization/test_turboquant.py::TestTurboQuantWorkspaceReservation::test_metadata_builder_reserves_decode_and_continuation_prefill_workspace
+tests/quantization/test_turboquant.py::TestTurboQuantWorkspaceReservation::test_metadata_builder_skips_continuation_prefill_when_disabled
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_shape[2-4]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_shape[3-8]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_shape[4-16]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_sorted[2]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_sorted[3]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_sorted[4]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_cached
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_different_dims_not_identical
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_symmetric_around_zero[2]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_symmetric_around_zero[3]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_symmetric_around_zero[4]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_within_4sigma[2]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_within_4sigma[3]
+tests/quantization/test_turboquant.py::TestCentroids::test_centroids_within_4sigma[4]
+tests/quantization/test_turboquant.py::TestLloydMax::test_solve_shapes[2-4]
+tests/quantization/test_turboquant.py::TestLloydMax::test_solve_shapes[3-8]
+tests/quantization/test_turboquant.py::TestLloydMax::test_solve_shapes[4-16]
+tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_sorted[2]
+tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_sorted[3]
+tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_sorted[4]
+tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_sorted[2]
+tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_sorted[3]
+tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_sorted[4]
+tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_between_centroids[2]
+tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_between_centroids[3]
+tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_between_centroids[4]
+tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_are_midpoints[2]
+tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_are_midpoints[3]
+tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_are_midpoints[4]
+tests/quantization/test_turboquant.py::TestLloydMax::test_solve_deterministic
+tests/quantization/test_turboquant.py::TestLloydMax::test_solve_dtype_float32
+tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_match_scipy_reference[3]
+tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_match_scipy_reference[4]
+tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[64]
+tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[96]
+tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[128]
+tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[256]
+tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_deterministic
+tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_different_seeds
+tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_det_is_pm1
+tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_orthonormal[64]
+tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_orthonormal[128]
+tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_orthonormal[256]
+tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_symmetric[64]
+tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_symmetric[128]
+tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_symmetric[256]
+tests/quantization/test_turboquant.py::TestStoreDecodeRoundTrip::test_single_token_roundtrip[turboquant_k8v4]
+tests/quantization/test_turboquant.py::TestStoreDecodeRoundTrip::test_single_token_roundtrip[turboquant_4bit_nc]
+
+123 tests collected in 9.62s
+EXP13_TQCOLLECT_STDOUT_END
+EXP13_TQCOLLECT_STDERR_BEGIN
+EXP13_TQCOLLECT_STDERR_END
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-fdA486bpPFwTj1p96HuSs7
