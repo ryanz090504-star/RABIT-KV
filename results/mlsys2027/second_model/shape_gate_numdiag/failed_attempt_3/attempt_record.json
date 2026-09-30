@@ -1,0 +1,65 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis",
+  "non_evidence": true,
+  "attempt": 3,
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "execution_commit": "618034c943f48fd74e88ac6d82ec85be3b22c4d8",
+  "started_utc": "2026-09-30T17:13:04.898111+00:00",
+  "completed_utc": "2026-09-30T17:18:00.163920+00:00",
+  "client_elapsed_s": 289.4,
+  "wall_clock_limit_s": 2700,
+  "timed_out": false,
+  "modal_returncode": 0,
+  "apps": {
+    "pre_launch_app_ids": ["ap-afhIH3WzeKkno4wrZdHHDY", "ap-pyYiSYIKytyO8KOu9mG8vX"],
+    "new_app_ids": ["ap-Sn0EFFWZMeaFjIlGJhs5CR"],
+    "parsed_stdout_app_ids": ["ap-Sn0EFFWZMeaFjIlGJhs5CR"],
+    "stop_actions": [],
+    "final_state": {"ap-Sn0EFFWZMeaFjIlGJhs5CR": {"State": "stopped", "Tasks": "0",
+                                                 "Stopped at": "2026-09-30 13:17:57-04:00"}},
+    "cleanup_verified": true,
+    "pre_existing_apps_stopped": false
+  },
+  "what_ran": {
+    "remote_diagnostic": "ran to completion on one H100 (EXP14_NUMDIAG_SUMMARY completed=true)",
+    "model_download_engine_serving_quality_capacity_latency": "none"
+  },
+  "failure": {
+    "classification": "HARNESS DATA-CAPTURE DEFECT: the diagnostic prints its full per-checkpoint summary as ONE JSON line; the Modal log stream truncated that line at 61,515 characters, so it is not parseable (json error at char 61493) and numdiag_summary.json was not written; the runner therefore recorded status 'failed'",
+    "lost": "per-replay / per-prefix / per-checkpoint records (J5-J10 per prefix)",
+    "survived_intact": "the two per-geometry 'overall' aggregate lines printed before the summary (parsed below)"
+  },
+  "partial_overall_aggregates_NOT_A_BASIS_FOR_A_GATE_CHANGE": {
+    "note": "aggregated over all 127 checkpoints per geometry (2 x 32 main + 7 x 9 boundary); max over checkpoints; ULP histograms count output elements after rounding the reference output to BF16; runtime-state and reference-state results were identical for every reference",
+    "model_b_qwen2_5_7b": {
+      "bytes_identical_all": true, "gate_attempt1_failures": 26, "max_ref_abs": 3.812,
+      "R_fp32": {"max_abs_err_vs_fp32_ref": 0.01192, "max_abs_err_vs_bf16_rounded_ref": 0.01562, "max_ulp": 30000,
+                 "ulp_hist": {"0": 389491, "1": 50987, "2": 6133, "3+": 8557}},
+      "R_sem": {"max_abs_err_vs_fp32_ref": 0.00772, "max_abs_err_vs_bf16_rounded_ref": 0.00195, "max_ulp": 9,
+                "ulp_hist": {"0": 455053, "1": 109, "2": 3, "3+": 3}},
+      "R_bf16all": {"max_abs_err_vs_fp32_ref": 0.00772, "max_abs_err_vs_bf16_rounded_ref": 0.00781, "max_ulp": 29763,
+                    "ulp_hist": {"0": 279884, "1": 113597, "2": 24706, "3+": 36981}}
+    },
+    "control_llama3_1_8b": {
+      "bytes_identical_all": true, "gate_attempt1_failures": 27, "max_ref_abs": 3.812,
+      "R_fp32": {"max_abs_err_vs_fp32_ref": 0.00988, "max_abs_err_vs_bf16_rounded_ref": 0.01562, "max_ulp": 30116,
+                 "ulp_hist": {"0": 445842, "1": 57674, "2": 6915, "3+": 9761}},
+      "R_sem": {"max_abs_err_vs_fp32_ref": 0.00771, "max_abs_err_vs_bf16_rounded_ref": 0.00391, "max_ulp": 148,
+                "ulp_hist": {"0": 520050, "1": 131, "2": 4, "3+": 7}},
+      "R_bf16all": {"max_abs_err_vs_fp32_ref": 0.00789, "max_abs_err_vs_bf16_rounded_ref": 0.01562, "max_ulp": 29939,
+                    "ulp_hist": {"0": 319655, "1": 130023, "2": 28503, "3+": 42011}}
+    }
+  },
+  "actions_not_taken": ["no Attempt 4", "no harness fix applied", "no gate change", "no probe attempt 2", "no serving",
+                        "no quality"],
+  "files_sha256": {
+    "numdiag_session.log": "e0a747280382d92ce19c282a05c8adde76b63338818f14300fbaf4bf6134530d",
+    "record.json": "12a5f5dbf3d72d4c00825210cfd9618e66b2eb3d2b4a4021e94429b261c6af37"
+  },
+  "files_sha256_lf_normalized": {
+    "numdiag_session.log": "90c53ae8c18e2d8d295d686f7d867a507e15c6e894aee7bcde82b18eda7646e8",
+    "record.json": "e3791177650e34e0b794db92569b3448e3cdb5481a8c21bc7e023fff9aead82f"
+  }
+}
