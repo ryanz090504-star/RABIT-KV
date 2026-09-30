@@ -1,0 +1,310 @@
+{
+  "experiment": 14,
+  "type": "generalization of the FROZEN RABIT policy to a second model: physical serving (capacity + single-request latency) and logical fake-quant quality, reported separately",
+  "plan": "docs/MLSYS_EXPERIMENT_PLAN.md Experiment 14 (one additional compatible model); the plan defers the model choice to a compatibility check",
+  "model_b": {
+    "id": "Qwen/Qwen2.5-7B-Instruct",
+    "source": "ModelScope snapshot_download (revision master; file hashes recorded in the session log)",
+    "geometry": {
+      "architectures": [
+        "Qwen2ForCausalLM"
+      ],
+      "num_hidden_layers": 28,
+      "num_attention_heads": 28,
+      "num_kv_heads": 4,
+      "head_dim": 128,
+      "sliding_window": null,
+      "rabit_gqa4_decode_engaged": false,
+      "rabit_fast_append_engaged": false
+    },
+    "context": "max_position_embeddings 32768, rope_theta 1e6, use_sliding_window false, BF16 weights",
+    "tokenizer": "no BOS token (bos_token null, add_bos_token false); eos <|im_end|>",
+    "selection": "user decision after the compatibility audit: tests a different GQA geometry (the plan's question) with no source change; Llama-3.1-8B is 32:8 (ratio 4)"
+  },
+  "policy": {
+    "frozen": "K3/V2/G32/R4/META8g64",
+    "serving_kv_cache_dtype": "rabit_kv2",
+    "quality_config": {
+      "name": "2b META8g64 K3V2 G32 R4",
+      "k_bits": 3,
+      "v_bits": 2,
+      "k_style": "seq_affine",
+      "v_style": "group_affine",
+      "k_group": 32,
+      "v_group": 32,
+      "residual": 4,
+      "metadata_mode": "int8",
+      "metadata_group_size": 64
+    },
+    "retuning": "none (Exp14 tests the frozen policy, not a new search)"
+  },
+  "compatibility_audit": {
+    "source_change_required": false,
+    "layout": "rabit2_page_layout and Rabit2OnlineStateRef invariants hold: head_dim 128 % 64 == 0; 4 x 128 = 512 K primaries and 32 x 4 x 4 = 512 V primaries per page are multiples of 64",
+    "backend_guards": "no sliding window / softcap / ALiBi / sinks (Qwen2.5 sliding_window resolves to None)",
+    "dispatch_at_model_b": {
+      "decode_attention": "Stage4B3 GQA4 entry -> exact Stage4B2 fallback (ratio 7)",
+      "one_token_append": "final fast append -> _rabit2_final_old_append (needs 8 x 128)",
+      "v2_quantizer": "compiled (1, 8, 128) path -> exact reference quantizer",
+      "prefill": "rabit2_bulk_append_exact (shape-general) + dense context attention"
+    },
+    "vllm_support": "Qwen2ForCausalLM is registered in the vendored snapshot"
+  },
+  "snapshot": {
+    "vllm_kvquant": "the committed tree (unchanged since backport commit 611a4ffc96c70c81529978dc01a290e87ccf76e9)",
+    "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+    "no_source_change": true
+  },
+  "gates": {
+    "rabit_gate": "exp3_correctness_gate.py, unchanged (Llama shape)",
+    "shape_gate": {
+      "script": "benchmarks/mlsys2027/exp14_shape_gate.py",
+      "geometries": {
+        "model_b": "28 / 4 / 128",
+        "positive_control": "32 / 8 / 128 (Llama)"
+      },
+      "replays": "exact serving call sequence: 2048-token bulk prefill + 31 decode steps (2 seeds) and boundary prefills 1, 4, 5, 35, 36, 37, 68 + 8 decode steps",
+      "criteria": [
+        "page bytes / alignment invariants",
+        "closed pages byte-identical to Rabit2OnlineStateRef",
+        "decode attention within 5e-3 of the fp32 GQA reference over the runtime state and over the reference state (tolerance of test_rabit_kv2_stage3c.py)",
+        "fallback call counts match the predicates"
+      ]
+    },
+    "order": "probe, serving and quality each run their gates / validity checks before any interpretation"
+  },
+  "feasibility_probe": {
+    "status": "NON-EVIDENCE; requires explicit approval; must pass before --part serving / quality",
+    "runs": "same image, RABIT gate, shape gate, model provenance, then one fresh engine per dtype (bfloat16, rabit_kv2): capacity, geometry, backend, physical-layout consistency, one 2048-token / 32-token generation, one chat sanity generation; NO timing emitted",
+    "output": "results/mlsys2027/second_model/feasibility_probe",
+    "binding": "the measured parts run only at a commit whose harness files are identical to the probe commit"
+  },
+  "serving": {
+    "engine": {
+      "worker_base_engine_kwargs": {
+        "dtype": "bfloat16",
+        "block_size": 32,
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 16384,
+        "max_num_seqs": 32,
+        "enable_prefix_caching": false,
+        "enable_chunked_prefill": true,
+        "gpu_memory_utilization": 0.82,
+        "enforce_eager": true,
+        "trust_remote_code": true,
+        "disable_log_stats": false,
+        "attention_config": {
+          "backend": "TRITON_ATTN"
+        }
+      },
+      "model_runner": "default V2; 'Using V2 Model Runner' required in every leg",
+      "process_topology": "vLLM default multiprocess engine core (Exp4 / Exp13 topology)"
+    },
+    "workload": {
+      "prompt": "filler x 2048 (no BOS token) (Model B has no BOS; the Exp13 [BOS] + ' the' x 2047 rule is unchanged for tokenizers with BOS)",
+      "context_tokens": 2048,
+      "output_tokens": 32,
+      "decoding": "greedy",
+      "ignore_eos": true,
+      "requests": "single request per generate call"
+    },
+    "session": {
+      "gpu": "one NVIDIA H100 80GB HBM3 (recorded; must be H100 80GB)",
+      "legs": [
+        {
+          "index": 1,
+          "label": "A1",
+          "kv_cache_dtype": "bfloat16"
+        },
+        {
+          "index": 2,
+          "label": "B1",
+          "kv_cache_dtype": "rabit_kv2"
+        },
+        {
+          "index": 3,
+          "label": "B2",
+          "kv_cache_dtype": "rabit_kv2"
+        },
+        {
+          "index": 4,
+          "label": "A2",
+          "kv_cache_dtype": "bfloat16"
+        }
+      ],
+      "order": "A B B A (Exp3 counterbalancing)",
+      "warmups_per_leg": 5,
+      "reps_per_leg": 30,
+      "samples_per_condition": 60,
+      "fresh_engine_process_per_leg": true,
+      "failure_rule": "any gate / leg failure, watchdog timeout or unclean GPU aborts; no retry"
+    },
+    "capacity": {
+      "primary": "OBSERVED PHYSICAL vLLM allocator KV capacity (num_gpu_blocks x block_size) from the live engine",
+      "ratio": "rabit / bf16",
+      "secondary_labelled_theoretical": {
+        "bfloat16": {
+          "bytes": 57344,
+          "formula": "28 layers x (K,V) x 4 heads x 128 x 2 B (BF16)"
+        },
+        "rabit_kv2": {
+          "bytes": 10864,
+          "formula": "28 layers x 388 B (RABIT physical page 12,416 B per 32-token block per layer: K3 payload 6,144 + V2 payload 4,096 + META8g64 K min/scale 2 x 544 + V min/scale 2 x 544)"
+        }
+      },
+      "implied_bytes_per_token": "reported KV GiB x 2^30 / observed capacity (derived; layout consistency check within 1 %)"
+    },
+    "latency": {
+      "per_leg": [
+        "median_tpot_ms",
+        "p90_tpot_ms",
+        "median_ttft_ms",
+        "median_wall_ms"
+      ],
+      "cross_leg": "median of the two leg-level values",
+      "secondary": "pooled 60-sample median / p90 TPOT (descriptive; not 60 independent replicates)",
+      "drift": "leg 2 - leg 1 per condition (TPOT abs / %, p90 TPOT, TTFT, wall)",
+      "comparison": "RABIT vs BF16 on the cross-leg summaries",
+      "no_inference": true,
+      "jit_warnings": "Triton JIT-during-inference warnings inside measured samples are counted and reported (descriptive, as in the Exp13 acceptance record)"
+    },
+    "integrity_gates": [
+      "RABIT gate and shape gate pass",
+      "4 legs exit 0, no watchdog timeout, GPU clean before each",
+      "every leg: V2 runner, block_size 32, 5 warmups + 30 samples, prompt 2048 / output 32 in every sample, prompt rule 'filler x 2048 (no BOS token)'",
+      "every leg: served geometry == the frozen Model-B geometry (incl. sliding_window None and the two fallback predicates false)",
+      "every leg: backend TRITON_ATTN",
+      "every leg: implied bytes / token within 1 % of the theoretical layout",
+      "RABIT legs: frozen markers present",
+      "identical capacity and config within a condition; only dtype-induced fields differ across conditions"
+    ],
+    "dtype_induced_allowlist": [
+      "requested.kv_cache_dtype",
+      "kv_dtype.requested_kv_cache_dtype",
+      "kv_dtype.engine_cache_dtype",
+      "kv_dtype.resolved_kv_torch_dtype",
+      "kv_dtype.kv_quant_mode"
+    ]
+  },
+  "quality": {
+    "kind": "LOGICAL fake-quant (HF transformers, unchanged benchmarks/quality/*.py; KV MB is logical)",
+    "methods": "bf16,rabit2",
+    "model_arg": [
+      "--model-name",
+      "Qwen/Qwen2.5-7B-Instruct"
+    ],
+    "selection": {
+      "continuation_ppl": {
+        "units": 32,
+        "canonical_subset": 8,
+        "args": [
+          "--context-tokens",
+          "1024",
+          "--eval-tokens",
+          "128",
+          "--samples",
+          "32"
+        ]
+      },
+      "niah": {
+        "units": 57,
+        "canonical_subset": 15,
+        "args": [
+          "--context-lengths",
+          "4096,8192,16384",
+          "--needle-depths",
+          "0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95",
+          "--max-new-tokens",
+          "16"
+        ]
+      },
+      "passage_retrieval": {
+        "units": 200,
+        "canonical_subset": 10,
+        "args": [
+          "--sample-start",
+          "0",
+          "--samples",
+          "200",
+          "--max-input-tokens",
+          "16384",
+          "--max-new-tokens",
+          "32"
+        ]
+      },
+      "hotpotqa": {
+        "units": 100,
+        "canonical_subset": 20,
+        "args": [
+          "--sample-start",
+          "0",
+          "--samples",
+          "100",
+          "--length-bucket",
+          "8k+",
+          "--max-input-tokens",
+          "16384",
+          "--max-new-tokens",
+          "32"
+        ]
+      },
+      "qasper": {
+        "units": 24,
+        "canonical_subset": 24,
+        "args": [
+          "--sample-start",
+          "0",
+          "--samples",
+          "24",
+          "--length-bucket",
+          "8k+",
+          "--max-input-tokens",
+          "16384",
+          "--max-new-tokens",
+          "32"
+        ]
+      }
+    },
+    "why_exp12_selection": "the accepted Exp12 methodology (superset of the Exp1 canonical units) gives both Exp1-count subset aggregates and paired bootstrap CIs in one run",
+    "statistics": "paired_bootstrap_ci.py unchanged (10,000 paired resamples; 95 % percentile CI); canonical subset aggregates on the canonical unit keys",
+    "validity": [
+      "exit 0, no traceback",
+      "log names Model B",
+      "summary counts exact",
+      "per-unit rows paired, count == Exp12 units",
+      "unit identity equals the accepted Exp12 log (unit keys, dataset header, ground truths)",
+      "every per-unit logical KV MB equals the Model-B geometry accounting within 0.001 MB"
+    ],
+    "not_applicable": "the Exp10 per-example QA control gate and the Exp12 control-reproduction targets are Llama reference values; no Model-B reference exists, so the within-run bf16 is the control"
+  },
+  "fairness": {
+    "MATCHED": [
+      "GPU class / container / session per part",
+      "model weights and tokenizer across conditions",
+      "vLLM snapshot",
+      "engine settings (block 32, gpu_memory_utilization 0.82, eager, prefix caching off, chunked prefill on, max_model_len 32768)",
+      "prompt / output length",
+      "warmups",
+      "measurement code (timed region AST-identical to Exp13 / Exp4)",
+      "counterbalanced order",
+      "quality units, prompts and scoring across bf16 / rabit2"
+    ],
+    "METHOD_INHERENT": [
+      "KV representation, metadata and R4 residual"
+    ],
+    "LIMITATIONS": [
+      "RABIT serves through untuned exact fallback kernels at Model B's geometry (BF16 uses the standard TRITON_ATTN path)",
+      "prompt has no BOS token (Model B convention), unlike Exp13",
+      "Model B differs from Llama in size, tokenizer and training; cross-model numbers are descriptive context only",
+      "one additional model; no universality claim",
+      "no Model-B quality reference: no control-reproduction gate"
+    ]
+  },
+  "claim_boundary": "Generalization of the FROZEN RABIT policy (K3/V2/G32/R4/META8g64, no retuning) to ONE additional model, Qwen2.5-7B-Instruct (GQA 28:4, head_dim 128). Serving: observed physical allocator capacity and single-request latency in one H100 session (default V2 runner, eager, 2048-token prompt, 32 output tokens); no throughput claim. At this geometry the frozen RABIT source serves through its exact FALLBACK paths (GQA ratio 7 is not a multiple of 4; the final fast append and the compiled V2 quantizer require 8 KV heads x head_dim 128), so RABIT latency on Model B measures those untuned paths -- it is NOT a measurement of how the Llama-tuned kernels transfer. Quality: LOGICAL fake-quant evaluation (HF transformers), separate from physical serving; neither validates the other. Cross-model comparisons with Exp12 / Exp13 (Llama-3.1-8B) are descriptive context from different sessions, never pooled. No universality claim beyond these two models.",
+  "exp13_correctness_wording_for_paper": "The upstream TurboQuant suite passed under the frozen item-level gate. The exact turboquant_k3v4_nc configuration was separately validated in the physical feasibility probe for cache initialization, backend routing and sanity generation.",
+  "outputs": {
+    "probe": "results/mlsys2027/second_model/feasibility_probe",
+    "serving": "results/mlsys2027/second_model/serving",
+    "quality": "results/mlsys2027/second_model/quality"
+  }
+}

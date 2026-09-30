@@ -896,6 +896,11 @@ remains optional (Experiment 16, P1) given its high engineering cost.
   correctness re-validation on an unfamiliar codepath).
 - **Estimated GPU cost:** Medium (one additional method beyond Experiments 3/4's existing
   BF16/FP8/RABIT-KV legs).
+- **Required correctness wording for the paper/docs (post-acceptance, evidence `42c2799`):**
+  "The upstream TurboQuant suite passed under the frozen item-level gate. The exact
+  turboquant_k3v4_nc configuration was separately validated in the physical feasibility
+  probe for cache initialization, backend routing and sanity generation." Do not state that
+  the upstream suite itself contains an end-to-end k3v4_nc round-trip test (it does not).
 
 ---
 
