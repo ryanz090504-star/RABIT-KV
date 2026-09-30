@@ -1,0 +1,20 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis_attempt_addendum",
+  "attempt": 2,
+  "addendum_to": "attempt_record.json (unchanged; archived in commit e628dc1fb02458a2a1e9988add9b594714395244)",
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "permanently_excluded": true,
+  "explicit_facts": {
+    "local_modal_client_failed_after_s": 1.4,
+    "failure": "Windows GBK encoding of the Unicode check-mark ('\\u2713') in the Modal client's first output line: 'gbk' codec can't encode character '\\u2713'",
+    "image_build_completed": false,
+    "remote_function_ran": false,
+    "gpu_task_ran": false,
+    "diagnostic_tensors_or_results_produced": false,
+    "observed": {"model": "none", "engine": "none", "capacity": "none", "latency": "none"},
+    "numerical_diagnostic_data": "ZERO"
+  },
+  "retained_archives": ["failed_attempt_1 (permanent)", "failed_attempt_2 (permanent)"]
+}
