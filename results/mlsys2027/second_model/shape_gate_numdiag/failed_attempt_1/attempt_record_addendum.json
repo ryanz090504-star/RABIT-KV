@@ -1,0 +1,18 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis_attempt_addendum",
+  "attempt": 1,
+  "addendum_to": "attempt_record.json (unchanged; archived in commit f54df78fa5684cda6b7c03295bbf798729fb8d4f)",
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "permanently_excluded": true,
+  "explicit_facts": {
+    "container_starts_failed_before_diagnostic_code": 39,
+    "failure": "ModuleNotFoundError: No module named 'exp14_deployment_modal' -- the wrapper's module-level import of a sibling module that was not shipped into the container",
+    "model_downloaded": false,
+    "vllm_engine_started": false,
+    "diagnostic_tensors_or_results_produced": false,
+    "observed": {"attention_values": "none", "ulp_values": "none", "capacity": "none", "timings": "none"},
+    "numerical_diagnostic_data": "ZERO"
+  }
+}
