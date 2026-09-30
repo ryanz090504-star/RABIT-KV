@@ -56,7 +56,13 @@ SESSION_LOG = OUT_DIR / "modal_session.log"
 MANIFEST = OUT_DIR / "manifest.json"
 INTEGRITY = OUT_DIR / "integrity_check.json"
 SUMMARY = OUT_DIR / "matched_capacity_latency_summary.json"
-MUST_BE_COMMITTED = [RUNNER_SCRIPT, MODAL_APP, WORKER, GATE, WATCHDOG, PROTOCOL, HERE / "test_experiment13_external_baseline.py"]
+TQ_GATE = HERE / "exp13_tq_gate.py"  # post-failure harness amendment (Attempt 2)
+MUST_BE_COMMITTED = [RUNNER_SCRIPT, MODAL_APP, WORKER, GATE, WATCHDOG, TQ_GATE, PROTOCOL,
+                     HERE / "test_experiment13_external_baseline.py"]
+ATTEMPT1_DIR = ROOT / "results" / "mlsys2027" / "external_baseline" / "exp13" / "failed_attempt_1"
+ATTEMPT1_ARCHIVE_COMMIT = "acac1a22234e5c3ffc8c04913b5573c8d828a30e"
+TQ_COLLECT_PROBE_COMMIT = "0b4d01b3438e2ed98460bf0746b4c13b142a56c3"
+TQ_GATE_SUMMARY = re.compile(r"^EXP13_TQ_GATE_SUMMARY=(\{.*\})\s*$")
 EXP12_EVIDENCE_COMMIT = "4f767ab03d83e043b2871dd0cd4cf2f8dc862e6b"
 PROTECTED_PATHS = [*r12.PROTECTED_PATHS, *r12.EXP11_FILES, r12.OUT_DIR,
                    ROOT / "results" / "mlsys2027" / "external_baseline" / "feasibility_probe",
@@ -198,7 +204,8 @@ def build_protocol() -> dict:
                     "order": "A B C D D C B A", "warmups_per_leg": WARMUPS_PER_LEG, "reps_per_leg": REPS_PER_LEG,
                     "samples_per_condition": SAMPLES_PER_CONDITION, "fresh_engine_process_per_leg": True,
                     "gates_before_legs": ["RABIT physical correctness gate (exp3_correctness_gate.py, unchanged)",
-                                          "TurboQuant correctness gate: pytest tests/quantization/test_turboquant.py"],
+                                          "TurboQuant correctness gate (exp13_tq_gate.py): frozen 123-item collection "
+                                          "(full node-ID hash) and execution accounting -- see tq_gate"],
                     "failure_rule": "any gate / leg failure, watchdog timeout or unclean GPU aborts the session; no retry; "
                                     "no substitution"},
         "metrics": {"capacity": {"primary": CAPACITY_LABEL, "ratios": [f"{SHORT[x]} / {SHORT[y]}" for x, y in PAIRS],
@@ -254,7 +261,53 @@ def build_protocol() -> dict:
         "outputs": {"session_log": SESSION_LOG.relative_to(ROOT).as_posix(), "manifest": MANIFEST.relative_to(ROOT).as_posix(),
                     "integrity": INTEGRITY.relative_to(ROOT).as_posix(), "summary": SUMMARY.relative_to(ROOT).as_posix()},
         "not_reported": ["throughput", "quality", "multi-request / batched serving", "other GPUs or runners"],
+        "tq_gate": tq_gate_protocol(),
+        "attempt_history": {
+            "attempt_1": {"status": "invalid_gate_harness_failure", "excluded_from_accepted_results": True,
+                          "archive": ATTEMPT1_DIR.relative_to(ROOT).as_posix(), "archive_commit": ATTEMPT1_ARCHIVE_COMMIT,
+                          "facts": ["RABIT gate passed", "TurboQuant gate failed before collection (pytest exit 4: "
+                                    "repository-level tests/conftest.py required the optional tblib)",
+                                    "zero TurboQuant tests collected", "zero measured benchmark legs executed",
+                                    "zero latency samples produced", "zero measured-leg allocator values produced"]},
+            "no_cross_attempt_pooling": True},
+        "harness_amendment": {
+            "kind": "post-failure HARNESS amendment (not a scientific-method change)",
+            "written_after": "Exp13 Attempt 1 failed at the TurboQuant gate; no benchmark result existed, so no "
+                             "treatment result informed this amendment",
+            "corrects": ["pytest conftest discovery: --confcutdir=/root/vllm-kvquant/tests/quantization (the accepted "
+                         "RABIT gate's convention)",
+                         "the incorrect definition-count assumption (45 test definitions != 123 pytest items)",
+                         "explicit accounting of the optional SciPy-reference skips (scipy absent in the unchanged image)",
+                         "pre-leg enforcement of collection and execution results before A1"],
+            "unchanged": ["conditions", "order", "workload", "snapshot", "engine settings", "latency aggregation",
+                          "capacity accounting", "measured-leg acceptance criteria", "Modal base image",
+                          "TurboQuant tests and source", "vLLM", "RABIT"]},
     }
+
+
+def tq_gate_protocol() -> dict:
+    """The frozen TurboQuant gate values, read from the committed gate script (itself generated from the
+    authoritative non-evidence collection probe)."""
+    import exp13_tq_gate as g  # noqa: PLC0415  (stdlib-only; read-only)
+    return {"script": TQ_GATE.relative_to(ROOT).as_posix(), "collection_probe_commit": TQ_COLLECT_PROBE_COMMIT,
+            "target": g.TARGET, "confcutdir": g.CONFCUTDIR, "expected_collected_items": g.EXPECTED_COUNT,
+            "test_definitions": 45, "expected_node_ids_sha256": g.EXPECTED_NODE_IDS_SHA256,
+            "expected_node_ids": g.EXPECTED_NODE_IDS, "s_scipy": len(g.SCIPY_NODE_IDS),
+            "scipy_node_ids": g.SCIPY_NODE_IDS, "gpu_only_node_ids": g.GPU_ONLY_NODE_IDS,
+            "collection_rule": "count == 123 AND sha256(sorted node IDs) == expected_node_ids_sha256, else STOP "
+                               "before executing tests",
+            "execution_rule": {"scipy_absent (expected)": "passed 121, skipped 2 == the frozen SciPy node IDs with a "
+                                                          "missing-scipy reason, failed 0, errors 0, xfailed 0, xpassed 0",
+                               "scipy_present": "passed 123, skipped 0, failed 0, errors 0, xfailed 0, xpassed 0",
+                               "gpu_only": "GPGPU_AVAILABLE true; all 15 GPU-only items execute and pass; any skip invalid",
+                               "enforced": "inside the container before A1; the Modal app aborts on a non-zero exit"},
+            "correctness_claim_boundary": (
+                "The upstream TurboQuant pytest suite does NOT include an end-to-end store / decode round-trip item for "
+                "turboquant_k3v4_nc (its round-trip items cover turboquant_4bit_nc and turboquant_k8v4). Exp13 "
+                "correctness evidence for k3v4_nc = (1) this suite: 123 accounted items with only the two frozen "
+                "optional SciPy skips allowed, AND (2) the non-evidence V2 feasibility probe on the identical patched "
+                "snapshot (e686502): physical packed KV cache initialized, TURBOQUANT / FA2 routing, BF16 boundary "
+                "layers 0 / 1 / 30 / 31, and a completed short sanity generation")}
 
 
 def load_protocol() -> dict:
@@ -360,10 +413,9 @@ def parse_worker(lines: list[str]) -> dict:
 
 def parse_gates(gate: list[str], tqgate: list[str]) -> dict:
     res = next((json.loads(m.group(1)) for ln in gate if (m := GATE_RESULT.match(ln.strip()))), None)
-    passed = next((int(m.group(1)) for ln in reversed(tqgate) if (m := PYTEST_SUMMARY.match(ln.strip()))), None)
-    failed = [ln for ln in tqgate if PYTEST_FAILED.search(ln) and ("failed" in ln or "error" in ln.lower())]
+    tq = next((json.loads(m.group(1)) for ln in reversed(tqgate) if (m := TQ_GATE_SUMMARY.match(ln.strip()))), None)
     return {"rabit_gate_result": res, "rabit_gate_passed": bool(res and res.get("passed")),
-            "tq_gate_pytest_passed": passed, "tq_gate_failure_lines": failed[:10]}
+            "tq_gate_summary": tq, "tq_gate_valid": bool(tq and tq.get("valid") is True and tq.get("stage") == "execution")}
 
 
 def parse_top(lines: list[str]) -> dict:
@@ -507,8 +559,7 @@ def build_summary(parsed: dict, top: dict) -> dict:
 
 def integrity(parsed: dict, gates: dict, top: dict, diff: dict) -> dict:
     checks = {"rabit_gate_passed": gates["rabit_gate_passed"] and top["gate_exit"] == 0,
-              "tq_gate_passed": top["tq_gate_exit"] == 0 and bool(gates["tq_gate_pytest_passed"])
-                                and not gates["tq_gate_failure_lines"],
+              "tq_gate_passed": top["tq_gate_exit"] == 0 and gates["tq_gate_valid"],
               "no_watchdog_timeout": not top["timeouts"], "session_complete": top["complete"],
               "gpu_is_h100_80gb": any("H100 80GB" in g.get("name", "") for g in ((top.get("environment") or {}).get("gpus") or []))}
     for k, label, d in LEGS:

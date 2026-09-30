@@ -40,6 +40,8 @@ GATE_LOCAL = Path(__file__).resolve().parent / "exp3_correctness_gate.py"
 GATE_REMOTE = "/opt/exp13/exp3_correctness_gate.py"
 WATCHDOG_LOCAL = Path(__file__).resolve().parent / "exp3_watchdog.py"
 WATCHDOG_REMOTE = "/opt/exp13/exp3_watchdog.py"
+TQ_GATE_LOCAL = Path(__file__).resolve().parent / "exp13_tq_gate.py"  # post-failure harness amendment (Attempt 2)
+TQ_GATE_REMOTE = "/opt/exp13/exp13_tq_gate.py"
 RABIT_KV2_REMOTE = "/root/vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py"
 EXPECTED_RABIT_SHA256_LF = "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
 GPU_CLEAN_TOLERANCE_MIB = 256
@@ -110,6 +112,7 @@ image = (
     image.add_local_file(str(WORKER_LOCAL), WORKER_REMOTE, copy=True)
     .add_local_file(str(GATE_LOCAL), GATE_REMOTE, copy=True)
     .add_local_file(str(WATCHDOG_LOCAL), WATCHDOG_REMOTE, copy=True)
+    .add_local_file(str(TQ_GATE_LOCAL), TQ_GATE_REMOTE, copy=True)
 )
 
 
@@ -259,7 +262,9 @@ def mirrored(legs: str, warmups: int, reps_per_leg: int) -> None:
         raise RuntimeError(f"correctness gate failed with exit code {code}; no measurement run")
 
     # TurboQuant correctness gate (the plan's required test_turboquant.py run on this image / GPU). Not timed.
-    tq_cmd = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/quantization/test_turboquant.py"]
+    # Frozen item-level gate: pytest --confcutdir=/root/vllm-kvquant/tests/quantization collection (123 items, full
+    # node-ID hash) and execution (121 passed + 2 frozen SciPy skips, or 123 if scipy is present; 15 GPU-only pass).
+    tq_cmd = [sys.executable, TQ_GATE_REMOTE]
     _emit("EXP13_TQ_GATE_START", {"cmd": tq_cmd, "cwd": "/root/vllm-kvquant", "timeout_s": TQ_GATE_TIMEOUT_S})
     prev_cwd = os.getcwd()
     os.chdir("/root/vllm-kvquant")

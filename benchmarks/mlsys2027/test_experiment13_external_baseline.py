@@ -120,7 +120,8 @@ def _session(tq_blocks_leg2=37600):
     blocks = {r13.A: 12282, r13.B: 24549, r13.C: 64831, r13.D: 37600}
     tp = {r13.A: 8.0, r13.B: 8.5, r13.C: 9.0, r13.D: 10.0}
     lines = ['EXP13_ENVIRONMENT={"gpus": [{"name": "NVIDIA H100 80GB HBM3"}]}', '[gate] EXP3_GATE_RESULT={"passed": true}',
-             "EXP13_GATE_EXIT={\"returncode\": 0}", "[tqgate] 45 passed, 3 warnings in 12.00s",
+             "EXP13_GATE_EXIT={\"returncode\": 0}",
+             '[tqgate] EXP13_TQ_GATE_SUMMARY={"stage": "execution", "valid": true, "counts": {"passed": 121, "skipped": 2}}',
              'EXP13_TQ_GATE_EXIT={"returncode": 0}']
     for k, label, d in r13.LEGS:
         lines.append(f'EXP13_PRE_LEG_GPU_STATE={{"leg": "{label}", "clean": true}}')
@@ -224,6 +225,118 @@ def test_prior_accepted_evidence_unchanged():
     for probe in ("feasibility_probe", "legacy_runner_probe", "v2_runner_probe"):
         assert e1.run_git("status", "--short", "--", f"results/mlsys2027/external_baseline/{probe}") == ""
 
+
+
+# ---------------------------------------------------------------- frozen TurboQuant gate (post-failure harness amendment)
+import exp13_tq_gate as tqg  # noqa: E402
+
+
+def _junit(outcomes: dict) -> str:
+    rows = []
+    for nid, (outcome, msg) in outcomes.items():
+        cls, name = nid.split("::")[1], nid.split("::")[2]
+        inner = {"passed": "", "skipped": f'<skipped type="pytest.skip" message="{msg}"/>',
+                 "xfailed": f'<skipped type="pytest.xfail" message="{msg}"/>',
+                 "failed": f'<failure message="{msg}"/>', "error": f'<error message="{msg}"/>'}[outcome]
+        rows.append(f'<testcase classname="tests.quantization.test_turboquant.{cls}" name="{name}">{inner}</testcase>')
+    return "<testsuites><testsuite>" + "".join(rows) + "</testsuite></testsuites>"
+
+
+def _outcomes(skip_scipy=True, **override):
+    out = {n: ("passed", "") for n in tqg.EXPECTED_NODE_IDS}
+    if skip_scipy:
+        for n in tqg.SCIPY_NODE_IDS:
+            out[n] = ("skipped", "could not import 'scipy': No module named 'scipy'")
+    out.update(override)
+    return out
+
+
+def _counts(outcomes):
+    c = {k: 0 for k in tqg.COUNT_KEYS}
+    for o, _ in outcomes.values():
+        c[{"error": "errors"}.get(o, o)] += 1
+    return c
+
+
+def _eval(outcomes, scipy_importable=False, gpgpu=True, collected=None, run_rc=0, counts=None):
+    collected = list(tqg.EXPECTED_NODE_IDS) if collected is None else collected
+    return tqg.evaluate(collected, 0, scipy_importable, gpgpu, run_rc, tqg.parse_junit(_junit(outcomes)),
+                        counts if counts is not None else _counts(outcomes))
+
+
+def test_tq_gate_frozen_values_match_the_collection_probe():
+    rec = json.loads((ROOT / "results/mlsys2027/external_baseline/tq_collect_probe/collect_record.json").read_text(encoding="utf-8"))
+    assert tqg.EXPECTED_COUNT == 123 == len(tqg.EXPECTED_NODE_IDS) == rec["count"]
+    assert sorted(tqg.EXPECTED_NODE_IDS) == sorted(rec["node_ids"])
+    assert tqg.EXPECTED_NODE_IDS_SHA256 == rec["sha256_sorted"] == tqg.node_ids_sha256(rec["node_ids"])
+    assert len(tqg.EXPECTED_NODE_IDS_SHA256) == 64  # FULL hash, not abbreviated
+    assert tqg.SCIPY_NODE_IDS == sorted(rec["scipy_reference"]) and len(tqg.SCIPY_NODE_IDS) == 2
+    assert all("test_centroids_match_scipy_reference[" in n for n in tqg.SCIPY_NODE_IDS)
+    assert tqg.GPU_ONLY_NODE_IDS == sorted(rec["gpu_only"]) and len(tqg.GPU_ONLY_NODE_IDS) == 15
+    assert rec["environment"]["scipy_importable"] is False and rec["environment"]["gpgpu_available_expr"] == "True"
+    assert tqg.CONFCUTDIR == "--confcutdir=/root/vllm-kvquant/tests/quantization"
+    p = r13.load_protocol()["tq_gate"]
+    assert p["expected_node_ids_sha256"] == tqg.EXPECTED_NODE_IDS_SHA256 and p["expected_collected_items"] == 123
+    assert "does NOT include an end-to-end store / decode round-trip item for turboquant_k3v4_nc" in p["correctness_claim_boundary"]
+
+
+def test_tq_gate_accepts_only_the_frozen_outcomes():
+    assert _eval(_outcomes())["valid"]  # scipy absent: 121 passed + 2 frozen SciPy skips
+    assert _eval(_outcomes(skip_scipy=False), scipy_importable=True)["valid"]  # scipy present: 123 passed
+    assert not _eval(_outcomes(), scipy_importable=True)["valid"]  # scipy present but skipped
+    gpu = tqg.GPU_ONLY_NODE_IDS[0]
+    bad_gpu = _eval(_outcomes(**{gpu: ("skipped", "GPGPU not available")}))
+    assert not bad_gpu["valid"] and not bad_gpu["checks"]["gpu_only_all_executed_and_passed"]
+    other = next(n for n in tqg.EXPECTED_NODE_IDS if n not in tqg.SCIPY_NODE_IDS and n not in tqg.GPU_ONLY_NODE_IDS)
+    assert not _eval(_outcomes(**{other: ("skipped", "No module named 'scipy'")}))["checks"]["skipped_exactly_allowed_set"]
+    wrong_reason = _outcomes(**{tqg.SCIPY_NODE_IDS[0]: ("skipped", "some other reason")})
+    assert not _eval(wrong_reason)["checks"]["skip_reasons_missing_scipy"]
+    assert not _eval(_outcomes(**{other: ("failed", "assert")}), run_rc=1)["valid"]
+    assert not _eval(_outcomes(**{other: ("xfailed", "x")}))["checks"]["xfailed_0"]
+    xp = _counts(_outcomes())
+    xp["xpassed"] = 1
+    assert not _eval(_outcomes(), counts=xp)["checks"]["xpassed_0"]
+    assert not _eval(_outcomes(), gpgpu=False)["valid"]
+
+
+def test_tq_gate_collection_stage_stops_before_execution():
+    short = list(tqg.EXPECTED_NODE_IDS)[:-1]
+    res = tqg.evaluate(short, 0, False, True, None, {}, {})
+    assert res["stage"] == "collection" and res["valid"] is False and not res["checks"]["collected_count_123"]
+    swapped = list(tqg.EXPECTED_NODE_IDS)[:-1] + [tqg.EXPECTED_NODE_IDS[-1] + "_renamed"]
+    res = tqg.evaluate(swapped, 0, False, True, None, {}, {})
+    assert res["checks"]["collected_count_123"] and not res["checks"]["collected_hash_matches"] and res["valid"] is False
+    ok = tqg.evaluate(list(tqg.EXPECTED_NODE_IDS), 0, False, True, None, {}, {})
+    assert ok["stage"] == "collection" and ok["valid"] is None  # passes collection; execution not yet evaluated
+    src = (HERE / "exp13_tq_gate.py").read_text(encoding="utf-8")
+    assert src.index('return 3') < src.index('run_cmd = [*BASE, "-rA"')  # stop happens before the test run
+
+
+def test_tq_gate_parsers():
+    assert tqg.parse_summary("== 121 passed, 2 skipped, 14 warnings in 12.34s ==")["passed"] == 121
+    c = tqg.parse_summary("== 1 failed, 120 passed, 2 skipped, 1 error in 9.1s ==")
+    assert (c["failed"], c["passed"], c["skipped"], c["errors"]) == (1, 120, 2, 1)
+    items = tqg.parse_junit(_junit(_outcomes()))
+    assert sorted(items) == sorted(tqg.EXPECTED_NODE_IDS) and sum(v["outcome"] == "skipped" for v in items.values()) == 2
+
+
+def test_modal_diff_is_harness_only_and_attempt1_frozen():
+    modal = (HERE / "exp13_deployment_modal.py").read_text(encoding="utf-8")
+    assert "tq_cmd = [sys.executable, TQ_GATE_REMOTE]" in modal
+    installs = [ln for ln in modal.splitlines() if "pip_install" in ln or "pip install" in ln or "apt_install" in ln]
+    assert not any(("tblib" in ln or "scipy" in ln) for ln in installs)  # nothing added to the environment
+    assert "tblib" not in modal
+    assert r13.verify_equivalence()["image_expression_identical_to_exp4"]
+    assert e1.run_git("diff", "--name-only", r13.ATTEMPT1_ARCHIVE_COMMIT, "--",
+                      r13.ATTEMPT1_DIR.relative_to(ROOT).as_posix()) == ""
+    rec = json.loads((r13.ATTEMPT1_DIR / "attempt_record.json").read_text(encoding="utf-8"))
+    assert rec["status"] == "invalid_gate_harness_failure" and rec["excluded_from_accepted_results"] is True
+    h = r13.load_protocol()["attempt_history"]
+    assert h["no_cross_attempt_pooling"] and "zero measured benchmark legs executed" in h["attempt_1"]["facts"]
+    tq_test = "vllm-kvquant/tests/quantization/test_turboquant.py"
+    assert e1.run_git("show", f"HEAD:{tq_test}") == (ROOT / tq_test).read_text(encoding="utf-8").rstrip("\n")
+    assert e1.run_git("diff", "--name-only", r13.BACKPORT_COMMIT, "HEAD", "--", tq_test) == ""  # tests unchanged
+    assert e1.run_git("diff", "--name-only", r13.BACKPORT_COMMIT, "HEAD", "--", "vllm-kvquant") == ""
 
 if __name__ == "__main__":
     tests = [(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
