@@ -1,0 +1,90 @@
+{
+  "experiment": 13,
+  "status": "accepted",
+  "accepted_attempt": 2,
+  "failed_attempt_1_excluded": true,
+  "failed_attempt_1_record": "failed_attempt_1/attempt_record.json",
+  "failed_attempt_1_record_sha256": "b87ff2a89242336eb3805e72b2ebaebb697d8426e74af6f1209c2cb86b539b69",
+  "failed_attempt_1_status": "invalid_gate_harness_failure (pytest exit 4: tests/conftest.py imported absent tblib; zero TurboQuant tests collected; no legs run)",
+  "no_cross_attempt_pooling": true,
+  "execution_commit": "a20025b4cad0c487b044f75b34435741ecb0cca4",
+  "protocol_sha256": "932299742df81e76607f953c7ab7b9efd3a74bca2915e1962d5d1eb482343915",
+  "harness_amendment": "post-failure HARNESS amendment (a20025b): frozen item-level TurboQuant gate exp13_tq_gate.py with --confcutdir=/root/vllm-kvquant/tests/quantization; no test, source or image change",
+  "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+  "backport": {
+    "commit": "611a4ffc96c70c81529978dc01a290e87ccf76e9",
+    "upstream_commit": "fa4321de3d894c50c5ca0766dffa352d3fb07423",
+    "upstream_pr": "#47609",
+    "upstream_release": "v0.25.0",
+    "file": "vllm/v1/worker/gpu/attn_utils.py",
+    "blob": "5fcc9053bf4c65b5f0f110f62edae66f4c363c4c"
+  },
+  "rabit_source_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+  "modal_app_ids": [
+    "ap-uX3NPDOYHu0V328kiK54wD"
+  ],
+  "started_utc": "2026-09-30T04:10:52.877149+00:00",
+  "completed_utc": "2026-09-30T04:29:54.660524+00:00",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "gates": {
+    "rabit_gate_passed": true,
+    "turboquant_gate": {
+      "valid": true,
+      "collected_count": 123,
+      "collected_sha256": "de2c00c3ded35dbdc3686e2480b81b6ab32f2cc2410aa969890de8663b41c86b",
+      "counts": {
+        "errors": 0,
+        "failed": 0,
+        "passed": 121,
+        "skipped": 2,
+        "xfailed": 0,
+        "xpassed": 0
+      },
+      "skipped_node_ids": [
+        "tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_match_scipy_reference[3]",
+        "tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_match_scipy_reference[4]"
+      ],
+      "scipy_importable": false,
+      "gpgpu_available": true,
+      "checks": {
+        "collect_exit_0": true,
+        "collected_count_123": true,
+        "collected_hash_matches": true,
+        "errors_0": true,
+        "every_collected_item_reported_once": true,
+        "failed_0": true,
+        "gpgpu_available": true,
+        "gpu_only_all_executed_and_passed": true,
+        "passed_count": true,
+        "run_exit_0": true,
+        "skip_reasons_missing_scipy": true,
+        "skipped_count": true,
+        "skipped_exactly_allowed_set": true,
+        "xfailed_0": true,
+        "xpassed_0": true
+      }
+    }
+  },
+  "integrity_passed": true,
+  "reanalysis": "run_experiment13_external_baseline.analyze(modal_session.log) reproduces integrity_check.json and matched_capacity_latency_summary.json exactly",
+  "jit_warnings": "24 Triton JIT-during-inference warnings, all inside warmup reps; none inside measured samples",
+  "claim_boundary": [
+    "TurboQuant comparison is a METHOD-NATIVE SYSTEM comparison (turboquant_k3v4_nc: 28 TURBOQUANT layers + BF16/FlashAttention boundary layers 0,1,30,31), not a quantizer-kernel comparison",
+    "TurboQuant correctness evidence is the frozen upstream test_turboquant.py gate (121 passed + 2 frozen SciPy skips); the upstream suite has no end-to-end k3v4_nc store/decode round-trip item",
+    "single-request latency and KV capacity only; no throughput, quality or universality claims",
+    "no confidence intervals or significance tests; the 60 timings per condition are not independent replicates",
+    "Exp3/Exp4 are historical context only"
+  ],
+  "files_sha256": {
+    "modal_session.log": "8421344d950ef30295d81881bfc82bb2883711a4b0e80cdda2fe635955087b07",
+    "manifest.json": "0259f8b3f33b909bd7b5a33688ea2fde6cb69cc19d26ca76e53e52d0298c07c4",
+    "integrity_check.json": "ce92c0409c16d4324094fad42020cda20a54d01c9db99f2800b5a9fb91d8a55f",
+    "matched_capacity_latency_summary.json": "90fd0e985a7613cc77aeef3be2c36ef3b749b1c5b84aa09bb0c9fc9b49b3ec58"
+  },
+  "files_sha256_lf_normalized": {
+    "modal_session.log": "1eb3556d71de871abe5b6d7ec239bf780c878e91c9ace3c9e644878218727cf8",
+    "manifest.json": "1a9f365d95100415ef8b1a852e205e934776b13b4ba1706f9b75d22abccd578b",
+    "integrity_check.json": "d2d5e8569c56de02b0ca00d457a66e37dff9d323ef36210802da1d3dc1291adb",
+    "matched_capacity_latency_summary.json": "6d0032d84bb6e43476d4b39dc11b65e862d68b38201f536a701a25867bfc9eb5"
+  }
+}

@@ -1,0 +1,491 @@
+{
+  "experiment": 13,
+  "status": "passed",
+  "started_utc": "2026-09-30T04:10:52.877149+00:00",
+  "provenance": {
+    "git_head": "a20025b4cad0c487b044f75b34435741ecb0cca4",
+    "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+    "backport_commit": "611a4ffc96c70c81529978dc01a290e87ccf76e9",
+    "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+    "equivalence": {
+      "image_expression_identical_to_exp4": true,
+      "base_engine_kwargs_identical": true,
+      "context_output_tokens_identical": true,
+      "timed_region_identical": true,
+      "allowed_dtypes": true,
+      "backend_pin_removed_only_for_turboquant": true
+    },
+    "protocol_sha256": "932299742df81e76607f953c7ab7b9efd3a74bca2915e1962d5d1eb482343915",
+    "runner_sha256": "abd6a8a48b26679a1e19e021cbfe8e319fa106f8ba81829c0193327b33b5d7a4",
+    "worker_sha256": "cd031b2007a03748889ac809eb154c955c2e0923cd41cfef4d9e52c3f9eb3a84",
+    "modal_sha256": "4cc70febc338b7a4342c909fdfd9febb79ebb144f2f4b0e0a8255e0434351199",
+    "protocol": {
+      "experiment": 13,
+      "type": "matched METHOD-NATIVE SYSTEM comparison: observed physical KV capacity + single-request decode latency (NOT a quality experiment, NOT a throughput benchmark, NOT a quantizer-kernel comparison)",
+      "plan": "docs/MLSYS_EXPERIMENT_PLAN.md Experiment 13 (external baseline: BF16 / FP8 / TurboQuant / RABIT-KV)",
+      "plan_deviation_approved": "BF16 / FP8 / RABIT are re-measured in the SAME session (not reused from Exp3 / Exp4); Exp3 / Exp4 are historical context only",
+      "conditions": {
+        "A": {
+          "kv_cache_dtype": "bfloat16",
+          "role": "reference (uncompressed)",
+          "attention_backend": "TRITON_ATTN"
+        },
+        "B": {
+          "kv_cache_dtype": "fp8_e4m3",
+          "role": "vLLM native FP8 E4M3 per-tensor KV",
+          "attention_backend": "TRITON_ATTN"
+        },
+        "C": {
+          "kv_cache_dtype": "rabit_kv2",
+          "role": "RABIT-KV final physical policy K3 / V2 / G32 / R4 / META8g64 (frozen source; rabit_kv2.py sha256 LF 7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae)",
+          "attention_backend": "TRITON_ATTN"
+        },
+        "D": {
+          "kv_cache_dtype": "turboquant_k3v4_nc",
+          "role": "external baseline: vLLM TurboQuant preset turboquant_k3v4_nc (3-bit Lloyd-Max K + fp16 norm, 4-bit uniform V + fp16 scale/zero, packed 118 B slot per head per token; layers 0, 1, 30, 31 BF16)",
+          "attention_backend": "method-required: TURBOQUANT (28 layers) + FlashAttention v2 (4 BF16 boundary layers)",
+          "boundary_layers": [
+            "0",
+            "1",
+            "30",
+            "31"
+          ]
+        }
+      },
+      "snapshot": {
+        "vllm_kvquant": "the committed tree at the execution commit (identical for all four conditions)",
+        "upstream_base": "f329ce405b12623fb8b1cf1830f12e5a712523be",
+        "backport": {
+          "local_commit": "611a4ffc96c70c81529978dc01a290e87ccf76e9",
+          "upstream_commit": "fa4321de3d894c50c5ca0766dffa352d3fb07423",
+          "upstream_pr": 47609,
+          "upstream_first_release": "v0.25.0",
+          "file": "vllm-kvquant/vllm/v1/worker/gpu/attn_utils.py",
+          "blob": "5fcc9053bf4c65b5f0f110f62edae66f4c363c4c"
+        },
+        "no_other_source_change": true
+      },
+      "engine": {
+        "worker_base_engine_kwargs": {
+          "dtype": "bfloat16",
+          "block_size": 32,
+          "max_model_len": 32768,
+          "max_num_batched_tokens": 16384,
+          "max_num_seqs": 32,
+          "enable_prefix_caching": false,
+          "enable_chunked_prefill": true,
+          "gpu_memory_utilization": 0.82,
+          "enforce_eager": true,
+          "trust_remote_code": true,
+          "disable_log_stats": false,
+          "attention_config": {
+            "backend": "TRITON_ATTN"
+          }
+        },
+        "turboquant_only_difference": "attention_config pin removed (method-required backend selection)",
+        "model_runner": "default V2 (VLLM_USE_V2_MODEL_RUNNER unset); 'Using V2 Model Runner' required in every leg",
+        "process_topology": "vLLM default multiprocess engine core for all four (accepted Exp4 topology)"
+      },
+      "workload": {
+        "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+        "prompt": "[BOS] + ' the' x 2047 token ids",
+        "context_tokens": 2048,
+        "output_tokens": 32,
+        "decoding": "greedy",
+        "ignore_eos": true,
+        "requests": "single request per generate call"
+      },
+      "session": {
+        "gpu": "one NVIDIA H100 80GB (Modal gpu='H100'; the GPU name is recorded and must be an H100 80GB HBM3)",
+        "legs": [
+          {
+            "index": 1,
+            "label": "A1",
+            "kv_cache_dtype": "bfloat16"
+          },
+          {
+            "index": 2,
+            "label": "B1",
+            "kv_cache_dtype": "fp8_e4m3"
+          },
+          {
+            "index": 3,
+            "label": "C1",
+            "kv_cache_dtype": "rabit_kv2"
+          },
+          {
+            "index": 4,
+            "label": "D1",
+            "kv_cache_dtype": "turboquant_k3v4_nc"
+          },
+          {
+            "index": 5,
+            "label": "D2",
+            "kv_cache_dtype": "turboquant_k3v4_nc"
+          },
+          {
+            "index": 6,
+            "label": "C2",
+            "kv_cache_dtype": "rabit_kv2"
+          },
+          {
+            "index": 7,
+            "label": "B2",
+            "kv_cache_dtype": "fp8_e4m3"
+          },
+          {
+            "index": 8,
+            "label": "A2",
+            "kv_cache_dtype": "bfloat16"
+          }
+        ],
+        "order": "A B C D D C B A",
+        "warmups_per_leg": 5,
+        "reps_per_leg": 30,
+        "samples_per_condition": 60,
+        "fresh_engine_process_per_leg": true,
+        "gates_before_legs": [
+          "RABIT physical correctness gate (exp3_correctness_gate.py, unchanged)",
+          "TurboQuant correctness gate (exp13_tq_gate.py): frozen 123-item collection (full node-ID hash) and execution accounting -- see tq_gate"
+        ],
+        "failure_rule": "any gate / leg failure, watchdog timeout or unclean GPU aborts the session; no retry; no substitution"
+      },
+      "metrics": {
+        "capacity": {
+          "primary": "OBSERVED PHYSICAL vLLM allocator KV capacity (num_gpu_blocks x block_size) from the live engine",
+          "ratios": [
+            "rabit / turboquant",
+            "rabit / bf16",
+            "rabit / fp8",
+            "turboquant / bf16",
+            "turboquant / fp8",
+            "fp8 / bf16"
+          ],
+          "secondary_labelled_theoretical": {
+            "bfloat16": {
+              "bytes": 131072,
+              "formula": "32 layers x (K,V) x 8 heads x 128 x 2 B (BF16)"
+            },
+            "fp8_e4m3": {
+              "bytes": 65536,
+              "formula": "32 layers x (K,V) x 8 heads x 128 x 1 B (FP8 e4m3, per-tensor scales)"
+            },
+            "rabit_kv2": {
+              "bytes": 24832,
+              "formula": "32 layers x 776 B (RABIT physical page 24,832 B per 32-token block per layer)"
+            },
+            "turboquant_k3v4_nc": {
+              "bytes": 42816,
+              "formula": "28 TurboQuant layers x 8 heads x 118 B slot (48 B 3-bit K codes + 2 B fp16 norm + 64 B 4-bit V codes + 4 B fp16 scale/zero) + 4 BF16 boundary layers x 4,096 B"
+            }
+          },
+          "implied_bytes_per_token": "reported KV-cache GiB x 2^30 / observed capacity (derived, not primary)"
+        },
+        "latency": {
+          "per_sample": [
+            "tpot_ms",
+            "ttft_ms",
+            "wall_ms",
+            "output_tokens"
+          ],
+          "primary_per_leg": [
+            "median TPOT",
+            "p90 TPOT (nearest-rank)",
+            "median TTFT",
+            "median wall"
+          ],
+          "primary_cross_leg": "per condition, the median of its two leg-level values for each per-leg statistic (descriptive; two engine instances per condition -- not inferential)",
+          "secondary": "pooled 60-sample median and p90 TPOT per condition, labelled pooled within-session descriptive (continuity with Exp3 / Exp4); the 60 timings are NOT treated as 60 independent replicates",
+          "leg_to_leg_drift": [
+            "TPOT absolute and percent difference",
+            "p90 TPOT difference",
+            "TTFT difference",
+            "wall-time difference"
+          ],
+          "comparisons": "RABIT vs BF16, FP8 and TurboQuant on the cross-leg summaries: TPOT ms/token and %, p90 TPOT, TTFT and wall-time differences",
+          "no_inference": "no significance tests and no confidence intervals"
+        },
+        "aggregation_frozen_before_execution": "reporting amendment of the approved prep (5e96650): aggregation and drift reporting only; no condition, order, setting, snapshot or implementation change"
+      },
+      "integrity_gates": [
+        "both correctness gates pass",
+        "all 8 legs exit 0 with no watchdog timeout",
+        "GPU clean before every leg",
+        "every leg: 'Using V2 Model Runner', effective block_size 32, 5 warmups, 30 samples, prompt 2048 and output 32 tokens in every sample",
+        "non-allowlisted engine / workload fields identical across all 8 legs",
+        "the two legs of each condition report identical capacity and identical config",
+        "TurboQuant legs: engine cache dtype turboquant_k3v4_nc, skip layers exactly [0, 1, 30, 31]",
+        "RABIT legs: frozen RABIT markers present and rabit_kv2.py sha matches",
+        "every leg: engine backend-selection log evidence equals the expected set (TRITON_ATTN for A / B / C; TURBOQUANT + FLASH_ATTN + FlashAttention version 2 for D)",
+        "every leg: physical-layout CONSISTENCY -- reported KV GiB x 2^30 / observed capacity within 1 % of the packed layout's bytes per token (a BF16 fallback would read ~131,072 B); capacity itself remains the observed allocator value",
+        "per-layer 'no retained BF16 copy' for TurboQuant: established by the tensor-level introspection of the non-evidence V2 probe on the identical snapshot (e686502); the multiprocess measurement legs cannot introspect tensors"
+      ],
+      "dtype_induced_allowlist": [
+        "requested.kv_cache_dtype",
+        "kv_dtype.requested_kv_cache_dtype",
+        "kv_dtype.engine_cache_dtype",
+        "kv_dtype.resolved_kv_torch_dtype",
+        "kv_dtype.kv_quant_mode",
+        "kv_dtype.fp8_storage_view_dtype",
+        "requested.attention_config",
+        "effective.attention_backend",
+        "effective.flash_attn_version",
+        "effective.kv_cache_dtype_skip_layers"
+      ],
+      "fairness": {
+        "MATCHED": [
+          "GPU model / container / session",
+          "model weights and tokenizer",
+          "patched vLLM snapshot",
+          "V2 model runner",
+          "process topology",
+          "prompt 2048 / output 32 / greedy / ignore_eos",
+          "max_model_len 32768",
+          "max_num_seqs 32",
+          "max_num_batched_tokens 16384",
+          "gpu_memory_utilization 0.82",
+          "block_size 32",
+          "enforce_eager",
+          "chunked prefill on",
+          "prefix caching off",
+          "warmup policy",
+          "measurement code (timed region AST-identical to Exp4)",
+          "condition scheduling (mirrored A B C D D C B A)"
+        ],
+        "METHOD_INHERENT": [
+          "KV representation, precision, metadata / per-vector parameters, residual window, and TurboQuant's four BF16 boundary layers"
+        ],
+        "UNAVOIDABLY_DIFFERENT": [
+          "attention backend: TRITON_ATTN (A, B, C) vs TURBOQUANT + FlashAttention v2 on the BF16 boundary layers (D); direction of the latency bias not determined"
+        ]
+      },
+      "claim_boundary": "A matched, method-native system comparison in ONE H100 session (default V2 runner, eager, single request, 2048-token prompt, 32 output tokens). TurboQuant uses its method-required attention backend (TURBOQUANT + FlashAttention v2 on its four BF16 boundary layers) while BF16 / FP8 / RABIT use TRITON_ATTN; latency differences are therefore system-level, not quantizer-kernel-level. No throughput claim (single request), no quality claim, no generalization beyond this configuration. Exp3 / Exp4 absolute TPOT are not comparable as the same experiment (different snapshot / session).",
+      "disclosure": "TurboQuant was evaluated using our vendored vLLM snapshot (upstream base f329ce4) with the official upstream TurboQuant V2 cache-dtype integration fix from fa4321de3d894c50c5ca0766dffa352d3fb07423 (PR #47609; first released in vLLM v0.25.0) backported. The change only restores the intended cache-dtype dispatch for TurboQuant specs in the model runner's KV-cache reshape; TurboQuant's quantizer, packed cache format, boundary-layer policy, and kernels were unchanged. All four methods ran on the same patched snapshot.",
+      "outputs": {
+        "session_log": "results/mlsys2027/external_baseline/exp13/modal_session.log",
+        "manifest": "results/mlsys2027/external_baseline/exp13/manifest.json",
+        "integrity": "results/mlsys2027/external_baseline/exp13/integrity_check.json",
+        "summary": "results/mlsys2027/external_baseline/exp13/matched_capacity_latency_summary.json"
+      },
+      "not_reported": [
+        "throughput",
+        "quality",
+        "multi-request / batched serving",
+        "other GPUs or runners"
+      ],
+      "tq_gate": {
+        "script": "benchmarks/mlsys2027/exp13_tq_gate.py",
+        "collection_probe_commit": "0b4d01b3438e2ed98460bf0746b4c13b142a56c3",
+        "target": "tests/quantization/test_turboquant.py",
+        "confcutdir": "--confcutdir=/root/vllm-kvquant/tests/quantization",
+        "expected_collected_items": 123,
+        "test_definitions": 45,
+        "expected_node_ids_sha256": "de2c00c3ded35dbdc3686e2480b81b6ab32f2cc2410aa969890de8663b41c86b",
+        "expected_node_ids": [
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_cached",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_different_dims_not_identical",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_shape[2-4]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_shape[3-8]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_shape[4-16]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_sorted[2]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_sorted[3]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_sorted[4]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_symmetric_around_zero[2]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_symmetric_around_zero[3]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_symmetric_around_zero[4]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_within_4sigma[2]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_within_4sigma[3]",
+          "tests/quantization/test_turboquant.py::TestCentroids::test_centroids_within_4sigma[4]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_orthonormal[128]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_orthonormal[256]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_orthonormal[64]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_symmetric[128]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_symmetric[256]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_symmetric[64]",
+          "tests/quantization/test_turboquant.py::TestHybridAttentionIndices::test_attn_type_list_minimax",
+          "tests/quantization/test_turboquant.py::TestHybridAttentionIndices::test_layer_types_full_attention",
+          "tests/quantization/test_turboquant.py::TestHybridAttentionIndices::test_layers_block_type_jamba",
+          "tests/quantization/test_turboquant.py::TestHybridAttentionIndices::test_no_hybrid_hints_returns_empty",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_are_midpoints[2]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_are_midpoints[3]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_are_midpoints[4]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_between_centroids[2]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_between_centroids[3]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_between_centroids[4]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_sorted[2]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_sorted[3]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_boundaries_sorted[4]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_match_scipy_reference[3]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_match_scipy_reference[4]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_sorted[2]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_sorted[3]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_sorted[4]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_solve_deterministic",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_solve_dtype_float32",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_solve_shapes[2-4]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_solve_shapes[3-8]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_solve_shapes[4-16]",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_det_is_pm1",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_deterministic",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_different_seeds",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[128]",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[256]",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[64]",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[96]",
+          "tests/quantization/test_turboquant.py::TestStoreDecodeRoundTrip::test_single_token_roundtrip[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestStoreDecodeRoundTrip::test_single_token_roundtrip[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[128-turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[128-turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[128-turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[128-turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[256-turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[256-turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[256-turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[256-turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[64-turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[64-turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[64-turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[64-turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[96-turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[96-turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[96-turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_all_presets_all_head_dims[96-turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_bits_and_centroids[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_bits_and_centroids[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_bits_and_centroids[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_bits_and_centroids[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_boundary_skip_layers_basic",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_boundary_skip_layers_cap_at_half",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_boundary_skip_layers_small_model",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_boundary_skip_layers_zero",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_centroid_bits_always_positive[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_centroid_bits_always_positive[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_centroid_bits_always_positive[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_centroid_bits_always_positive[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_invalid_preset_raises",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_mode[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_mode[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_mode[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_mode[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_value_packed_sizes_positive[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_value_packed_sizes_positive[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_value_packed_sizes_positive[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_key_value_packed_sizes_positive[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_mse_key_or_fp8_exclusive[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_mse_key_or_fp8_exclusive[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_mse_key_or_fp8_exclusive[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_mse_key_or_fp8_exclusive[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_n_centroids_is_2_to_mse_bits[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_n_centroids_is_2_to_mse_bits[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_n_centroids_is_2_to_mse_bits[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_n_centroids_is_2_to_mse_bits[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_norm_correction[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_norm_correction[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_norm_correction[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_norm_correction[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_packed_sizes[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_packed_sizes[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_packed_sizes[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_packed_sizes[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_padded_slot_is_even[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_padded_slot_is_even[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_padded_slot_is_even[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_padded_slot_is_even[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_preset_parses[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_preset_parses[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_preset_parses[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_preset_parses[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_slot_equals_key_plus_value[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_slot_equals_key_plus_value[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_slot_equals_key_plus_value[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_slot_equals_key_plus_value[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_value_mode[turboquant_3bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_value_mode[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_value_mode[turboquant_k3v4_nc]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantConfig::test_value_mode[turboquant_k8v4]",
+          "tests/quantization/test_turboquant.py::TestTurboQuantWorkspaceReservation::test_metadata_builder_reserves_decode_and_continuation_prefill_workspace",
+          "tests/quantization/test_turboquant.py::TestTurboQuantWorkspaceReservation::test_metadata_builder_skips_continuation_prefill_when_disabled"
+        ],
+        "s_scipy": 2,
+        "scipy_node_ids": [
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_match_scipy_reference[3]",
+          "tests/quantization/test_turboquant.py::TestLloydMax::test_centroids_match_scipy_reference[4]"
+        ],
+        "gpu_only_node_ids": [
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_orthonormal[128]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_orthonormal[256]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_orthonormal[64]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_symmetric[128]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_symmetric[256]",
+          "tests/quantization/test_turboquant.py::TestHadamardRotation::test_hadamard_symmetric[64]",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_det_is_pm1",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_deterministic",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_different_seeds",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[128]",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[256]",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[64]",
+          "tests/quantization/test_turboquant.py::TestRotationMatrix::test_rotation_matrix_shape_and_orthogonal[96]",
+          "tests/quantization/test_turboquant.py::TestStoreDecodeRoundTrip::test_single_token_roundtrip[turboquant_4bit_nc]",
+          "tests/quantization/test_turboquant.py::TestStoreDecodeRoundTrip::test_single_token_roundtrip[turboquant_k8v4]"
+        ],
+        "collection_rule": "count == 123 AND sha256(sorted node IDs) == expected_node_ids_sha256, else STOP before executing tests",
+        "execution_rule": {
+          "scipy_absent (expected)": "passed 121, skipped 2 == the frozen SciPy node IDs with a missing-scipy reason, failed 0, errors 0, xfailed 0, xpassed 0",
+          "scipy_present": "passed 123, skipped 0, failed 0, errors 0, xfailed 0, xpassed 0",
+          "gpu_only": "GPGPU_AVAILABLE true; all 15 GPU-only items execute and pass; any skip invalid",
+          "enforced": "inside the container before A1; the Modal app aborts on a non-zero exit"
+        },
+        "correctness_claim_boundary": "The upstream TurboQuant pytest suite does NOT include an end-to-end store / decode round-trip item for turboquant_k3v4_nc (its round-trip items cover turboquant_4bit_nc and turboquant_k8v4). Exp13 correctness evidence for k3v4_nc = (1) this suite: 123 accounted items with only the two frozen optional SciPy skips allowed, AND (2) the non-evidence V2 feasibility probe on the identical patched snapshot (e686502): physical packed KV cache initialized, TURBOQUANT / FA2 routing, BF16 boundary layers 0 / 1 / 30 / 31, and a completed short sanity generation"
+      },
+      "attempt_history": {
+        "attempt_1": {
+          "status": "invalid_gate_harness_failure",
+          "excluded_from_accepted_results": true,
+          "archive": "results/mlsys2027/external_baseline/exp13/failed_attempt_1",
+          "archive_commit": "acac1a22234e5c3ffc8c04913b5573c8d828a30e",
+          "facts": [
+            "RABIT gate passed",
+            "TurboQuant gate failed before collection (pytest exit 4: repository-level tests/conftest.py required the optional tblib)",
+            "zero TurboQuant tests collected",
+            "zero measured benchmark legs executed",
+            "zero latency samples produced",
+            "zero measured-leg allocator values produced"
+          ]
+        },
+        "no_cross_attempt_pooling": true
+      },
+      "harness_amendment": {
+        "kind": "post-failure HARNESS amendment (not a scientific-method change)",
+        "written_after": "Exp13 Attempt 1 failed at the TurboQuant gate; no benchmark result existed, so no treatment result informed this amendment",
+        "corrects": [
+          "pytest conftest discovery: --confcutdir=/root/vllm-kvquant/tests/quantization (the accepted RABIT gate's convention)",
+          "the incorrect definition-count assumption (45 test definitions != 123 pytest items)",
+          "explicit accounting of the optional SciPy-reference skips (scipy absent in the unchanged image)",
+          "pre-leg enforcement of collection and execution results before A1"
+        ],
+        "unchanged": [
+          "conditions",
+          "order",
+          "workload",
+          "snapshot",
+          "engine settings",
+          "latency aggregation",
+          "capacity accounting",
+          "measured-leg acceptance criteria",
+          "Modal base image",
+          "TurboQuant tests and source",
+          "vLLM",
+          "RABIT"
+        ]
+      }
+    },
+    "uncommitted_files": null,
+    "vllm_kvquant_snapshot_sha256": "fe7169e0ba545f025948e4d5dc7f58c8b36b2214bfc86ab1924e813c48047c5a"
+  },
+  "modal_returncode": 0,
+  "completed_utc": "2026-09-30T04:29:54.660524+00:00",
+  "modal_app_ids": [
+    "ap-uX3NPDOYHu0V328kiK54wD"
+  ],
+  "session_log_sha256": "8421344d950ef30295d81881bfc82bb2883711a4b0e80cdda2fe635955087b07"
+}
