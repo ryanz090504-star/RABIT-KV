@@ -213,13 +213,20 @@ def _run_guarded(cmd: list[str], prefix: str, timeout_s: int, label: str) -> dic
 
 @app.function(
     image=image,
-    gpu="H100",
+    gpu="H100!:1",
     timeout=14400,
     volumes={"/model_cache": model_cache},
 )
 def mirrored(legs: str, warmups: int, reps_per_leg: int, probe: bool = False) -> None:
     """probe=True: NON-EVIDENCE feasibility probe -- identical gates / provenance / GPU-clean checks, but each
     "leg" runs exp14_probe_worker.py (engine init + sanity generations, no timing) instead of the measured worker."""
+    _gpus = _gpu_query()
+    _hw_ok = (len(_gpus) == 1 and "H100" in _gpus[0].get("name", "")
+              and 79 * 1024 <= int(float(_gpus[0].get("memory.total", 0))) <= 82 * 1024)
+    _emit("EXP14_HARDWARE_CHECK", {"gpus": _gpus, "passed": _hw_ok, "required": "exactly 1 x NVIDIA H100 80GB"})
+    if not _hw_ok:
+        _emit("EXP14_HARDWARE_MISMATCH", {"gpus": _gpus})
+        raise RuntimeError(f"hardware mismatch: {_gpus}; no gate, engine or measurement run")
     import importlib.metadata as md
 
     from modelscope import snapshot_download

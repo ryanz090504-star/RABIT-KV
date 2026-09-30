@@ -1,0 +1,16 @@
+{
+  "experiment": 14,
+  "part": "serving",
+  "attempt": 1,
+  "addendum_to": "attempt_record.json (unchanged; archived in commit 2ccc699a71d8d6538795b3819d16fce21ccf82e9)",
+  "status": "invalid_hardware_assignment",
+  "excluded": true,
+  "evidence_class": "infrastructure evidence only",
+  "explicit_facts": {
+    "requested_selector": "gpu=\"H100\" (permissive selector)",
+    "assigned_gpu": "NVIDIA H200, memory.total 143771 MiB",
+    "sole_failed_integrity_check": "gpu_is_h100_80gb",
+    "capacity_and_latency_measurements": "EXCLUDED -- never pooled, reported, or used for interpretation",
+    "modal_app": {"id": "ap-dmml6P9O7HnLHcn1SqbI8v", "state": "stopped", "tasks": 0}
+  }
+}

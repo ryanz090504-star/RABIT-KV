@@ -39,6 +39,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+import exp14_hardware_binding as hb  # noqa: E402  (scheduler-only hardware binding amendment checks)
 import exp14_model_snapshot as ms  # noqa: E402  (frozen Model-B identity)
 import qa_control_gate as qg  # noqa: E402  (read-only: identity-line regexes)
 import run_exp13_turboquant_probe as p1  # noqa: E402  (read-only: image-expression extractor)
@@ -401,15 +402,41 @@ def load_probe_record() -> dict | None:
     return json.loads(PROBE_RECORD.read_text(encoding="utf-8")) if PROBE_RECORD.exists() else None
 
 
+HW_BINDING_AMENDMENT = ROOT / "results" / "mlsys2027" / "second_model" / "serving_hardware_binding_amendment.json"
+
+
+def hardware_binding_amendment_ok(probe_hashes: dict, current_hashes: dict) -> bool:
+    """The ONLY accepted harness difference from the probe binding: the documented scheduler-only hardware binding
+    amendment (deployment wrapper: selector + fail-closed guard; runner: this prerequisite binding), verified by the
+    recorded old / new hash pairs AND by AST against the accepted probe commit."""
+    diff = {n for n in set(probe_hashes) | set(current_hashes) if probe_hashes.get(n) != current_hashes.get(n)}
+    amend = hb.load_amendment(HW_BINDING_AMENDMENT)
+    if not diff or not amend or amend.get("kind") != "scheduler_only_hardware_binding_amendment":
+        return False
+    files = amend.get("bound_file_changes") or {}
+    if not diff <= set(files):
+        return False
+    for name in diff:
+        if files[name].get("old_sha256") != probe_hashes.get(name) or files[name].get("new_sha256") != current_hashes.get(name):
+            return False
+    old_dep = e1.run_git("show", f"{hb.ACCEPTED_PROBE_COMMIT}:{hb.DEPLOYMENT_PATH}")
+    old_run = e1.run_git("show", f"{hb.ACCEPTED_PROBE_COMMIT}:{hb.RUNNER_PATH}")
+    return (hb.deployment_diff(old_dep, MODAL_APP.read_text(encoding="utf-8"))["passed"] and
+            hb.runner_diff(old_run, RUNNER_SCRIPT.read_text(encoding="utf-8"))["passed"])
+
+
 def check_probe_prerequisite(record: dict | None, prov: dict) -> None:
     """--part serving / quality may run only after a PASSED non-evidence probe whose harness hashes, protocol hash,
-    vllm-kvquant tree and frozen model revision / manifest hash equal the current ones. Raises RuntimeError."""
+    vllm-kvquant tree and frozen model revision / manifest hash equal the current ones -- the harness hashes may differ
+    ONLY by the documented scheduler-only hardware binding amendment. Raises RuntimeError."""
     if not record:
         raise RuntimeError("no Exp14 feasibility probe record: the probe must pass before serving / quality")
     if record.get("status") != "passed" or record.get("non_evidence") is not True:
         raise RuntimeError(f"the Exp14 feasibility probe has not passed (status={record.get('status')!r})")
     for k in PROBE_BINDING_KEYS:
         if record.get(k) != prov.get(k):
+            if k == "harness_sha256" and hardware_binding_amendment_ok(record.get(k) or {}, prov.get(k) or {}):
+                continue
             raise RuntimeError(f"Exp14 probe record does not match the current state: {k}")
 
 
