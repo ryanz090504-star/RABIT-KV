@@ -333,14 +333,21 @@ def test_completeness_gate_accepts_complete_and_rejects_gaps():
 
 
 def test_preflight_dry_run_validation():
-    prov = nd.preflight(dry_run=True)  # read-only; no Modal call
-    c = prov["checks"]
-    for k in ("wrapper_self_contained", "image_expression_equal_to_frozen_exp14", "isolated_remote_import_simulation",
-              "diagnostic_unchanged_since_e6361eb", "shape_gate_unchanged", "vllm_kvquant_tree_unchanged",
-              "rabit_source_unchanged", "qwen_revision_unchanged", "exp13_evidence_unchanged",
-              "exp1_12_evidence_unchanged", "attempt1_archive_unchanged", "attempt2_archive_unchanged",
-              "attempt3_archive_unchanged"):
-        assert c[k], k
+    """The diagnostic is COMPLETE (valid Attempt 4, commit 4947050) and runs once: its preflight must now refuse --
+    Attempt 4 exists (run-once guard) and the shape gate is no longer the pre-amendment version the diagnostic was
+    pinned to (the post-failure correctness-criterion amendment changed only the gate's attention criterion)."""
+    try:
+        nd.preflight(dry_run=True)  # read-only; no Modal call
+    except RuntimeError as e:
+        msg = str(e)
+        assert "attempt4_not_already_run" in msg and "shape_gate_unchanged" in msg, msg[:400]
+        for k in ("wrapper_self_contained", "image_expression_equal_to_frozen_exp14", "isolated_remote_import_simulation",
+                  "diagnostic_unchanged_since_e6361eb", "vllm_kvquant_tree_unchanged", "rabit_source_unchanged",
+                  "qwen_revision_unchanged", "exp13_evidence_unchanged", "attempt1_archive_unchanged",
+                  "attempt2_archive_unchanged", "attempt3_archive_unchanged"):
+            assert f"'{k}'" not in msg.split("\n")[0], k  # every other pre-run check still holds
+    else:
+        raise AssertionError("the completed diagnostic's preflight accepted a re-run")
 
 
 if __name__ == "__main__":
