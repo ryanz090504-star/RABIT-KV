@@ -1,0 +1,31 @@
+{
+  "kind": "static semantic-parity audit of the logical quality evaluator vs canonical RABIT (offline; no GPU, no model execution)",
+  "classification": "A -- SEMANTIC MISMATCH FOUND",
+  "basis_commits": {"exp14_quality": "4049642e197e6da0e12cd2e3a4da3fee4d73fff6",
+                    "exp14_serving": "7dfaee4c0863eb31642ad484cb5a6997d64f10d2"},
+  "logical_evaluator": "benchmarks/quality/{continuation_ppl,niah,passage_retrieval,hotpotqa,qasper}.py (quantizer functions semantically identical across the five; continuation_ppl differs only by variable renames, alpha-normalized AST equal); also benchmarks/quality/multilingual_ppl.py and the derived Exp7-11 scripts contain the same HF-layout quantizer",
+  "canonical_reference": "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py quantize_rabit2_kv_ref / dequantize_rabit2_kv_ref ([T, H, D] layout); Rabit2OnlineStateRef equals it (tests/quantization/test_rabit_kv2_physical.py); physical pages byte-identical to the reference state",
+  "findings": {
+    "1_v_metadata_grouping_mismatch": {
+      "old_logical_flattening_order": "(head, token, V-group) -- HF cache layout [B, H_kv, T, D], V primary min / scale shaped [B, H, T, 4, 1] flattened before META8g64",
+      "canonical_flattening_order": "(token, head, V-group) -- oracle [T, H, 4, 1] and physical page order v_idx = (t * NUM_KV_HEADS + kvh) * V_GROUPS + vg",
+      "observed_group_identity": {"qwen_h_kv_4": "0 / 511 META8g64 groups identical", "llama_h_kv_8": "0 / 1022 META8g64 groups identical"},
+      "affects": "BOTH models (layout-order difference, not a head-count-specific bug)",
+      "quality_effect": "UNKNOWN (not measured)"
+    },
+    "2_generation_cache_aging_mismatch": {
+      "old_logical": "prefix K / V quantized and dequantized ONCE after the BF16 prefill; K / V of every later token (last prompt token, generated / continuation tokens) remain BF16 for the rest of the sequence",
+      "canonical": "newest R4 = 4 tokens residual BF16; older tokens age through the canonical online state (open group -> closed 32-token pages) and open / closed transitions continue during decode"
+    },
+    "3_repeated_requantization": "NOT found: each prefix token is quantized once; later tokens are never quantized in the old harness",
+    "4_matching_semantics": "K3 sequence-axis affine G32 codes (incl. zero-padded incomplete group) and V2 per-token last-dimension G32 primary codes matched; K META8g64 groups identical (Qwen 504 / 504, Llama 1008 / 1008)",
+    "5_rope_cache_point": "matched: in transformers 4.48.2 both Qwen2 and Llama project to [B, H_kv, T, D], apply RoPE, then call past_key_value.update (post-RoPE K); same conceptual tensor as the physical vLLM KV write. Model difference: Qwen2 k_proj / v_proj bias=True; Llama attention_bias=False"
+  },
+  "provenance_conclusion": {
+    "affected_logical_quality_evidence": ["Exp1", "Exp2", "Exp7", "Exp8", "Exp9", "Exp10", "Exp11", "Exp12", "Exp14 quality (4049642)"],
+    "status_of_affected": "valid measurements of the OLD logical evaluator; NOT canonical physical-RABIT quality evidence",
+    "unaffected_physical_system_evidence": ["Exp3", "Exp4", "Exp5", "Exp6", "Exp13", "Exp14 numerical correctness work", "Exp14 probe", "Exp14 physical serving"],
+    "paper_claims_changed": false
+  },
+  "cpu_parity_tests_in_audit": "index-level grouping parity only (local torch unavailable: Windows VC++ runtime); numeric parity deferred to the canonical-quality-v2 repair"
+}
