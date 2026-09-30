@@ -1,0 +1,29 @@
+{
+  "label": "NON-EVIDENCE FEASIBILITY PROBE",
+  "probe_record": "probe_record.json",
+  "modal_app_id": "ap-o7VwxZBoIi5yLhfzvBqswX",
+  "harness_commit": "81347248f0b890d3f2314550026afdefbba5874a",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "startup": "FAILED during KV-cache tensor initialization (after allocator sizing)",
+  "requested_block_size": 32,
+  "effective_block_size": "not observable: the engine failed before the effective config could be read; the log contains no 'Setting attention block size' (block-size bump) line",
+  "failure": {
+    "exception": "ValueError: Unknown TurboQuant cache dtype: 'auto'. Valid presets: turboquant_k8v4, turboquant_4bit_nc, turboquant_k3v4_nc, turboquant_3bit_nc",
+    "raised_in": "vllm/model_executor/layers/quantization/turboquant/config.py:222 TurboQuantConfig.from_cache_dtype",
+    "called_from": "vllm/v1/attention/backends/turboquant_attn.py:161 TurboQuantAttentionBackend.get_kv_cache_shape <- vllm/v1/worker/gpu/attn_utils.py:312 _reshape_kv_cache <- vllm/v1/worker/gpu/model_runner.py:492 initialize_kv_cache (V2 model runner)",
+    "root_cause": "vllm/v1/worker/gpu/attn_utils.py chooses each layer's cache dtype as 'auto' when kv_cache_spec.kv_quant_mode == KVQuantMode.NONE (intended for --kv-cache-dtype-skip-layers). get_kv_quant_mode() has no TurboQuant mode, so every turboquant_* dtype maps to KVQuantMode.NONE and TQFullAttentionSpec is built with kv_quant_mode NONE. The V2 model runner therefore treats the TurboQuant layers THEMSELVES as unquantized skip layers and passes cache_dtype_str='auto' to TurboQuantAttentionBackend.get_kv_cache_shape, which raises",
+    "model_runner": "V2 Model Runner (log: 'Using V2 Model Runner'; vllm_config.use_v2_model_runner default, VLLM_USE_V2_MODEL_RUNNER unset)",
+    "confirms_heterogeneous_page_size_blocker": false,
+    "note_on_page_sizes": "the predicted page-size reconciliation blocker did NOT trigger: KV-cache sizing completed ('Available KV cache memory: 47.98 GiB', 'GPU KV cache size: 1,203,200 tokens'); 47.98 GiB / 1,203,200 tokens = 42,818 B/token, matching the derived packed footprint 28 x 944 + 4 x 4096 = 42,816 B/token (28 TurboQuant layers x 8 heads x 118 B slots + 4 BF16 boundary layers). These are allocator-PLANNING figures from the log, not a verified live allocation (the tensors were never created)"
+  },
+  "recorded_before_failure": {
+    "kv_cache_dtype": "turboquant_k3v4_nc",
+    "backends_selected": ["FLASH_ATTN (FlashAttention version 2; forced by the TurboQuant FA3-incompatibility override) for the BF16 boundary layers",
+                          "TURBOQUANT for the quantized layers"],
+    "warnings": ["TurboQuant is not yet compatible with FlashAttention >= 3. Overriding flash_attn_version to 2"],
+    "skip_layers": "not observable (effective config not read); by code, the boundary list for 32-layer Llama is ['0', '1', '30', '31']",
+    "physical_turboquant_cache_confirmed": "no -- the cache tensors were never created"
+  },
+  "matched_exp13_feasible_without_source_modification": "NOT under the probed configuration: turboquant_k3v4_nc cannot initialize its KV cache on the V2 model runner that this fork selects by default. Not attempted (per the authorization): the legacy model runner, other block sizes, other presets, or any source change",
+  "no_actions_taken": ["no retry", "no alternate block size", "no model-runner switch", "no vLLM / TurboQuant / RABIT modification", "no latency measured", "no BF16 / FP8 / RABIT legs"]
+}
