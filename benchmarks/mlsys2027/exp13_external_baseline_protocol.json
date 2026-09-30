@@ -167,17 +167,24 @@
         "wall_ms",
         "output_tokens"
       ],
-      "pooling": "the 60 measured samples of each condition (both legs) within this session only",
-      "summary": [
+      "primary_per_leg": [
         "median TPOT",
-        "p90 TPOT (nearest-rank on the sorted pooled samples)",
+        "p90 TPOT (nearest-rank)",
         "median TTFT",
-        "median wall",
-        "per-leg medians",
-        "order effect: leg-2 median minus leg-1 median per condition",
-        "pairwise median-TPOT delta %"
-      ]
-    }
+        "median wall"
+      ],
+      "primary_cross_leg": "per condition, the median of its two leg-level values for each per-leg statistic (descriptive; two engine instances per condition -- not inferential)",
+      "secondary": "pooled 60-sample median and p90 TPOT per condition, labelled pooled within-session descriptive (continuity with Exp3 / Exp4); the 60 timings are NOT treated as 60 independent replicates",
+      "leg_to_leg_drift": [
+        "TPOT absolute and percent difference",
+        "p90 TPOT difference",
+        "TTFT difference",
+        "wall-time difference"
+      ],
+      "comparisons": "RABIT vs BF16, FP8 and TurboQuant on the cross-leg summaries: TPOT ms/token and %, p90 TPOT, TTFT and wall-time differences",
+      "no_inference": "no significance tests and no confidence intervals"
+    },
+    "aggregation_frozen_before_execution": "reporting amendment of the approved prep (5e96650): aggregation and drift reporting only; no condition, order, setting, snapshot or implementation change"
   },
   "integrity_gates": [
     "both correctness gates pass",
@@ -187,7 +194,10 @@
     "non-allowlisted engine / workload fields identical across all 8 legs",
     "the two legs of each condition report identical capacity and identical config",
     "TurboQuant legs: engine cache dtype turboquant_k3v4_nc, skip layers exactly [0, 1, 30, 31]",
-    "RABIT legs: frozen RABIT markers present and rabit_kv2.py sha matches"
+    "RABIT legs: frozen RABIT markers present and rabit_kv2.py sha matches",
+    "every leg: engine backend-selection log evidence equals the expected set (TRITON_ATTN for A / B / C; TURBOQUANT + FLASH_ATTN + FlashAttention version 2 for D)",
+    "every leg: physical-layout CONSISTENCY -- reported KV GiB x 2^30 / observed capacity within 1 % of the packed layout's bytes per token (a BF16 fallback would read ~131,072 B); capacity itself remains the observed allocator value",
+    "per-layer 'no retained BF16 copy' for TurboQuant: established by the tensor-level introspection of the non-evidence V2 probe on the identical snapshot (e686502); the multiprocess measurement legs cannot introspect tensors"
   ],
   "dtype_induced_allowlist": [
     "requested.kv_cache_dtype",

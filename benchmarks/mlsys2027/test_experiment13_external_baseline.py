@@ -90,7 +90,16 @@ def test_workload_settings_match_and_order_trials_frozen():
     assert "tests/quantization/test_turboquant.py" in modal and "VLLM_USE_V2_MODEL_RUNNER" not in modal
 
 
-def _leg_lines(d, label, blocks, tpot, skip=None, backend="AttentionBackendEnum.TRITON_ATTN"):
+BACKEND_LOG = {  # verbatim formats observed in the non-evidence V2 probe log
+    "tq": ["INFO [cuda.py:476] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN'].",
+           "INFO [flash_attn.py:718] Using FlashAttention version 2",
+           "INFO [cuda.py:476] Using TURBOQUANT attention backend out of potential backends: ['TURBOQUANT']."],
+    "triton": ["INFO [cuda.py:416] Using AttentionBackendEnum.TRITON_ATTN backend."]}
+KV_GIB = {"bfloat16": "47.98", "fp8_e4m3": "47.95", "rabit_kv2": "47.98", "turboquant_k3v4_nc": "47.98"}
+
+
+def _leg_lines(d, label, blocks, tpot, skip=None, backend="AttentionBackendEnum.TRITON_ATTN", gib=None,
+               backend_log=None):
     eff = {"block_size": 32, "kv_cache_dtype_skip_layers": skip or [], "attention_backend": backend,
            "flash_attn_version": 2 if d == r13.D else None, "gpu_memory_utilization": 0.82}
     req = {"block_size": 32, "kv_cache_dtype": d, **({} if d == r13.D else {"attention_config": {"backend": "TRITON_ATTN"}})}
@@ -98,7 +107,8 @@ def _leg_lines(d, label, blocks, tpot, skip=None, backend="AttentionBackendEnum.
              f"EXP13_WORKLOAD={json.dumps({'context_tokens': 2048, 'output_tokens': 32})}",
              f"EXP13_KV_DTYPE={json.dumps({'engine_cache_dtype': d, 'requested_kv_cache_dtype': d})}",
              f"EXP13_CAPACITY={json.dumps({'num_gpu_blocks': blocks, 'block_size': 32, 'capacity_tokens': blocks * 32})}",
-             "INFO Using V2 Model Runner", "INFO Available KV cache memory: 47.98 GiB"]
+             "INFO Using V2 Model Runner", f"INFO Available KV cache memory: {gib or KV_GIB[d]} GiB",
+             *(backend_log if backend_log is not None else BACKEND_LOG["tq" if d == r13.D else "triton"])]
     if d == r13.C:
         lines.append('EXP13_RABIT_MARKERS={"a": true, "b": true, "c": true}')
     lines += [f"EXP13_WARMUP {json.dumps({'rep': i, 'prompt_tokens': 2048, 'output_tokens': 32, 'tpot_ms': tpot, 'ttft_ms': 50.0, 'wall_ms': 500.0})}" for i in range(5)]
@@ -126,10 +136,50 @@ def test_measurement_parser_is_condition_agnostic_and_integrity_works():
     res = r13.analyze(_session())
     assert res["integrity"]["passed"], {k: v for k, v in res["integrity"]["checks"].items() if not v}
     s = res["summary"]
-    assert s["capacity"]["turboquant"]["observed_capacity_tokens"] == 1203200
-    assert s["capacity"]["rabit"]["observed_capacity_tokens"] == 2074592
-    assert all(s["latency"][c]["n"] == 60 for c in ("bf16", "fp8", "rabit", "turboquant"))
-    assert abs(s["pairs"]["rabit_vs_turboquant"]["capacity_ratio"] - 2074592 / 1203200) < 1e-12
+    assert s["observed_capacity"]["turboquant"]["observed_capacity_tokens"] == 1203200
+    assert s["observed_capacity"]["rabit"]["observed_capacity_tokens"] == 2074592
+    assert all(s["latency_secondary_pooled_within_session_descriptive"][c]["n"] == 60
+               for c in ("bf16", "fp8", "rabit", "turboquant"))
+    assert abs(s["capacity_ratios"]["rabit_over_turboquant"] - 2074592 / 1203200) < 1e-12
+    assert set(s["capacity_ratios"]) == {"rabit_over_turboquant", "rabit_over_bf16", "rabit_over_fp8",
+                                         "turboquant_over_bf16", "turboquant_over_fp8", "fp8_over_bf16"}
+    assert set(s["rabit_comparisons"]) == {"rabit_vs_bf16", "rabit_vs_fp8", "rabit_vs_turboquant"}
+    assert "METHOD-NATIVE SYSTEM" in s["rabit_comparisons"]["rabit_vs_turboquant"]["framing"]
+
+
+def test_frozen_aggregation_per_leg_cross_leg_pooled_and_drift():
+    res = r13.analyze(_session())
+    s = res["summary"]
+    rab = s["latency_primary_per_leg"]["rabit"]
+    assert set(rab) == {"C1", "C2"} and all(rab[l]["n"] == 30 for l in rab)
+    assert set(rab["C1"]) == {"n", *r13.LEG_STATS}
+    cross = s["latency_primary_cross_leg"]["rabit"]
+    for m in r13.LEG_STATS:
+        assert cross[f"median_of_leg_{m}"] == (rab["C1"][m] + rab["C2"][m]) / 2  # median of two values
+    dr = s["leg_to_leg_drift"]["rabit"]
+    assert dr["legs"] == ["C1", "C2"] and dr["tpot_abs_diff_ms"] == rab["C2"]["median_tpot_ms"] - rab["C1"]["median_tpot_ms"]
+    assert {"tpot_pct_diff", "ttft_abs_diff_ms", "wall_abs_diff_ms"} <= set(dr)
+    comp = s["rabit_comparisons"]["rabit_vs_fp8"]
+    fp8 = s["latency_primary_cross_leg"]["fp8"]
+    assert comp["tpot_abs_diff_ms"] == cross["median_of_leg_median_tpot_ms"] - fp8["median_of_leg_median_tpot_ms"]
+    assert "no significance tests" in s["statistics_note"]
+    assert not any(k in json.dumps(s) for k in ("ci_low", "ci_high", "p_value", "confidence"))
+    p = r13.load_protocol()["metrics"]["latency"]
+    assert "not inferential" in p["primary_cross_leg"] and "NOT treated as 60 independent" in p["secondary"]
+
+
+def test_physical_mode_consistency_and_backend_evidence_are_enforced():
+    bf16_sized = _session().replace("[leg4:turboquant_k3v4_nc] INFO Available KV cache memory: 47.98 GiB",
+                                    "[leg4:turboquant_k3v4_nc] INFO Available KV cache memory: 146.88 GiB", 1)
+    res = r13.analyze(bf16_sized)  # a BF16-sized footprint at TurboQuant capacity is not the packed layout
+    assert not res["integrity"]["checks"]["D1_physical_layout_consistent"] and not res["integrity"]["passed"]
+    no_tq_backend = "\n".join(ln for ln in _session().splitlines()
+                              if not (ln.startswith("[leg5:turboquant_k3v4_nc]") and "TURBOQUANT attention backend" in ln))
+    assert not r13.analyze(no_tq_backend)["integrity"]["checks"]["D2_backend_evidence"]
+    triton_on_tq = _session().replace("[leg4:turboquant_k3v4_nc] INFO [cuda.py:476] Using TURBOQUANT attention backend",
+                                      "[leg4:turboquant_k3v4_nc] INFO [cuda.py:416] Using AttentionBackendEnum.TRITON_ATTN "
+                                      "backend. Using TURBOQUANT attention backend", 1)
+    assert not r13.analyze(triton_on_tq)["integrity"]["checks"]["D1_backend_evidence"]
     # the same parser code path handles every condition (no per-condition branch in parse_worker)
     src = ast.unparse(next(n for n in ast.walk(ast.parse(Path(r13.__file__).read_text(encoding="utf-8")))
                            if isinstance(n, ast.FunctionDef) and n.name == "parse_worker"))

@@ -205,10 +205,22 @@ def build_protocol() -> dict:
                                  "secondary_labelled_theoretical": THEORETICAL_BYTES_PER_TOKEN,
                                  "implied_bytes_per_token": "reported KV-cache GiB x 2^30 / observed capacity (derived, not primary)"},
                     "latency": {"per_sample": ["tpot_ms", "ttft_ms", "wall_ms", "output_tokens"],
-                                "pooling": "the 60 measured samples of each condition (both legs) within this session only",
-                                "summary": ["median TPOT", "p90 TPOT (nearest-rank on the sorted pooled samples)",
-                                            "median TTFT", "median wall", "per-leg medians", "order effect: leg-2 median "
-                                            "minus leg-1 median per condition", "pairwise median-TPOT delta %"]}},
+                                "primary_per_leg": ["median TPOT", "p90 TPOT (nearest-rank)", "median TTFT",
+                                                    "median wall"],
+                                "primary_cross_leg": "per condition, the median of its two leg-level values for each "
+                                                     "per-leg statistic (descriptive; two engine instances per "
+                                                     "condition -- not inferential)",
+                                "secondary": "pooled 60-sample median and p90 TPOT per condition, labelled pooled "
+                                             "within-session descriptive (continuity with Exp3 / Exp4); the 60 "
+                                             "timings are NOT treated as 60 independent replicates",
+                                "leg_to_leg_drift": ["TPOT absolute and percent difference", "p90 TPOT difference",
+                                                     "TTFT difference", "wall-time difference"],
+                                "comparisons": "RABIT vs BF16, FP8 and TurboQuant on the cross-leg summaries: TPOT "
+                                               "ms/token and %, p90 TPOT, TTFT and wall-time differences",
+                                "no_inference": "no significance tests and no confidence intervals"},
+                    "aggregation_frozen_before_execution": "reporting amendment of the approved prep (5e96650): "
+                                                           "aggregation and drift reporting only; no condition, order, "
+                                                           "setting, snapshot or implementation change"},
         "integrity_gates": ["both correctness gates pass", "all 8 legs exit 0 with no watchdog timeout",
                             "GPU clean before every leg",
                             "every leg: 'Using V2 Model Runner', effective block_size 32, 5 warmups, 30 samples, "
@@ -216,7 +228,15 @@ def build_protocol() -> dict:
                             "non-allowlisted engine / workload fields identical across all 8 legs",
                             "the two legs of each condition report identical capacity and identical config",
                             "TurboQuant legs: engine cache dtype turboquant_k3v4_nc, skip layers exactly [0, 1, 30, 31]",
-                            "RABIT legs: frozen RABIT markers present and rabit_kv2.py sha matches"],
+                            "RABIT legs: frozen RABIT markers present and rabit_kv2.py sha matches",
+                            "every leg: engine backend-selection log evidence equals the expected set (TRITON_ATTN for "
+                            "A / B / C; TURBOQUANT + FLASH_ATTN + FlashAttention version 2 for D)",
+                            "every leg: physical-layout CONSISTENCY -- reported KV GiB x 2^30 / observed capacity within "
+                            "1 % of the packed layout's bytes per token (a BF16 fallback would read ~131,072 B); "
+                            "capacity itself remains the observed allocator value",
+                            "per-layer 'no retained BF16 copy' for TurboQuant: established by the tensor-level "
+                            "introspection of the non-evidence V2 probe on the identical snapshot (e686502); the "
+                            "multiprocess measurement legs cannot introspect tensors"],
         "dtype_induced_allowlist": DTYPE_INDUCED_ALLOWLIST,
         "fairness": {
             "MATCHED": ["GPU model / container / session", "model weights and tokenizer", "patched vLLM snapshot",
@@ -302,9 +322,17 @@ def demux(session_text: str) -> tuple[dict, list[str], list[str], list[str]]:
     return legs, gate, tqgate, top
 
 
+BACKEND_LINE = re.compile(r"Using (\S+) attention backend|Using (AttentionBackendEnum\.\w+) backend|"
+                          r"Using FlashAttention version (\d+)")
+# Expected backend-selection evidence per condition (from the engine's own log lines in each leg).
+EXPECTED_BACKEND_EVIDENCE = {A: {"AttentionBackendEnum.TRITON_ATTN"}, B: {"AttentionBackendEnum.TRITON_ATTN"},
+                             C: {"AttentionBackendEnum.TRITON_ATTN"}, D: {"TURBOQUANT", "FLASH_ATTN", "FA2"}}
+IMPLIED_BYTES_REL_TOL = 0.01  # physical-layout CONSISTENCY check only; capacity itself is the observed allocator value
+
+
 def parse_worker(lines: list[str]) -> dict:
     out: dict = {"tags": {}, "samples": [], "warmups": [], "kv_log_tokens": None, "kv_log_gib": None,
-                 "v2_runner": False, "line_count": len(lines)}
+                 "v2_runner": False, "backend_evidence": [], "line_count": len(lines)}
     for line in lines:
         s = line.strip()
         m = ROWLINE.match(s)
@@ -317,6 +345,10 @@ def parse_worker(lines: list[str]) -> dict:
             continue
         if V2_RUNNER in line:
             out["v2_runner"] = True
+        for m in BACKEND_LINE.finditer(line):
+            ev = m.group(1) or m.group(2) or (f"FA{m.group(3)}" if m.group(3) else None)
+            if ev and ev not in out["backend_evidence"]:
+                out["backend_evidence"].append(ev)
         m = KV_TOKENS.search(line)
         if m:
             out["kv_log_tokens"] = int(m.group(1).replace(",", ""))
@@ -408,29 +440,68 @@ def p90(values: list[float]) -> float:
     return s[max(0, math.ceil(0.9 * len(s)) - 1)]
 
 
+LEG_STATS = ("median_tpot_ms", "p90_tpot_ms", "median_ttft_ms", "median_wall_ms")
+
+
+def leg_stats(samples: list[dict]) -> dict:
+    tpot = [s["tpot_ms"] for s in samples]
+    return {"n": len(samples), "median_tpot_ms": statistics.median(tpot), "p90_tpot_ms": p90(tpot),
+            "median_ttft_ms": statistics.median(s["ttft_ms"] for s in samples),
+            "median_wall_ms": statistics.median(s["wall_ms"] for s in samples)}
+
+
+def implied_bytes_per_token(p: dict) -> float | None:
+    cap = capacity(p)
+    return p["kv_log_gib"] * 2**30 / cap if cap and p["kv_log_gib"] else None
+
+
 def build_summary(parsed: dict, top: dict) -> dict:
-    by = {d: [k for k, _, dd in LEGS if dd == d] for d in CONDITIONS}
-    cap = {d: capacity(parsed[by[d][0]]) for d in CONDITIONS}
-    lat = {}
+    """PRIMARY: per-leg statistics and, per condition, the median of its two leg-level values (descriptive; two engine
+    instances per condition -- not inferential). SECONDARY: pooled 60-sample within-session descriptive statistics."""
+    by = {d: [(k, label) for k, label, dd in LEGS if dd == d] for d in CONDITIONS}
+    cap = {d: capacity(parsed[by[d][0][0]]) for d in CONDITIONS}
+    per_leg, cross, pooled, drift = {}, {}, {}, {}
     for d in CONDITIONS:
-        samples = [s for k in by[d] for s in parsed[k]["samples"]]
-        tpot = [s["tpot_ms"] for s in samples]
-        legs = {label: statistics.median(s["tpot_ms"] for s in parsed[k]["samples"]) for k, label, dd in LEGS if dd == d}
-        l1, l2 = [label for k, label, dd in LEGS if dd == d]
-        lat[SHORT[d]] = {"n": len(samples), "median_tpot_ms": statistics.median(tpot), "p90_tpot_ms": p90(tpot),
-                         "median_ttft_ms": statistics.median(s["ttft_ms"] for s in samples),
-                         "median_wall_ms": statistics.median(s["wall_ms"] for s in samples),
-                         "per_leg_median_tpot_ms": legs, "order_effect_ms": legs[l2] - legs[l1]}
-    cap_out = {SHORT[d]: {"observed_capacity_tokens": cap[d],
-                          "implied_bytes_per_token": (parsed[by[d][0]]["kv_log_gib"] * 2**30 / cap[d])
-                          if cap[d] and parsed[by[d][0]]["kv_log_gib"] else None,
-                          "theoretical_bytes_per_token": THEORETICAL_BYTES_PER_TOKEN[d]} for d in CONDITIONS}
-    pairs = {f"{SHORT[x]}_vs_{SHORT[y]}": {
-        "capacity_ratio": (cap[x] / cap[y]) if cap[x] and cap[y] else None,
-        "median_tpot_delta_pct": 100.0 * (lat[SHORT[x]]["median_tpot_ms"] / lat[SHORT[y]]["median_tpot_ms"] - 1.0)}
-        for x, y in PAIRS}
-    return {"capacity_label": CAPACITY_LABEL, "capacity": cap_out, "latency": lat, "pairs": pairs,
-            "claim_boundary": CLAIM_BOUNDARY, "disclosure": DISCLOSURE,
+        (k1, l1), (k2, l2) = by[d]
+        s1, s2 = leg_stats(parsed[k1]["samples"]), leg_stats(parsed[k2]["samples"])
+        per_leg[SHORT[d]] = {l1: s1, l2: s2}
+        cross[SHORT[d]] = {f"median_of_leg_{m}": statistics.median([s1[m], s2[m]]) for m in LEG_STATS}
+        both = parsed[k1]["samples"] + parsed[k2]["samples"]
+        tp = [s["tpot_ms"] for s in both]
+        pooled[SHORT[d]] = {"n": len(both), "pooled_median_tpot_ms": statistics.median(tp), "pooled_p90_tpot_ms": p90(tp)}
+        drift[SHORT[d]] = {"legs": [l1, l2],
+                           "tpot_abs_diff_ms": s2["median_tpot_ms"] - s1["median_tpot_ms"],
+                           "tpot_pct_diff": 100.0 * (s2["median_tpot_ms"] / s1["median_tpot_ms"] - 1.0),
+                           "p90_tpot_abs_diff_ms": s2["p90_tpot_ms"] - s1["p90_tpot_ms"],
+                           "ttft_abs_diff_ms": s2["median_ttft_ms"] - s1["median_ttft_ms"],
+                           "wall_abs_diff_ms": s2["median_wall_ms"] - s1["median_wall_ms"]}
+    cap_out = {SHORT[d]: {"observed_capacity_tokens": cap[d], "num_gpu_blocks":
+                          parsed[by[d][0][0]]["tags"]["EXP13_CAPACITY"]["num_gpu_blocks"],
+                          "reported_kv_cache_gib": parsed[by[d][0][0]]["kv_log_gib"],
+                          "implied_bytes_per_token_derived": implied_bytes_per_token(parsed[by[d][0][0]])}
+               for d in CONDITIONS}
+    theoretical = {SHORT[d]: THEORETICAL_BYTES_PER_TOKEN[d] for d in CONDITIONS}
+    ratios = {f"{SHORT[x]}_over_{SHORT[y]}": (cap[x] / cap[y]) if cap[x] and cap[y] else None for x, y in PAIRS}
+    comparisons = {}
+    for y in (A, B, D):
+        cx, cy = cross[SHORT[C]], cross[SHORT[y]]
+        comparisons[f"rabit_vs_{SHORT[y]}"] = {
+            "basis": "cross-leg summaries (median of the two leg-level values per condition)",
+            "tpot_abs_diff_ms": cx["median_of_leg_median_tpot_ms"] - cy["median_of_leg_median_tpot_ms"],
+            "tpot_pct_diff": 100.0 * (cx["median_of_leg_median_tpot_ms"] / cy["median_of_leg_median_tpot_ms"] - 1.0),
+            "p90_tpot_abs_diff_ms": cx["median_of_leg_p90_tpot_ms"] - cy["median_of_leg_p90_tpot_ms"],
+            "ttft_abs_diff_ms": cx["median_of_leg_median_ttft_ms"] - cy["median_of_leg_median_ttft_ms"],
+            "wall_abs_diff_ms": cx["median_of_leg_median_wall_ms"] - cy["median_of_leg_median_wall_ms"],
+            "capacity_ratio": ratios[f"rabit_over_{SHORT[y]}"],
+            **({"framing": "METHOD-NATIVE SYSTEM comparison (TurboQuant uses its own backend + FlashAttention v2 on "
+                           "its BF16 boundary layers); not a quantizer-kernel comparison"} if y == D else {})}
+    return {"capacity_label": CAPACITY_LABEL, "observed_capacity": cap_out, "capacity_ratios": ratios,
+            "theoretical_bytes_per_token_SEPARATE_FROM_OBSERVED": theoretical,
+            "latency_primary_per_leg": per_leg, "latency_primary_cross_leg": cross,
+            "latency_secondary_pooled_within_session_descriptive": pooled, "leg_to_leg_drift": drift,
+            "rabit_comparisons": comparisons,
+            "statistics_note": "descriptive only: two fresh-engine legs per condition; no significance tests or CIs",
+            "fairness": build_protocol()["fairness"], "claim_boundary": CLAIM_BOUNDARY, "disclosure": DISCLOSURE,
             "gpu": (top.get("environment") or {}).get("gpus")}
 
 
@@ -454,6 +525,10 @@ def integrity(parsed: dict, gates: dict, top: dict, diff: dict) -> dict:
         checks[f"{label}_capacity_observed"] = capacity(p) is not None
         kvd = p["tags"].get("EXP13_KV_DTYPE") or {}
         checks[f"{label}_engine_cache_dtype"] = kvd.get("engine_cache_dtype") == d
+        checks[f"{label}_backend_evidence"] = set(p["backend_evidence"]) == EXPECTED_BACKEND_EVIDENCE[d]
+        ib = implied_bytes_per_token(p)
+        checks[f"{label}_physical_layout_consistent"] = ib is not None and abs(
+            ib / THEORETICAL_BYTES_PER_TOKEN[d]["bytes"] - 1.0) <= IMPLIED_BYTES_REL_TOL
         if d == D:
             checks[f"{label}_tq_boundary_layers"] = [str(x) for x in eff.get("kv_cache_dtype_skip_layers", [])] == TQ_BOUNDARY_LAYERS
         else:
