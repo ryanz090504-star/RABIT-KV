@@ -110,6 +110,128 @@ def test_wrapper_compiles_and_has_no_module_level_ancestry():
     assert any(isinstance(n, ast.If) and ast.unparse(n.test) == "modal.is_local()" for n in tree.body)
 
 
+
+# ------------------------------------------------------------------ Attempt-3 transport / cleanup tests (zero torch)
+def _wrapper_local():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("parity_wrapper_under_test", WRAPPER)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def _runner():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("parity_runner_under_test", HERE / "run_canonical_quality_parity.py")
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+def _synthetic_result():
+    geo = {"T1_full_state": {"normal": {"1": [], "75": ["\u2713 decoded V"]}},
+           "T2_sequential_aging": {"normal": {"0": []}}, "T3_hf_cache": {"normal": {"1": []}},
+           "T4_old_harness": {"normal": [{"n": 36, "old_k_equals_canonical": True, "old_v_equals_canonical": False}]},
+           "summary": {"parity_failures": 0, "T4_old_v_mismatch_min_n": None, "ratio": 0.5}}
+    return {"oracle": {"file_sha256_lf": "ab", "extracted_sha256": "cd", "functions": ["f"]}, "lengths": [1, 75],
+            "prefills": [0], "geometries": {"qwen2_5_7b": geo, "llama3_1_8b": json.loads(json.dumps(geo))},
+            "passed": True, "negative_control_passed": True, "torch_version": "2.11.0+cpu", "python_version": "3.11.9"}
+
+
+def test_strict_json_transport_roundtrip():
+    import hashlib
+    w = _wrapper_local()
+    res = _synthetic_result()
+    payload = w.serialize_result(res)
+    assert type(payload) is str
+    back = w.validate_payload(payload)
+    assert back == res and json.loads(payload) == res
+    h1 = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    assert h1 == hashlib.sha256(w.serialize_result(_synthetic_result()).encode("utf-8")).hexdigest()  # stable
+    assert "\u2713" in payload  # Unicode carried as-is
+
+
+def test_strict_transport_rejects_non_json_native():
+    w = _wrapper_local()
+
+    class FakeTorchVersion(str):  # str subclass, like torch.torch_version.TorchVersion
+        pass
+
+    class Custom:
+        pass
+
+    for bad in (FakeTorchVersion("2.11.0"), {1, 2}, (1, 2), Custom(), float("nan")):
+        res = _synthetic_result()
+        res["geometries"]["qwen2_5_7b"]["summary"]["x"] = bad
+        try:
+            w.serialize_result(res)
+        except (TypeError, ValueError):
+            pass
+        else:
+            raise AssertionError(f"strict serializer accepted {type(bad).__qualname__}")
+    try:  # plain strict json.dumps also refuses a set (no default= fallback anywhere)
+        json.dumps({"x": {1}})
+    except TypeError:
+        pass
+    else:
+        raise AssertionError("json.dumps accepted a set")
+    try:
+        w.validate_payload(b"{}")
+    except TypeError:
+        pass
+    else:
+        raise AssertionError("non-str payload accepted")
+    bad_schema = _synthetic_result()
+    del bad_schema["geometries"]["llama3_1_8b"]
+    try:
+        w.validate_payload(json.dumps(bad_schema))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("schema gap accepted")
+    src = WRAPPER.read_text(encoding="utf-8")
+    fn = next(n for n in ast.walk(ast.parse(src)) if isinstance(n, ast.FunctionDef) and n.name == "serialize_result")
+    dumps = [c for c in ast.walk(fn) if isinstance(c, ast.Call) and ast.unparse(c.func) == "json.dumps"]
+    assert len(dumps) == 1 and "default" not in {k.arg for k in dumps[0].keywords}
+    assert 'res["torch_version"] = str(torch.__version__)' in src and "return payload" in src
+
+
+def test_cleanup_polling():
+    r = _runner()
+    t = {"now": 0.0}
+    clock = lambda: t["now"]  # noqa: E731
+
+    def sleep(dt):
+        t["now"] += dt
+
+    seq = iter([{"ap-A": {"State": "ephemeral", "Tasks": "1"}, "ap-OLD": {"State": "ephemeral", "Tasks": "1"}},
+                {"ap-A": {"State": "stopped", "Tasks": "1"}},
+                {"ap-A": {"State": "stopped", "Tasks": "0"}}])
+    out = r.poll_cleanup(["ap-A"], lambda: next(seq), lambda a: (_ for _ in ()).throw(AssertionError("no stop")),
+                         timeout_s=60, poll_s=3, sleep=sleep, clock=clock)
+    assert out["verified"] and out["polls"] == 3 and out["first_observed_states"]["ap-A"]["Tasks"] == "1"
+    assert out["final_states"]["ap-A"] == {"State": "stopped", "Tasks": "0"} and out["elapsed_s"] == 6.0
+    stops = []
+    t["now"] = 0.0
+    stuck = r.poll_cleanup(["ap-B"], lambda: {"ap-B": {"State": "ephemeral", "Tasks": "1"}}, stops.append,
+                           timeout_s=60, poll_s=3, sleep=sleep, clock=clock)
+    assert stops == ["ap-B"] and not stuck["verified"] and stuck["stopped_again_after_timeout"] == ["ap-B"]
+
+
+def test_planned_cases_match_frozen_suite():
+    r = _runner()
+    tree = ast.parse((HERE / "canonical_quality_parity_tests.py").read_text(encoding="utf-8"))
+    const = {n.targets[0].id: ast.literal_eval(n.value) for n in tree.body if isinstance(n, ast.Assign)
+             and getattr(n.targets[0], "id", None) in ("LENGTHS", "DISTRIBUTIONS", "PREFILLS")}
+    nl, nd, npre = len(const["LENGTHS"]), len(const["DISTRIBUTIONS"]), len(const["PREFILLS"])
+    assert r.PLANNED_PER_GEOMETRY == {"T1_full_state": nd * nl, "T2_sequential_aging": nd * npre,
+                                      "T3_hf_cache": 2 * 3, "T4_old_harness": nd * nl}
+
+
+def test_no_ppl_files_in_parity_workflow():
+    assert not (HERE / "canonical_quality_v2").exists() and not (HERE / "gen_canonical_ppl_v2.py").exists()
+
+
 if __name__ == "__main__":
     tests = [(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     failed = 0
