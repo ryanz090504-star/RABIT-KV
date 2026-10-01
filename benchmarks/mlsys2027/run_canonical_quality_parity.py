@@ -22,8 +22,13 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 MODAL_APP = HERE / "canonical_quality_parity_modal.py"
 APP_NAME = "rabit-kv-canonical-quality-v2-parity"
-OUT = ROOT / "results/mlsys2027/quality_semantic_audit/parity"
-WALL_CLOCK_S = 45 * 60
+OUT = ROOT / "results/mlsys2027/quality_semantic_audit/parity_attempt_2"
+WALL_CLOCK_S = 20 * 60
+ATTEMPT1_DIR = "results/mlsys2027/quality_semantic_audit/parity_failed_attempt_1"
+ATTEMPT1_ARCHIVE_COMMIT = "9d6b819db91157f3fb3bda47c640ccb1cd814d14"
+AUDIT_COMMIT, AUDIT_PATH = "e88f46014acebba8458a59fdc714adc26f7ac9fe", "results/mlsys2027/quality_semantic_audit/semantic_audit_record.json"
+IMPL_COMMIT = "c36069781b259e2e9b4d8adf60b7c58ea5df5cac"
+IMPL_FILES = ["benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/canonical_quality_parity_tests.py"]
 FILES = [HERE / "canonical_rabit_quality.py", HERE / "canonical_quality_parity_tests.py", MODAL_APP, Path(__file__).resolve(),
          ROOT / "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py", ROOT / "benchmarks/quality/hotpotqa.py"]
 APP_RE = re.compile(r"ap-[A-Za-z0-9]{20,}")
@@ -45,17 +50,34 @@ def apps() -> dict:
     return {r["App ID"]: r for r in json.loads(p.stdout) if r.get("Description") == APP_NAME}
 
 
+def preflight() -> dict:
+    """Pre-run requirements (no Modal / GPU / model): clean tree, archives / audit / implementation unchanged, offline
+    harness tests (isolated remote import, Attempt-1 negative control, file shipping, compile)."""
+    h = subprocess.run([sys.executable, str(HERE / "test_canonical_parity_harness.py")], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace", env=env(), timeout=900)
+    checks = {
+        "clean_tree": git("status", "--short") == "",
+        "attempt1_archive_unchanged": git("diff", "--name-only", ATTEMPT1_ARCHIVE_COMMIT, "--",
+                                          f"{ATTEMPT1_DIR}/parity_session.log", f"{ATTEMPT1_DIR}/record.json",
+                                          f"{ATTEMPT1_DIR}/attempt_record.json") == "",
+        "semantic_audit_unchanged": git("diff", "--name-only", AUDIT_COMMIT, "--", AUDIT_PATH) == "",
+        "implementation_unchanged_since_c360697": git("diff", "--name-only", IMPL_COMMIT, "--", *IMPL_FILES) == "",
+        "offline_harness_tests_pass": h.returncode == 0 and "4/4 passed" in h.stdout,
+        "attempt2_not_already_run": not OUT.exists()}
+    if not all(checks.values()):
+        raise SystemExit(f"pre-run validation failed: {checks} | harness tests: {h.stdout[-1500:]}")
+    return checks
+
+
 def main() -> int:
-    if git("status", "--short"):
-        raise SystemExit("tree not clean")
-    if (OUT / "record.json").exists():
-        raise SystemExit("parity already run; runs once")
+    checks = preflight()
     OUT.mkdir(parents=True, exist_ok=False)
     result_path = Path(tempfile.mkdtemp()) / "parity_result.json"
     e = env()
     e["CANONICAL_PARITY_RESULT_PATH"] = str(result_path)
     rec = {"kind": "canonical-quality-v2 CPU parity tests (correctness testing, not a quality experiment)",
            "source_commit": git("rev-parse", "HEAD"), "started_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+           "attempt": 2, "preflight": checks,
            "file_sha256": {str(p.relative_to(ROOT)).replace("\\", "/"): hashlib.sha256(p.read_bytes()).hexdigest()
                            for p in FILES}, "wall_clock_s": WALL_CLOCK_S}
     pre = apps()

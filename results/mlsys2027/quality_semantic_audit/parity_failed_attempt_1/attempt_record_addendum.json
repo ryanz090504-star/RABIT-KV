@@ -1,0 +1,18 @@
+{
+  "kind": "canonical-quality-v2 CPU parity tests -- attempt addendum",
+  "attempt": 1,
+  "addendum_to": "attempt_record.json (unchanged; archived in commit 9d6b819db91157f3fb3bda47c640ccb1cd814d14)",
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "permanently_excluded": true,
+  "explicit_facts": {
+    "container": "CPU-only",
+    "gpu_used": false,
+    "model_used": false,
+    "parity_tests_executed": false,
+    "failure_point": "remote import of the wrapper module (before any function body ran)",
+    "root_cause": "module-level ROOT = Path(__file__).resolve().parents[2] evaluated under the remote module location /root/canonical_quality_parity_modal.py (only one parent) -> IndexError: 2",
+    "app": {"id": "ap-2Doer4zsR7M4kOk3zO7j62", "state": "stopped", "tasks": 0},
+    "parity_result": "none exists"
+  }
+}
