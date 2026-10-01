@@ -1,0 +1,28 @@
+{
+  "kind": "canonical-quality-v2 CPU parity tests",
+  "attempt": 2,
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "source_commit": "ebe7e793aa9e895a0e525ac7b00fdb38aaddb46d",
+  "modal_app_id": "ap-Yyc9tCQFfBWnrinXKhZnNK",
+  "hardware": "CPU-only container (cpu=8); no GPU; no model",
+  "elapsed_s": 35.6,
+  "timed_out": false,
+  "app_final_state": "stopped, 0 tasks (verified by a later query; the runner's single post-run query caught 'Tasks: 1' moments before the stop, so its cleanup_verified=false is a polling race, not a running task)",
+  "failure": {
+    "error": "modal DeserializationError in the LOCAL client: unpickling the returned result required importing torch, which cannot load locally (OSError WinError 126, missing VC++ runtime)",
+    "root_cause": "HARNESS DEFECT: the returned result dict contained torch.__version__ (a torch.torch_version.TorchVersion object, not a plain str), so local unpickling needed torch",
+    "remote_suite": "the remote function returned (app lifetime ~30 s on the cached CPU image), but its result was lost in transport and nothing was printed remotely -- NO parity result exists or is claimed"
+  },
+  "parity_result": "none",
+  "actions_not_taken": [
+    "no retry",
+    "no fix applied",
+    "no amendment record",
+    "no PPL run"
+  ],
+  "files_sha256": {
+    "parity_session.log": "0fc0dc7522d76a5e62a6da4204316ce048eaff1ad3aa3f4e234f4480a27b93ee",
+    "record.json": "86e1573f8042542e5a3f6e47cb8be9af80b88558cb41d6d48a5e4fb4bc6f3557"
+  }
+}

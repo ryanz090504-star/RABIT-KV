@@ -1,0 +1,113 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-Yyc9tCQFfBWnrinXKhZnNK
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_quality_parity_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_rabit_quality.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_quality_parity_tests.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\vll
+│   m-kvquant\vllm\v1\attention\ops\kvquant_k3.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\quality\hotpotqa.py
+└── 🔨 Created function parity.
+Microsoft Visual C++ Redistributable is not installed, this may lead to the DLL load failure.
+It can be downloaded at https://aka.ms/vs/17/release/vc_redist.x64.exe
+Stopping app - uncaught exception raised locally: DeserializationError('Encountered an error when deserializing an object in the local environment (see above for details).').
+┌───────────────────── Traceback (most recent call last) ─────────────────────┐
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_serialization.py:115 in deserialize                                    │
+│                                                                             │
+│   114 │   try:                                                              │
+│ > 115 │   │   return Unpickler(client, io.BytesIO(s)).load()                │
+│   116 │   except AttributeError as exc:                                     │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\to │
+│ rch\__init__.py:287 in <module>                                             │
+│                                                                             │
+│    286 │                                                                    │
+│ >  287 │   _load_dll_libraries()                                            │
+│    288 │   del _load_dll_libraries                                          │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\to │
+│ rch\__init__.py:283 in _load_dll_libraries                                  │
+│                                                                             │
+│    282 │   │   │   │   │   )                                                │
+│ >  283 │   │   │   │   │   raise err                                        │
+│    284                                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+OSError: [WinError 126] 找不到指定的模块。 Error loading 
+"C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\torch
+\lib\c10.dll" or one of its dependencies.
+
+The above exception was the direct cause of the following exception:
+
+┌───────────────────── Traceback (most recent call last) ─────────────────────┐
+│ C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben │
+│ chmarks\mlsys2027\canonical_quality_parity_modal.py:46 in main              │
+│                                                                             │
+│   45 def main():                                                            │
+│ > 46 │   res = parity.remote()                                              │
+│   47 │   with open(os.environ[RESULT_PATH_ENV], "w", encoding="utf-8") as f │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_object.py:46 in wrapped                                                │
+│                                                                             │
+│    45 │   │   await self.hydrate()                                          │
+│ >  46 │   │   return await method(self, *args, **kwargs)                    │
+│    47                                                                       │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_functions.py:1696 in remote                                            │
+│                                                                             │
+│   1695 │   │                                                                │
+│ > 1696 │   │   return await self._call_function(args, kwargs)               │
+│   1697                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_functions.py:1640 in _call_function                                    │
+│                                                                             │
+│   1639 │   │                                                                │
+│ > 1640 │   │   return await invocation.run_function()                       │
+│   1641                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_functions.py:474 in run_function                                       │
+│                                                                             │
+│    473 │   │   │   if await_response.output.result.status in TERMINAL_STATU │
+│ >  474 │   │   │   │   return await _process_result(                        │
+│    475 │   │   │   │   │   await_response.output.result, await_response.out │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_utils\function_utils.py:553 in _process_result                         │
+│                                                                             │
+│   552 │   try:                                                              │
+│ > 553 │   │   return deserialize_data_format(data, data_format, client)     │
+│   554 │   except ModuleNotFoundError as deser_exc:                          │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_serialization.py:395 in deserialize_data_format                        │
+│                                                                             │
+│   394 │   if data_format == api_pb2.DATA_FORMAT_PICKLE:                     │
+│ > 395 │   │   return deserialize(s, client)                                 │
+│   396 │   elif data_format == api_pb2.DATA_FORMAT_ASGI:                     │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_serialization.py:143 in deserialize                                    │
+│                                                                             │
+│   142 │   │   │   more = " (see above for details)"                         │
+│ > 143 │   │   raise DeserializationError(                                   │
+│   144 │   │   │   f"Encountered an error when deserializing an object in th │
+└─────────────────────────────────────────────────────────────────────────────┘
+DeserializationError: Encountered an error when deserializing an object in the 
+local environment (see above for details).
