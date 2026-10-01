@@ -1,0 +1,33 @@
+{
+  "kind": "quality-harness amendment record (canonical-quality-v2)",
+  "status": "parity established; NO quality result produced under the new harness yet",
+  "old_logical_quality_semantics": {
+    "harness": "benchmarks/quality/{continuation_ppl,niah,passage_retrieval,hotpotqa,qasper}.py (+ multilingual_ppl.py and the derived Exp7-11 scripts); left UNCHANGED",
+    "behaviour": "BF16 prefill of the prompt prefix; the prefix K / V quantized and dequantized ONCE (HF layout [B, H_kv, T, D]); later tokens (last prompt token, generated / continuation tokens) stay BF16"
+  },
+  "discovered_mismatches": {
+    "v_metadata_order": "old (head, token, V-group) vs canonical (token, head, V-group) flattening before META8g64; Qwen 0 / 511 and Llama 0 / 1022 groups identical (semantic audit e88f460); confirmed numerically: old V != canonical V at N >= 31 for both geometries (parity Attempt 3)",
+    "decode_aging": "old: generated / continuation tokens never aged; canonical: R4 residual BF16, older tokens age through open group -> closed 32-token pages as the sequence grows"
+  },
+  "new_canonical_semantics": "benchmarks/mlsys2027/canonical_rabit_quality.py -- the single shared implementation: state at length N = the oracle state of the first N raw tokens (K3 seq-affine G32 with zero-padded open group, V2 per-token G32, META8g64 in canonical order with BF16 group min / scale, R4 BF16 residual); closed pages cached, open group + residual recomputed from raw BF16 (no cumulative requantization); HF CanonicalRabitCache: BF16 prefill, then one token per forward",
+  "policy_unchanged": "K3 / V2 / G32 / R4 / META8g64 (no bit-width, group, residual or metadata change)",
+  "files": {
+    "added": ["benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/canonical_quality_parity_tests.py",
+              "benchmarks/mlsys2027/canonical_quality_parity_modal.py", "benchmarks/mlsys2027/run_canonical_quality_parity.py",
+              "benchmarks/mlsys2027/test_canonical_parity_harness.py"],
+    "changed": [],
+    "not_yet_wired": "the benchmark runners (continuation PPL first; NIAH / passage retrieval / HotpotQA / Qasper later) are NOT yet part of the registered workflow; a PPL runner draft is held outside the repository pending review"
+  },
+  "oracle": {"source": "kvquant_k3.py *_ref (quantize_rabit2_kv_ref / dequantize_rabit2_kv_ref)",
+             "file_sha256_lf": "c2a48e97d9ca71fe55eb400938c3b3e665422b1534c4fb8fbe6ef02f2e60cc0f",
+             "extracted_sha256": "d58f58a5431bb5eeb2eb24bf3a86b6ea3160c83b9c4ecc1585dd4cad95450f3c",
+             "equivalence_basis": "Rabit2OnlineStateRef equals this oracle (test_rabit_kv2_physical.py); physical pages byte-identical to the reference state"},
+  "parity_results": {"evidence": "results/mlsys2027/quality_semantic_audit/parity_attempt_3/ (result sha256 98d3a5d9a16f83256a31d01556c9ecf26233c418f1c08e0bb971f1cb1d7f7d54)",
+                     "summary": "Qwen (H_kv 4) and Llama (H_kv 8), D 128: 276 / 276 planned cases ran; full-state 104 / 104, sequential aging 56 / 56, HF cache 12 / 12 bit-exact; old-harness negative control: K equal everywhere, V differs at every N >= 31"},
+  "prior_experiments_classification": {
+    "LEGACY LOGICAL-EVALUATOR RESULTS": ["Exp1", "Exp2", "Exp7", "Exp8", "Exp9", "Exp10", "Exp11", "Exp12", "Exp14 quality (4049642)"],
+    "meaning": "valid measurements of the old logical evaluator; NOT canonical-RABIT quality evidence; their records are NOT modified",
+    "unaffected_physical_system_evidence": ["Exp3", "Exp4", "Exp5", "Exp6", "Exp13", "Exp14 numerical correctness", "Exp14 probe", "Exp14 serving"]
+  },
+  "next_step_requires_review": "two-model (Llama-3.1-8B, Qwen2.5-7B) N=32 continuation-PPL validation under canonical-quality-v2 -- NOT run"
+}
