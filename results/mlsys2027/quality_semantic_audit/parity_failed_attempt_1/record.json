@@ -1,0 +1,37 @@
+{
+  "kind": "canonical-quality-v2 CPU parity tests (correctness testing, not a quality experiment)",
+  "source_commit": "c36069781b259e2e9b4d8adf60b7c58ea5df5cac",
+  "started_utc": "2026-09-30T23:19:02.970333+00:00",
+  "file_sha256": {
+    "benchmarks/mlsys2027/canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+    "benchmarks/mlsys2027/canonical_quality_parity_tests.py": "25068361f21128ff545041e00827b33da5061bffeea3f145ede9d621613f3ed3",
+    "benchmarks/mlsys2027/canonical_quality_parity_modal.py": "35518074b865a6bf4987e58451033f835b0a9165b46dcbf16f30966b781d7302",
+    "benchmarks/mlsys2027/run_canonical_quality_parity.py": "933f86893e35ed507583b7ad305f71c48a363d04135124eccb06419e11d7b702",
+    "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py": "c2a48e97d9ca71fe55eb400938c3b3e665422b1534c4fb8fbe6ef02f2e60cc0f",
+    "benchmarks/quality/hotpotqa.py": "67c9b5754bced90a0dc0cac5cbacc748566ad28005eefb5d2dd2ae95696d7288"
+  },
+  "wall_clock_s": 2700,
+  "completed_utc": "2026-10-01T00:04:08.532632+00:00",
+  "elapsed_s": 2704.1,
+  "modal_returncode": 1,
+  "timed_out": true,
+  "app_ids_new": [
+    "ap-2Doer4zsR7M4kOk3zO7j62"
+  ],
+  "apps_stopped": [
+    "ap-2Doer4zsR7M4kOk3zO7j62"
+  ],
+  "final_app_states": {
+    "ap-2Doer4zsR7M4kOk3zO7j62": {
+      "App ID": "ap-2Doer4zsR7M4kOk3zO7j62",
+      "Description": "rabit-kv-canonical-quality-v2-parity",
+      "State": "stopped",
+      "Tasks": "0",
+      "Created at": "2026-09-30 19:19:05-04:00",
+      "Stopped at": "2026-09-30 20:04:07-04:00"
+    }
+  },
+  "cleanup_verified": true,
+  "result_sha256": null,
+  "passed": false
+}
