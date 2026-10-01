@@ -1,0 +1,28 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-HbcE93fgye1sizoxfRwvuy
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_quality_parity_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_rabit_quality.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_quality_parity_tests.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\vll
+│   m-kvquant\vllm\v1\attention\ops\kvquant_k3.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\quality\hotpotqa.py
+└── 🔨 Created function parity.
+CANONICAL_PARITY_REMOTE={"completed": true, "passed": true, "negative_control_passed": true, "qwen2_5_7b_summary": {"parity_failures": 0, "T4_old_k_matches_everywhere": true, "T4_old_v_mismatch_count": 40, "T4_old_v_mismatch_min_n": 31, "T4_cases": 52}, "llama3_1_8b_summary": {"parity_failures": 0, "T4_old_k_matches_everywhere": true, "T4_old_v_mismatch_count": 40, "T4_old_v_mismatch_min_n": 31, "T4_cases": 52}}
+CANONICAL_PARITY_LOCAL={"payload_type": "str", "bytes": 11264, "sha256": "98d3a5d9a16f83256a31d01556c9ecf26233c418f1c08e0bb971f1cb1d7f7d54", "completed": true, "passed": true, "negative_control_passed": true, "qwen2_5_7b_summary": {"parity_failures": 0, "T4_old_k_matches_everywhere": true, "T4_old_v_mismatch_count": 40, "T4_old_v_mismatch_min_n": 31, "T4_cases": 52}, "llama3_1_8b_summary": {"parity_failures": 0, "T4_old_k_matches_everywhere": true, "T4_old_v_mismatch_count": 40, "T4_old_v_mismatch_min_n": 31, "T4_cases": 52}}
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-HbcE93fgye1sizoxfRwvuy
