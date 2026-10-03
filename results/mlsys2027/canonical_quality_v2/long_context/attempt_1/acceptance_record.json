@@ -1,0 +1,267 @@
+{
+  "kind": "canonical-quality-v2 Llama long-context suite: ACCEPTANCE RECORD of registered Attempt 1",
+  "status": "accepted",
+  "accepted_utc_date": "2026-10-03",
+  "evidence_commit": "7896fcd",
+  "authoritative": "the final canonical long-context quality evidence for the paper",
+  "results": {
+    "niah": {
+      "n": 57,
+      "bf16_passed": 57,
+      "rabit_passed": 57,
+      "delta": 0,
+      "per_context": {
+        "4096": {
+          "bf16": "19 / 19",
+          "rabit": "19 / 19"
+        },
+        "8192": {
+          "bf16": "19 / 19",
+          "rabit": "19 / 19"
+        },
+        "16384": {
+          "bf16": "19 / 19",
+          "rabit": "19 / 19"
+        }
+      },
+      "score_changes": 0,
+      "answer_text_changed": 23,
+      "inferential_statistics": "none (deterministic grid; cases are not independent draws)"
+    },
+    "passage_retrieval": {
+      "n": 200,
+      "bf16": 100.0,
+      "rabit": 100.0,
+      "delta_points": 0.0,
+      "ci95_paired_bootstrap": [
+        0.0,
+        0.0
+      ],
+      "score_changes": 0,
+      "prediction_text_changed": 79
+    },
+    "hotpotqa_primary_legacy_compatible_scorer": {
+      "n": 100,
+      "bf16_f1": 59.29949070537306,
+      "rabit_f1": 58.27376099319833,
+      "delta_points": -1.02572971217473,
+      "relative_delta_pct": -1.7297445559372904,
+      "ci95_paired_bootstrap": [
+        -4.235586408476436,
+        2.1993342264442006
+      ],
+      "ci_contains_zero": true,
+      "scores_changed": 8,
+      "worse": 5,
+      "better": 3,
+      "identical_scores": 92,
+      "median_paired_delta_points": 0.0,
+      "prediction_text_changed": 20,
+      "changed_examples": [
+        {
+          "key": 201,
+          "bf16": 0.5,
+          "rabit": 0.0
+        },
+        {
+          "key": 203,
+          "bf16": 0.1,
+          "rabit": 0.0
+        },
+        {
+          "key": 207,
+          "bf16": 1.0,
+          "rabit": 0.5
+        },
+        {
+          "key": 225,
+          "bf16": 0.5,
+          "rabit": 0.6666666666666666
+        },
+        {
+          "key": 226,
+          "bf16": 0.0,
+          "rabit": 1.0
+        },
+        {
+          "key": 257,
+          "bf16": 1.0,
+          "rabit": 0.0
+        },
+        {
+          "key": 273,
+          "bf16": 0.888888888888889,
+          "rabit": 0.5714285714285715
+        },
+        {
+          "key": 289,
+          "bf16": 0.47058823529411764,
+          "rabit": 0.6956521739130435
+        }
+      ],
+      "rounded": {
+        "bf16": 59.3,
+        "rabit": 58.27,
+        "delta": -1.03,
+        "relative_delta_pct": -1.73,
+        "ci95": [
+          -4.24,
+          2.2
+        ]
+      }
+    },
+    "hotpotqa_secondary_official_scorer": {
+      "n": 100,
+      "bf16_f1": 59.85098039215686,
+      "rabit_f1": 58.71457431457432,
+      "delta_points": -1.1364060775825493,
+      "relative_delta_pct": -1.8987259191688393,
+      "ci95_paired_bootstrap": [
+        -4.2980222391987155,
+        2.025210084033617
+      ],
+      "ci_contains_zero": true,
+      "scores_changed": 7,
+      "worse": 5,
+      "better": 2,
+      "identical_scores": 93,
+      "median_paired_delta_points": 0.0,
+      "prediction_text_changed": 20,
+      "changed_examples": [
+        {
+          "key": 201,
+          "bf16": 0.5,
+          "rabit": 0.0
+        },
+        {
+          "key": 203,
+          "bf16": 0.11764705882352942,
+          "rabit": 0.0
+        },
+        {
+          "key": 207,
+          "bf16": 1.0,
+          "rabit": 0.5714285714285715
+        },
+        {
+          "key": 226,
+          "bf16": 0.0,
+          "rabit": 1.0
+        },
+        {
+          "key": 257,
+          "bf16": 1.0,
+          "rabit": 0.0
+        },
+        {
+          "key": 273,
+          "bf16": 0.888888888888889,
+          "rabit": 0.5714285714285715
+        },
+        {
+          "key": 289,
+          "bf16": 0.5000000000000001,
+          "rabit": 0.7272727272727273
+        }
+      ],
+      "rounded": {
+        "bf16": 59.85,
+        "rabit": 58.71,
+        "delta": -1.14,
+        "relative_delta_pct": -1.9,
+        "ci95": [
+          -4.3,
+          2.03
+        ]
+      }
+    }
+  },
+  "interpretation": "On Llama-3.1-8B, the frozen canonical RABIT operating point preserves exact retrieval on the tested NIAH and Passage Retrieval suites. On the 100-example HotpotQA subset, canonical RABIT is approximately 1 F1 point below BF16, with the paired confidence interval spanning zero and the observed differences concentrated in a small number of examples.",
+  "do_not_write": [
+    "HotpotQA is statistically equivalent",
+    "HotpotQA is proven unaffected",
+    "RABIT causes no degradation",
+    "quality is universally preserved"
+  ],
+  "concentration": {
+    "niah": "0 / 57 score changes",
+    "passage_retrieval": "0 / 200 score changes",
+    "hotpotqa_primary": "8 / 100 score changes (5 worse, 3 better); 92 / 100 identical scores; median paired delta 0; the difference is concentrated rather than broadly distributed",
+    "notable_examples_descriptive_only": [
+      {
+        "key": 257,
+        "delta_points": -100.0,
+        "answers": [
+          "Pennsylvania"
+        ],
+        "bf16_prediction": "Pennsylvania",
+        "rabit_prediction": "United Airlines Flight 93"
+      },
+      {
+        "key": 201,
+        "delta_points": -50.0,
+        "answers": [
+          "2016–17 NHL season"
+        ],
+        "bf16_prediction": "2016–17",
+        "rabit_prediction": "2016-17"
+      },
+      {
+        "key": 207,
+        "delta_points": -50.0,
+        "answers": [
+          "Vice President"
+        ],
+        "bf16_prediction": "Vice President.",
+        "rabit_prediction": "Vice President of the United States."
+      },
+      {
+        "key": 273,
+        "delta_points": -31.746031746031743,
+        "answers": [
+          "more than 330 million people"
+        ],
+        "bf16_prediction": "more than 330 million",
+        "rabit_prediction": "330 million"
+      },
+      {
+        "key": 203,
+        "delta_points": -10.0,
+        "answers": [
+          "Passion Pit is an American indietronica band"
+        ],
+        "bf16_prediction": "Both bands have had a lead guitarist leave the band and then return.",
+        "rabit_prediction": "Both bands have had their music featured in various video games, with Sum 41's \"Underclass Hero\" being featured in Madden 08 and NBA 08"
+      }
+    ],
+    "rule": "nothing is excluded; formatting-sensitive examples are NOT removed post hoc"
+  },
+  "bf16_reproducibility_vs_exp12": {
+    "niah": "57 / 57 reproduced",
+    "passage_retrieval": "200 / 200 scores reproduced",
+    "hotpotqa": "99 / 100 scores reproduced; one example (dataset index 289) differs, the known greedy-decoding run-to-run variability; the accepted BF16 validity gate passed; not rerun",
+    "detail": {
+      "niah": {
+        "note": "this run's BF16 arm vs the accepted Exp12 BF16 arm, per example (3-decimal printed scores)",
+        "examples_differing": 0,
+        "indices": [],
+        "l1_distance": 0.0
+      },
+      "passage_retrieval": {
+        "note": "this run's BF16 arm vs the accepted Exp12 BF16 arm, per example (3-decimal printed scores)",
+        "examples_differing": 0,
+        "indices": [],
+        "l1_distance": 0.0
+      },
+      "hotpotqa": {
+        "note": "this run's BF16 arm vs the accepted Exp12 BF16 arm, per example (3-decimal printed scores)",
+        "examples_differing": 1,
+        "indices": [
+          89
+        ],
+        "l1_distance": 0.225
+      }
+    }
+  },
+  "follow_up_experiments_launched": "none"
+}

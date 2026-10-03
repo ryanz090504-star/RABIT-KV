@@ -85,8 +85,49 @@ experiment descriptions below; index: `results/mlsys2027/canonical_quality_v2/EV
   K3/V2/G32/R4/META8g64 operating point is universally suitable." "Qwen degradation is caused
   by GQA, projection bias, outliers, fallback attention, or any other specific mechanism."
   Mechanism remains unknown.
-- **Not run under canonical semantics:** NIAH, Passage Retrieval, HotpotQA, Qasper,
-  multilingual PPL, and all K/V/group/residual/metadata ablations.
+- **Llama canonical long-context validation: COMPLETE** (registered Attempt 1, accepted;
+  evidence `7896fcd`; harness/protocol `a4d8ac5`; smoke test `432033c`; 16k CUDA conformance
+  `2637457`). Final paper-ready record:
+  `results/mlsys2027/canonical_quality_v2/canonical_quality_final_record.json`.
+
+  Llama-3.1-8B-Instruct @ `359efdbb`, BF16 vs canonical RABIT (K3/V2/G32/R4/META8g64) on
+  identical prompt ids, the frozen Exp12 prompts / selection / greedy generation / scorers,
+  one H100 80GB. Logical quality; not physical serving evidence.
+
+  | Task | N | BF16 | Canonical RABIT | Delta | Paired 95% CI |
+  |---|---|---|---|---|---|
+  | NIAH (exact retrieval) | 57 | 57/57 | 57/57 | 0 | n/a (deterministic grid) |
+  | Passage Retrieval | 200 | 100.0 | 100.0 | 0.0 | [0.0, 0.0] |
+  | HotpotQA, primary legacy-compatible scorer (F1) | 100 | 59.30 | 58.27 | −1.03 (−1.73%) | [−4.24, +2.20] |
+  | HotpotQA, secondary official scorer (F1) | 100 | 59.85 | 58.71 | −1.14 (−1.90%) | [−4.30, +2.03] |
+
+  NIAH per context: 19/19 vs 19/19 at 4096, 8192 and 16384.
+- **Long-context interpretation (frozen wording):** "On Llama-3.1-8B, the frozen canonical
+  RABIT operating point preserves exact retrieval on the tested NIAH and Passage Retrieval
+  suites. On the 100-example HotpotQA subset, canonical RABIT is approximately 1 F1 point
+  below BF16, with the paired confidence interval spanning zero and the observed differences
+  concentrated in a small number of examples." A confidence interval spanning zero does
+  **not** establish equivalence; do not write that HotpotQA is statistically equivalent or
+  proven unaffected, that RABIT causes no degradation, or that quality is universally
+  preserved.
+- **Concentration:** NIAH 0/57 score changes; Passage Retrieval 0/200; HotpotQA primary 8/100
+  (5 worse, 3 better), 92/100 identical, median paired delta 0. Notable examples are
+  descriptive only; no formatting-sensitive example is excluded post hoc.
+- **BF16 reproducibility vs Exp12:** NIAH 57/57; Passage Retrieval 200/200; HotpotQA 99/100
+  (one example differs: known greedy-decoding run-to-run variability). The BF16 validity
+  gate passed; not rerun.
+- **Final quality story:** Llama continuation PPL 7.515 → 7.633 (+1.56%); Llama long-context:
+  NIAH no score loss, Passage Retrieval no score loss, HotpotQA about −1 F1 with the CI
+  spanning zero; Qwen continuation PPL 6.787 → 112.39 (+1555.9%). Supported conclusion:
+  "RABIT's physical representation and canonical cache semantics transfer across the tested
+  Llama and Qwen geometries, but the quality robustness of a single frozen low-bit operating
+  point is strongly model-dependent."
+- **Quality experiments COMPLETE and frozen:** canonical evaluator validation; CPU/CUDA
+  semantic conformance; two-model canonical continuation PPL; Llama canonical long-context
+  validation.
+- **Not run under canonical semantics, and not to be launched unless explicitly reopened for
+  a specific paper-review need:** Qwen NIAH / Passage Retrieval / HotpotQA, Qasper,
+  multilingual PPL, all K/V/group/residual/metadata ablations, quality retuning.
 
 ---
 

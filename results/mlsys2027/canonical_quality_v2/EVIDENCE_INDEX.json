@@ -1,5 +1,5 @@
 {
-  "kind": "CANONICAL QUALITY EVIDENCE INDEX (canonical-quality-v2); status as of 2026-10-03",
+  "kind": "CANONICAL QUALITY EVIDENCE INDEX (canonical-quality-v2); FINAL status as of 2026-10-03",
   "authoritative_canonical_quality_evidence": [
     {
       "item": "validated canonical evaluator / independent parity",
@@ -14,11 +14,12 @@
       ]
     },
     {
-      "item": "Llama and Qwen CPU / CUDA semantic conformance",
+      "item": "Llama and Qwen CPU / CUDA semantic conformance (1k both models; 16k Llama)",
       "commits": [
         "8fa9a9c",
         "ec80638",
         "fd8d275",
+        "2637457",
         "d7ba819"
       ],
       "paths": [
@@ -34,6 +35,18 @@
       "paths": [
         "results/mlsys2027/canonical_quality_v2/continuation_ppl/two_model_attempt_2/",
         "results/mlsys2027/canonical_quality_v2/canonical_ppl_paper_ready_record.json"
+      ]
+    },
+    {
+      "item": "Registered Llama long-context Attempt 1: NIAH 57/57 vs 57/57; Passage Retrieval 100.0 vs 100.0; HotpotQA 59.30 vs 58.27 (-1.03 F1, CI [-4.24, +2.20])",
+      "commits": [
+        "a4d8ac5",
+        "432033c",
+        "7896fcd"
+      ],
+      "paths": [
+        "results/mlsys2027/canonical_quality_v2/long_context/attempt_1/",
+        "results/mlsys2027/canonical_quality_v2/canonical_quality_final_record.json"
       ]
     }
   ],
@@ -66,23 +79,43 @@
     }
   },
   "not_run_under_canonical_semantics": [
-    "NIAH",
-    "Passage Retrieval",
-    "HotpotQA",
+    "Qwen NIAH / Passage Retrieval / HotpotQA",
     "Qasper",
     "multilingual PPL",
     "K / V / group / residual / metadata ablations"
   ],
   "generalization_claims": {
     "supported": [
-      "RABIT's physical representation and canonical cache semantics transfer across the tested Llama and Qwen KV geometries.",
-      "The same frozen operating point exhibits strongly model-dependent quality behavior."
+      "RABIT's physical representation and canonical cache semantics transfer across the tested Llama and Qwen geometries, but the quality robustness of a single frozen low-bit operating point is strongly model-dependent.",
+      "On Llama-3.1-8B, the frozen canonical RABIT operating point preserves exact retrieval on the tested NIAH and Passage Retrieval suites. On the 100-example HotpotQA subset, canonical RABIT is approximately 1 F1 point below BF16, with the paired confidence interval spanning zero and the observed differences concentrated in a small number of examples.",
+      "The same frozen operating point exhibits strongly model-dependent quality behavior (Llama continuation PPL +1.56 %; Qwen continuation PPL +1555.9 %)."
     ],
     "not_supported": [
       "RABIT quality generalizes across models.",
       "The frozen K3/V2/G32/R4/META8g64 operating point is universally suitable.",
-      "Qwen degradation is caused by GQA, projection bias, outliers, fallback attention, or any other specific mechanism."
+      "Qwen degradation is caused by GQA, projection bias, outliers, fallback attention, or any other specific mechanism.",
+      "HotpotQA is statistically equivalent",
+      "HotpotQA is proven unaffected",
+      "RABIT causes no degradation",
+      "quality is universally preserved"
     ],
-    "mechanism": "unknown"
-  }
+    "note": "a confidence interval spanning zero does NOT establish equivalence; mechanism of the Qwen degradation unknown"
+  },
+  "complete": [
+    "canonical evaluator validation",
+    "CPU / CUDA semantic conformance",
+    "two-model canonical continuation PPL",
+    "Llama canonical long-context validation"
+  ],
+  "llama_long_context_validation": "COMPLETE",
+  "final_paper_ready_record": "results/mlsys2027/canonical_quality_v2/canonical_quality_final_record.json",
+  "not_to_be_launched_unless_reopened": [
+    "Qwen NIAH",
+    "Qwen Passage Retrieval",
+    "Qwen HotpotQA",
+    "Qasper",
+    "multilingual",
+    "K / V / group / residual / metadata ablations",
+    "quality retuning"
+  ]
 }
