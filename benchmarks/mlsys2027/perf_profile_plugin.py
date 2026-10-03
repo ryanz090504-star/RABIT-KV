@@ -255,7 +255,6 @@ def _patch(prof: Profiler, owner, name: str, key: str, patched: list, meta=None)
 
 
 def _install_cuda_events(prof: Profiler) -> list:
-    import triton
     import vllm.v1.attention.backends.triton_attn as ta
     import vllm.v1.attention.ops.rabit_kv2 as r
     import vllm.v1.attention.ops.rabit_kv2_stage3c_shared_decode as sd
@@ -284,7 +283,6 @@ def _install_cuda_events(prof: Profiler) -> list:
         if name in r.__dict__:
             _patch(prof, r, name, key, patched)
     # every Triton kernel that is LAUNCHED (K[grid](...)) from these modules, in every module namespace that holds it
-    jit_cls = triton.runtime.jit.JITFunction
     launched: set = set()
     for mod in (r, sd, t32):
         with open(mod.__file__, encoding="utf-8") as fh:
@@ -292,7 +290,7 @@ def _install_cuda_events(prof: Profiler) -> list:
     for name in sorted(launched):
         for owner in (r, sd, t32):
             obj = owner.__dict__.get(name)
-            if isinstance(obj, jit_cls):
+            if obj is not None and not isinstance(obj, KernelProxy) and hasattr(obj, "__getitem__"):
                 setattr(owner, name, KernelProxy(prof, f"kernel.{name}", obj))
                 patched.append(f"{owner.__name__}.{name}->kernel")
     return sorted(set(patched))
