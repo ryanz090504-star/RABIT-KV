@@ -227,34 +227,38 @@ when disabled: roughly one working day. A plumbing smoke test (no measurement) i
 
 ---
 
-## F. GO / NO-GO rule (fixed before any new profile is seen)
+## F. GO / NO-GO rule (fixed before any new profile is seen; amended before profiling)
 
-Operational definitions (proposed, to be confirmed before profiling): "dominant" = one component ≥ 50% of
-its domain (host wall or GPU span); "small number" = at most two components together ≥ 60%. These reuse
-the thresholds style of the existing pre-registered Stage3C rule (dominant share 0.5).
+Amendment (before any profile was run): the earlier proposed numeric boundaries ("one component >= 50%",
+"two components >= 60%") are WITHDRAWN. They must not be used as hard decision boundaries, because the
+profiler itself materially perturbs host timing and synchronizes GPU work.
 
-**GO for performance optimization only if ALL hold:**
+**GO for a narrow optimization only if ALL hold:**
 
-1. A small number of implementation bottlenecks dominate the profiled time in the case being fixed.
-2. They are not intrinsic to the frozen representation — i.e. they are launch count, per-request /
-   per-token iteration, redundant re-decoding, or host orchestration, not the unavoidable cost of decoding
-   packed pages that must be read.
-3. A fix appears feasible without changing K3 / V2 / G32 / R4 / META8g64 or the canonical quality
-   semantics, and can be shown bit-exact against the existing correctness gate and oracle.
-4. The engineering scope fits the MLSys deadline, including re-running the affected matched protocols
-   (Exp13-style latency, Exp6, Exp5) and re-validating correctness.
+1. One or at most two concrete IMPLEMENTATION components account for a clear majority of the relevant GPU
+   or host-time domain.
+2. The attribution is directionally consistent across CUDA-event instrumentation, source / control-flow
+   evidence and, where practical, one `torch.profiler` cross-check.
+3. The bottleneck is not intrinsic to K3 / V2 / G32 / R4 / META8g64 semantics.
+4. A fix can be implemented without changing the quantization policy, the cache semantics, the physical
+   layout definition, the quality protocol or the model policy.
+5. The engineering scope is small enough to complete and revalidate before the MLSys deadline.
 
-**NO-GO if ANY holds:**
+**NO-GO** if the attribution is diffuse, contradictory, architecture-level, or would require redesign or
+retuning.
 
-1. The slowdown is distributed across the representation (no dominant component).
-2. Fixing it requires redesigning the method.
-3. Fixing it requires retuning scientific parameters.
-4. The change would invalidate major frozen evidence (quality semantics, canonical conformance, capacity).
-5. The estimated engineering time is too large.
+A GO authorizes only a specific implementation fix and its re-measurement. It does NOT authorize Story B
+claims. If NO-GO: performance is frozen and Story A is final.
 
-If NO-GO: freeze performance and write Story A honestly. A GO decision authorizes only the specific
-bottleneck fix and its re-measurement; it does not authorize Story B claims until the new evidence is
-accepted.
+Profiling cases (amended, fixed before profiling; Llama-3.1-8B only; no quality scoring):
+
+| Case | Workload | Purpose |
+|---|---|---|
+| 1 | 2048-token prompts, C = 8 (below the chunked-prefill threshold), accepted Exp6 shape, matched BF16 | concurrency / per-request decode behaviour without chunked prefill as a confound |
+| 2 | 8192-token prompts, C = 32, accepted Exp6 shape, matched BF16 | combined high-concurrency path with chunked prefill active |
+| 3 | 32,736-token prompt, single request, accepted Exp5 setup: one unprofiled RABIT, one profiled RABIT, one BF16 | second-chunk breakdown for the shipped `shared_decode` implementation |
+
+Profiled timing is for attribution only; accepted Exp5 / Exp6 numbers remain authoritative for performance.
 
 ---
 
