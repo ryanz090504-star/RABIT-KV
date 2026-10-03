@@ -9,13 +9,14 @@ SHA-256 -- against the manifest below BEFORE the model is loaded):
                (exp14_model_snapshot.py, unchanged; manifest 9be52dd6...).
 
   llama3_1_8b  LLM-Research/Meta-Llama-3.1-8B-Instruct @ 359efdbb8af05b788a4ad4185215c6b8caa9052c.
-               PROVENANCE (stated exactly; nothing guessed): the accepted Exp12 evidence did NOT record a revision or a
-               file manifest. It records only `snapshot_download("LLM-Research/Meta-Llama-3.1-8B-Instruct")` and the log
-               line "Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master" (2026-09-30). The commit
-               above is DERIVED: resolved 2026-10-03 by `git ls-remote https://www.modelscope.cn/LLM-Research/
-               Meta-Llama-3.1-8B-Instruct.git` -> refs/heads/master = 359efdbb...; its ModelScope commit date is
-               2025-02-26 (unix 1740572854), i.e. before every Exp1-Exp12 run, and the file API lists the same 18 blobs
-               for Revision=master and Revision=<commit>. The run additionally fingerprints the model + windows by
+               PROVENANCE: recovered by byte-identity audit of the preserved historical Exp12 cache
+               (results/mlsys2027/canonical_quality_v2/llama_identity_audit/, commit 3bde966). Exp12 loaded model bytes
+               byte-identical to ModelScope revision 359efdbb8af05b788a4ad4185215c6b8caa9052c, recovered by content
+               matching of the preserved historical cache: all 18 files (size + SHA-256) equal the git tree d4c78fb7...
+               of that revision and of no other commit in the repository. NOT claimed: the accepted Exp12 evidence did
+               not record a revision or a file manifest (only "Downloading 18 files from LLM-Research/
+               Meta-Llama-3.1-8B-Instruct@master"), and the historical master branch pointer was not directly
+               recovered. The run additionally fingerprints the model + windows by
                reproducing the Exp12 BF16 per-window PPL with the legacy batched scorer (runner validity gate).
 
 Dataset / windows (the frozen legacy protocol, benchmarks/quality/continuation_ppl.py): WikiText-2 test raw text,
@@ -69,7 +70,7 @@ LLAMA_MANIFEST_SHA256 = "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d
 MODELS = {
     "llama3_1_8b": {"model_id": LLAMA_ID, "revision": LLAMA_REVISION, "files": LLAMA_FILES,
                     "manifest_sha256": LLAMA_MANIFEST_SHA256, "layers": 32, "kv_heads": 8, "head_dim": 128,
-                    "revision_provenance": "derived (Exp12 recorded only @master); see module docstring",
+                    "revision_provenance": "recovered by byte-identity audit of the preserved historical Exp12 cache",
                     # sha256 of the int64-LE token pool (first 32 x 1152 tokens), computed offline
                     "token_pool_sha256": "88dadfe6521c338ca71b1edfe5e85f08b8e2466e0884f8003b5b34a7ee3c849f"},
     "qwen2_5_7b": {"model_id": qwen.MODEL_ID, "revision": qwen.MODEL_REVISION, "files": qwen.FROZEN_FILES,

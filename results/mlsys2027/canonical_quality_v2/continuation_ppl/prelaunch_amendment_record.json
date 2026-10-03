@@ -1,0 +1,101 @@
+{
+  "kind": "canonical-quality-v2 continuation PPL: pre-launch amendment record (NOT run; no GPU, no model weights)",
+  "date_utc": "2026-10-03",
+  "base_commit": "eb3f4b1377beb7ecf8c0da39b89d81490db54a74",
+  "scope": "approved provenance wording, proof-harness (observer) fix, two-model orchestration and preregistered interpretation cases ONLY; dataset, windows, scorer, N = 32, context 1024, continuation 128, policy, model identities, geometry, hardware criteria and every validity gate are unchanged",
+  "protocol_sha256_lf": {
+    "old": "fac3944799d29e457e00a02329853f9bca28c613c59547765dca4a41bd5f6d80",
+    "new": "add20212722c91bb29bb9ab0b6d168cf544bcc3097cc8234a5f671e8aab67aa4"
+  },
+  "protocol_changes": [
+    "models.llama3_1_8b.revision_provenance (wording)",
+    "llama_identity_note (wording)",
+    "registered_attempt (added)",
+    "interpretation_cases (added; preregistered, descriptive only)"
+  ],
+  "file_sha256_lf": {
+    "canonical_ppl_protocol.json": {
+      "old": "fac3944799d29e457e00a02329853f9bca28c613c59547765dca4a41bd5f6d80",
+      "new": "add20212722c91bb29bb9ab0b6d168cf544bcc3097cc8234a5f671e8aab67aa4"
+    },
+    "canonical_ppl_identity.py": {
+      "old": "a8c68eba483a6aa82a1f470fd4fa4b6018d2f568cdec8d0899593ace0bfa646d",
+      "new": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba"
+    },
+    "run_canonical_ppl.py": {
+      "old": "f2e23473532ce0be7605795bb1fdf9f82667079567cd29d3a6aa509918c3a9c5",
+      "new": "3fb2585d4dae3bdea21d5bd34a4ff0aefa3140e1fdc9e8c66d6cc307627fba5f"
+    },
+    "canonical_ppl_offline_proofs.py": {
+      "old": "7d74958058ddf53de333a4a5219211dba79a59e2c2bda94ba21e9b7647c11f10",
+      "new": "a05a7dbebfead642dc266ff97f62cd885ae99cd30edbc3af690d4729b9c2f8ea"
+    },
+    "test_canonical_ppl_harness.py": {
+      "old": "a18c45f6c485a2e62e736e84bbb320b6bfb0540eb5e901437632c4180313e1e3",
+      "new": "b759357d9160af67c448de3c519367c303e0d02cf5854d1e0bbe62f97c5c0371"
+    },
+    "proof_observer.py": {
+      "old": null,
+      "new": "f0d6ceef2bf851a5c8aeebd33f82bf6bbbbf19ddf186e2d8262d2cda1f0bdd46"
+    },
+    "run_canonical_ppl_two_model.py": {
+      "old": null,
+      "new": "4d09c57ae56b6db541680d04ee196b533978bab996efbca8e5dd482568c1b2df"
+    },
+    "canonical_ppl_core.py": {
+      "old": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44",
+      "new": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44"
+    },
+    "canonical_ppl_modal.py": {
+      "old": "47e5499da96571465a35ded4b3285bd3c6576589e77db32c8aeba45d40f88a65",
+      "new": "47e5499da96571465a35ded4b3285bd3c6576589e77db32c8aeba45d40f88a65"
+    },
+    "canonical_rabit_quality.py": {
+      "old": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+      "new": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5"
+    },
+    "exp14_model_snapshot.py": {
+      "old": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+      "new": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9"
+    }
+  },
+  "unchanged_files": [
+    "canonical_ppl_core.py",
+    "canonical_ppl_modal.py",
+    "canonical_rabit_quality.py",
+    "exp14_model_snapshot.py"
+  ],
+  "exact_textual_diff": "prelaunch_amendment.diff (git diff eb3f4b1 -- benchmarks/mlsys2027; LF)",
+  "exact_textual_diff_sha256": "02b9d6fdaeccdf2f4495279fdc215233733a8ab7b3404327595abeec6c734d4e",
+  "llama_identity": {
+    "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+    "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+    "wording": "Exp12 loaded model bytes byte-identical to ModelScope revision 359efdbb8af05b788a4ad4185215c6b8caa9052c, recovered by content matching of the preserved historical cache.",
+    "audit": "results/mlsys2027/canonical_quality_v2/llama_identity_audit (commit 3bde966); all 18 historical cached files matched the immutable revision byte for byte",
+    "limitation": "the historical master branch pointer itself was not directly reconstructed; Exp12 recorded only '@master'"
+  },
+  "qwen_identity_unchanged": {
+    "revision": "16c174980d8a1492910551634b4969e69cdc2444",
+    "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1"
+  },
+  "offline_proof": {
+    "superseded_record": "offline_proof_record.json (eb3f4b1; kept unmodified; SUPERSEDED)",
+    "diagnostic_commit": "bfe43db",
+    "observer_fix_commit": "e991664",
+    "regenerated_record": "offline_proof_record_v2.json",
+    "regenerated_record_sha256_lf": "905f45a3fbd6f8063d344c8ef6748b8eda1475fa1120da4804d5b2e4dc3a1cdb",
+    "executions_of_the_corrected_full_proof": 1,
+    "executed_utc": "2026-10-03T15:32:49Z",
+    "passed": true,
+    "observer": "IdentityObserver v2 (object identity + retained direct references; no id() keying)",
+    "state_mismatches": {
+      "tiny_llama_gqa_4_2_d64": 0,
+      "tiny_qwen2_gqa_2_1_d128": 0
+    },
+    "stale_state_associations": {
+      "tiny_llama_gqa_4_2_d64": 0,
+      "tiny_qwen2_gqa_2_1_d128": 0
+    }
+  },
+  "gpu_or_model_execution": false
+}

@@ -6,7 +6,7 @@
       "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
       "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
       "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
-      "revision_provenance": "derived (Exp12 recorded only @master); see module docstring",
+      "revision_provenance": "recovered by byte-identity audit of the preserved historical Exp12 cache",
       "layers": 32,
       "kv_heads": 8,
       "head_dim": 128,
@@ -23,7 +23,7 @@
       "token_pool_sha256": "eb424fb71baccb8b64ae53688613a30c462a54a893f82359c9e6ea5385c0f63c"
     }
   },
-  "llama_identity_note": "the accepted Exp12 evidence recorded no revision / manifest (only '@master', 18 files); the pinned commit is the ModelScope master resolved on 2026-10-03, committed 2025-02-26 (before every Exp1-Exp12 run); equality with the Exp12 model is additionally checked by the BF16 control-reproduction gate",
+  "llama_identity_note": "Exp12 loaded model bytes byte-identical to ModelScope revision 359efdbb8af05b788a4ad4185215c6b8caa9052c, recovered by content matching of the preserved historical cache (results/mlsys2027/canonical_quality_v2/llama_identity_audit: 18 / 18 files); the accepted Exp12 evidence itself recorded only '@master' (no revision / manifest) and the historical master branch pointer was not directly recovered; equality with the Exp12 model is additionally checked by the BF16 control-reproduction gate",
   "dataset": {
     "name": "WikiText-2 test (raw text)",
     "url": "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt",
@@ -79,6 +79,26 @@
     "stepwise BF16 aggregate PPL within 0.5% (relative) of bf16_batched"
   ],
   "quality_threshold": "NONE -- the result is reported, not gated; no acceptance threshold on the RABIT delta",
+  "registered_attempt": "both models form ONE registered validation attempt, run Llama -> Qwen by run_canonical_ppl_two_model.py with no human / model-dependent decision in between; valid only if BOTH runs pass every validity gate; if either fails the whole attempt is invalid and archived; no selective rerun",
+  "interpretation_cases": {
+    "note": "preregistered before GPU execution; descriptive only; no numerical success threshold",
+    "case_1": {
+      "condition": "Llama remains near its BF16 control while Qwen still shows severe degradation.",
+      "interpretation": "the frozen operating point shows model-specific quality sensitivity; mechanism remains undiagnosed."
+    },
+    "case_2": {
+      "condition": "Both Llama and Qwen show substantial degradation relative to their BF16 controls.",
+      "interpretation": "the legacy logical evaluator materially understated canonical-RABIT quality loss, and the paper's quality story must be rebuilt."
+    },
+    "case_3": {
+      "condition": "Both Llama and Qwen remain close to their BF16 controls.",
+      "interpretation": "the severe legacy Qwen degradation was primarily an artifact of the old logical evaluator semantics."
+    },
+    "case_4": {
+      "condition": "Results are mixed or intermediate and do not cleanly fit Cases 1-3.",
+      "interpretation": "report the actual values directly without forcing a categorical narrative."
+    }
+  },
   "statistics": {
     "aggregate": "PPL = exp(total loss / total tokens) per arm",
     "delta": "100 * (exp(mean ln PPL_rabit - mean ln PPL_bf16) - 1) over the 32 windows",

@@ -2,7 +2,8 @@
 Static / offline tests of the canonical-quality-v2 continuation-PPL harness (stdlib + modal client only; no torch, no
 GPU, no model, no network). Run by run_canonical_ppl.py's preflight. The torch-dependent proofs (legacy window /
 scorer equivalence, canonical path) are in canonical_ppl_offline_proofs.py and recorded in
-results/mlsys2027/canonical_quality_v2/continuation_ppl/offline_proof_record.json.
+results/mlsys2027/canonical_quality_v2/continuation_ppl/offline_proof_record_v2.json (the first
+record, offline_proof_record.json, is SUPERSEDED: id()-keyed spy).
 """
 
 from __future__ import annotations
@@ -14,7 +15,9 @@ import importlib.util
 import json
 import math
 import sys
+import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -22,6 +25,7 @@ sys.path.insert(0, str(HERE))
 import canonical_ppl_identity as ident  # noqa: E402
 import exp14_hardware_binding as hb  # noqa: E402
 import run_canonical_ppl as runner  # noqa: E402
+import run_canonical_ppl_two_model as two  # noqa: E402
 
 CORE, MODAL, IDENT, CRQ = (HERE / n for n in ("canonical_ppl_core.py", "canonical_ppl_modal.py",
                                               "canonical_ppl_identity.py", "canonical_rabit_quality.py"))
@@ -366,8 +370,123 @@ def test_proof_code_never_keys_on_raw_addresses():
     assert all("proof_observer" not in imports(p) for p in (CORE, MODAL, IDENT, CRQ))
 
 
+# ------------------------------------------------------------------------------------------------ preregistration
+def test_interpretation_cases_are_preregistered_verbatim_without_thresholds():
+    cases = runner.load_protocol()["interpretation_cases"]
+    assert [cases[f"case_{i}"] for i in (1, 2, 3, 4)] == [
+        {"condition": "Llama remains near its BF16 control while Qwen still shows severe degradation.",
+         "interpretation": "the frozen operating point shows model-specific quality sensitivity; mechanism remains "
+                           "undiagnosed."},
+        {"condition": "Both Llama and Qwen show substantial degradation relative to their BF16 controls.",
+         "interpretation": "the legacy logical evaluator materially understated canonical-RABIT quality loss, and the "
+                           "paper's quality story must be rebuilt."},
+        {"condition": "Both Llama and Qwen remain close to their BF16 controls.",
+         "interpretation": "the severe legacy Qwen degradation was primarily an artifact of the old logical evaluator "
+                           "semantics."},
+        {"condition": "Results are mixed or intermediate and do not cleanly fit Cases 1-3.",
+         "interpretation": "report the actual values directly without forcing a categorical narrative."}]
+    assert set(cases) == {"note", "case_1", "case_2", "case_3", "case_4"}
+    text = "".join(c["condition"].replace("BF16", "").replace("Cases 1-3", "") + c["interpretation"]
+                   for c in cases.values() if isinstance(c, dict))
+    assert not any(ch.isdigit() or ch in "%<>" for ch in text)  # descriptive only: no numeric threshold
+
+
+# ------------------------------------------------------------------------------------------------ two-model orchestrator
+def _orchestrate(codes: dict, stdout: dict | None = None, pre_existing: str | None = None, archive_fails: bool = False):
+    """Run two.orchestrate against fakes in a temporary root; returns (exit code or exception, log, printed, record)."""
+    root = Path(tempfile.mkdtemp())
+    base = root / two.OUT_BASE
+    if pre_existing:
+        (base / pre_existing).mkdir(parents=True)
+    log, printed = [], []
+
+    def run(model, attempt):
+        log.append(("run", model, attempt, list(printed)))  # what had been printed when this model was launched
+        (base / model / f"attempt_{attempt}").mkdir(parents=True)
+        return SimpleNamespace(returncode=codes[model], stdout=(stdout or {}).get(model, f"STATS-{model}"), stderr="")
+
+    def archive(model, attempt):
+        log.append(("archive", model, attempt, list(printed)))
+        if archive_fails:
+            raise RuntimeError("git push failed")
+
+    try:
+        rc = two.orchestrate(1, run=run, archive=archive, root=root, out=printed.append)
+    except (SystemExit, RuntimeError) as exc:
+        rc = exc
+    rec = base / "two_model_attempt_1" / "record.json"
+    return rc, log, printed, json.loads(rec.read_text(encoding="utf-8")) if rec.is_file() else None
+
+
+def test_orchestrator_runs_llama_then_qwen_once_each_and_hides_the_first_result():
+    rc, log, printed, rec = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 0})
+    assert [e[:3] for e in log] == [("run", "llama3_1_8b", 1), ("archive", "llama3_1_8b", 1), ("run", "qwen2_5_7b", 1)]
+    assert all(e[3] == [] for e in log)  # NOTHING was printed before Qwen was launched
+    assert rc == 0 and rec["valid"] is True and rec["order"] == ["llama3_1_8b", "qwen2_5_7b"]
+    assert rec["runner_exit_codes"] == {"llama3_1_8b": 0, "qwen2_5_7b": 0} and rec["models_not_run"] == []
+    text = "\n".join(printed)
+    assert text.index("STATS-llama3_1_8b") < text.index("STATS-qwen2_5_7b")
+    assert printed[-1] == "TWO_MODEL_ATTEMPT_1_VALID=True"
+
+
+def test_orchestrator_never_branches_on_quality_values():
+    seqs = []
+    for llama_out in ('{"delta_pct": 0.01, "rabit_ppl": 7.5}', '{"delta_pct": 950.0, "rabit_ppl": 80.0}', "garbage"):
+        rc, log, _, rec = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 0}, {"llama3_1_8b": llama_out})
+        seqs.append(([e[:3] for e in log], rc, rec["valid"]))
+    assert seqs[0] == seqs[1] == seqs[2] and seqs[0][0][-1] == ("run", "qwen2_5_7b", 1)
+    src = Path(two.__file__)
+    fn = next(n for n in tree(src).body if isinstance(n, ast.FunctionDef) and n.name == "orchestrate")
+    launch = next(i for i, s in enumerate(fn.body) if isinstance(s, ast.Assign)
+                  and getattr(s.targets[0], "id", "") == "second")
+    used = {n.attr for s in fn.body[:launch + 1] for n in ast.walk(s) if isinstance(n, ast.Attribute)
+            and isinstance(n.value, ast.Name) and n.value.id == "first"}
+    assert used == {"returncode"}  # up to and including the Qwen launch only the VALIDITY exit code of Llama is read
+    assert imports(src) <= STDLIB
+    assert not (identifiers(src) & (QUANT_ARITHMETIC | {"loads", "statistics", "delta_pct", "ppl", "evaluate",
+                                                        "retry", "sleep"}))
+
+
+def test_orchestrator_does_not_change_any_scientific_argument():
+    for m in ("llama3_1_8b", "qwen2_5_7b"):
+        assert two.command(m, 3) == [sys.executable, str(HERE / "run_canonical_ppl.py"), "--execute", "--model", m,
+                                     "--attempt", "3"]
+    assert two.ORDER == ["llama3_1_8b", "qwen2_5_7b"] and set(two.ORDER) == set(ident.MODELS)
+    assert two.OUT_BASE == runner.OUT_BASE.relative_to(ROOT).as_posix()
+    assert Path(two.__file__).resolve() in runner.HARNESS
+    try:
+        two.main([])
+    except SystemExit as e:
+        assert e.code not in (0, None)
+    else:
+        raise AssertionError("ran without --execute")
+
+
+def test_orchestrator_failure_invalidates_the_whole_attempt_without_retry():
+    # Llama fails a validity gate: Qwen is not run, nothing is retried, the attempt is INVALID
+    rc, log, printed, rec = _orchestrate({"llama3_1_8b": 1, "qwen2_5_7b": 0})
+    assert [e[:2] for e in log] == [("run", "llama3_1_8b"), ("archive", "llama3_1_8b")]
+    assert rc == 1 and rec["valid"] is False and rec["models_not_run"] == ["qwen2_5_7b"] and "INVALID" in rec["status"]
+    assert printed[-1] == "TWO_MODEL_ATTEMPT_1_VALID=False"
+    # Qwen fails: each model ran exactly once; the valid Llama result does not make the attempt valid
+    rc, log, printed, rec = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 1})
+    assert [e[1] for e in log if e[0] == "run"] == ["llama3_1_8b", "qwen2_5_7b"]
+    assert rc == 1 and rec["valid"] is False and rec["runner_exit_codes"] == {"llama3_1_8b": 0, "qwen2_5_7b": 1}
+    assert "neither result is accepted evidence on its own" in rec["rule"] and "no selective rerun" in rec["rule"]
+    # a failing archive step (commit / push) propagates and Qwen is never launched
+    rc, log, _, rec = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 0}, archive_fails=True)
+    assert isinstance(rc, RuntimeError) and rec is None
+    assert [e[:2] for e in log] == [("run", "llama3_1_8b"), ("archive", "llama3_1_8b")]
+
+
+def test_orchestrator_refuses_a_partial_rerun():
+    for existing in ("llama3_1_8b/attempt_1", "qwen2_5_7b/attempt_1", "two_model_attempt_1"):
+        rc, log, printed, _ = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 0}, pre_existing=existing)
+        assert isinstance(rc, SystemExit) and "never partially rerun" in str(rc) and log == [] and printed == []
+
+
 if __name__ == "__main__":
-    tests =[(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
+    tests = [(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     failed = 0
     for name, fn in tests:
         try:

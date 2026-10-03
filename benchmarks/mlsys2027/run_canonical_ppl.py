@@ -48,10 +48,12 @@ MODAL_APP = HERE / "canonical_ppl_modal.py"
 STATIC_TESTS = HERE / "test_canonical_ppl_harness.py"
 PROTOCOL = HERE / "canonical_ppl_protocol.json"
 OUT_BASE = ROOT / "results/mlsys2027/canonical_quality_v2/continuation_ppl"
-PROOF_RECORD = OUT_BASE / "offline_proof_record.json"
+PROOF_RECORD = OUT_BASE / "offline_proof_record_v2.json"  # corrected observer; offline_proof_record.json is SUPERSEDED
+PROOF_OBSERVER = "IdentityObserver v2 (object identity + retained direct references; no id() keying)"
+TWO_MODEL = HERE / "run_canonical_ppl_two_model.py"
 SHIPPED = ["canonical_rabit_quality.py", "canonical_ppl_core.py", "canonical_ppl_identity.py", "exp14_model_snapshot.py"]
 HARNESS = [*[HERE / n for n in SHIPPED], MODAL_APP, Path(__file__).resolve(), STATIC_TESTS,
-           HERE / "canonical_ppl_offline_proofs.py", PROTOCOL, PROOF_RECORD]
+           HERE / "canonical_ppl_offline_proofs.py", HERE / "proof_observer.py", TWO_MODEL, PROTOCOL, PROOF_RECORD]
 RABIT_KV2 = ROOT / "vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py"
 RABIT_KV2_SHA256_LF = "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
 PARITY_RESULT_SHA256 = "98d3a5d9a16f83256a31d01556c9ecf26233c418f1c08e0bb971f1cb1d7f7d54"
@@ -115,10 +117,12 @@ def build_protocol() -> dict:
         "type": "logical quality (HF transformers); NOT a physical serving benchmark",
         "models": {k: {x: m[x] for x in ("model_id", "revision", "manifest_sha256", "revision_provenance", "layers",
                                          "kv_heads", "head_dim", "token_pool_sha256")} for k, m in ident.MODELS.items()},
-        "llama_identity_note": "the accepted Exp12 evidence recorded no revision / manifest (only '@master', 18 files); "
-                               "the pinned commit is the ModelScope master resolved on 2026-10-03, committed "
-                               "2025-02-26 (before every Exp1-Exp12 run); equality with the Exp12 model is additionally "
-                               "checked by the BF16 control-reproduction gate",
+        "llama_identity_note": "Exp12 loaded model bytes byte-identical to ModelScope revision "
+                               "359efdbb8af05b788a4ad4185215c6b8caa9052c, recovered by content matching of the preserved "
+                               "historical cache (results/mlsys2027/canonical_quality_v2/llama_identity_audit: 18 / 18 "
+                               "files); the accepted Exp12 evidence itself recorded only '@master' (no revision / "
+                               "manifest) and the historical master branch pointer was not directly recovered; equality "
+                               "with the Exp12 model is additionally checked by the BF16 control-reproduction gate",
         "dataset": {"name": "WikiText-2 test (raw text)", "url": ident.WIKITEXT_URL, "sha256": ident.WIKITEXT_SHA256,
                     "preprocessing": "non-empty stripped lines joined in blocks of 64; tokenizer(text, "
                                      "add_special_tokens=False) -- no BOS",
@@ -154,6 +158,23 @@ def build_protocol() -> dict:
             "accepted legacy BF16 aggregate of the same model (Llama: Exp12 log; Qwen: Exp14 quality log)",
             f"stepwise BF16 aggregate PPL within {CONTROL_REL_TOL:.1%} (relative) of bf16_batched"],
         "quality_threshold": "NONE -- the result is reported, not gated; no acceptance threshold on the RABIT delta",
+        "registered_attempt": "both models form ONE registered validation attempt, run Llama -> Qwen by "
+                              "run_canonical_ppl_two_model.py with no human / model-dependent decision in between; "
+                              "valid only if BOTH runs pass every validity gate; if either fails the whole attempt is "
+                              "invalid and archived; no selective rerun",
+        "interpretation_cases": {
+            "note": "preregistered before GPU execution; descriptive only; no numerical success threshold",
+            "case_1": {"condition": "Llama remains near its BF16 control while Qwen still shows severe degradation.",
+                       "interpretation": "the frozen operating point shows model-specific quality sensitivity; "
+                                         "mechanism remains undiagnosed."},
+            "case_2": {"condition": "Both Llama and Qwen show substantial degradation relative to their BF16 controls.",
+                       "interpretation": "the legacy logical evaluator materially understated canonical-RABIT quality "
+                                         "loss, and the paper's quality story must be rebuilt."},
+            "case_3": {"condition": "Both Llama and Qwen remain close to their BF16 controls.",
+                       "interpretation": "the severe legacy Qwen degradation was primarily an artifact of the old "
+                                         "logical evaluator semantics."},
+            "case_4": {"condition": "Results are mixed or intermediate and do not cleanly fit Cases 1-3.",
+                       "interpretation": "report the actual values directly without forcing a categorical narrative."}},
         "statistics": {"aggregate": "PPL = exp(total loss / total tokens) per arm",
                        "delta": "100 * (exp(mean ln PPL_rabit - mean ln PPL_bf16) - 1) over the 32 windows",
                        "ci": "paired percentile bootstrap over windows (Exp12 procedure and seed)", **BOOTSTRAP,
@@ -191,7 +212,7 @@ def preflight(model: str, attempt: int, execute: bool) -> dict:
         "rabit_kv2_is_frozen_source": sha256_lf(RABIT_KV2) == RABIT_KV2_SHA256_LF,
         "parity_accepted": parity.get("passed") is True and parity.get("result_sha256") == PARITY_RESULT_SHA256,
         "static_harness_tests_pass": t.returncode == 0 and bool(re.search(r"^(\d+)/\1 passed$", t.stdout, re.M)),
-        "offline_proofs_passed": proof.get("passed") is True,
+        "offline_proofs_passed": proof.get("passed") is True and proof.get("observer") == PROOF_OBSERVER,
         "offline_proofs_bound_to_current_files": bool(proof) and all(
             sha256_lf(ROOT / f) == h for f, h in proof.get("bound_file_sha256_lf", {}).items()),
         "protocol_matches": PROTOCOL.exists() and load_protocol() is not None,
