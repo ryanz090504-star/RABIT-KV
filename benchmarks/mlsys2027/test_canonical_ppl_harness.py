@@ -293,8 +293,81 @@ def test_runner_never_executes_by_default():
     assert src.count('"modal", "run"') == 1 and "return run(a.model, a.attempt)" in src
 
 
+# ------------------------------------------------------------------------------------------------ proof observer
+class _Thing:
+    """Stand-in for a layer state. Adversarial on purpose: every instance compares equal and hashes alike."""
+
+    def __eq__(self, other):
+        return True
+
+    def __hash__(self):
+        return 0
+
+
+def test_id_keyed_bookkeeping_aliases_when_an_address_is_reused():
+    """Why raw id()-keying is unsafe (the superseded spy). Deterministic part: two DISTINCT objects that present the
+    same address key (what CPython does after a free) share state. Opportunistic part: real CPython address reuse."""
+    by_address = {}
+
+    def spy_record(address, item):  # the superseded mechanism: state keyed by an address
+        by_address.setdefault(address, []).append(item)
+        return by_address[address]
+
+    dead, new = _Thing(), _Thing()
+    reused_address = 0xDEAD  # the address `dead` had, handed to `new` after `dead` was freed (simulated)
+    spy_record(reused_address, "109 tokens of the dead object")
+    assert dead is not new and spy_record(reused_address, "70 tokens of the new object") == [
+        "109 tokens of the dead object", "70 tokens of the new object"]  # stale state associated with the new object
+
+    # real interpreter: free an object, allocate another, and look for the same id() (usual in CPython; not required)
+    for _ in range(1000):
+        a = object.__new__(_Thing)
+        address, real = id(a), {}
+        real[address] = ["stale"]
+        del a
+        b = object.__new__(_Thing)
+        if id(b) == address:
+            assert real.get(id(b)) == ["stale"]  # a brand-new object inherits the dead object's bookkeeping
+            break
+
+
+def test_identity_observer_cannot_associate_stale_state_with_a_new_object():
+    from proof_observer import IdentityObserver
+
+    obs = IdentityObserver()
+    first = _Thing()
+    assert obs.record(first, "a") == 0 and obs.record(first, "b") == 0 and obs.items(first) == ["a", "b"]
+    retained_address = id(first)
+    del first  # the caller drops it; the observer still holds a direct reference, so it cannot be freed
+    fresh = [_Thing() for _ in range(2000)]
+    assert all(id(x) != retained_address for x in fresh)  # a live object's address is never handed out again
+    for x in fresh[:50]:  # equal-comparing, equal-hashing, never-observed objects get NO state
+        try:
+            obs.items(x)
+        except KeyError:
+            continue
+        raise AssertionError("state returned for an object that was never observed")
+    # new objects start empty and get their own monotonic sequence IDs; earlier state is untouched
+    assert [obs.record(x, i) for i, x in enumerate(fresh[:3])] == [1, 2, 3]
+    assert [obs.items(x) for x in fresh[:3]] == [[0], [1], [2]] and len(obs) == 4
+    assert [obs.sequence_id(x) for x in fresh[:3]] == [1, 2, 3]
+    assert obs._entries[0][1] == ["a", "b"] and all(e[0] is not x for e in obs._entries[:1] for x in fresh)
+
+
+def test_proof_code_never_keys_on_raw_addresses():
+    for name in ("canonical_ppl_offline_proofs.py", "proof_observer.py"):
+        calls = [n for n in ast.walk(tree(HERE / name)) if isinstance(n, ast.Call) and getattr(n.func, "id", "") in
+                 ("id", "hash")]
+        assert not calls, (name, [n.lineno for n in calls])
+    assert imports(HERE / "proof_observer.py") - STDLIB == set()
+    src = (HERE / "canonical_ppl_offline_proofs.py").read_text(encoding="utf-8")
+    assert "raw = IdentityObserver()" in src and "raw.items(self)" in src and "raw.record(self, " in src
+    # scoring code never sees the observer
+    assert all("proof_observer" not in imports(p) for p in (CORE, MODAL, IDENT, CRQ))
+
+
 if __name__ == "__main__":
-    tests = [(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
+    tests =[(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     failed = 0
     for name, fn in tests:
         try:

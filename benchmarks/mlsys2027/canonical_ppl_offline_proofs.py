@@ -47,11 +47,14 @@ sys.path.insert(0, str(HERE))
 import canonical_ppl_core as core  # noqa: E402
 import canonical_ppl_identity as ident  # noqa: E402
 import canonical_rabit_quality as crq  # noqa: E402
+from proof_observer import IdentityObserver  # noqa: E402  (proof bookkeeping only)
 
 LEGACY = ROOT / "benchmarks" / "quality" / "continuation_ppl.py"
 BOUND_FILES = ["benchmarks/mlsys2027/canonical_ppl_core.py", "benchmarks/mlsys2027/canonical_ppl_identity.py",
                "benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/exp14_model_snapshot.py",
-               "benchmarks/mlsys2027/canonical_ppl_offline_proofs.py", "benchmarks/quality/continuation_ppl.py"]
+               "benchmarks/mlsys2027/canonical_ppl_offline_proofs.py", "benchmarks/mlsys2027/proof_observer.py",
+               "benchmarks/quality/continuation_ppl.py"]
+OBSERVER = "IdentityObserver v2 (object identity + retained direct references; no id() keying)"
 TOKENIZER_FILES = {"llama3_1_8b": ("llama", ["tokenizer.json", "tokenizer_config.json", "special_tokens_map.json"]),
                    "qwen2_5_7b": ("qwen", ["tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt"])}
 TINY_CONTEXT, TINY_EVAL = 70, 40  # old region 66 -> 105 tokens: the third 32-token page closes during decode
@@ -200,19 +203,24 @@ def scoring_proofs(name: str, model) -> dict:
 def canonical_path_proofs(name: str, model) -> dict:
     """Spy on CanonicalLayerState inside core.score_stepwise: every decoded() equals canonical_state(all raw so far)."""
     ctx, cont = _tiny_ids(11)
-    raw, stats = {}, {"decoded_calls": 0, "mismatches": 0, "append_sizes": set(), "final_n": set(), "closed_tokens": set()}
+    # raw tokens per layer-state OBJECT (identity + retained reference; never id(): see proof_observer.py)
+    raw = IdentityObserver()
+    stats = {"decoded_calls": 0, "mismatches": 0, "stale": 0, "append_sizes": set(), "final_n": set(),
+             "closed_tokens": set()}
     append0, decoded0 = crq.CanonicalLayerState.append, crq.CanonicalLayerState.decoded
 
     def append(self, k, v):
-        pk, pv = raw.get(id(self), (None, None))
-        k16, v16 = k.detach().to(torch.bfloat16), v.detach().to(torch.bfloat16)
-        raw[id(self)] = (k16 if pk is None else torch.cat([pk, k16]), v16 if pv is None else torch.cat([pv, v16]))
+        raw.record(self, (k.detach().to(torch.bfloat16), v.detach().to(torch.bfloat16)))
         stats["append_sizes"].add(int(k.shape[0]))
         return append0(self, k, v)
 
     def decoded(self):
         dk, dv = decoded0(self)
-        ref = crq.canonical_state(*raw[id(self)])
+        chunks = raw.items(self)
+        raw_k, raw_v = torch.cat([c[0] for c in chunks]), torch.cat([c[1] for c in chunks])
+        if int(raw_k.shape[0]) != self.n:  # the observer's raw tokens are not those of this object
+            stats["stale"] += 1
+        ref = crq.canonical_state(raw_k, raw_v)
         stats["decoded_calls"] += 1
         if not (torch.equal(dk, ref["decoded_k"]) and torch.equal(dv, ref["decoded_v"])):
             stats["mismatches"] += 1
@@ -232,8 +240,11 @@ def canonical_path_proofs(name: str, model) -> dict:
            "expected_decoded_calls": 2 * layers * (1 + steps) - layers * steps,  # score: L*(1+steps); parity: L
            "state_mismatches": stats["mismatches"], "append_sizes": sorted(stats["append_sizes"]),
            "max_n": max(stats["final_n"]), "closed_tokens_seen": sorted(stats["closed_tokens"]),
-           "prefill_state_parity": parity}
+           "observed_layer_states": len(raw), "expected_observed_layer_states": 2 * layers,  # score + parity caches
+           "stale_state_associations": stats["stale"], "prefill_state_parity": parity}
     out["passed"] = (out["cache_class"] == "CanonicalRabitCache" and out["state_mismatches"] == 0
+                     and out["stale_state_associations"] == 0
+                     and out["observed_layer_states"] == out["expected_observed_layer_states"]
                      and out["decoded_calls"] == out["expected_decoded_calls"]
                      and out["append_sizes"] == [1, TINY_CONTEXT] and out["max_n"] == n_end
                      and out["closed_tokens_seen"] == [64, 96] and parity["passed"])
@@ -260,6 +271,7 @@ def main(argv=None) -> int:
                            "transformers": str(transformers.__version__)},
            "protocol": {"samples": ident.SAMPLES, "context_tokens": ident.CONTEXT_TOKENS,
                         "eval_tokens": ident.EVAL_TOKENS, "policy": crq.POLICY},
+           "observer": OBSERVER,
            "bound_file_sha256_lf": {f: sha256_lf(ROOT / f) for f in BOUND_FILES},
            "W_dataset_windows": w, "S_scoring": s, "C_canonical_path": c}
     rec["passed"] = w["passed"] and all(x["passed"] for x in s.values()) and all(x["passed"] for x in c.values())
