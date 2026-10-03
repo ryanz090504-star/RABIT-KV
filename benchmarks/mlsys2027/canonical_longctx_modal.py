@@ -18,6 +18,10 @@ unconditionally. While the tasks run it prints ONLY progress lines (task, positi
 no aggregate. Predictions and scores leave the container only in the returned payload (and, best-effort, as raw rows
 in a crash-recovery volume that nothing reads during the run).
 The result crosses the RPC boundary as ONE strict-JSON str (parity Attempt 3 transport rule).
+
+SMOKE TEST (smoke_test=True; orchestration only, NOT a quality run): the same container performs every identity step
+above, writes and commits one line to the crash-recovery volume, and RETURNS BEFORE the model is loaded -- no forward
+pass, no generation, no BF16 / RABIT pair, no score; the task lists of its payload are empty.
 """
 
 from __future__ import annotations
@@ -44,7 +48,7 @@ VALIDATED_RUNTIME = {"python_minor": "3.11", "torch": "2.11.0+cu130", "torch_cud
                      "cuda_device": "NVIDIA H100 80GB HBM3", "transformers": "4.48.2"}
 SUITE_TIMEOUT_S = 12 * 3600
 JSON_NATIVE = (dict, list, str, int, float, bool, type(None))
-RESULT_KEYS = ("hardware", "environment", "runtime_environment", "files", "model", "datasets", "prompt_sets", "geometry",
+RESULT_KEYS = ("smoke_test", "hardware", "environment", "runtime_environment", "files", "model", "datasets", "prompt_sets", "geometry",
                "policy", "task_order", "tasks", "legacy_unreachable", "artifact_persistence", "timing")
 
 app = modal.App("rabit-kv-canonical-quality-v2-longctx")
@@ -107,7 +111,7 @@ def validate_payload(payload) -> dict:
 
 @app.function(image=image, gpu="H100!:1", timeout=SUITE_TIMEOUT_S,
               volumes={"/model_cache": model_cache, "/artifacts": artifacts})
-def run_suite(attempt: int, expected_file_sha256_lf: dict) -> str:
+def run_suite(attempt: int, expected_file_sha256_lf: dict, smoke_test: bool = False) -> str:
     _gpus = _gpu_query()
     _hw_ok = (len(_gpus) == 1 and "H100" in _gpus[0].get("name", "")
               and 79 * 1024 <= int(float(_gpus[0].get("memory.total", 0))) <= 82 * 1024)
@@ -216,6 +220,35 @@ def run_suite(attempt: int, expected_file_sha256_lf: dict) -> str:
     if not all(p["passed"] for p in prompt_sets.values()):
         raise RuntimeError("a prompt set differs from the pinned identity; no model loaded")
 
+    if smoke_test:  # plumbing only: stop BEFORE the model is loaded; nothing is forwarded, generated or scored
+        smoke_path, smoke = f"/artifacts/smoke_test_{attempt}/smoke.jsonl", {"line_written": False, "committed": False}
+        os.makedirs(os.path.dirname(smoke_path), exist_ok=True)
+        with open(smoke_path, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"smoke_test": attempt, "prompt_sets": prompt_sets}) + "\n")
+        smoke["line_written"] = True
+        artifacts.commit()
+        smoke["committed"] = True
+        loaded = sorted(n for n in sys.modules if n.split(".")[0] in FORBIDDEN_MODULES)
+        res = {"kind": "canonical-quality-v2 long-context suite -- PLUMBING SMOKE TEST (no model load, no inference, no "
+                       "score; NOT a quality result)",
+               "smoke_test": True, "attempt": attempt, "model_key": MODEL_KEY, "model": verification,
+               "hardware": {"gpus": _gpus, "passed": _hw_ok}, "environment": environment,
+               "runtime_environment": {"runtime": runtime, "validated": dict(VALIDATED_RUNTIME), "passed": runtime_ok},
+               "files": {"sha256_lf": file_sha, "passed": files_ok}, "datasets": datasets_info, "prompt_sets": prompt_sets,
+               "geometry": None, "policy": dict(crq.POLICY), "task_order": list(TASK_ORDER),
+               "tasks": {task: [] for task in TASK_ORDER},
+               "tokenizer": {"class": type(tokenizer).__name__, "eos_token": str(tokenizer.eos_token),
+                             "eos_token_id": tokenizer.eos_token_id},
+               "imports": {"generation_core_arms": list(core.ARMS), "datasets": str(md.version("datasets")),
+                           "pyarrow": str(md.version("pyarrow")), "huggingface_hub": str(md.version("huggingface_hub"))},
+               "model_loaded": False, "forward_passes": 0, "units_prepared": {t: len(units[t]) for t in TASK_ORDER},
+               "legacy_unreachable": {"forbidden_modules_loaded": loaded, "repo_files": repo_files, "passed": not loaded},
+               "artifact_persistence": {"path": smoke_path, **smoke},
+               "timing": {"total_seconds": time.time() - t_start}}
+        assert_json_native(res)
+        _emit("CANONICAL_LONGCTX_SMOKE", {"completed": True, "model_loaded": False, "forward_passes": 0})
+        return json.dumps(res, ensure_ascii=False, allow_nan=False)
+
     # ---- model (same loading / seed / TF32 settings as the legacy protocol)
     torch.manual_seed(0)
     torch.cuda.manual_seed_all(0)
@@ -299,7 +332,8 @@ def run_suite(attempt: int, expected_file_sha256_lf: dict) -> str:
         raise RuntimeError(f"legacy modules were imported: {loaded}")
 
     res = {"kind": "canonical-quality-v2 long-context suite (logical quality; NOT physical serving evidence)",
-           "attempt": attempt, "model_key": MODEL_KEY, "model": verification, "hardware": {"gpus": _gpus, "passed": _hw_ok},
+           "smoke_test": False, "attempt": attempt, "model_key": MODEL_KEY, "model": verification,
+           "hardware": {"gpus": _gpus, "passed": _hw_ok},
            "environment": environment,
            "runtime_environment": {"runtime": runtime, "validated": dict(VALIDATED_RUNTIME), "passed": runtime_ok},
            "files": {"sha256_lf": file_sha, "passed": files_ok}, "datasets": datasets_info, "prompt_sets": prompt_sets,
@@ -315,9 +349,9 @@ def run_suite(attempt: int, expected_file_sha256_lf: dict) -> str:
 
 
 @app.local_entrypoint()
-def main(attempt: int):
+def main(attempt: int, smoke_test: bool = False):
     expected = json.loads(os.environ[EXPECTED_SHA_ENV])
-    payload = run_suite.remote(attempt, expected)
+    payload = run_suite.remote(attempt, expected, smoke_test)
     res = validate_payload(payload)
     data = payload.encode("utf-8")
     path = os.environ[RESULT_PATH_ENV]

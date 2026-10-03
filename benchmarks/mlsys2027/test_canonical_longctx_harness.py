@@ -190,8 +190,9 @@ def test_no_treatment_result_is_exposed_between_tasks():
     assert rsrc.count('"modal", "run"') == 1
     run_fn = next(n for n in tree(Path(runner.__file__)).body if isinstance(n, ast.FunctionDef) and n.name == "run")
     prints = [n for n in ast.walk(run_fn) if isinstance(n, ast.Call) and getattr(n.func, "id", "") == "print"]
-    assert len(prints) == 1 and run_fn.body.index(next(s for s in run_fn.body if prints[0] in list(ast.walk(s)))) > \
-        run_fn.body.index(next(s for s in run_fn.body if "evaluate(res)" in ast.unparse(s)))
+    evaluated = run_fn.body.index(next(s for s in run_fn.body if "evaluate(res)" in ast.unparse(s)))
+    assert len(prints) == 2 and all(  # the smoke-test summary and the suite summary: both after evaluation
+        run_fn.body.index(next(s for s in run_fn.body if pr in list(ast.walk(s)))) > evaluated for pr in prints)
 
 
 def test_no_result_dependent_control_flow_in_the_container():
@@ -308,8 +309,69 @@ def test_cuda_conformance_prerequisites_are_pinned():
         runner.CONFORMANCE.update(saved)
 
 
+# ------------------------------------------------------------------------------------------------ plumbing smoke test
+def _smoke_payload() -> dict:
+    m = ident.MODELS["llama3_1_8b"]
+    return {"smoke_test": True,
+            "model": {"passed": True, "model_revision": m["revision"], "manifest_sha256": m["manifest_sha256"],
+                      "files_checked": len(m["files"])},
+            "hardware": {"passed": True, "gpus": [{"name": "NVIDIA H100 80GB HBM3", "memory.total": "81559"}]},
+            "runtime_environment": {"runtime": dict(runner.VALIDATED_RUNTIME), "passed": True},
+            "files": {"passed": True, "sha256_lf": {n: runner.sha256_lf(HERE / n) for n in runner.SHIPPED}},
+            "datasets": {"wikitext_sha256": tasks.WIKITEXT_SHA256,
+                         **{k: {"sha256": d["sha256"], "bytes": d["bytes"], "rows": d["rows"]} for k, d in tasks.DATASETS.items()}},
+            "prompt_sets": {k: {**pins.PROMPT_SETS[k], "passed": True} for k in runner.TASK_ORDER},
+            "units_prepared": dict(runner.COUNTS), "tokenizer": {"eos_token": "<|eot_id|>", "eos_token_id": 128009},
+            "imports": {"generation_core_arms": ["bf16", "rabit"], "datasets": "x", "pyarrow": "x", "huggingface_hub": "x"},
+            "model_loaded": False, "forward_passes": 0, "geometry": None,
+            "tasks": {k: [] for k in runner.TASK_ORDER}, "task_order": list(runner.TASK_ORDER),
+            "legacy_unreachable": {"passed": True, "repo_files": sorted(f"benchmarks/mlsys2027/{n}" for n in runner.SHIPPED)},
+            "artifact_persistence": {"line_written": True, "committed": True}}
+
+
+def test_smoke_test_stops_before_the_model_and_runs_no_benchmark_inference():
+    fn = run_suite_def()
+    smoke = next(s for s in fn.body if isinstance(s, ast.If) and ast.unparse(s.test) == "smoke_test")
+    load = next(i for i, s in enumerate(fn.body) if "AutoModelForCausalLM.from_pretrained(" in ast.unparse(s))
+    assert fn.body.index(smoke) < load < fn.body.index(task_loop(fn))  # before the model is even loaded
+    assert isinstance(smoke.body[-1], ast.Return) and not smoke.orelse
+    code = ast.unparse(smoke)
+    for forbidden in ("core.generate", "run_arm", "model(", "from_pretrained", "tasks.score", "niah_score", "argmax",
+                      "past_key_values", "make_canonical_cache_class", "CanonicalRabitCache"):
+        assert forbidden not in code, forbidden
+    assert "'model_loaded': False" in code and "'forward_passes': 0" in code and "{task: [] for task in TASK_ORDER}" in code
+    assert not [n for n in ast.walk(smoke) if isinstance(n, (ast.For, ast.While))]  # no loop over any unit
+    # the registered-suite path is untouched by the flag: it is read exactly once, to return early
+    assert [ast.unparse(n.test) for n in ast.walk(fn) if isinstance(n, (ast.If, ast.IfExp)) and "smoke_test" in ast.unparse(n.test)] == ["smoke_test"]
+    ev = runner.evaluate_smoke(_smoke_payload(), True)
+    assert ev["valid"] and len(ev["checks"]) == 15
+    for mutate, check in ((lambda r: r.update(model_loaded=True), "no_model_load_no_inference"),
+                          (lambda r: r.update(forward_passes=1), "no_model_load_no_inference"),
+                          (lambda r: r["tasks"]["niah"].append({"index": 0}), "no_benchmark_rows"),
+                          (lambda r: r["prompt_sets"]["hotpotqa"].update(prompt_set_sha256="0" * 64), "prompt_sets"),
+                          (lambda r: r["artifact_persistence"].update(committed=False), "artifact_volume_written_and_committed"),
+                          (lambda r: r.update(smoke_test=False), "is_smoke_test")):
+        r = _smoke_payload()
+        mutate(r)
+        e = runner.evaluate_smoke(r, True)
+        assert not e["valid"] and e["checks"][check] is False, check
+    assert not runner.evaluate_smoke(_smoke_payload(), False)["valid"]
+    # a smoke payload can never be evaluated as a valid suite, and the smoke output directory is separate
+    full = runner.evaluate({**_synthetic("same"), "tasks": {k: [] for k in runner.TASK_ORDER}})
+    assert not full["valid"] and full["gates"]["structure"] is False
+    src = Path(runner.__file__).read_text(encoding="utf-8")
+    assert 'f"smoke_test_{attempt}" if smoke_test else f"attempt_{attempt}"' in src
+
+
 # ------------------------------------------------------------------------------------------------ gates / evaluation
-def test_bf16_control_gates_are_the_accepted_exp12_rules():
+def test_bf16_validity_checks_are_adapted_from_the_exp12_canonical_subset_checks():
+    wording = "BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks."
+    p = runner.load_protocol()
+    assert runner.BF16_CHECK_WORDING == p["bf16_validity_checks"]["description"] == wording
+    assert "not literal reproductions" in p["bf16_validity_checks"]["relation_to_exp12"]
+    assert p["bf16_validity_checks"]["rabit_quality_determines_validity"] is False
+    assert p["bf16_validity_checks"]["validity_depends_on"] == ["BF16", "infrastructure", "provenance"]
+    assert not [g for g in p["validity_gates"] if "Exp12 rule" in g or "BF16 control" in g]
     proto = json.loads(runner.read(runner.EXP12_PROTOCOL))["validity"]
     assert proto["continuation_ppl_niah_passage_retrieval"]["tolerances"]["accuracy_pct"] == {"absolute_points": 1.0}
     assert proto["continuation_ppl_niah_passage_retrieval"]["targets"]["niah"]["bf16"]["accuracy_pct"] == 100.0
@@ -323,10 +385,13 @@ def test_bf16_control_gates_are_the_accepted_exp12_rules():
         e = runner.exp12_rows(task)
         g = runner.bf16_subset_gate(task, [x["key"] for x in e["rows"]["bf16"]], [x["value"] for x in e["rows"]["bf16"]])
         assert g["passed"] and g["canonical_subset_units"] == units and g["observed_accuracy_pct"] == 100.0
+        assert g["rule"] == wording and "bf16 and rabit2" in g["historical_exp12_rule"]  # the historical text is quoted,
+        assert g["arm"] == "bf16 only (no RABIT gate)"  # ... not claimed as this gate
         bad = [0.0 if i < 2 else v for i, v in enumerate([x["value"] for x in e["rows"]["bf16"]])]
         assert task == "niah" or not runner.bf16_subset_gate(task, [x["key"] for x in e["rows"]["bf16"]], bad)["passed"]
     e = runner.exp12_rows("hotpotqa")
     g = runner.bf16_hotpot_gate(e["identity"], [x["value"] for x in e["rows"]["bf16"]])
+    assert g["rule"] == wording and g["arm"] == "bf16 only (no RABIT gate)"
     assert g["passed"] and g["n_canonical_subset"] == 20 and (g["score_mismatch_count"], g["score_mismatch_indices"],
                                                              g["l1_score_distance"]) == (1, [3], 0.035)  # = Exp12 record
     scores = [x["value"] for x in e["rows"]["bf16"]]
@@ -462,7 +527,7 @@ def test_evaluate_rejects_each_invalid_condition():
 
 
 def test_runner_never_executes_by_default_and_registered_suite_rule():
-    for argv in ([], ["--dry-run", "--execute"]):
+    for argv in ([], ["--dry-run", "--execute"], ["--smoke-test", "--execute"], ["--smoke-test", "--dry-run"]):
         try:
             runner.main(argv)
         except SystemExit as e:

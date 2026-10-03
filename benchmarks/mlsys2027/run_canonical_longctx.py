@@ -5,17 +5,20 @@ evidence). ONE registered suite = ONE container invocation running, in fixed ord
 prompt token ids, with the frozen legacy Exp12 prompts, selection, truncation, greedy generation schedule and scorers
 (canonical_longctx_tasks.py / canonical_longctx_core.py; canonical_rabit_quality.py is the only RABIT implementation).
 
-Validity gates depend ONLY on infrastructure, hardware / runtime, model and dataset identity, harness integrity and the
-accepted Exp12 BF16 CONTROL rules. No gate reads a RABIT quality value, and there is no quality threshold:
-    NIAH               BF16 accuracy on the 15-case canonical subset within 1.0 point of 100.0   (Exp12 rule)
-    Passage Retrieval  BF16 score on the 10-row canonical subset within 1.0 point of 100.0        (Exp12 rule)
-    HotpotQA           frozen per-example QA control gate on the first 20 examples vs results/quality/hotpotqa.log:
-                       BF16 score mismatches <= 1 and L1 <= 0.065                                 (amendment 86b03ea)
+Validity gates depend ONLY on infrastructure, hardware / runtime, model and dataset identity, harness integrity and
+BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks. (The historical checks
+compared BOTH bf16 and the legacy rabit2 with the canonical targets; here ONLY the BF16 arm is checked, with the
+historical subsets and tolerances unchanged.) No gate reads a RABIT quality value, and there is no quality threshold:
+    NIAH               BF16 accuracy on the 15-case canonical subset within 1.0 point of 100.0
+    Passage Retrieval  BF16 score on the 10-row canonical subset within 1.0 point of 100.0
+    HotpotQA           per-example check on the first 20 examples vs results/quality/hotpotqa.log:
+                       BF16 score mismatches <= 1 and L1 <= 0.065 (thresholds of amendment 86b03ea)
 If any gate fails the WHOLE suite is INVALID (archive; no selective rerun; no retry).
 
 Usage:
     python benchmarks/mlsys2027/run_canonical_longctx.py --write-protocol                (once, before commit)
     python benchmarks/mlsys2027/run_canonical_longctx.py --dry-run
+    python benchmarks/mlsys2027/run_canonical_longctx.py --smoke-test --attempt 1        (plumbing only; no inference)
     python benchmarks/mlsys2027/run_canonical_longctx.py --execute --attempt 1           (ONLY when authorized)
 """
 
@@ -70,6 +73,7 @@ EXP12_LOG = {t: f"results/mlsys2027/variance/{t}.log" for t in TASK_ORDER}  # ac
 REFERENCE_LOG = {t: f"results/quality/{t}.log" for t in TASK_ORDER}  # the canonical-subset control reference
 EXP12_PROTOCOL = "benchmarks/mlsys2027/exp12_variance_protocol.json"
 QA_AMENDMENT = "results/mlsys2027/control_reproducibility_audit/qa_control_gate_amendment.json"
+BF16_CHECK_WORDING = "BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks."
 BOOTSTRAP = {"resamples": 10000, "confidence": 0.95, "seed": {"passage_retrieval": 20270931, "hotpotqa": 20270932}}
 SUITE_TIMEOUT_S = 12 * 3600
 WALL_CLOCK_S = SUITE_TIMEOUT_S + 1800
@@ -96,7 +100,7 @@ FROZEN = {
                                                                            "benchmarks/mlsys2027/exp14_model_snapshot.py"]),
     "accepted_ppl_attempt_2_bae70af": ("bae70af", ["results/mlsys2027/canonical_quality_v2/continuation_ppl"]),
     "llama_cuda_conformance_ec80638": ("ec80638", [f"{CONFORMANCE_BASE}/attempt_1"]),
-    "llama_16k_cuda_conformance_2637457": ("2637457", [f"{CONFORMANCE_BASE}/llama3_1_8b_niah_16384"]),
+    "llama_16k_cuda_conformance_2637457": ("2637457", [f"{CONFORMANCE_BASE}/llama3_1_8b_niah_16384/attempt_1"]),
 }
 APP_RE = re.compile(r"ap-[A-Za-z0-9]{20,}")
 NIAH_CASE_RE = re.compile(r"^\s+(\S+)\s+(PASS|FAIL)\s+KV=[0-9.]+ MB Comp=[0-9.]+x answer=(.*)$")
@@ -198,15 +202,17 @@ def milli(score: float) -> int:
 
 # ------------------------------------------------------------------------------------- BF16 control gates (Exp12)
 def bf16_subset_gate(task: str, keys: list, bf16_values: list) -> dict:
-    """The accepted Exp12 control rule for NIAH / Passage Retrieval, BF16 only: on the canonical subset (the units of
-    results/quality/<task>.log) the BF16 aggregate reproduces the canonical target within the Exp1 tolerance."""
+    """BF16-only validity check adapted from the historical Exp12 canonical-subset sanity check (NIAH / Passage
+    Retrieval): on the canonical subset (the units of results/quality/<task>.log) the BF16 aggregate lies within the
+    historical tolerance of the historical canonical target. The legacy rabit2 half of the historical check is not used."""
     proto = json.loads(read(EXP12_PROTOCOL))["validity"]["continuation_ppl_niah_passage_retrieval"]
     target = proto["targets"][task]["bf16"]["accuracy_pct"]
     tol = proto["tolerances"]["accuracy_pct"]["absolute_points"]
     ref_keys = [x["key"] for x in pb.extract(task, read(REFERENCE_LOG[task]))["bf16"]]
     by_key = {json.dumps(k): v for k, v in zip(keys, bf16_values)}
     present = all(json.dumps(k) in by_key for k in ref_keys) and (task == "niah" or keys[:len(ref_keys)] == ref_keys)
-    out = {"rule": proto["rule"], "arm": "bf16 only (no RABIT gate)", "canonical_subset_units": len(ref_keys),
+    out = {"rule": BF16_CHECK_WORDING, "historical_exp12_rule": proto["rule"], "arm": "bf16 only (no RABIT gate)",
+           "canonical_subset_units": len(ref_keys),
            "target_accuracy_pct": target, "tolerance_absolute_points": tol, "canonical_subset_units_present": present}
     if present:
         agg = pb.aggregate(task, [by_key[json.dumps(k)] for k in ref_keys])
@@ -217,13 +223,16 @@ def bf16_subset_gate(task: str, keys: list, bf16_values: list) -> dict:
 
 
 def bf16_hotpot_gate(identity: list, bf16_scores: list) -> dict:
-    """The frozen per-example QA control gate (amendment 86b03ea) on the canonical subset (first 20 examples), BF16
-    only: identical dataset indices / token counts / ground truths, score mismatches and L1 within the frozen maxima."""
+    """BF16-only validity check adapted from the historical Exp12 canonical-subset sanity check (HotpotQA): the
+    per-example QA control gate of amendment 86b03ea on the first 20 examples, BF16 arm only: identical dataset indices /
+    token counts / ground truths, score mismatches and L1 within the frozen maxima."""
     thr = json.loads(read(QA_AMENDMENT))["thresholds"]["hotpotqa"]["bf16"]
     ref = exp12_rows("hotpotqa", REFERENCE_LOG["hotpotqa"])
     rr, n_ref = ref["rows"]["bf16"], len(ref["rows"]["bf16"])
     ident_ok = identity[:n_ref] == ref["identity"]
-    out = {"rule": "frozen per-example QA control gate on the canonical subset (results/quality/hotpotqa.log)",
+    out = {"rule": BF16_CHECK_WORDING,
+           "historical_exp12_rule": "frozen per-example QA control gate on the canonical subset "
+                                    "(results/quality/hotpotqa.log), applied in Exp12 to bf16 and legacy rabit2",
            "arm": "bf16 only (no RABIT gate)", "n_canonical_subset": n_ref, "canonical_subset_identity": ident_ok,
            "max_allowed_mismatch_count": thr["historical_max_score_mismatch_count"],
            "max_allowed_l1_score_distance": thr["historical_max_l1_score_distance"]}
@@ -367,9 +376,18 @@ def build_protocol() -> dict:
             "every LongBench example equals the Exp12 log (dataset index, original / used token counts, ground truth); "
             "NIAH cases equal the Exp12 grid",
             "no legacy quality module imported in the container; only the shipped files present",
-            "BF16 control, NIAH: 15-case canonical subset accuracy within 1.0 point of 100.0 (Exp12 rule)",
-            "BF16 control, Passage Retrieval: 10-row canonical subset score within 1.0 point of 100.0 (Exp12 rule)",
-            "BF16 control, HotpotQA: frozen per-example gate on the first 20 examples: mismatches <= 1, L1 <= 0.065"],
+            "BF16 validity check, NIAH: 15-case canonical subset accuracy within 1.0 point of 100.0",
+            "BF16 validity check, Passage Retrieval: 10-row canonical subset score within 1.0 point of 100.0",
+            "BF16 validity check, HotpotQA: per-example check on the first 20 examples: mismatches <= 1, L1 <= 0.065"],
+        "bf16_validity_checks": {
+            "description": BF16_CHECK_WORDING,
+            "relation_to_exp12": "the historical Exp12 checks compared BOTH bf16 and the legacy rabit2 with the canonical "
+                                 "targets; here ONLY the BF16 arm is checked. The historical subsets (15 NIAH cases, 10 "
+                                 "Passage Retrieval rows, first 20 HotpotQA examples), targets and tolerances are "
+                                 "unchanged. They are not literal reproductions of the Exp12 gates.",
+            "role": "validity / sanity only; never a quality-success threshold",
+            "validity_depends_on": ["BF16", "infrastructure", "provenance"],
+            "rabit_quality_determines_validity": False},
         "rabit_quality_gate": "NONE -- no gate reads a RABIT score; a valid suite is never rejected for RABIT quality",
         "quality_threshold": "NONE -- no definition of preserved / healthy / acceptable; exact values are reported",
         "statistics": {"niah": "deterministic grid only (no inferential statistics): exact-retrieval counts overall and "
@@ -393,7 +411,7 @@ def load_protocol() -> dict:
     return committed
 
 
-def preflight(attempt: int, execute: bool) -> dict:
+def preflight(attempt: int, execute: bool, smoke_test: bool = False) -> dict:
     t = subprocess.run([sys.executable, str(STATIC_TESTS)], capture_output=True, text=True, encoding="utf-8",
                        errors="replace", env=env(), timeout=1800)
     proof = json.loads(PROOF_RECORD.read_text(encoding="utf-8")) if PROOF_RECORD.exists() else {}
@@ -414,7 +432,7 @@ def preflight(attempt: int, execute: bool) -> dict:
         "protocol_matches": PROTOCOL.exists() and load_protocol() is not None,
         **{f"cuda_conformance_accepted_{k}": all(v is True for v in conformance_evidence(k).values())
            for k in sorted(CONFORMANCE)},
-        "attempt_dir_absent": not (OUT_BASE / f"attempt_{attempt}").exists(),
+        "attempt_dir_absent": not (OUT_BASE / (f"smoke_test_{attempt}" if smoke_test else f"attempt_{attempt}")).exists(),
     }
     if execute and not all(checks.values()):
         raise SystemExit(f"pre-run validation failed: {json.dumps(checks, indent=1)}\nstatic tests: {t.stdout[-1500:]}")
@@ -555,22 +573,58 @@ def statistics(t_: dict) -> dict:
     return out
 
 
-def run(attempt: int) -> int:
-    checks = preflight(attempt, execute=True)
-    out = OUT_BASE / f"attempt_{attempt}"
+def evaluate_smoke(res: dict, artifact_copied: bool) -> dict:
+    """Plumbing checks of a smoke-test payload: identity steps passed, nothing was loaded, forwarded or scored."""
+    m = ident.MODELS[MODEL_KEY]
+    checks = {
+        "is_smoke_test": res.get("smoke_test") is True,
+        "hardware": res["hardware"]["passed"] is True and ident.hardware_ok(res["hardware"]["gpus"]),
+        "runtime_environment": res["runtime_environment"]["passed"] is True
+        and res["runtime_environment"]["runtime"] == VALIDATED_RUNTIME,
+        "shipped_files": res["files"]["passed"] is True
+        and res["files"]["sha256_lf"] == {n: sha256_lf(HERE / n) for n in SHIPPED},
+        "model_snapshot_verified": res["model"]["passed"] is True and res["model"]["model_revision"] == m["revision"]
+        and res["model"]["manifest_sha256"] == m["manifest_sha256"] and res["model"]["files_checked"] == len(m["files"]),
+        "datasets": res["datasets"]["wikitext_sha256"] == tasks.WIKITEXT_SHA256 and all(
+            res["datasets"][k]["sha256"] == tasks.DATASETS[k]["sha256"] and res["datasets"][k]["bytes"] == tasks.DATASETS[k]["bytes"]
+            and res["datasets"][k]["rows"] == tasks.DATASETS[k]["rows"] for k in tasks.DATASETS),
+        "prompt_sets": all(res["prompt_sets"][k]["passed"] is True and {x: res["prompt_sets"][k][x] for x in (
+            "units", "prompt_set_sha256")} == pins.PROMPT_SETS[k] for k in TASK_ORDER),
+        "units_prepared": res.get("units_prepared") == COUNTS,
+        "tokenizer": res["tokenizer"]["eos_token"] == "<|eot_id|>" and res["tokenizer"]["eos_token_id"] is not None,
+        "imports": res["imports"]["generation_core_arms"] == ARMS and all(res["imports"][k] for k in (
+            "datasets", "pyarrow", "huggingface_hub")),
+        "no_model_load_no_inference": res.get("model_loaded") is False and res.get("forward_passes") == 0
+        and res["geometry"] is None,
+        "no_benchmark_rows": res["tasks"] == {k: [] for k in TASK_ORDER} and res["task_order"] == TASK_ORDER,
+        "legacy_unreachable": res["legacy_unreachable"]["passed"] is True
+        and res["legacy_unreachable"]["repo_files"] == sorted(f"benchmarks/mlsys2027/{n}" for n in SHIPPED),
+        "artifact_volume_written_and_committed": res["artifact_persistence"].get("line_written") is True
+        and res["artifact_persistence"].get("committed") is True,
+        "artifact_copied_locally": artifact_copied,
+    }
+    return {"checks": checks, "valid": all(checks.values()) and len(checks) == 15}
+
+
+def run(attempt: int, smoke_test: bool = False) -> int:
+    checks = preflight(attempt, execute=True, smoke_test=smoke_test)
+    out = OUT_BASE / (f"smoke_test_{attempt}" if smoke_test else f"attempt_{attempt}")
     out.mkdir(parents=True, exist_ok=False)
     result_tmp = Path(tempfile.mkdtemp()) / "result.json"
     e = env()
     e["CANONICAL_LONGCTX_RESULT_PATH"] = str(result_tmp)
     e["CANONICAL_LONGCTX_EXPECTED_FILE_SHA256_LF"] = json.dumps({n: sha256_lf(HERE / n) for n in SHIPPED})
-    rec = {"kind": "canonical-quality-v2 long-context suite (logical quality; NOT physical serving evidence)",
+    rec = {"kind": "canonical-quality-v2 long-context suite -- PLUMBING SMOKE TEST (no inference; NOT a quality result)"
+           if smoke_test else "canonical-quality-v2 long-context suite (logical quality; NOT physical serving evidence)",
+           "smoke_test": smoke_test,
            "attempt": attempt, "source_commit": git("rev-parse", "HEAD"),
            "started_utc": dt.datetime.now(dt.timezone.utc).isoformat(), "preflight": checks,
            "protocol_sha256_lf": sha256_lf(PROTOCOL), "harness_sha256_lf": {rel(p): sha256_lf(p) for p in HARNESS},
            "wall_clock_s": WALL_CLOCK_S}
     pre, t0, parsed = apps(), time.time(), set()
     with (out / "session.log").open("w", encoding="utf-8") as fh:
-        proc = subprocess.Popen([sys.executable, "-m", "modal", "run", str(MODAL_APP), "--attempt", str(attempt)],
+        proc = subprocess.Popen([sys.executable, "-m", "modal", "run", str(MODAL_APP), "--attempt", str(attempt),
+                                 *(["--smoke-test"] if smoke_test else [])],
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8",
                                 errors="replace", env=e, cwd=ROOT)
 
@@ -593,24 +647,35 @@ def run(attempt: int) -> int:
     cleanup = poll_cleanup(new, apps, lambda a: subprocess.run([sys.executable, "-m", "modal", "app", "stop", "-y", a],
                                                                env=env(), capture_output=True, timeout=180))
     # best-effort copy of the incremental raw rows written by the container (crash-recovery / provenance only)
+    art_name = ("smoke.jsonl", f"smoke_test_{attempt}/smoke.jsonl") if smoke_test else (
+        "incremental_rows.jsonl", f"attempt_{attempt}/rows.jsonl")
     art = subprocess.run([sys.executable, "-m", "modal", "volume", "get", "--force", ARTIFACT_VOLUME,
-                          f"attempt_{attempt}/rows.jsonl", str(out / "incremental_rows.jsonl")], env=env(),
+                          art_name[1], str(out / art_name[0])], env=env(),
                          capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=900)
     res = ev = None
     if result_tmp.is_file():
         (out / "result.json").write_bytes(result_tmp.read_bytes())
         res = json.loads((out / "result.json").read_bytes().decode("utf-8"))
-        ev = evaluate(res)
+        if smoke_test:
+            ev = evaluate_smoke(res, art.returncode == 0 and (out / art_name[0]).is_file())
+        else:
+            ev = evaluate(res)
     process_ok = rc == 0 and not timed_out and cleanup["verified"]
     valid = bool(process_ok and ev and ev["valid"])
     rec.update(completed_utc=dt.datetime.now(dt.timezone.utc).isoformat(), elapsed_s=round(time.time() - t0, 1),
                modal_returncode=rc, timed_out=timed_out, app_ids_new=new, cleanup=cleanup, process_ok=process_ok,
-               incremental_rows_copied=art.returncode == 0 and (out / "incremental_rows.jsonl").is_file(),
+               incremental_rows_copied=art.returncode == 0 and (out / art_name[0]).is_file(),
                result_sha256=hashlib.sha256((out / "result.json").read_bytes()).hexdigest() if res else None,
                gpu=res["hardware"]["gpus"] if res else None, evaluation=ev, valid=valid,
-               status="valid (awaiting review; not accepted evidence until reviewed)" if valid
+               status=("smoke test passed (plumbing only; NOT evidence)" if valid else "smoke test FAILED") if smoke_test
+               else "valid (awaiting review; not accepted evidence until reviewed)" if valid
                else "INVALID registered suite (archive; no selective rerun; never pool)")
     (out / "record.json").write_text(json.dumps(rec, indent=2) + "\n", encoding="utf-8", newline="\n")
+    if smoke_test:
+        print(json.dumps({"smoke_test": attempt, "valid": valid, "modal_returncode": rc, "timed_out": timed_out,
+                          "app_ids": new, "cleanup_verified": cleanup["verified"],
+                          "checks": ev["checks"] if ev else None}, indent=1))
+        return 0 if valid else 1
     st = ev.get("statistics") if ev else None
     print(json.dumps({"attempt": attempt, "valid": valid, "modal_returncode": rc, "timed_out": timed_out,
                       "gates": ev["gates"] if ev else None,
@@ -627,6 +692,8 @@ def main(argv=None) -> int:
     ap.add_argument("--attempt", type=int, default=1)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--execute", action="store_true", help="launch the GPU suite (ONLY when explicitly authorized)")
+    ap.add_argument("--smoke-test", action="store_true", help="plumbing smoke test: identity steps only, no model "
+                                                              "load, no inference, no score")
     ap.add_argument("--write-protocol", action="store_true")
     a = ap.parse_args(argv)
     if a.write_protocol:
@@ -635,8 +702,10 @@ def main(argv=None) -> int:
         PROTOCOL.write_text(json.dumps(build_protocol(), indent=2) + "\n", encoding="utf-8", newline="\n")
         print(f"wrote {rel(PROTOCOL)}")
         return 0
-    if a.dry_run == a.execute:
-        raise SystemExit("exactly one of --dry-run / --execute is required")
+    if a.dry_run + a.execute + a.smoke_test != 1:
+        raise SystemExit("exactly one of --dry-run / --execute / --smoke-test is required")
+    if a.smoke_test:
+        return run(a.attempt, smoke_test=True)
     if a.dry_run:
         checks = preflight(a.attempt, execute=False)
         print(json.dumps({"model": {k: ident.MODELS[MODEL_KEY][k] for k in ("model_id", "revision", "manifest_sha256")},

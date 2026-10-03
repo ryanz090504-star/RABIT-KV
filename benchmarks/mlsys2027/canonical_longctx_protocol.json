@@ -186,10 +186,21 @@
     "every stored score equals the frozen scorer applied to the stored prediction string",
     "every LongBench example equals the Exp12 log (dataset index, original / used token counts, ground truth); NIAH cases equal the Exp12 grid",
     "no legacy quality module imported in the container; only the shipped files present",
-    "BF16 control, NIAH: 15-case canonical subset accuracy within 1.0 point of 100.0 (Exp12 rule)",
-    "BF16 control, Passage Retrieval: 10-row canonical subset score within 1.0 point of 100.0 (Exp12 rule)",
-    "BF16 control, HotpotQA: frozen per-example gate on the first 20 examples: mismatches <= 1, L1 <= 0.065"
+    "BF16 validity check, NIAH: 15-case canonical subset accuracy within 1.0 point of 100.0",
+    "BF16 validity check, Passage Retrieval: 10-row canonical subset score within 1.0 point of 100.0",
+    "BF16 validity check, HotpotQA: per-example check on the first 20 examples: mismatches <= 1, L1 <= 0.065"
   ],
+  "bf16_validity_checks": {
+    "description": "BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks.",
+    "relation_to_exp12": "the historical Exp12 checks compared BOTH bf16 and the legacy rabit2 with the canonical targets; here ONLY the BF16 arm is checked. The historical subsets (15 NIAH cases, 10 Passage Retrieval rows, first 20 HotpotQA examples), targets and tolerances are unchanged. They are not literal reproductions of the Exp12 gates.",
+    "role": "validity / sanity only; never a quality-success threshold",
+    "validity_depends_on": [
+      "BF16",
+      "infrastructure",
+      "provenance"
+    ],
+    "rabit_quality_determines_validity": false
+  },
   "rabit_quality_gate": "NONE -- no gate reads a RABIT score; a valid suite is never rejected for RABIT quality",
   "quality_threshold": "NONE -- no definition of preserved / healthy / acceptable; exact values are reported",
   "statistics": {
