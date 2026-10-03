@@ -1,0 +1,103 @@
+{
+  "name": "two-model N32 canonical continuation-PPL validation (canonical-quality-v2)",
+  "type": "logical quality (HF transformers); NOT a physical serving benchmark",
+  "models": {
+    "llama3_1_8b": {
+      "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+      "revision_provenance": "derived (Exp12 recorded only @master); see module docstring",
+      "layers": 32,
+      "kv_heads": 8,
+      "head_dim": 128,
+      "token_pool_sha256": "88dadfe6521c338ca71b1edfe5e85f08b8e2466e0884f8003b5b34a7ee3c849f"
+    },
+    "qwen2_5_7b": {
+      "model_id": "Qwen/Qwen2.5-7B-Instruct",
+      "revision": "16c174980d8a1492910551634b4969e69cdc2444",
+      "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+      "revision_provenance": "frozen Exp14 Model-B identity (exp14_model_snapshot.py)",
+      "layers": 28,
+      "kv_heads": 4,
+      "head_dim": 128,
+      "token_pool_sha256": "eb424fb71baccb8b64ae53688613a30c462a54a893f82359c9e6ea5385c0f63c"
+    }
+  },
+  "llama_identity_note": "the accepted Exp12 evidence recorded no revision / manifest (only '@master', 18 files); the pinned commit is the ModelScope master resolved on 2026-10-03, committed 2025-02-26 (before every Exp1-Exp12 run); equality with the Exp12 model is additionally checked by the BF16 control-reproduction gate",
+  "dataset": {
+    "name": "WikiText-2 test (raw text)",
+    "url": "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt",
+    "sha256": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0",
+    "preprocessing": "non-empty stripped lines joined in blocks of 64; tokenizer(text, add_special_tokens=False) -- no BOS",
+    "windows": "the first 32 x (1024 + 128) tokens, consecutive non-overlapping windows, stream order (identical to the accepted legacy protocol; windows 1-8 are the canonical Exp1 windows)"
+  },
+  "samples": 32,
+  "context_tokens": 1024,
+  "eval_tokens": 128,
+  "scored_tokens_per_arm": 4096,
+  "policy": "K3 / V2 / G32 / R4 / META8g64 (frozen; no retuning)",
+  "rabit_implementation": {
+    "file": "benchmarks/mlsys2027/canonical_rabit_quality.py",
+    "commit": "c360697",
+    "parity_evidence": "8fa9a9c (276 / 276 cases bit-exact, CPU)",
+    "sole_implementation": true
+  },
+  "arms": {
+    "bf16_batched": "CONTROL only: the legacy BF16 scorer verbatim (continuation[:-1] in one forward)",
+    "bf16": "BF16 cache; BF16 prefill; first token from the prefill logit; then one teacher-forced token per forward",
+    "rabit": "identical loop and token ids; the cache is CanonicalRabitCache.from_prefill(BF16 prefill) and ages canonically at every decode step (R4 residual -> open group -> closed 32-token page)"
+  },
+  "order": "arms bf16_batched, bf16, rabit; windows 1..32 inside each arm (the legacy method-major order)",
+  "comparison": "bf16 (stepwise) vs rabit (stepwise) on identical paired token inputs",
+  "model_settings": {
+    "dtype": "bfloat16",
+    "attention": "sdpa",
+    "seed": "torch.manual_seed(0), cuda.manual_seed_all(0)",
+    "tf32": "enabled (matmul and cudnn)",
+    "warmup": "one untimed 32-token BF16 forward"
+  },
+  "image": {
+    "python": "3.11",
+    "torch": "2.11.0",
+    "transformers": "4.48.2",
+    "other": "accelerate, requests, sentencepiece, modelscope (versions recorded at run time)"
+  },
+  "hardware": {
+    "selector": "H100!:1",
+    "guard": "fail-closed: exactly 1 x NVIDIA H100 80GB before anything else"
+  },
+  "validity_gates": [
+    "modal exit code 0, no wall-clock timeout, app cleanup verified",
+    "hardware guard passed (1 x H100 80GB)",
+    "model snapshot at the pinned revision equals the frozen manifest (every file: size + SHA-256; no extra file)",
+    "WikiText SHA-256 and token-pool SHA-256 equal the pinned values",
+    "shipped-file SHA-256 equal the committed harness; canonical_rabit_quality.py equals c360697",
+    "GPU canonical state == CPU canonical state, bit-exact, every layer (window 1 prefill), before any scoring",
+    "structure: 3 arms x 32 windows x 128 tokens; rabit rows use CanonicalRabitCache with 127 one-token forwards",
+    "no legacy quality module imported in the container; only the four shipped files present",
+    "BF16 control reproduction: bf16_batched aggregate PPL within 0.5% (relative) of the accepted legacy BF16 aggregate of the same model (Llama: Exp12 log; Qwen: Exp14 quality log)",
+    "stepwise BF16 aggregate PPL within 0.5% (relative) of bf16_batched"
+  ],
+  "quality_threshold": "NONE -- the result is reported, not gated; no acceptance threshold on the RABIT delta",
+  "statistics": {
+    "aggregate": "PPL = exp(total loss / total tokens) per arm",
+    "delta": "100 * (exp(mean ln PPL_rabit - mean ln PPL_bf16) - 1) over the 32 windows",
+    "ci": "paired percentile bootstrap over windows (Exp12 procedure and seed)",
+    "resamples": 10000,
+    "confidence": 0.95,
+    "seed": 20270929,
+    "inputs": "full-precision per-window mean token NLL from the result JSON (Exp12 used the 4-decimal logged PPL)",
+    "legacy_context": "the accepted legacy-evaluator rabit2 values are quoted for context only; they are a different evaluator and are never pooled or compared as a gate"
+  },
+  "attempts": "each attempt writes results/mlsys2027/canonical_quality_v2/continuation_ppl/<model>/attempt_<n>/; an existing attempt directory is never overwritten; failed attempts are archived, not pooled",
+  "not_run_here": [
+    "NIAH",
+    "Passage Retrieval",
+    "HotpotQA",
+    "Qasper",
+    "ablations",
+    "retuning",
+    "serving",
+    "kernel optimization"
+  ]
+}
