@@ -11,9 +11,13 @@ Classification (computed from the result; nothing is tuned):
   B  any CUDA canonical vs CUDA oracle difference
   C  diagnostic invalid / incomplete
 
+One invocation = one model. The accepted Llama diagnostic (ec80638) is cuda_conformance_diagnostic/attempt_1/; later
+runs are written to cuda_conformance_diagnostic/<model>/attempt_<n>/.
+
 Usage:
-    python benchmarks/mlsys2027/run_canonical_cuda_conformance.py --dry-run
-    python benchmarks/mlsys2027/run_canonical_cuda_conformance.py --execute --attempt 1     (ONLY when authorized)
+    python benchmarks/mlsys2027/run_canonical_cuda_conformance.py --dry-run --model qwen2_5_7b
+    python benchmarks/mlsys2027/run_canonical_cuda_conformance.py --execute --model qwen2_5_7b --attempt 1
+                                                                                  (ONLY when authorized)
 """
 
 from __future__ import annotations
@@ -57,6 +61,7 @@ FROZEN = {
                                        "benchmarks/mlsys2027/canonical_ppl_modal.py",
                                        "benchmarks/mlsys2027/canonical_ppl_protocol.json",
                                        "benchmarks/mlsys2027/exp14_model_snapshot.py"]),
+    "llama_conformance_evidence_ec80638": ("ec80638", ["results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/attempt_1"]),
     "attempt_1_archive_3cba625": ("3cba625", ["results/mlsys2027/canonical_quality_v2/continuation_ppl/llama3_1_8b",
                                               "results/mlsys2027/canonical_quality_v2/continuation_ppl/two_model_attempt_1/record.json",
                                               "results/mlsys2027/canonical_quality_v2/continuation_ppl/two_model_attempt_1/attempt_record_addendum.json"]),
@@ -85,7 +90,7 @@ def apps() -> dict:
     return {r["App ID"]: r for r in json.loads(p.stdout) if r.get("Description") == APP_NAME}
 
 
-def preflight(attempt: int, execute: bool) -> dict:
+def preflight(model: str, attempt: int, execute: bool) -> dict:
     upstream = subprocess.run(["git", "rev-parse", "@{u}"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     t = subprocess.run([sys.executable, str(STATIC_TESTS)], capture_output=True, text=True, encoding="utf-8",
                        errors="replace", env=env(), timeout=900)
@@ -96,7 +101,7 @@ def preflight(attempt: int, execute: bool) -> dict:
         "harness_committed": all(p.exists() for p in HARNESS)
         and git("status", "--short", "--", *[p.relative_to(ROOT).as_posix() for p in HARNESS]) == "",
         **{f"unchanged_{k}": git("diff", "--name-only", c, "--", *paths) == "" for k, (c, paths) in FROZEN.items()},
-        "attempt_dir_absent": not (OUT_BASE / f"attempt_{attempt}").exists(),
+        "attempt_dir_absent": not (OUT_BASE / model / f"attempt_{attempt}").exists(),
     }
     if execute and not all(checks.values()):
         raise SystemExit(f"pre-run validation failed: {json.dumps(checks, indent=1)}")
@@ -104,11 +109,13 @@ def preflight(attempt: int, execute: bool) -> dict:
 
 
 # ------------------------------------------------------------------------------------------- evaluation (offline)
-def evaluate(res: dict) -> dict:
+def evaluate(res: dict, model: str = "llama3_1_8b") -> dict:
     """Validity of the DIAGNOSTIC and the classification. Pure function of the result JSON."""
-    m = ident.MODELS["llama3_1_8b"]
+    m = ident.MODELS[model]
     layers = res.get("layers", [])
     validity = {
+        "model_key": res.get("model_key", "llama3_1_8b") == model and res["model"]["model_id"] == m["model_id"]
+        and [res["geometry"][k] for k in ("layers", "kv_heads", "head_dim")] == [m["layers"], m["kv_heads"], m["head_dim"]],
         "hardware": res["hardware"]["passed"] is True and ident.hardware_ok(res["hardware"]["gpus"]),
         "shipped_files": res["files"]["passed"] is True
         and res["files"]["sha256_lf"] == {f: sha256_lf(ROOT / f) for f in SHIPPED},
@@ -139,36 +146,36 @@ def evaluate(res: dict) -> dict:
              and r["accepted_t1_comparison_on_cuda"] == [] and all(r["residual_equals_raw"].values()) for r in layers]
     syn = res["synthetic"]["geometries"]
     out["primary"] = {
-        "llama_layers": len(layers), "llama_layers_cuda_canonical_equals_cuda_oracle": sum(eq_bc),
-        "llama_layers_mismatched_cuda_canonical_vs_cuda_oracle": [r["layer"] for r, e in zip(layers, eq_bc) if not e],
+        "model": model, "layers": len(layers), "layers_cuda_canonical_equals_cuda_oracle": sum(eq_bc),
+        "layers_mismatched_cuda_canonical_vs_cuda_oracle": [r["layer"] for r, e in zip(layers, eq_bc) if not e],
         "synthetic": {g: {"cases": G["cases"], "aging_cases": G["aging_cases"], "passed": G["passed"],
                           "failures": len(G["field_failures"]) + len(G["t1_failures"]) + len(G["aging_failures"])}
                       for g, G in syn.items()}}
     out["descriptive"] = {
-        "llama_layers_cpu_canonical_equals_cpu_oracle": sum(r["summary"]["cpu_canonical_equals_cpu_oracle"] for r in layers),
-        "llama_layers_cpu_canonical_equals_cuda_canonical": sum(r["summary"]["cpu_canonical_equals_cuda_canonical"] for r in layers),
-        "llama_layers_cpu_oracle_equals_cuda_oracle": sum(r["summary"]["cpu_oracle_equals_cuda_oracle"] for r in layers),
+        "layers_cpu_canonical_equals_cpu_oracle": sum(r["summary"]["cpu_canonical_equals_cpu_oracle"] for r in layers),
+        "layers_cpu_canonical_equals_cuda_canonical": sum(r["summary"]["cpu_canonical_equals_cuda_canonical"] for r in layers),
+        "layers_cpu_oracle_equals_cuda_oracle": sum(r["summary"]["cpu_oracle_equals_cuda_oracle"] for r in layers),
         "attempt1_gate_reevaluated_passed": res["attempt1_gate_reevaluated"]["passed"],
         "attempt1_gate_reevaluated_mismatched_layers": len(res["attempt1_gate_reevaluated"]["mismatched_layers"])}
     out["classification"] = "A" if all(eq_bc) and all(G["passed"] for G in syn.values()) else "B"
     return out
 
 
-def run(attempt: int) -> int:
-    checks = preflight(attempt, execute=True)
-    out = OUT_BASE / f"attempt_{attempt}"
+def run(model: str, attempt: int) -> int:
+    checks = preflight(model, attempt, execute=True)
+    out = OUT_BASE / model / f"attempt_{attempt}"
     out.mkdir(parents=True, exist_ok=False)
     result_tmp = Path(tempfile.mkdtemp()) / "result.json"
     e = env()
     e["CANONICAL_CUDA_CONFORMANCE_RESULT_PATH"] = str(result_tmp)
     e["CANONICAL_CUDA_CONFORMANCE_EXPECTED_FILE_SHA256_LF"] = json.dumps({f: sha256_lf(ROOT / f) for f in SHIPPED})
     rec = {"kind": "canonical-quality-v2 GPU semantic-conformance diagnostic (descriptive; NOT a quality result)",
-           "attempt": attempt, "source_commit": git("rev-parse", "HEAD"),
+           "model_key": model, "attempt": attempt, "source_commit": git("rev-parse", "HEAD"),
            "started_utc": dt.datetime.now(dt.timezone.utc).isoformat(), "preflight": checks,
            "harness_sha256_lf": {p.relative_to(ROOT).as_posix(): sha256_lf(p) for p in HARNESS}}
     pre, t0, parsed = apps(), time.time(), set()
     with (out / "session.log").open("w", encoding="utf-8") as fh:
-        proc = subprocess.Popen([sys.executable, "-m", "modal", "run", str(MODAL_APP)], stdout=subprocess.PIPE,
+        proc = subprocess.Popen([sys.executable, "-m", "modal", "run", str(MODAL_APP), "--model-key", model], stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace", env=e, cwd=ROOT)
 
         def pump():
@@ -193,7 +200,7 @@ def run(attempt: int) -> int:
     if result_tmp.is_file():
         (out / "result.json").write_bytes(result_tmp.read_bytes())
         res = json.loads((out / "result.json").read_bytes().decode("utf-8"))
-        ev = evaluate(res)
+        ev = evaluate(res, model)
     process_ok = rc == 0 and not timed_out and cleanup["verified"]
     valid = bool(process_ok and ev and ev["valid"])
     rec.update(completed_utc=dt.datetime.now(dt.timezone.utc).isoformat(), elapsed_s=round(time.time() - t0, 1),
@@ -202,7 +209,7 @@ def run(attempt: int) -> int:
                gpu=res["hardware"]["gpus"] if res else None, evaluation=ev, diagnostic_valid=valid,
                classification=ev["classification"] if valid else "C")
     (out / "record.json").write_text(json.dumps(rec, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(json.dumps({"attempt": attempt, "diagnostic_valid": valid, "classification": rec["classification"],
+    print(json.dumps({"model": model, "attempt": attempt, "diagnostic_valid": valid, "classification": rec["classification"],
                       "modal_returncode": rc, "validity": ev["validity"] if ev else None,
                       "primary": ev.get("primary") if ev else None, "descriptive": ev.get("descriptive") if ev else None},
                      indent=1))
@@ -211,6 +218,7 @@ def run(attempt: int) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--model", choices=sorted(ident.MODELS), required=True)
     ap.add_argument("--attempt", type=int, default=1)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--execute", action="store_true", help="launch the GPU job (ONLY when explicitly authorized)")
@@ -218,12 +226,12 @@ def main(argv=None) -> int:
     if a.dry_run == a.execute:
         raise SystemExit("exactly one of --dry-run / --execute is required")
     if a.dry_run:
-        checks = preflight(a.attempt, execute=False)
+        checks = preflight(a.model, a.attempt, execute=False)
         print(json.dumps({"preflight": checks, "all_preflight_checks_pass": all(checks.values()),
-                          "command": f"modal run {MODAL_APP.relative_to(ROOT).as_posix()}"}, indent=1))
+                          "command": f"modal run {MODAL_APP.relative_to(ROOT).as_posix()} --model-key {a.model}"}, indent=1))
         print("\n--dry-run: nothing executed, no files written.")
         return 0
-    return run(a.attempt)
+    return run(a.model, a.attempt)
 
 
 if __name__ == "__main__":

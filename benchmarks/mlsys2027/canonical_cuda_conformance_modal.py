@@ -2,14 +2,16 @@
 canonical-quality-v2 GPU SEMANTIC-CONFORMANCE DIAGNOSTIC -- Modal app (strict ONE H100 80GB; fail-closed hardware guard
 first). Launched only by benchmarks/mlsys2027/run_canonical_cuda_conformance.py.
 
-NO scoring, NO PPL, NO generation, NO quality benchmark: for Llama-3.1-8B (pinned revision, verified manifest) it runs
-ONLY the 1024-token BF16 prefill of the frozen canonical-PPL window 1 to obtain the raw K / V of the 32 layers (the
+NO scoring, NO PPL, NO generation, NO quality benchmark: for ONE model (llama3_1_8b | qwen2_5_7b; pinned revision,
+verified manifest) it runs ONLY the 1024-token BF16 prefill of that model's frozen canonical-PPL window 1 to obtain
+the raw K / V of every layer (the
 logits are discarded unread), then compares, from identical bytes, CPU canonical / CUDA canonical / CUDA frozen oracle
 field by field (canonical_cuda_conformance.py). It also runs the synthetic Llama / Qwen geometry cases on CUDA and
 re-evaluates the Attempt-1 gate (core.prefill_state_parity, unchanged) for the record.
 
 Shipped files: the four files of the PPL harness (unchanged), the comparison module, the accepted parity suite (for
 its oracle loader, distributions and T1 / T2 comparisons) and the frozen oracle source kvquant_k3.py.
+The model key was added after the accepted Llama diagnostic (ec80638); the Llama path is unchanged.
 """
 
 from __future__ import annotations
@@ -31,11 +33,11 @@ ORACLE = "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py"
 CANONICAL_RABIT_QUALITY_SHA256_LF = "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5"  # c360697
 ORACLE_FILE_SHA256_LF = "c2a48e97d9ca71fe55eb400938c3b3e665422b1534c4fb8fbe6ef02f2e60cc0f"  # accepted parity 8fa9a9c
 ORACLE_EXTRACTED_SHA256 = "d58f58a5431bb5eeb2eb24bf3a86b6ea3160c83b9c4ecc1585dd4cad95450f3c"  # accepted parity 8fa9a9c
-MODEL_KEY = "llama3_1_8b"
+MODEL_KEYS = ("llama3_1_8b", "qwen2_5_7b")
 RESULT_PATH_ENV = "CANONICAL_CUDA_CONFORMANCE_RESULT_PATH"
 EXPECTED_SHA_ENV = "CANONICAL_CUDA_CONFORMANCE_EXPECTED_FILE_SHA256_LF"
 JSON_NATIVE = (dict, list, str, int, float, bool, type(None))
-RESULT_KEYS = ("hardware", "environment", "files", "oracle", "model", "dataset", "window", "geometry", "layers",
+RESULT_KEYS = ("model_key", "hardware", "environment", "files", "oracle", "model", "dataset", "window", "geometry", "layers",
                "attempt1_gate_reevaluated", "synthetic", "no_scoring", "timing")
 
 app = modal.App("rabit-kv-canonical-quality-v2-cuda-conformance")
@@ -90,13 +92,15 @@ def validate_payload(payload) -> dict:
 
 
 @app.function(image=image, gpu="H100!:1", timeout=3600, volumes={"/model_cache": model_cache})
-def conformance(expected_file_sha256_lf: dict) -> str:
+def conformance(model_key: str, expected_file_sha256_lf: dict) -> str:
     _gpus = _gpu_query()
     _hw_ok = (len(_gpus) == 1 and "H100" in _gpus[0].get("name", "")
               and 79 * 1024 <= int(float(_gpus[0].get("memory.total", 0))) <= 82 * 1024)
     _emit("CUDA_CONFORMANCE_HARDWARE_CHECK", {"gpus": _gpus, "passed": _hw_ok, "required": "exactly 1 x NVIDIA H100 80GB"})
     if not _hw_ok:
         raise RuntimeError(f"hardware mismatch: {_gpus}; nothing loaded")
+    if model_key not in MODEL_KEYS:
+        raise RuntimeError(f"unknown model key {model_key!r}; nothing loaded")
 
     import importlib.metadata as md
     import struct
@@ -118,7 +122,7 @@ def conformance(expected_file_sha256_lf: dict) -> str:
     import canonical_ppl_identity as ident
 
     ident.check_constants()
-    m = ident.MODELS[MODEL_KEY]
+    m = ident.MODELS[model_key]
 
     import requests
     import torch
@@ -153,7 +157,7 @@ def conformance(expected_file_sha256_lf: dict) -> str:
     # ---- model identity: pinned immutable revision, verified file by file BEFORE loading
     os.environ["MODELSCOPE_CACHE"] = "/model_cache"
     model_dir = snapshot_download(m["model_id"], revision=m["revision"], cache_dir="/model_cache")
-    verification = ident.verify_dir(model_dir, MODEL_KEY)
+    verification = ident.verify_dir(model_dir, model_key)
     _emit("CUDA_CONFORMANCE_MODEL", verification)
     if not verification["passed"]:
         raise RuntimeError("model snapshot differs from the frozen manifest; no model loaded")
@@ -226,6 +230,7 @@ def conformance(expected_file_sha256_lf: dict) -> str:
         for g, G in synthetic["geometries"].items()})
 
     res = {"kind": "canonical-quality-v2 GPU semantic-conformance diagnostic (descriptive; NO scoring / PPL / generation)",
+           "model_key": model_key,
            "hardware": {"gpus": _gpus, "passed": _hw_ok}, "environment": environment,
            "files": {"sha256_lf": file_sha, "passed": files_ok}, "oracle": oracle_meta, "model": verification,
            "dataset": dataset, "window": window, "geometry": geometry, "policy": dict(crq.POLICY), "layers": layers,
@@ -236,7 +241,7 @@ def conformance(expected_file_sha256_lf: dict) -> str:
            "timing": {"total_seconds": time.time() - t_start}}
     assert_json_native(res)
     payload = json.dumps(res, ensure_ascii=False, allow_nan=False)
-    _emit("CUDA_CONFORMANCE_REMOTE", {"completed": True, "layers": len(layers),
+    _emit("CUDA_CONFORMANCE_REMOTE", {"completed": True, "model_key": model_key, "layers": len(layers),
                                       "layers_cuda_canonical_equals_cuda_oracle": sum(
                                           r["summary"]["cuda_canonical_equals_cuda_oracle"] for r in layers),
                                       "synthetic_passed": synthetic["passed"]})
@@ -244,9 +249,9 @@ def conformance(expected_file_sha256_lf: dict) -> str:
 
 
 @app.local_entrypoint()
-def main():
+def main(model_key: str):
     expected = json.loads(os.environ[EXPECTED_SHA_ENV])
-    payload = conformance.remote(expected)
+    payload = conformance.remote(model_key, expected)
     res = validate_payload(payload)
     data = payload.encode("utf-8")
     path = os.environ[RESULT_PATH_ENV]

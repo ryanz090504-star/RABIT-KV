@@ -85,8 +85,8 @@ def test_strict_h100_selector_and_guard_first():
     assert pos == sorted(pos), list(zip(order, pos))
 
 
-def _layer(equal: bool = True) -> dict:
-    return {"layer": 0, "raw": {"dtype": "torch.bfloat16", "shape": [1024, 8, 128], "device": "cuda:0",
+def _layer(equal: bool = True, heads: int = 8) -> dict:
+    return {"layer": 0, "raw": {"dtype": "torch.bfloat16", "shape": [1024, heads, 128], "device": "cuda:0",
                                 "host_copy_bitwise_identical": True},
             "trace_reproduces_frozen_code_on_both_devices": True, "accepted_t1_comparison_on_cuda": [],
             "residual_equals_raw": {"cuda_canonical": True, "cuda_oracle": True},
@@ -95,19 +95,20 @@ def _layer(equal: bool = True) -> dict:
                         "cpu_oracle_equals_cuda_oracle": False}}
 
 
-def _synthetic_result() -> dict:
-    m = ident.MODELS["llama3_1_8b"]
+def _synthetic_result(model: str = "llama3_1_8b") -> dict:
+    m = ident.MODELS[model]
     geo = lambda h: {"kv_heads": h, "head_dim": 128, "cases": 60, "aging_cases": 28, "field_failures": [],  # noqa: E731
                      "t1_failures": [], "aging_failures": [], "passed": True}
-    return {"hardware": {"passed": True, "gpus": [{"name": "NVIDIA H100 80GB HBM3", "memory.total": "81559"}]},
+    return {"model_key": model, "geometry": {k: m[k] for k in ("layers", "kv_heads", "head_dim")},
+            "hardware": {"passed": True, "gpus": [{"name": "NVIDIA H100 80GB HBM3", "memory.total": "81559"}]},
             "files": {"passed": True, "sha256_lf": {f: runner.sha256_lf(ROOT / f) for f in runner.SHIPPED}},
             "oracle": {"equals_accepted_parity_oracle": True, "oracle_namespace_references_canonical_module": False},
-            "model": {"passed": True, "model_revision": m["revision"], "manifest_sha256": m["manifest_sha256"],
-                      "files_checked": 18},
+            "model": {"passed": True, "model_id": m["model_id"], "model_revision": m["revision"],
+                      "manifest_sha256": m["manifest_sha256"], "files_checked": len(m["files"])},
             "dataset": {"wikitext_sha256": ident.WIKITEXT_SHA256, "token_pool_sha256": m["token_pool_sha256"]},
             "window": {"context_tokens": 1024, "equals_first_1024_pool_tokens": True, "contains_bos": False},
-            "layers": [dict(_layer(), layer=i) for i in range(32)],
-            "attempt1_gate_reevaluated": {"passed": False, "mismatched_layers": list(range(32))},
+            "layers": [dict(_layer(heads=m["kv_heads"]), layer=i) for i in range(m["layers"])],
+            "attempt1_gate_reevaluated": {"passed": False, "mismatched_layers": list(range(m["layers"]))},
             "synthetic": {"geometries": {"llama3_1_8b": geo(8), "qwen2_5_7b": geo(4)}},
             "no_scoring": {"continuation_tokens_scored": 0, "logits_read": False, "generation": False}}
 
@@ -116,7 +117,12 @@ def test_classification_is_a_pure_function_of_the_same_device_oracle_comparison(
     base = _synthetic_result()
     ev = runner.evaluate(base)
     assert ev["valid"] and ev["classification"] == "A"  # CPU-vs-CUDA differences do NOT affect the classification
-    assert ev["descriptive"]["llama_layers_cpu_canonical_equals_cuda_canonical"] == 0
+    assert ev["descriptive"]["layers_cpu_canonical_equals_cuda_canonical"] == 0
+    q = runner.evaluate(_synthetic_result("qwen2_5_7b"), "qwen2_5_7b")
+    assert q["valid"] and q["classification"] == "A" and q["primary"]["layers"] == 28
+    # a result of one model evaluated as the other is INVALID (model key, identity, geometry)
+    assert runner.evaluate(_synthetic_result("qwen2_5_7b"), "llama3_1_8b")["classification"] == "C"
+    assert runner.evaluate(_synthetic_result("llama3_1_8b"), "qwen2_5_7b")["classification"] == "C"
 
     def cls(mutate):
         r = copy.deepcopy(base)
@@ -137,7 +143,7 @@ def test_classification_is_a_pure_function_of_the_same_device_oracle_comparison(
 
 
 def test_runner_never_executes_by_default():
-    for argv in ([], ["--dry-run", "--execute"]):
+    for argv in ([], ["--model", "qwen2_5_7b"], ["--model", "qwen2_5_7b", "--dry-run", "--execute"], ["--execute"]):
         try:
             runner.main(argv)
         except SystemExit as e:
