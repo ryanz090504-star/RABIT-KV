@@ -1,0 +1,184 @@
+{
+  "kind": "canonical-quality-v2 long-context OFFLINE proofs (CPU; no GPU, no model weights; NOT a quality result)",
+  "environment": {
+    "python": "3.11.9",
+    "torch": "2.11.0+cpu",
+    "transformers": "4.48.2",
+    "datasets": "5.0.1"
+  },
+  "observer": "IdentityObserver v2 (object identity + retained direct references; no id() keying)",
+  "policy": {
+    "k_bits": 3,
+    "v_bits": 2,
+    "group_size": 32,
+    "residual_tokens": 4,
+    "metadata_bits": 8,
+    "metadata_group_size": 64
+  },
+  "bound_file_sha256_lf": {
+    "benchmarks/mlsys2027/canonical_longctx_core.py": "6fcfecb15d9349e81f5818d84862da0b46d4ea947543893eb813e82ef3cd4d24",
+    "benchmarks/mlsys2027/canonical_longctx_tasks.py": "b7664357eeb1a9b73161df4c89902deb807cc371f949904650dc975978115bfd",
+    "benchmarks/mlsys2027/canonical_longctx_pins.py": "e3685460115cac09cd20585ca1e8d180b328b0e32ab7337d158f51458fd5abed",
+    "benchmarks/mlsys2027/canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+    "benchmarks/mlsys2027/canonical_ppl_identity.py": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba",
+    "benchmarks/mlsys2027/exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+    "benchmarks/mlsys2027/canonical_longctx_offline_proofs.py": "565e419bdbec7865c190d49cca7604e298e00c8575aa9155b0e069c137e0beb3",
+    "benchmarks/mlsys2027/proof_observer.py": "f0d6ceef2bf851a5c8aeebd33f82bf6bbbbf19ddf186e2d8262d2cda1f0bdd46",
+    "benchmarks/quality/niah.py": "35764fd6a1ba52c6e9811af33f8ac613a57432288608f5795d2e8986c9a9f1ba",
+    "benchmarks/quality/passage_retrieval.py": "4aa1bde469ce0edabe9e60f94cf29395ee982cc9c5b80b503e49b06c2c23ada9",
+    "benchmarks/quality/hotpotqa.py": "6253c17a37f37b7930c2311cc4228551962aac0df087f00608e92fa4b3e99f8d"
+  },
+  "inputs": {
+    "wikitext_pinned": true,
+    "tokenizer_files_match_manifest": true,
+    "tokenizer_eos_token": "<|eot_id|>",
+    "tokenizer_eos_token_id": 128009,
+    "eos_is_eot_id": true
+  },
+  "P_prompts_and_selection": {
+    "niah": {
+      "units": 57,
+      "prompts_identical_to_legacy": true,
+      "secret_code_identical": true,
+      "filler_tokens": 296960,
+      "bos_in_any_prompt": false,
+      "keys_equal_exp12_grid": true,
+      "prompt_set_sha256": "452dbe81bf7cc331f163dfd485dca8d4b7691613a7065a7aba79b00ee8e4f962",
+      "passed": true
+    },
+    "passage_retrieval": {
+      "file_matches_pin": true,
+      "dataset_rows": 200,
+      "units": 200,
+      "indices_identical_to_legacy_selection": true,
+      "template_identical": true,
+      "prompts_identical_to_legacy": true,
+      "units_equal_exp12_log": true,
+      "units_truncated": 0,
+      "max_prompt_tokens": 15243,
+      "prompt_set_sha256": "c59428c8210bd4a49ff127995ca5e160b24481f06ab616afe34d532755b81260",
+      "passed": true
+    },
+    "hotpotqa": {
+      "file_matches_pin": true,
+      "dataset_rows": 300,
+      "units": 100,
+      "indices_identical_to_legacy_selection": true,
+      "template_identical": true,
+      "prompts_identical_to_legacy": true,
+      "units_equal_exp12_log": true,
+      "units_truncated": 2,
+      "max_prompt_tokens": 16384,
+      "prompt_set_sha256": "01e6976cc58d161c2b06f084101fc4b416437433c6279f7eba80b09bb2a16b1a",
+      "passed": true
+    }
+  },
+  "prompt_sets_equal_pins": true,
+  "S_scorers": {
+    "niah": {
+      "predictions": 114,
+      "outcomes_reproduce_log": true
+    },
+    "passage_retrieval": {
+      "predictions": 400,
+      "frozen_scorer_equals_legacy_source": true,
+      "scores_reproduce_log": true
+    },
+    "hotpotqa": {
+      "predictions": 200,
+      "frozen_scorer_equals_legacy_source": true,
+      "scores_reproduce_log": true,
+      "legacy_article_example": 0.8,
+      "official_article_example": 1.0,
+      "exp12_predictions_where_the_two_scorers_differ": 15
+    },
+    "passed": true
+  },
+  "G_generation": {
+    "niah": {
+      "prompt_tokens": 71,
+      "max_new_tokens": 16,
+      "bf16_equals_legacy_no_eos": true,
+      "bf16_equals_legacy_with_eos": true,
+      "kept_tokens_no_eos": 16,
+      "kept_tokens_with_eos": 2,
+      "eos_stop_exercised": true,
+      "identity_quantizer_rabit_equals_bf16": true,
+      "decode_forwards": [
+        17,
+        17
+      ],
+      "one_forward_per_kept_token_plus_last_prompt_token": true,
+      "cache_classes": [
+        "DynamicCache",
+        "CanonicalRabitCache"
+      ],
+      "prefix_is_prompt_minus_one": true,
+      "passed": true
+    },
+    "passage_retrieval": {
+      "prompt_tokens": 90,
+      "max_new_tokens": 32,
+      "bf16_equals_legacy_no_eos": true,
+      "bf16_equals_legacy_with_eos": true,
+      "kept_tokens_no_eos": 32,
+      "kept_tokens_with_eos": 0,
+      "eos_stop_exercised": true,
+      "identity_quantizer_rabit_equals_bf16": true,
+      "decode_forwards": [
+        33,
+        33
+      ],
+      "one_forward_per_kept_token_plus_last_prompt_token": true,
+      "cache_classes": [
+        "DynamicCache",
+        "CanonicalRabitCache"
+      ],
+      "prefix_is_prompt_minus_one": true,
+      "passed": true
+    },
+    "hotpotqa": {
+      "prompt_tokens": 67,
+      "max_new_tokens": 32,
+      "bf16_equals_legacy_no_eos": true,
+      "bf16_equals_legacy_with_eos": true,
+      "kept_tokens_no_eos": 32,
+      "kept_tokens_with_eos": 3,
+      "eos_stop_exercised": true,
+      "identity_quantizer_rabit_equals_bf16": true,
+      "decode_forwards": [
+        33,
+        33
+      ],
+      "one_forward_per_kept_token_plus_last_prompt_token": true,
+      "cache_classes": [
+        "DynamicCache",
+        "CanonicalRabitCache"
+      ],
+      "prefix_is_prompt_minus_one": true,
+      "passed": true
+    }
+  },
+  "C_canonical_path": {
+    "cache_class": "CanonicalRabitCache",
+    "decode_forwards": 33,
+    "decoded_calls": 102,
+    "expected_decoded_calls": 102,
+    "state_mismatches": 0,
+    "stale_state_associations": 0,
+    "observed_layer_states": 3,
+    "expected_observed_layer_states": 3,
+    "append_sizes": [
+      1,
+      70
+    ],
+    "max_n": 103,
+    "closed_tokens_seen": [
+      64,
+      96
+    ],
+    "final_cache_tokens": 103,
+    "passed": true
+  },
+  "passed": true
+}

@@ -1,0 +1,218 @@
+{
+  "name": "Llama-only canonical long-context validation (canonical-quality-v2)",
+  "type": "logical quality (HF transformers); NOT a physical serving benchmark",
+  "model": {
+    "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+    "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+    "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+    "layers": 32,
+    "kv_heads": 8,
+    "head_dim": 128
+  },
+  "policy": "K3 / V2 / G32 / R4 / META8g64 (frozen; no retuning; no task-specific setting)",
+  "rabit_implementation": {
+    "file": "benchmarks/mlsys2027/canonical_rabit_quality.py",
+    "commit": "c360697",
+    "sole_implementation": true
+  },
+  "tasks": {
+    "niah": {
+      "cases": 57,
+      "contexts": [
+        4096,
+        8192,
+        16384
+      ],
+      "depths": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5,
+        0.55,
+        0.6,
+        0.65,
+        0.7,
+        0.75,
+        0.8,
+        0.85,
+        0.9,
+        0.95
+      ],
+      "max_new_tokens": 16,
+      "order": "context-major, then depth",
+      "prompt": "instruction + WikiText-2 filler with the needle at round(filler x depth) + question; no chat template; token ids without special tokens",
+      "filler": {
+        "url": "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt",
+        "sha256": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0"
+      },
+      "warmup": "one unreported BF16 case at 4096 tokens, depth 0.05",
+      "metric": "exact match: regex RABIT-\\d{4} on the upper-cased answer equals RABIT-7291"
+    },
+    "passage_retrieval": {
+      "revision": "915b0c6ec0b6dfae1cd44224b7d8995317837f27",
+      "filename": "passage_retrieval_en/test-00000-of-00001.parquet",
+      "bytes": 7029836,
+      "sha256": "452f03dbb0e394de2b26d6e016bf1e715a3ebac9dc93844fde73c0e8e74cfd68",
+      "samples": 200,
+      "repo": "zai-org/LongBench",
+      "selection": "dataset rows [0, 200)",
+      "max_input_tokens": 16384,
+      "max_new_tokens": 32,
+      "metric": "LongBench retrieval score, mean x 100"
+    },
+    "hotpotqa": {
+      "revision": "92b6c5fbfb0c97b91e92d9ef79802f95ce74b05e",
+      "filename": "hotpotqa_e/test-00000-of-00001.parquet",
+      "bytes": 7196922,
+      "sha256": "44ca413b8c2435a771cd7987b1d9298ab8fce512684533994b5a55c67b539dc3",
+      "samples": 100,
+      "repo": "zai-org/LongBench",
+      "selection": "rows with length >= 8000 (bucket 8k+), filtered positions [0, 100)",
+      "max_input_tokens": 16384,
+      "max_new_tokens": 32,
+      "metric_primary": "qa_f1_score_legacy: the accepted Exp12 scorer verbatim, including its historical article behaviour (articles are NOT removed); max over references; mean x 100",
+      "metric_secondary": "qa_f1_score_official: standards-aligned LongBench qa_f1_score (articles removed); computed from the identical predictions; secondary only"
+    }
+  },
+  "longbench_common": {
+    "prompt": "LongBench official template through the tokenizer chat template (add_generation_prompt), tokenized without special tokens",
+    "truncation": "if longer than 16384 tokens keep the first 8192 and the last 8192",
+    "warmup": "one 2-token forward before the task"
+  },
+  "dataset_hash_provenance": "the parquet SHA-256 / sizes are NEWLY RECOVERED / FROZEN provenance for this suite (2026-10-03); the accepted Exp12 evidence recorded the dataset commits only",
+  "prompt_sets": {
+    "definition": "sha256 of the ordered 'key<TAB>token count<TAB>int64-LE token-id sha256' lines",
+    "niah": {
+      "units": 57,
+      "prompt_set_sha256": "452dbe81bf7cc331f163dfd485dca8d4b7691613a7065a7aba79b00ee8e4f962"
+    },
+    "passage_retrieval": {
+      "units": 200,
+      "prompt_set_sha256": "c59428c8210bd4a49ff127995ca5e160b24481f06ab616afe34d532755b81260"
+    },
+    "hotpotqa": {
+      "units": 100,
+      "prompt_set_sha256": "01e6976cc58d161c2b06f084101fc4b416437433c6279f7eba80b09bb2a16b1a"
+    }
+  },
+  "task_definition_sha256_lf": {
+    "canonical_longctx_tasks.py": "b7664357eeb1a9b73161df4c89902deb807cc371f949904650dc975978115bfd",
+    "canonical_longctx_core.py": "6fcfecb15d9349e81f5818d84862da0b46d4ea947543893eb813e82ef3cd4d24",
+    "canonical_longctx_pins.py": "e3685460115cac09cd20585ca1e8d180b328b0e32ab7337d158f51458fd5abed"
+  },
+  "scorer_source_sha256": {
+    "niah_score": "558fea8135934bfdb3a3b385e2c098e76c13d1d0ca6644b3f0b3d8c17dd6199c",
+    "retrieval_score": "37f42e49711b2d5de54f287d9725b758feaad64e336c957c4882db33761a90d2",
+    "normalize_answer_legacy": "dc1f87df97db7c07269e762d151717d6b9180a18eba267ed9a4c9aa046ea2453",
+    "qa_f1_score_legacy": "1e596cf70f317e99a052c53f2bdc9b3d0678cedcf75de4d5230543a17af8dcc4",
+    "normalize_answer_official": "a25714a9f304554b2e9f9c15c7f9512616d0650869283f27d1a0e6c676d085fa",
+    "qa_f1_score_official": "76220c6f3745b38482b1c5ff71943f5aef5bacee9190120291551e0e50366a88",
+    "normalize_answers": "b3d4acd163574e5845b433ef1181b89b331706331eff10839d2d41b342902322",
+    "score": "f4454ac27a7e590fe33024a91b8ab5edb2e67db5a431041c97589866998c5321"
+  },
+  "legacy_scripts_sha256_raw": {
+    "niah": "845e58c018859554400c6c2a239b160320e6fae8fe3089d050a3de53cbdd3c9e",
+    "passage_retrieval": "d9835832b586a7a6c09118436694ad028f7f32473573ca952523cf6fa013dbee",
+    "hotpotqa": "67c9b5754bced90a0dc0cac5cbacc748566ad28005eefb5d2dd2ae95696d7288"
+  },
+  "generation": {
+    "prefill": "prompt[:-1] in BF16",
+    "first_decode_step": "the last prompt token",
+    "decoding": "greedy argmax, one token per forward",
+    "stop": "tokenizer EOS (not kept) or the token limit",
+    "answer": "tokenizer.decode(kept ids, skip_special_tokens=True).strip()"
+  },
+  "arms": {
+    "bf16": "the BF16 prefill cache itself",
+    "rabit": "CanonicalRabitCache.from_prefill(BF16 prefill); the last prompt token and every generated token age canonically (R4 residual -> open group -> closed page)"
+  },
+  "pairing": "per example: bf16 then rabit on the identical prompt token ids",
+  "model_settings": {
+    "dtype": "bfloat16",
+    "attention": "sdpa",
+    "seed": "torch.manual_seed(0), cuda.manual_seed_all(0)",
+    "tf32": "enabled (matmul and cudnn)"
+  },
+  "registered_suite": {
+    "order": [
+      "niah",
+      "passage_retrieval",
+      "hotpotqa"
+    ],
+    "invocation": "ONE container invocation; no result is printed, summarized or used for control flow between tasks",
+    "rule": "valid only if EVERY validity gate of all three tasks passes; otherwise the whole suite is INVALID and archived; no selective rerun; no automatic retry",
+    "timeout_hours": 12,
+    "timeout_rule": "infrastructure only; a timeout is an INVALID infrastructure attempt"
+  },
+  "hardware": {
+    "selector": "H100!:1",
+    "guard": "fail-closed: exactly 1 x NVIDIA H100 80GB before anything else"
+  },
+  "validated_runtime": {
+    "python_minor": "3.11",
+    "torch": "2.11.0+cu130",
+    "torch_cuda": "13.0",
+    "cuda_device": "NVIDIA H100 80GB HBM3",
+    "transformers": "4.48.2"
+  },
+  "conformance_prerequisites": {
+    "llama_1k_ppl_window": {
+      "dir": "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/attempt_1",
+      "prefill_tokens": 1024,
+      "record_sha256_lf": "65f37a9b6053bd3bcf1cb388d6c48cdc69c6ad5d785a0781477bbba3486d1a71",
+      "result_sha256": "593e8a29ce63904278933a6d25855a41571a97b9a75a770d0bbdf6b163999106"
+    },
+    "llama_16k_niah": {
+      "dir": "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/llama3_1_8b_niah_16384/attempt_1",
+      "prefill_tokens": 16383,
+      "record_sha256_lf": "96892a4f7bf55d47ca3c2bbd9d92999d1fe04d8d786806116e5a06fbbf4852ea",
+      "result_sha256": "faa3a82ec7b3440b84a5270f86c825c8236137ec4d03c5e54ea5ed27c69bbb16"
+    }
+  },
+  "validity_gates": [
+    "modal exit code 0, no wall-clock timeout, app cleanup verified",
+    "hardware guard passed (1 x H100 80GB); runtime equals the validated conformance runtime",
+    "model snapshot at the pinned revision equals the frozen manifest",
+    "dataset files equal the pinned SHA-256 / size; WikiText SHA-256 equals the pinned value",
+    "every prompt set equals its pinned SHA-256 (computed in the container before the model is loaded)",
+    "shipped-file SHA-256 equal the committed harness; canonical_rabit_quality.py equals c360697",
+    "structure: fixed task order, 57 / 200 / 100 examples, both arms per example on identical prompt ids, rabit rows use CanonicalRabitCache, one token per forward",
+    "every stored score equals the frozen scorer applied to the stored prediction string",
+    "every LongBench example equals the Exp12 log (dataset index, original / used token counts, ground truth); NIAH cases equal the Exp12 grid",
+    "no legacy quality module imported in the container; only the shipped files present",
+    "BF16 control, NIAH: 15-case canonical subset accuracy within 1.0 point of 100.0 (Exp12 rule)",
+    "BF16 control, Passage Retrieval: 10-row canonical subset score within 1.0 point of 100.0 (Exp12 rule)",
+    "BF16 control, HotpotQA: frozen per-example gate on the first 20 examples: mismatches <= 1, L1 <= 0.065"
+  ],
+  "rabit_quality_gate": "NONE -- no gate reads a RABIT score; a valid suite is never rejected for RABIT quality",
+  "quality_threshold": "NONE -- no definition of preserved / healthy / acceptable; exact values are reported",
+  "statistics": {
+    "niah": "deterministic grid only (no inferential statistics): exact-retrieval counts overall and per context, failed coordinates, cases changed",
+    "passage_retrieval_hotpotqa": "aggregate = mean score x 100; delta = rabit - bf16 (points); paired percentile bootstrap over examples (Exp12 procedure and seeds)",
+    "resamples": 10000,
+    "confidence": 0.95,
+    "seed": {
+      "passage_retrieval": 20270931,
+      "hotpotqa": 20270932
+    },
+    "descriptive": "examples changed, per-example delta distribution, concentration (top-1 / top-3 contributions), worst examples; nothing is removed"
+  },
+  "legacy_comparison": "the accepted Exp12 values are quoted as LEGACY LOGICAL-EVALUATOR RESULTS; never pooled",
+  "attempts": "results/mlsys2027/canonical_quality_v2/long_context/attempt_<n>/; never overwritten",
+  "not_run_here": [
+    "Qasper",
+    "multilingual",
+    "Qwen long-context",
+    "ablations",
+    "retuning",
+    "serving",
+    "profiling",
+    "kernel optimization"
+  ]
+}
