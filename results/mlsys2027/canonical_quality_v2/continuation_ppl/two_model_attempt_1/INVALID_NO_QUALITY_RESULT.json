@@ -1,0 +1,19 @@
+{
+  "attempt": 1,
+  "classification": "INVALID HARNESS / VALIDITY-GATE FAILURE",
+  "quality_result": "NO QUALITY RESULT PRODUCED",
+  "status": "permanently INVALID and EXCLUDED (review decision, 2026-10-03); never rerun, never pooled",
+  "source_commit": "1e5a7ff8f5c50cb7c85246dd1eb93b6de8418641",
+  "evidence_commits": ["5d8d212", "3cba625"],
+  "facts": [
+    "the Llama hardware, model-identity and dataset gates passed",
+    "the first model failed BEFORE scoring: gate 'GPU canonical state == CPU canonical state, bit-exact', 32 / 32 layers mismatched",
+    "no result.json; no PPL, no NLL, no quality value of any kind exists",
+    "Qwen was never run",
+    "no retry occurred"
+  ],
+  "llama_artifact": "results/mlsys2027/canonical_quality_v2/continuation_ppl/llama3_1_8b/attempt_1/ is part of this INVALID two-model attempt and is NOT independently accepted evidence",
+  "interpretation_case": "none applies (no result)",
+  "attempt_1_files_overwritten": false,
+  "follow_up": "GPU semantic-conformance diagnostic only (results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/); the failed gate is not loosened on the basis of its observed result"
+}
