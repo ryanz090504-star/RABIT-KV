@@ -1,0 +1,119 @@
+{
+  "kind": "canonical-quality-v2 GPU semantic-conformance diagnostic (descriptive; NOT a quality result)",
+  "attempt": 1,
+  "source_commit": "2a5aec01e4ff96dde426fd2914341427ba0fd864",
+  "started_utc": "2026-10-03T16:10:31.102186+00:00",
+  "preflight": {
+    "static_tests_pass": true,
+    "clean_tree": true,
+    "head_is_pushed": true,
+    "harness_committed": true,
+    "unchanged_canonical_impl_c360697": true,
+    "unchanged_parity_suite_and_oracle_8fa9a9c": true,
+    "unchanged_ppl_core_and_identity_1e5a7ff": true,
+    "unchanged_attempt_1_archive_3cba625": true,
+    "attempt_dir_absent": true
+  },
+  "harness_sha256_lf": {
+    "benchmarks/mlsys2027/canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+    "benchmarks/mlsys2027/canonical_ppl_core.py": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44",
+    "benchmarks/mlsys2027/canonical_ppl_identity.py": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba",
+    "benchmarks/mlsys2027/exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+    "benchmarks/mlsys2027/canonical_cuda_conformance.py": "fbc28c146c6dc21f6c28b368ff207cabdd50fbb015b63b3aad3f9236967816ea",
+    "benchmarks/mlsys2027/canonical_quality_parity_tests.py": "25068361f21128ff545041e00827b33da5061bffeea3f145ede9d621613f3ed3",
+    "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py": "c2a48e97d9ca71fe55eb400938c3b3e665422b1534c4fb8fbe6ef02f2e60cc0f",
+    "benchmarks/mlsys2027/canonical_cuda_conformance_modal.py": "0eed0a310fd14f4531cfd94eb9a250b74e8e2548986fed76ae3659c7ed99917d",
+    "benchmarks/mlsys2027/run_canonical_cuda_conformance.py": "26ee58bed2d56c6604f3e48decc87e61d3fe5f11178805075c8459087a175433",
+    "benchmarks/mlsys2027/test_canonical_cuda_conformance.py": "ffda9a100f2c4bb3ec126ca1de953a88c7cec10d585626b2422cff5b6ea39f36"
+  },
+  "completed_utc": "2026-10-03T16:12:30.338761+00:00",
+  "elapsed_s": 117.9,
+  "modal_returncode": 0,
+  "timed_out": false,
+  "app_ids_new": [
+    "ap-iaWl7bs2fNlgYrdvepTz30"
+  ],
+  "cleanup": {
+    "new_app_ids": [
+      "ap-iaWl7bs2fNlgYrdvepTz30"
+    ],
+    "first_observed_states": {
+      "ap-iaWl7bs2fNlgYrdvepTz30": {
+        "App ID": "ap-iaWl7bs2fNlgYrdvepTz30",
+        "Description": "rabit-kv-canonical-quality-v2-cuda-conformance",
+        "State": "stopped",
+        "Tasks": "1",
+        "Created at": "2026-10-03 12:10:33-04:00",
+        "Stopped at": "2026-10-03 12:12:22-04:00"
+      }
+    },
+    "final_states": {
+      "ap-iaWl7bs2fNlgYrdvepTz30": {
+        "App ID": "ap-iaWl7bs2fNlgYrdvepTz30",
+        "Description": "rabit-kv-canonical-quality-v2-cuda-conformance",
+        "State": "stopped",
+        "Tasks": "0",
+        "Created at": "2026-10-03 12:10:33-04:00",
+        "Stopped at": "2026-10-03 12:12:22-04:00"
+      }
+    },
+    "polls": 2,
+    "elapsed_s": 5.7,
+    "stopped_again_after_timeout": [],
+    "verified": true
+  },
+  "process_ok": true,
+  "result_sha256": "593e8a29ce63904278933a6d25855a41571a97b9a75a770d0bbdf6b163999106",
+  "gpu": [
+    {
+      "name": "NVIDIA H100 80GB HBM3",
+      "memory.total": "81559",
+      "memory.used": "4",
+      "driver_version": "580.95.05"
+    }
+  ],
+  "evaluation": {
+    "validity": {
+      "hardware": true,
+      "shipped_files": true,
+      "oracle_is_the_accepted_parity_oracle": true,
+      "model_snapshot": true,
+      "window": true,
+      "all_layers_reported": true,
+      "raw_kv": true,
+      "trace_reproduces_frozen_code": true,
+      "synthetic_complete": true,
+      "no_scoring": true
+    },
+    "valid": true,
+    "primary": {
+      "llama_layers": 32,
+      "llama_layers_cuda_canonical_equals_cuda_oracle": 32,
+      "llama_layers_mismatched_cuda_canonical_vs_cuda_oracle": [],
+      "synthetic": {
+        "qwen2_5_7b": {
+          "cases": 60,
+          "aging_cases": 28,
+          "passed": true,
+          "failures": 0
+        },
+        "llama3_1_8b": {
+          "cases": 60,
+          "aging_cases": 28,
+          "passed": true,
+          "failures": 0
+        }
+      }
+    },
+    "descriptive": {
+      "llama_layers_cpu_canonical_equals_cpu_oracle": 32,
+      "llama_layers_cpu_canonical_equals_cuda_canonical": 0,
+      "llama_layers_cpu_oracle_equals_cuda_oracle": 0,
+      "attempt1_gate_reevaluated_passed": false,
+      "attempt1_gate_reevaluated_mismatched_layers": 32
+    },
+    "classification": "A"
+  },
+  "diagnostic_valid": true,
+  "classification": "A"
+}

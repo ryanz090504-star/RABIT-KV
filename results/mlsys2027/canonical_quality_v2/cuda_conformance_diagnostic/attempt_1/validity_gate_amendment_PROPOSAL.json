@@ -1,0 +1,22 @@
+{
+  "kind": "PROPOSAL ONLY (not applied; requires review): post-failure validity-gate amendment for the canonical-quality-v2 continuation-PPL protocol",
+  "status": "proposed 2026-10-03 after the INVALID registered Attempt 1 (3cba625) and the GPU semantic-conformance diagnostic (classification A); no code or protocol file has been changed",
+  "transparency": "this amendment is written AFTER a failure of the gate it replaces. It is not derived from the size of the observed CPU-vs-CUDA differences and defines no tolerance: the replacement gate is again bit-exact, against an independent oracle, on the device that executes the quality run.",
+  "old_gate": "GPU canonical state == CPU canonical state, bit-exact, every layer (window 1 prefill), before any scoring",
+  "new_gate": "CUDA canonical state == independent frozen oracle (kvquant_k3.py *_ref, AST-extracted as in accepted parity 8fa9a9c) executed ON CUDA from the same raw BF16 K / V, bit-exact, every canonical field, every layer (window 1 prefill), before any scoring; fail-closed",
+  "unchanged": "CPU canonical <-> CPU oracle remains covered by the accepted parity 8fa9a9c (276 / 276 cases); every other validity gate, the scorer, dataset, windows, N = 32, context 1024, continuation 128, policy, model identities and hardware criteria",
+  "basis": {
+    "diagnostic": "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/attempt_1 (summary.json, result.json)",
+    "cuda_canonical_vs_cuda_oracle": "bit-exact in every canonical field for 32 / 32 Llama layers (real prefill K / V of window 1), and in 60 + 60 full-state cases and 28 + 28 token-by-token aging cases of the Llama and Qwen geometries",
+    "cpu_canonical_vs_cpu_oracle_same_bytes": "bit-exact, 32 / 32 layers",
+    "cpu_vs_cuda": "differs in 32 / 32 layers for the canonical implementation AND, identically in kind, for the independent oracle; the earliest diverging field is the primary FP32 scale (max - min) / c in every layer, with min and max bit-identical on both devices"
+  },
+  "cross_device_differences": "recorded descriptively in summary.json; NOT a validity criterion and NOT quality evidence",
+  "caveats_for_review": [
+    "The CPU-vs-CUDA differences are not confined to the last bit of the decoded values: a one-ULP scale difference flips round() at code boundaries, so 0.07 % of K3 codes and 0.02 % of V2 codes differ by exactly 1 and the affected decoded elements differ by up to one quantization step (max abs 2.88 for K, 3.02 for V in this prefill). Both device results satisfy the same oracle on their own device.",
+    "Real-model CUDA conformance was measured for Llama only; Qwen was covered by synthetic geometry. The proposed in-run gate would measure it on Qwen's own window-1 K / V before scoring.",
+    "Implementing the new gate inside the PPL container requires shipping kvquant_k3.py and an oracle loader there. The current harness ships exactly four files and lists kvquant_k3 among forbidden modules, so canonical_ppl_modal.py, canonical_ppl_core.py (or a new gate module), the runner, the protocol and the static tests would all change. The oracle must be used ONLY by the gate, never by the scoring path.",
+    "A new registered attempt needs a new attempt number for BOTH models; Attempt 1 stays INVALID and excluded."
+  ],
+  "not_proposed": ["any CPU-vs-CUDA tolerance", "any change to canonical_rabit_quality.py", "any change to K3 / V2 / G32 / R4 / META8g64"]
+}
