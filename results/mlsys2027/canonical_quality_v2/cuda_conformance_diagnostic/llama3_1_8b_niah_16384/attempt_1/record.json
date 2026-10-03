@@ -1,0 +1,127 @@
+{
+  "kind": "canonical-quality-v2 GPU semantic-conformance diagnostic (descriptive; NOT a quality result)",
+  "model_key": "llama3_1_8b",
+  "input_key": "niah_16384_depth_0.50",
+  "attempt": 1,
+  "source_commit": "0f8fdc0098cdfb88c37faa906fd0336d74ed4418",
+  "started_utc": "2026-10-03T17:51:42.563648+00:00",
+  "preflight": {
+    "static_tests_pass": true,
+    "clean_tree": true,
+    "head_is_pushed": true,
+    "harness_committed": true,
+    "unchanged_canonical_impl_c360697": true,
+    "unchanged_parity_suite_and_oracle_8fa9a9c": true,
+    "unchanged_ppl_core_and_identity_1e5a7ff": true,
+    "unchanged_llama_conformance_evidence_ec80638": true,
+    "unchanged_qwen_conformance_evidence_fd8d275": true,
+    "unchanged_attempt_1_archive_3cba625": true,
+    "attempt_dir_absent": true
+  },
+  "harness_sha256_lf": {
+    "benchmarks/mlsys2027/canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+    "benchmarks/mlsys2027/canonical_ppl_core.py": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44",
+    "benchmarks/mlsys2027/canonical_ppl_identity.py": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba",
+    "benchmarks/mlsys2027/exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+    "benchmarks/mlsys2027/canonical_cuda_conformance.py": "fbc28c146c6dc21f6c28b368ff207cabdd50fbb015b63b3aad3f9236967816ea",
+    "benchmarks/mlsys2027/canonical_quality_parity_tests.py": "25068361f21128ff545041e00827b33da5061bffeea3f145ede9d621613f3ed3",
+    "benchmarks/mlsys2027/canonical_longctx_tasks.py": "b7664357eeb1a9b73161df4c89902deb807cc371f949904650dc975978115bfd",
+    "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py": "c2a48e97d9ca71fe55eb400938c3b3e665422b1534c4fb8fbe6ef02f2e60cc0f",
+    "benchmarks/mlsys2027/canonical_cuda_conformance_modal.py": "d49a659b424d277b362cacbc551d9c5c16b469dca33a6e0581846a6129c23a9e",
+    "benchmarks/mlsys2027/run_canonical_cuda_conformance.py": "1a5c3e07bad31905bcb2eaca1b92759ede1f9e50337bb0a7010a4de2d2a51496",
+    "benchmarks/mlsys2027/test_canonical_cuda_conformance.py": "2673ac119e15f272228e4211e4dfff8bd2657634de53be42140bbbb9c19f5409"
+  },
+  "completed_utc": "2026-10-03T18:06:05.977251+00:00",
+  "elapsed_s": 862.3,
+  "modal_returncode": 0,
+  "timed_out": false,
+  "app_ids_new": [
+    "ap-GTthuAGwkuA1ARQqhMfcWw"
+  ],
+  "cleanup": {
+    "new_app_ids": [
+      "ap-GTthuAGwkuA1ARQqhMfcWw"
+    ],
+    "first_observed_states": {
+      "ap-GTthuAGwkuA1ARQqhMfcWw": {
+        "App ID": "ap-GTthuAGwkuA1ARQqhMfcWw",
+        "Description": "rabit-kv-canonical-quality-v2-cuda-conformance",
+        "State": "stopped",
+        "Tasks": "0",
+        "Created at": "2026-10-03 13:51:44-04:00",
+        "Stopped at": "2026-10-03 14:06:03-04:00"
+      }
+    },
+    "final_states": {
+      "ap-GTthuAGwkuA1ARQqhMfcWw": {
+        "App ID": "ap-GTthuAGwkuA1ARQqhMfcWw",
+        "Description": "rabit-kv-canonical-quality-v2-cuda-conformance",
+        "State": "stopped",
+        "Tasks": "0",
+        "Created at": "2026-10-03 13:51:44-04:00",
+        "Stopped at": "2026-10-03 14:06:03-04:00"
+      }
+    },
+    "polls": 1,
+    "elapsed_s": 1.1,
+    "stopped_again_after_timeout": [],
+    "verified": true
+  },
+  "process_ok": true,
+  "result_sha256": "faa3a82ec7b3440b84a5270f86c825c8236137ec4d03c5e54ea5ed27c69bbb16",
+  "gpu": [
+    {
+      "name": "NVIDIA H100 80GB HBM3",
+      "memory.total": "81559",
+      "memory.used": "4",
+      "driver_version": "580.95.05"
+    }
+  ],
+  "evaluation": {
+    "validity": {
+      "model_key": true,
+      "hardware": true,
+      "shipped_files": true,
+      "oracle_is_the_accepted_parity_oracle": true,
+      "model_snapshot": true,
+      "input_key": true,
+      "window": true,
+      "all_layers_reported": true,
+      "raw_kv": true,
+      "trace_reproduces_frozen_code": true,
+      "synthetic_complete": true,
+      "no_scoring": true
+    },
+    "valid": true,
+    "primary": {
+      "model": "llama3_1_8b",
+      "layers": 32,
+      "layers_cuda_canonical_equals_cuda_oracle": 32,
+      "layers_mismatched_cuda_canonical_vs_cuda_oracle": [],
+      "synthetic": {
+        "qwen2_5_7b": {
+          "cases": 60,
+          "aging_cases": 28,
+          "passed": true,
+          "failures": 0
+        },
+        "llama3_1_8b": {
+          "cases": 60,
+          "aging_cases": 28,
+          "passed": true,
+          "failures": 0
+        }
+      }
+    },
+    "descriptive": {
+      "layers_cpu_canonical_equals_cpu_oracle": 32,
+      "layers_cpu_canonical_equals_cuda_canonical": 0,
+      "layers_cpu_oracle_equals_cuda_oracle": 0,
+      "attempt1_gate_reevaluated_passed": null,
+      "attempt1_gate_reevaluated_mismatched_layers": 0
+    },
+    "classification": "A"
+  },
+  "diagnostic_valid": true,
+  "classification": "A"
+}
