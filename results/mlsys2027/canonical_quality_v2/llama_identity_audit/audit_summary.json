@@ -1,0 +1,823 @@
+{
+  "kind": "READ-ONLY identity recovery audit of the Llama model used by accepted Exp12 (no GPU, no model execution; NOT a quality result)",
+  "audit_date_utc": "2026-10-03",
+  "status": "accepted by review (2026-10-03)",
+  "approved_wording": "Exp12 loaded model bytes byte-identical to ModelScope revision 359efdbb8af05b788a4ad4185215c6b8caa9052c, recovered by content matching of the preserved historical cache.",
+  "not_claimed": [
+    "Exp12 explicitly recorded that revision",
+    "the historical master branch pointer was directly recovered"
+  ],
+  "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+  "immutable_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+  "immutable_tree": "d4c78fb73d397e54468b14b78513dd3de561b14d",
+  "repository": "https://www.modelscope.cn/LLM-Research/Meta-Llama-3.1-8B-Instruct.git",
+  "exp12": {
+    "started_utc": "2026-09-30T00:37:26.468843+00:00",
+    "completed_utc": "2026-09-30T00:54:58.175753+00:00",
+    "evidence": [
+      "results/mlsys2027/variance/acceptance_record.json:12-13",
+      "results/mlsys2027/variance/manifest.json:5",
+      "results/mlsys2027/variance/manifest.json:65"
+    ],
+    "model_load_log_lines": {
+      "results/mlsys2027/variance/continuation_ppl.log:24": "2026-09-30 00:37:41",
+      "results/mlsys2027/variance/niah.log:21": "2026-09-30 00:38:47",
+      "results/mlsys2027/variance/passage_retrieval.log:21": "2026-09-30 00:41:12",
+      "results/mlsys2027/variance/hotpotqa.log:22": "2026-09-30 00:48:40",
+      "results/mlsys2027/variance/qasper.log:22": "2026-09-30 00:53:13"
+    },
+    "recorded_identity": "only 'Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master' and '(modelscope snapshot_download)'; no revision, hash, manifest or snapshot path",
+    "code": "benchmarks/quality/continuation_ppl.py (raw sha256 4f1385a6..., pinned in variance/manifest.json:12) mounts Modal volume modelscope-llama31-cache at /model_cache and calls snapshot_download(model_name, cache_dir='/model_cache') with no revision (lines 42-52, 115-119)",
+    "downloaded_or_reused": "reused the persistent cache: all 18 files and the snapshot directory carry 2026-07-10 mtime and ctime; each Exp12 '18 files' step took about 20 s for 32 GB"
+  },
+  "historical_cache": {
+    "modal_volume": "modelscope-llama31-cache",
+    "volume_created": "2026-07-10 03:28:40-04:00",
+    "snapshot_path_in_volume": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+    "snapshot_path_as_mounted": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+    "llama_snapshot_directories": [
+      "master"
+    ],
+    "revision_metadata_in_cache": "none (no refs directory, no metadata file; only zero-byte .lock files)",
+    "file_mtime_utc_range": [
+      "2026-07-10T07:30:00.799474+00:00",
+      "2026-07-10T09:36:39.169324+00:00"
+    ],
+    "symlinks": 0
+  },
+  "historical_manifest": {
+    "definition": "sha256 of the sorted 'path<TAB>size<TAB>sha256' lines joined by LF, no trailing newline (canonical_ppl_identity.manifest_sha256); llama_manifest.tsv holds exactly those bytes",
+    "files": 18,
+    "total_bytes": 32132582371,
+    "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89"
+  },
+  "comparison_with_revision": {
+    "source": "git objects of a bare clone (plain blobs hashed; LFS pointers' oid sha256 + size)",
+    "matched": 18,
+    "of": 18,
+    "extra_in_git_tree": [],
+    "result": "EXACT MATCH (18/18)",
+    "per_file": [
+      {
+        "path": ".gitattributes",
+        "size": 1519,
+        "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361",
+        "git_kind": "blob",
+        "git_blob_sha1": "a6344aac8c09253b3b630fb776ae94478aa0275b",
+        "match": true
+      },
+      {
+        "path": "LICENSE",
+        "size": 7627,
+        "sha256": "64e1b2889b7892e6bbe7a7ed5bfe6ff793c61f9d584345f8f41cf9f5cb30a369",
+        "git_kind": "blob",
+        "git_blob_sha1": "a7c3ca16cee30425ed6ad841a809590f2bcbf290",
+        "match": true
+      },
+      {
+        "path": "README.md",
+        "size": 44044,
+        "sha256": "ed0e2e86f7a40c38b793b0a04dfd993b2c1dfb34906804f96b999f0bbd8d70e6",
+        "git_kind": "blob",
+        "git_blob_sha1": "bbd5630a05b65c1a8b25141bd11ec44844107d58",
+        "match": true
+      },
+      {
+        "path": "USE_POLICY.md",
+        "size": 4691,
+        "sha256": "a568f2ebc73cec3fd74ba2afd992d4e945a8c7a9d851f9b66163aac834b7b859",
+        "git_kind": "blob",
+        "git_blob_sha1": "81ebb55902285e8dd5804ccf423d17ffb2a622ee",
+        "match": true
+      },
+      {
+        "path": "config.json",
+        "size": 855,
+        "sha256": "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e",
+        "git_kind": "blob",
+        "git_blob_sha1": "0bb6fd75b3ad2fe988565929f329945262c2814e",
+        "match": true
+      },
+      {
+        "path": "configuration.json",
+        "size": 48,
+        "sha256": "a78221ae93dd8977b26fcd1d106fa5ad7e7f1fd3a7d93bfd9d6fba5ed00ec4d2",
+        "git_kind": "blob",
+        "git_blob_sha1": "f9291c34499303a5103dea21c45e605bb20981bb",
+        "match": true
+      },
+      {
+        "path": "generation_config.json",
+        "size": 184,
+        "sha256": "189fb0c0d7fd8a527db217c0a60a0e013f0394cd8800f9697a666a9e75e5f7fd",
+        "git_kind": "blob",
+        "git_blob_sha1": "cc7276afd599de091142c6ed3005faf8a74aa257",
+        "match": true
+      },
+      {
+        "path": "model-00001-of-00004.safetensors",
+        "size": 4976698672,
+        "sha256": "2b1879f356aed350030bb40eb45ad362c89d9891096f79a3ab323d3ba5607668",
+        "git_kind": "lfs",
+        "git_blob_sha1": "a59dca28867995c0d05384251ac5f4d62461a226",
+        "match": true
+      },
+      {
+        "path": "model-00002-of-00004.safetensors",
+        "size": 4999802720,
+        "sha256": "09d433f650646834a83c580877bd60c6d1f88f7755305c12576b5c7058f9af15",
+        "git_kind": "lfs",
+        "git_blob_sha1": "4ab0726caf5e75dd1e5700c7e7899ac8c0798428",
+        "match": true
+      },
+      {
+        "path": "model-00003-of-00004.safetensors",
+        "size": 4915916176,
+        "sha256": "fc1cdddd6bfa91128d6e94ee73d0ce62bfcdb7af29e978ddcab30c66ae9ea7fa",
+        "git_kind": "lfs",
+        "git_blob_sha1": "5864b15557563e7700a3f95236afdee36f5fdb74",
+        "match": true
+      },
+      {
+        "path": "model-00004-of-00004.safetensors",
+        "size": 1168138808,
+        "sha256": "92ecfe1a2414458b4821ac8c13cf8cb70aed66b5eea8dc5ad9eeb4ff309d6d7b",
+        "git_kind": "lfs",
+        "git_blob_sha1": "b8babcaa5a888d6efd5c05206361b4685492ad13",
+        "match": true
+      },
+      {
+        "path": "model.safetensors.index.json",
+        "size": 23950,
+        "sha256": "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b",
+        "git_kind": "blob",
+        "git_blob_sha1": "0fd8120f1c6acddc268ebc2583058efaf699a771",
+        "match": true
+      },
+      {
+        "path": "original/consolidated.00.pth",
+        "size": 16060617592,
+        "sha256": "ab33d910f405204e5d388bc3521503584800461dc96808e287821dd451c1edac",
+        "git_kind": "lfs",
+        "git_blob_sha1": "419e2d2c8b3fcbea2955c1177110fe777df351f7",
+        "match": true
+      },
+      {
+        "path": "original/params.json",
+        "size": 199,
+        "sha256": "b15b6b31b2043c0400b028ecc25c8946e21d76ac260e9ac6a357ed8727c8865f",
+        "git_kind": "blob",
+        "git_blob_sha1": "f1131204e79d0c09d2bac93f11569a8a655d68ba",
+        "match": true
+      },
+      {
+        "path": "original/tokenizer.model",
+        "size": 2183982,
+        "sha256": "82e9d31979e92ab929cd544440f129d9ecd797b69e327f80f17e1c50d5551b55",
+        "git_kind": "lfs",
+        "git_blob_sha1": "a097ce5a06fce0fa3d685a8cfb175cef243dfde9",
+        "match": true
+      },
+      {
+        "path": "special_tokens_map.json",
+        "size": 296,
+        "sha256": "6f38c73729248f6c127296386e3cdde96e254636cc58b4169d3fd32328d9a8ec",
+        "git_kind": "blob",
+        "git_blob_sha1": "02ee80b6196926a5ad790a004d9efd6ab1ba6542",
+        "match": true
+      },
+      {
+        "path": "tokenizer.json",
+        "size": 9085657,
+        "sha256": "79e3e522635f3171300913bb421464a87de6222182a0570b9b2ccba2a964b2b4",
+        "git_kind": "blob",
+        "git_blob_sha1": "5cc5f00a5b203e90a27a3bd60d1ec393b07971e8",
+        "match": true
+      },
+      {
+        "path": "tokenizer_config.json",
+        "size": 55351,
+        "sha256": "177c7b61e616fecb84c17ce0591acb92c6c4d60e9ac5ababfb940ff23bbcd424",
+        "git_kind": "blob",
+        "git_blob_sha1": "db88166e2bc4c799fd5d1ae643b75e84d03ee70e",
+        "match": true
+      }
+    ],
+    "commits_examined": 15,
+    "commits_equal_to_historical_manifest": [
+      "359efdbb8af05b788a4ad4185215c6b8caa9052c"
+    ],
+    "by_commit": {
+      "359efdbb8af05b788a4ad4185215c6b8caa9052c": {
+        "tree": "d4c78fb73d397e54468b14b78513dd3de561b14d",
+        "files": 18,
+        "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+        "equals_historical_manifest": true,
+        "differing_files": [],
+        "meta_parents_ct_date_subject": "d02f94ee4a1a317d00309c1a9019f89428034720|1740572854|2025-02-26T20:27:34+08:00|Update README.md"
+      },
+      "0b681bbcf9c63506df0c2a932180246df2d85897": {
+        "tree": "4ac767c35ac5b3d05bd0725b97b668c09f71e0be",
+        "files": 18,
+        "manifest_sha256": "9f99c1cf2750a23e443ad9cfde0c080a2ab26508190a2d7c263ce5a0096386e4",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          "README.md"
+        ],
+        "meta_parents_ct_date_subject": "d02f94ee4a1a317d00309c1a9019f89428034720|1739437124|2025-02-13T08:58:44Z|下载模型，运行后，报错"
+      },
+      "d02f94ee4a1a317d00309c1a9019f89428034720": {
+        "tree": "4ac767c35ac5b3d05bd0725b97b668c09f71e0be",
+        "files": 18,
+        "manifest_sha256": "9f99c1cf2750a23e443ad9cfde0c080a2ab26508190a2d7c263ce5a0096386e4",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          "README.md"
+        ],
+        "meta_parents_ct_date_subject": "cfa5b4b06b4e21867e18ec84c12807188748c14e|1722380797|2024-07-31T07:06:37+08:00|Add tool use example to README (#64)"
+      },
+      "cfa5b4b06b4e21867e18ec84c12807188748c14e": {
+        "tree": "cec55e1e3b124e15622a58a07dbc97358273ded0",
+        "files": 18,
+        "manifest_sha256": "92b9f9b36e36f7acb5f6e72b6d33c335cc8246ff6246032b8dff33e590d933d7",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          "README.md",
+          "tokenizer_config.json"
+        ],
+        "meta_parents_ct_date_subject": "86283db58aba4be4ffa058c48e36fa3eb53e3dfd|1722293538|2024-07-30T06:52:18+08:00|Update chat template (#53)"
+      },
+      "86283db58aba4be4ffa058c48e36fa3eb53e3dfd": {
+        "tree": "1b22e19b85f0f7a63a2158c6e4f288e136b38cc2",
+        "files": 18,
+        "manifest_sha256": "a668b58b65fdd6b6447e0a863afb927cc99485a8aa2ab9d55e876ea06eabee23",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          "README.md",
+          "tokenizer_config.json"
+        ],
+        "meta_parents_ct_date_subject": "a092eee97200271305e62b8f18a6a343a1db2188|1722008271|2024-07-26T23:37:51+08:00|Upload tokenizer (#29)"
+      },
+      "a092eee97200271305e62b8f18a6a343a1db2188": {
+        "tree": "813b995677536047dfadef742a5f4fbbddfd839c",
+        "files": 18,
+        "manifest_sha256": "45daf6a8814efd17f62c9692cd40976251fcaeb7732d44b3c725e1500aa8137b",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          "README.md",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "meta_parents_ct_date_subject": "ec643e8863253443e053bd83eb6485687420b2db|1721827583|2024-07-24T13:26:23Z|Update README.md"
+      },
+      "ec643e8863253443e053bd83eb6485687420b2db": {
+        "tree": "684ff23148c18c13a77ced12fc97b19834e3905a",
+        "files": 18,
+        "manifest_sha256": "501f82e64fe88021d747c145df9e189199a9f7e1a29342de1a380bf0bec785db",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          "README.md",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "meta_parents_ct_date_subject": "bee806f27e9e4e7d7667ec3b6b4b0e66b564d41a|1721793176|2024-07-24T03:52:56Z|Update README.md"
+      },
+      "bee806f27e9e4e7d7667ec3b6b4b0e66b564d41a": {
+        "tree": "3cfd256ef6232d39ff78a1a9ca3fd5491e2ab35e",
+        "files": 18,
+        "manifest_sha256": "9e87e86d878a0ac0ddcd1d955c7726a2e53724097ce67374e9acf6f991fef33a",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          "README.md",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "meta_parents_ct_date_subject": "af9df87426d128a37607f0232972aad7e33a7380|1721761549|2024-07-23T19:05:49Z|Update README.md"
+      },
+      "af9df87426d128a37607f0232972aad7e33a7380": {
+        "tree": "06a54635d70819dabcac5a22097e165df0fdffa5",
+        "files": 18,
+        "manifest_sha256": "492bbaa4e28f86f3b60edfea86158a4bdacc244163243dc8cd054c37f894179e",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          "README.md",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "meta_parents_ct_date_subject": "d2d4122b6d5440aa15549ed2d723c3b7505cee9f|1721761463|2024-07-24T03:04:23+08:00|Update config.json"
+      },
+      "d2d4122b6d5440aa15549ed2d723c3b7505cee9f": {
+        "tree": "5aec126e08c672e61e91d5d95f084ab7d6b52389",
+        "files": 18,
+        "manifest_sha256": "0a8235948ea38f2572543603ef7e40f2461252170aa75aa31d1c3bbe6f8e32c4",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          ".gitattributes",
+          "README.md",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "meta_parents_ct_date_subject": "ad43d16f0814824b26c3a2302b79360d6c6b1578|1721753769|2024-07-23T16:56:09Z|Update README.md"
+      },
+      "ad43d16f0814824b26c3a2302b79360d6c6b1578": {
+        "tree": "f030b6c54b0b48ddc9285774b6180c00eef6adef",
+        "files": 18,
+        "manifest_sha256": "8bbbce60d630aadeb52763b364f43859ee959707377eaadd0c7d3bcb8177de90",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          ".gitattributes",
+          "README.md",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "meta_parents_ct_date_subject": "043efdca396f2b6f4b5714d76d70df7840856ed7|1721753742|2024-07-23T16:55:42Z|Update README.md"
+      },
+      "043efdca396f2b6f4b5714d76d70df7840856ed7": {
+        "tree": "57725756eb84c64e52e85b4d82c93785679e69c3",
+        "files": 18,
+        "manifest_sha256": "3e3c6bae12a52190a0eb64843188e2f0ac10cc3be5ea445f5de0bf94a30b2c7b",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          ".gitattributes",
+          "README.md",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "meta_parents_ct_date_subject": "ee7565b21b3ac64f3b8fae80081cfde648f95db9|1721752538|2024-07-24T00:35:38+08:00|upload"
+      },
+      "ee7565b21b3ac64f3b8fae80081cfde648f95db9": {
+        "tree": "2c8852b52a3c6cc19ada2829eb680f79ca7af0d8",
+        "files": 3,
+        "manifest_sha256": "d897e28948bbde516352e3298e39e167655aad5e16d3eea3486d385da822b7db",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          ".gitattributes",
+          "README.md"
+        ],
+        "meta_parents_ct_date_subject": "ea75ac49c75ef0500f3c2f4a21726e6f38bde6c5|1721751926|2024-07-23T16:25:26Z|System init configuration.json"
+      },
+      "ea75ac49c75ef0500f3c2f4a21726e6f38bde6c5": {
+        "tree": "1a08d402f07b4d3697e1888c424fdb8cf5a8e02d",
+        "files": 2,
+        "manifest_sha256": "9b764512d3817672b71ff852f8cc7a1f05df8ae72a6cdf6e78c5b5dd181c2ad8",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          ".gitattributes",
+          "README.md"
+        ],
+        "meta_parents_ct_date_subject": "e8a60ced8b58e85dbbb14e78d007421785cb9454|1721751926|2024-07-23T16:25:26Z|System update meta information"
+      },
+      "e8a60ced8b58e85dbbb14e78d007421785cb9454": {
+        "tree": "55503de1e77cb07c008c3e798b9f53b882223173",
+        "files": 1,
+        "manifest_sha256": "083dd1af09894f0d178b10492b0c1c6efcf429d4fbb57d9623257e33eddbda39",
+        "equals_historical_manifest": false,
+        "differing_files": [
+          ".gitattributes"
+        ],
+        "meta_parents_ct_date_subject": "|1721751925|2024-07-23T16:25:25Z|System init .gitattributes"
+      }
+    }
+  },
+  "historical_corroboration": {
+    "note": "accepted runs that printed size + SHA-256 of files in the SAME snapshot directory at run time (before and after Exp12)",
+    "files_hashed_historically": [
+      "config.json",
+      "configuration.json",
+      "generation_config.json",
+      "model-00001-of-00004.safetensors",
+      "model-00002-of-00004.safetensors",
+      "model-00003-of-00004.safetensors",
+      "model-00004-of-00004.safetensors",
+      "model.safetensors.index.json",
+      "special_tokens_map.json",
+      "tokenizer.json",
+      "tokenizer_config.json"
+    ],
+    "files_not_hashed_historically": [
+      ".gitattributes",
+      "LICENSE",
+      "README.md",
+      "USE_POLICY.md",
+      "original/consolidated.00.pth",
+      "original/params.json",
+      "original/tokenizer.model"
+    ],
+    "records": [
+      {
+        "file": "results/mlsys2027/context_scaling/attempt_2/context_scaling_summary.json",
+        "line_of_shard1_hash": 5398,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": null
+      },
+      {
+        "file": "results/mlsys2027/context_scaling/attempt_2/raw_run_1/modal_session.log",
+        "line_of_shard1_hash": 236,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-27 21:09:48"
+      },
+      {
+        "file": "results/mlsys2027/context_scaling/failed_attempt_1/modal_session.log",
+        "line_of_shard1_hash": 233,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-26 20:52:12"
+      },
+      {
+        "file": "results/mlsys2027/deployment/failed_attempt_1/modal_session.log",
+        "line_of_shard1_hash": 224,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-25 19:31:38"
+      },
+      {
+        "file": "results/mlsys2027/deployment/matched_capacity_latency_summary.json",
+        "line_of_shard1_hash": 1915,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": null
+      },
+      {
+        "file": "results/mlsys2027/deployment/modal_session.log",
+        "line_of_shard1_hash": 233,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-25 23:50:22"
+      },
+      {
+        "file": "results/mlsys2027/deployment/replication_1/matched_capacity_latency_summary.json",
+        "line_of_shard1_hash": 1915,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": null
+      },
+      {
+        "file": "results/mlsys2027/deployment/replication_1/modal_session.log",
+        "line_of_shard1_hash": 234,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-26 02:39:21"
+      },
+      {
+        "file": "results/mlsys2027/deployment/replication_1/summary.json",
+        "line_of_shard1_hash": 1258,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-26T02:35:13"
+      },
+      {
+        "file": "results/mlsys2027/diagnostics/stage3c_cliff/modal_session.log",
+        "line_of_shard1_hash": 236,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-27 00:48:43"
+      },
+      {
+        "file": "results/mlsys2027/diagnostics/stage3c_component_profile/raw_run_1/modal_session.log",
+        "line_of_shard1_hash": 345,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-27 13:25:33"
+      },
+      {
+        "file": "results/mlsys2027/diagnostics/stage3c_shared_decode_final_benchmark/modal_session.log",
+        "line_of_shard1_hash": 521,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-27 18:24:58"
+      },
+      {
+        "file": "results/mlsys2027/diagnostics/stage3c_shared_decode_q16352_feasibility/modal_session.log",
+        "line_of_shard1_hash": 521,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-27 20:21:53"
+      },
+      {
+        "file": "results/mlsys2027/diagnostics/stage3c_shared_decode_qb_tiebreak/modal_session.log",
+        "line_of_shard1_hash": 523,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-27 17:25:15"
+      },
+      {
+        "file": "results/mlsys2027/diagnostics/stage3c_shared_decode_qb_tuning/modal_session.log",
+        "line_of_shard1_hash": 523,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-27 16:56:43"
+      },
+      {
+        "file": "results/mlsys2027/diagnostics/stage3c_tile32_benchmark/modal_session.log",
+        "line_of_shard1_hash": 288,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-27 03:13:01"
+      },
+      {
+        "file": "results/mlsys2027/external_baseline/exp13/modal_session.log",
+        "line_of_shard1_hash": 353,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-30 04:16:51"
+      },
+      {
+        "file": "results/mlsys2027/fp8_baseline/matched_capacity_latency_summary.json",
+        "line_of_shard1_hash": 3305,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": null
+      },
+      {
+        "file": "results/mlsys2027/fp8_baseline/modal_session.log",
+        "line_of_shard1_hash": 236,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-26 16:56:38"
+      },
+      {
+        "file": "results/mlsys2027/fp8_baseline/summary.json",
+        "line_of_shard1_hash": 2027,
+        "files_whose_sha256_appears": [
+          "config.json",
+          "configuration.json",
+          "generation_config.json",
+          "model-00001-of-00004.safetensors",
+          "model-00002-of-00004.safetensors",
+          "model-00003-of-00004.safetensors",
+          "model-00004-of-00004.safetensors",
+          "model.safetensors.index.json",
+          "special_tokens_map.json",
+          "tokenizer.json",
+          "tokenizer_config.json"
+        ],
+        "records_snapshot_dir": true,
+        "first_timestamp_in_file": "2026-09-26T16:52:55"
+      }
+    ]
+  },
+  "limitations": [
+    "Exp12 recorded '@master', not an immutable revision.",
+    "The branch pointer itself was not reconstructed: ModelScope exposes current refs and commit history only (no reflog); a since-deleted commit with an identical tree cannot be excluded.",
+    "The historical cache was hashed later (2026-10-03), not at Exp12 time.",
+    "The model-relevant files (weight shards, index, configs, tokenizer files) have stronger historical corroboration: accepted runs before and after Exp12 recorded the same hashes from the same directory. The other files (.gitattributes, LICENSE, README.md, USE_POLICY.md, original/*) rest on the unchanged 2026-07-10 timestamps.",
+    "README.md is the only file separating 359efdbb from its parent d02f94ee; the model-relevant bytes are identical in both.",
+    "Exp12's logs do not print the snapshot path; it follows from the hash-pinned script and from other runs that print the same path."
+  ],
+  "provenance": {
+    "hashing": "CPU-only Modal app llama-cache-identity-audit-readonly (ap-MckPw5RFdG9cFcXlUyARGF), debian_slim python 3.11, cpu=8, no GPU, no torch, no model load; modal client 1.4.3",
+    "volume_mount": "read-only (modal.Volume.from_name(...).read_only())",
+    "write_probe": "write refused (OSError: [Errno 30] Read-only file system: '/model_cache/.audit_write_probe')",
+    "git": "bare partial clone (GIT_LFS_SKIP_SMUDGE=1, --filter=blob:limit=20m); nothing downloaded into the volume",
+    "raw_artifacts": [
+      "raw/llama_cache_audit.json",
+      "raw/git_manifests.json",
+      "raw/vol_listing.json",
+      "raw/audit_run.log"
+    ],
+    "scripts_as_run": [
+      "scripts/llama_cache_audit_modal.py",
+      "scripts/git_manifests.py",
+      "scripts/vol_list.py",
+      "scripts/compare.py"
+    ]
+  },
+  "accepted_evidence_modified": false
+}
