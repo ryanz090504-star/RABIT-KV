@@ -50,6 +50,9 @@ def test_no_scoring_generation_or_tolerance_anywhere():
                   and isinstance(n.value, ast.Name) and n.value.id == "core"}
     assert core_attrs == {"build_token_pool", "wikitext_lines", "pool_sha256", "split_windows",
                           "canonical_cache_from_prefill", "prefill_state_parity"}
+    task_attrs = {n.attr for n in ast.walk(tree(MODAL)) if isinstance(n, ast.Attribute)
+                  and isinstance(n.value, ast.Name) and n.value.id == "tasks"}
+    assert task_attrs == {"niah_prompt_ids", "niah_parts", "ids_sha256"}  # prompt construction only; no scorer
     src = ast.unparse(fn("conformance"))
     assert src.count("model(input_ids=context_ids, use_cache=True)") == 1 and src.count("model(") == 1
 
@@ -79,7 +82,8 @@ def test_strict_h100_selector_and_guard_first():
     assert isinstance(guard, ast.If) and ast.unparse(guard.test) == "not _hw_ok" and isinstance(guard.body[-1], ast.Raise)
     src = ast.unparse(f)
     order = ["if not _hw_ok", "if not files_ok", "suite.load_oracle(", "snapshot_download(", "ident.verify_dir(",
-             "ident.WIKITEXT_SHA256", "m['token_pool_sha256']", "AutoModelForCausalLM.from_pretrained(",
+             "ident.WIKITEXT_SHA256", "m['token_pool_sha256']", "if not window['equals_frozen_niah_16k']",
+             "AutoModelForCausalLM.from_pretrained(",
              "conf.layer_report(", "core.prefill_state_parity(", "conf.synthetic_report("]
     pos = [src.index(s) for s in order]
     assert pos == sorted(pos), list(zip(order, pos))
@@ -123,6 +127,20 @@ def test_classification_is_a_pure_function_of_the_same_device_oracle_comparison(
     # a result of one model evaluated as the other is INVALID (model key, identity, geometry)
     assert runner.evaluate(_synthetic_result("qwen2_5_7b"), "llama3_1_8b")["classification"] == "C"
     assert runner.evaluate(_synthetic_result("llama3_1_8b"), "qwen2_5_7b")["classification"] == "C"
+    # the 16k NIAH input: 16383 prefilled tokens, the frozen prompt identity, no Attempt-1 gate re-evaluation
+    k = _synthetic_result("llama3_1_8b")
+    k.update(input_key="niah_16384_depth_0.50", attempt1_gate_reevaluated={"skipped": "x"},
+             window={"equals_frozen_niah_16k": True, "prompt_tokens": 16384, "prefill_tokens": 16383, "depth": 0.5,
+                     "contains_bos": False})
+    for r in k["layers"]:
+        r["raw"]["shape"] = [16383, 8, 128]
+    e = runner.evaluate(k, "llama3_1_8b", "niah_16384_depth_0.50")
+    assert e["valid"] and e["classification"] == "A"
+    assert runner.evaluate(k, "llama3_1_8b")["classification"] == "C"  # evaluated as the PPL input: invalid
+    k["window"]["equals_frozen_niah_16k"] = False
+    assert runner.evaluate(k, "llama3_1_8b", "niah_16384_depth_0.50")["classification"] == "C"
+    assert runner.out_dir("llama3_1_8b", "niah_16384_depth_0.50", 1).parts[-2:] == ("llama3_1_8b_niah_16384", "attempt_1")
+    assert runner.out_dir("qwen2_5_7b", "ppl_window_1", 1).parts[-2:] == ("qwen2_5_7b", "attempt_1")
 
     def cls(mutate):
         r = copy.deepcopy(base)

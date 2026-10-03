@@ -47,7 +47,8 @@ OUT_BASE = ROOT / "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagn
 SHIPPED = ["benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/canonical_ppl_core.py",
            "benchmarks/mlsys2027/canonical_ppl_identity.py", "benchmarks/mlsys2027/exp14_model_snapshot.py",
            "benchmarks/mlsys2027/canonical_cuda_conformance.py", "benchmarks/mlsys2027/canonical_quality_parity_tests.py",
-           "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py"]
+           "benchmarks/mlsys2027/canonical_longctx_tasks.py", "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py"]
+INPUTS = {"ppl_window_1": 1024, "niah_16384_depth_0.50": 16383}  # input key -> prefilled tokens
 STATIC_TESTS = HERE / "test_canonical_cuda_conformance.py"
 HARNESS = [*[ROOT / f for f in SHIPPED], MODAL_APP, Path(__file__).resolve(), STATIC_TESTS]
 FROZEN = {
@@ -60,7 +61,8 @@ FROZEN = {
                                        "benchmarks/mlsys2027/canonical_ppl_identity.py",
                                        "benchmarks/mlsys2027/exp14_model_snapshot.py"]),
     "llama_conformance_evidence_ec80638": ("ec80638", ["results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/attempt_1"]),
-    "attempt_1_archive_3cba625": ("3cba625", ["results/mlsys2027/canonical_quality_v2/continuation_ppl/llama3_1_8b",
+    "qwen_conformance_evidence_fd8d275": ("fd8d275", ["results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/qwen2_5_7b"]),
+    "attempt_1_archive_3cba625": ("3cba625", ["results/mlsys2027/canonical_quality_v2/continuation_ppl/llama3_1_8b/attempt_1",
                                               "results/mlsys2027/canonical_quality_v2/continuation_ppl/two_model_attempt_1/record.json",
                                               "results/mlsys2027/canonical_quality_v2/continuation_ppl/two_model_attempt_1/attempt_record_addendum.json"]),
 }
@@ -88,7 +90,12 @@ def apps() -> dict:
     return {r["App ID"]: r for r in json.loads(p.stdout) if r.get("Description") == APP_NAME}
 
 
-def preflight(model: str, attempt: int, execute: bool) -> dict:
+def out_dir(model: str, input_key: str, attempt: int) -> Path:
+    name = model if input_key == "ppl_window_1" else f"{model}_{input_key.split('_depth')[0]}"
+    return OUT_BASE / name / f"attempt_{attempt}"
+
+
+def preflight(model: str, attempt: int, execute: bool, input_key: str = "ppl_window_1") -> dict:
     upstream = subprocess.run(["git", "rev-parse", "@{u}"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     t = subprocess.run([sys.executable, str(STATIC_TESTS)], capture_output=True, text=True, encoding="utf-8",
                        errors="replace", env=env(), timeout=900)
@@ -99,7 +106,7 @@ def preflight(model: str, attempt: int, execute: bool) -> dict:
         "harness_committed": all(p.exists() for p in HARNESS)
         and git("status", "--short", "--", *[p.relative_to(ROOT).as_posix() for p in HARNESS]) == "",
         **{f"unchanged_{k}": git("diff", "--name-only", c, "--", *paths) == "" for k, (c, paths) in FROZEN.items()},
-        "attempt_dir_absent": not (OUT_BASE / model / f"attempt_{attempt}").exists(),
+        "attempt_dir_absent": not out_dir(model, input_key, attempt).exists(),
     }
     if execute and not all(checks.values()):
         raise SystemExit(f"pre-run validation failed: {json.dumps(checks, indent=1)}")
@@ -107,7 +114,7 @@ def preflight(model: str, attempt: int, execute: bool) -> dict:
 
 
 # ------------------------------------------------------------------------------------------- evaluation (offline)
-def evaluate(res: dict, model: str = "llama3_1_8b") -> dict:
+def evaluate(res: dict, model: str = "llama3_1_8b", input_key: str = "ppl_window_1") -> dict:
     """Validity of the DIAGNOSTIC and the classification. Pure function of the result JSON."""
     m = ident.MODELS[model]
     layers = res.get("layers", [])
@@ -121,11 +128,16 @@ def evaluate(res: dict, model: str = "llama3_1_8b") -> dict:
         and res["oracle"]["oracle_namespace_references_canonical_module"] is False,
         "model_snapshot": res["model"]["passed"] is True and res["model"]["model_revision"] == m["revision"]
         and res["model"]["manifest_sha256"] == m["manifest_sha256"] and res["model"]["files_checked"] == len(m["files"]),
+        "input_key": res.get("input_key", "ppl_window_1") == input_key,
         "window": res["dataset"]["wikitext_sha256"] == ident.WIKITEXT_SHA256
-        and res["dataset"]["token_pool_sha256"] == m["token_pool_sha256"] and res["window"]["context_tokens"] == 1024
-        and res["window"]["equals_first_1024_pool_tokens"] is True and res["window"]["contains_bos"] is False,
+        and res["dataset"]["token_pool_sha256"] == m["token_pool_sha256"] and res["window"]["contains_bos"] is False
+        and ((res["window"].get("context_tokens") == 1024 and res["window"].get("equals_first_1024_pool_tokens") is True)
+             if input_key == "ppl_window_1" else
+             (res["window"].get("equals_frozen_niah_16k") is True and res["window"].get("prompt_tokens") == 16384
+              and res["window"].get("prefill_tokens") == 16383 and res["window"].get("depth") == 0.5)),
         "all_layers_reported": [r["layer"] for r in layers] == list(range(m["layers"])),
-        "raw_kv": all(r["raw"]["dtype"] == "torch.bfloat16" and r["raw"]["shape"] == [1024, m["kv_heads"], m["head_dim"]]
+        "raw_kv": all(r["raw"]["dtype"] == "torch.bfloat16"
+                      and r["raw"]["shape"] == [INPUTS[input_key], m["kv_heads"], m["head_dim"]]
                       and r["raw"]["host_copy_bitwise_identical"] is True and r["raw"]["device"].startswith("cuda")
                       for r in layers),
         "trace_reproduces_frozen_code": all(r.get("trace_reproduces_frozen_code_on_both_devices") is True for r in layers),
@@ -153,27 +165,28 @@ def evaluate(res: dict, model: str = "llama3_1_8b") -> dict:
         "layers_cpu_canonical_equals_cpu_oracle": sum(r["summary"]["cpu_canonical_equals_cpu_oracle"] for r in layers),
         "layers_cpu_canonical_equals_cuda_canonical": sum(r["summary"]["cpu_canonical_equals_cuda_canonical"] for r in layers),
         "layers_cpu_oracle_equals_cuda_oracle": sum(r["summary"]["cpu_oracle_equals_cuda_oracle"] for r in layers),
-        "attempt1_gate_reevaluated_passed": res["attempt1_gate_reevaluated"]["passed"],
-        "attempt1_gate_reevaluated_mismatched_layers": len(res["attempt1_gate_reevaluated"]["mismatched_layers"])}
+        "attempt1_gate_reevaluated_passed": res["attempt1_gate_reevaluated"].get("passed"),
+        "attempt1_gate_reevaluated_mismatched_layers": len(res["attempt1_gate_reevaluated"].get("mismatched_layers", []))}
     out["classification"] = "A" if all(eq_bc) and all(G["passed"] for G in syn.values()) else "B"
     return out
 
 
-def run(model: str, attempt: int) -> int:
-    checks = preflight(model, attempt, execute=True)
-    out = OUT_BASE / model / f"attempt_{attempt}"
+def run(model: str, attempt: int, input_key: str = "ppl_window_1") -> int:
+    checks = preflight(model, attempt, execute=True, input_key=input_key)
+    out = out_dir(model, input_key, attempt)
     out.mkdir(parents=True, exist_ok=False)
     result_tmp = Path(tempfile.mkdtemp()) / "result.json"
     e = env()
     e["CANONICAL_CUDA_CONFORMANCE_RESULT_PATH"] = str(result_tmp)
     e["CANONICAL_CUDA_CONFORMANCE_EXPECTED_FILE_SHA256_LF"] = json.dumps({f: sha256_lf(ROOT / f) for f in SHIPPED})
     rec = {"kind": "canonical-quality-v2 GPU semantic-conformance diagnostic (descriptive; NOT a quality result)",
-           "model_key": model, "attempt": attempt, "source_commit": git("rev-parse", "HEAD"),
+           "model_key": model, "input_key": input_key, "attempt": attempt, "source_commit": git("rev-parse", "HEAD"),
            "started_utc": dt.datetime.now(dt.timezone.utc).isoformat(), "preflight": checks,
            "harness_sha256_lf": {p.relative_to(ROOT).as_posix(): sha256_lf(p) for p in HARNESS}}
     pre, t0, parsed = apps(), time.time(), set()
     with (out / "session.log").open("w", encoding="utf-8") as fh:
-        proc = subprocess.Popen([sys.executable, "-m", "modal", "run", str(MODAL_APP), "--model-key", model], stdout=subprocess.PIPE,
+        proc = subprocess.Popen([sys.executable, "-m", "modal", "run", str(MODAL_APP), "--model-key", model,
+                                 "--input-key", input_key], stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace", env=e, cwd=ROOT)
 
         def pump():
@@ -198,7 +211,7 @@ def run(model: str, attempt: int) -> int:
     if result_tmp.is_file():
         (out / "result.json").write_bytes(result_tmp.read_bytes())
         res = json.loads((out / "result.json").read_bytes().decode("utf-8"))
-        ev = evaluate(res, model)
+        ev = evaluate(res, model, input_key)
     process_ok = rc == 0 and not timed_out and cleanup["verified"]
     valid = bool(process_ok and ev and ev["valid"])
     rec.update(completed_utc=dt.datetime.now(dt.timezone.utc).isoformat(), elapsed_s=round(time.time() - t0, 1),
@@ -207,7 +220,7 @@ def run(model: str, attempt: int) -> int:
                gpu=res["hardware"]["gpus"] if res else None, evaluation=ev, diagnostic_valid=valid,
                classification=ev["classification"] if valid else "C")
     (out / "record.json").write_text(json.dumps(rec, indent=2) + "\n", encoding="utf-8", newline="\n")
-    print(json.dumps({"model": model, "attempt": attempt, "diagnostic_valid": valid, "classification": rec["classification"],
+    print(json.dumps({"model": model, "input": input_key, "attempt": attempt, "diagnostic_valid": valid, "classification": rec["classification"],
                       "modal_returncode": rc, "validity": ev["validity"] if ev else None,
                       "primary": ev.get("primary") if ev else None, "descriptive": ev.get("descriptive") if ev else None},
                      indent=1))
@@ -217,6 +230,7 @@ def run(model: str, attempt: int) -> int:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--model", choices=sorted(ident.MODELS), required=True)
+    ap.add_argument("--input", choices=sorted(INPUTS), default="ppl_window_1")
     ap.add_argument("--attempt", type=int, default=1)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--execute", action="store_true", help="launch the GPU job (ONLY when explicitly authorized)")
@@ -224,12 +238,12 @@ def main(argv=None) -> int:
     if a.dry_run == a.execute:
         raise SystemExit("exactly one of --dry-run / --execute is required")
     if a.dry_run:
-        checks = preflight(a.model, a.attempt, execute=False)
+        checks = preflight(a.model, a.attempt, execute=False, input_key=a.input)
         print(json.dumps({"preflight": checks, "all_preflight_checks_pass": all(checks.values()),
                           "command": f"modal run {MODAL_APP.relative_to(ROOT).as_posix()} --model-key {a.model}"}, indent=1))
         print("\n--dry-run: nothing executed, no files written.")
         return 0
-    return run(a.model, a.attempt)
+    return run(a.model, a.attempt, a.input)
 
 
 if __name__ == "__main__":

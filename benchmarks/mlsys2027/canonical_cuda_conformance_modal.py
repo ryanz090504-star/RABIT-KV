@@ -12,6 +12,8 @@ re-evaluates the Attempt-1 gate (core.prefill_state_parity, unchanged) for the r
 Shipped files: the four files of the PPL harness (unchanged), the comparison module, the accepted parity suite (for
 its oracle loader, distributions and T1 / T2 comparisons) and the frozen oracle source kvquant_k3.py.
 The model key was added after the accepted Llama diagnostic (ec80638); the Llama path is unchanged.
+Input 'niah_16384_depth_0.50' (added for the long-context suite): the prefill is prompt[:-1] (16383 tokens) of the
+frozen 16384-token NIAH case, exactly the prefill the long-context suite performs; no answer is generated.
 """
 
 from __future__ import annotations
@@ -28,16 +30,23 @@ REMOTE_REPO = "/repo"
 FILES = ["benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/canonical_ppl_core.py",
          "benchmarks/mlsys2027/canonical_ppl_identity.py", "benchmarks/mlsys2027/exp14_model_snapshot.py",
          "benchmarks/mlsys2027/canonical_cuda_conformance.py", "benchmarks/mlsys2027/canonical_quality_parity_tests.py",
-         "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py"]
+         "benchmarks/mlsys2027/canonical_longctx_tasks.py", "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py"]
 ORACLE = "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py"
 CANONICAL_RABIT_QUALITY_SHA256_LF = "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5"  # c360697
 ORACLE_FILE_SHA256_LF = "c2a48e97d9ca71fe55eb400938c3b3e665422b1534c4fb8fbe6ef02f2e60cc0f"  # accepted parity 8fa9a9c
 ORACLE_EXTRACTED_SHA256 = "d58f58a5431bb5eeb2eb24bf3a86b6ea3160c83b9c4ecc1585dd4cad95450f3c"  # accepted parity 8fa9a9c
 MODEL_KEYS = ("llama3_1_8b", "qwen2_5_7b")
+INPUT_KEYS = ("ppl_window_1", "niah_16384_depth_0.50")
+# the frozen 16384-token NIAH case (context 16384, depth 0.50) of the long-context suite, computed offline from the
+# pinned tokenizer and WikiText-2 and proven equal to the legacy niah.py prompt (int64-LE token-id SHA-256)
+NIAH_16K = {"task": "niah", "context_tokens": 16384, "depth": 0.5, "prompt_tokens": 16384, "prefill_tokens": 16383,
+            "prompt_ids_sha256": "5fbd3681f69de3760b058fd92320a149a2d72dda81cad1fe7b9686af82d5ac00",
+            "prefill_ids_sha256": "5e2cf6508791cb537e9513531e0d9eca5f4c661ae3b1715a9e21bc7a786c54d1",
+            "prompt_text_sha256": "569324f54a3b39600d364fd8ea1cc45486978225c1400cb22f438da3e3fa1957"}
 RESULT_PATH_ENV = "CANONICAL_CUDA_CONFORMANCE_RESULT_PATH"
 EXPECTED_SHA_ENV = "CANONICAL_CUDA_CONFORMANCE_EXPECTED_FILE_SHA256_LF"
 JSON_NATIVE = (dict, list, str, int, float, bool, type(None))
-RESULT_KEYS = ("model_key", "hardware", "environment", "files", "oracle", "model", "dataset", "window", "geometry", "layers",
+RESULT_KEYS = ("model_key", "input_key", "hardware", "environment", "files", "oracle", "model", "dataset", "window", "geometry", "layers",
                "attempt1_gate_reevaluated", "synthetic", "no_scoring", "timing")
 
 app = modal.App("rabit-kv-canonical-quality-v2-cuda-conformance")
@@ -92,7 +101,7 @@ def validate_payload(payload) -> dict:
 
 
 @app.function(image=image, gpu="H100!:1", timeout=3600, volumes={"/model_cache": model_cache})
-def conformance(model_key: str, expected_file_sha256_lf: dict) -> str:
+def conformance(model_key: str, expected_file_sha256_lf: dict, input_key: str = "ppl_window_1") -> str:
     _gpus = _gpu_query()
     _hw_ok = (len(_gpus) == 1 and "H100" in _gpus[0].get("name", "")
               and 79 * 1024 <= int(float(_gpus[0].get("memory.total", 0))) <= 82 * 1024)
@@ -101,6 +110,8 @@ def conformance(model_key: str, expected_file_sha256_lf: dict) -> str:
         raise RuntimeError(f"hardware mismatch: {_gpus}; nothing loaded")
     if model_key not in MODEL_KEYS:
         raise RuntimeError(f"unknown model key {model_key!r}; nothing loaded")
+    if input_key not in INPUT_KEYS or (input_key != "ppl_window_1" and model_key != "llama3_1_8b"):
+        raise RuntimeError(f"unsupported input {input_key!r} for {model_key!r}; nothing loaded")
 
     import importlib.metadata as md
     import struct
@@ -175,13 +186,31 @@ def conformance(model_key: str, expected_file_sha256_lf: dict) -> str:
     pool_sha = core.pool_sha256(pool)
     if pool_sha != m["token_pool_sha256"]:
         raise RuntimeError("token pool differs from the pinned frozen windows; no model loaded")
-    context_ids = core.split_windows(pool, samples, context_tokens, eval_tokens, device)[0][0]
-    ids = [int(x) for x in context_ids[0].tolist()]
     dataset = {"url": ident.WIKITEXT_URL, "wikitext_sha256": wikitext_sha, "token_pool_sha256": pool_sha}
-    window = {"window": 1, "context_tokens": len(ids), "bos_token_id": tokenizer.bos_token_id,
-              "contains_bos": tokenizer.bos_token_id in ids,
-              "context_ids_sha256_int64_le": hashlib.sha256(struct.pack(f"<{len(ids)}q", *ids)).hexdigest(),
-              "equals_first_1024_pool_tokens": ids == [int(x) for x in pool[:context_tokens]]}
+    if input_key == "ppl_window_1":
+        context_ids = core.split_windows(pool, samples, context_tokens, eval_tokens, device)[0][0]
+        ids = [int(x) for x in context_ids[0].tolist()]
+        window = {"window": 1, "context_tokens": len(ids), "bos_token_id": tokenizer.bos_token_id,
+                  "contains_bos": tokenizer.bos_token_id in ids,
+                  "context_ids_sha256_int64_le": hashlib.sha256(struct.pack(f"<{len(ids)}q", *ids)).hexdigest(),
+                  "equals_first_1024_pool_tokens": ids == [int(x) for x in pool[:context_tokens]]}
+    else:  # the frozen NIAH 16384 / depth 0.50 prompt of the long-context suite; prefill = prompt[:-1]
+        import canonical_longctx_tasks as tasks
+
+        prompt = tasks.niah_prompt_ids(tasks.niah_parts(tokenizer, response.content.decode("utf-8")),
+                                       NIAH_16K["context_tokens"], NIAH_16K["depth"])
+        ids = prompt[:-1]
+        window = {**{k: NIAH_16K[k] for k in ("task", "context_tokens", "depth")}, "input": input_key,
+                  "prompt_tokens": len(prompt), "prefill_tokens": len(ids), "context_tokens_prefilled": len(ids),
+                  "prompt_ids_sha256": tasks.ids_sha256(prompt), "prefill_ids_sha256": tasks.ids_sha256(ids),
+                  "prompt_text_sha256": hashlib.sha256(tokenizer.decode(prompt).encode("utf-8")).hexdigest(),
+                  "bos_token_id": tokenizer.bos_token_id, "contains_bos": tokenizer.bos_token_id in prompt,
+                  "prefill_rule": "prompt[:-1] (the suite feeds the last prompt token as the first decode step)"}
+        window["equals_frozen_niah_16k"] = all(window[k] == NIAH_16K[k] for k in (
+            "prompt_tokens", "prefill_tokens", "prompt_ids_sha256", "prefill_ids_sha256", "prompt_text_sha256"))
+        if not window["equals_frozen_niah_16k"]:
+            raise RuntimeError(f"NIAH 16k prompt differs from the frozen identity: {window}; no model loaded")
+        context_ids = torch.tensor([ids], dtype=torch.long, device=device)
     _emit("CUDA_CONFORMANCE_WINDOW", {**dataset, **window})
 
     # ---- model (the loading / seed / TF32 settings of the PPL harness, unchanged)
@@ -221,8 +250,9 @@ def conformance(model_key: str, expected_file_sha256_lf: dict) -> str:
                                              "earliest_divergence": rep.get("earliest_divergence")})
         del cache, raw, legacy
         torch.cuda.empty_cache()
-        # the Attempt-1 gate, re-evaluated with the unchanged function (its own prefill; no scoring)
-        gate = core.prefill_state_parity(model, context_ids)
+        # the Attempt-1 gate, re-evaluated with the unchanged function (its own prefill; no scoring); PPL input only
+        gate = (core.prefill_state_parity(model, context_ids) if input_key == "ppl_window_1"
+                else {"skipped": "not re-evaluated for the long-context input (one prefill only)"})
         _emit("CUDA_CONFORMANCE_ATTEMPT1_GATE", gate)
         synthetic = conf.synthetic_report(oracle, suite, device)
     _emit("CUDA_CONFORMANCE_SYNTHETIC", {g: {k: v for k, v in G.items() if not k.endswith("failures")} | {
@@ -230,12 +260,12 @@ def conformance(model_key: str, expected_file_sha256_lf: dict) -> str:
         for g, G in synthetic["geometries"].items()})
 
     res = {"kind": "canonical-quality-v2 GPU semantic-conformance diagnostic (descriptive; NO scoring / PPL / generation)",
-           "model_key": model_key,
+           "model_key": model_key, "input_key": input_key,
            "hardware": {"gpus": _gpus, "passed": _hw_ok}, "environment": environment,
            "files": {"sha256_lf": file_sha, "passed": files_ok}, "oracle": oracle_meta, "model": verification,
            "dataset": dataset, "window": window, "geometry": geometry, "policy": dict(crq.POLICY), "layers": layers,
            "attempt1_gate_reevaluated": gate, "synthetic": synthetic,
-           "no_scoring": {"prefill_forwards": 2, "continuation_tokens_scored": 0, "logits_read": False,
+           "no_scoring": {"prefill_forwards": 2 if input_key == "ppl_window_1" else 1, "continuation_tokens_scored": 0, "logits_read": False,
                           "generation": False, "note": "one prefill for the raw K / V and one inside the unchanged "
                                                        "core.prefill_state_parity; no loss, no PPL"},
            "timing": {"total_seconds": time.time() - t_start}}
@@ -249,9 +279,9 @@ def conformance(model_key: str, expected_file_sha256_lf: dict) -> str:
 
 
 @app.local_entrypoint()
-def main(model_key: str):
+def main(model_key: str, input_key: str = "ppl_window_1"):
     expected = json.loads(os.environ[EXPECTED_SHA_ENV])
-    payload = conformance.remote(model_key, expected)
+    payload = conformance.remote(model_key, expected, input_key)
     res = validate_payload(payload)
     data = payload.encode("utf-8")
     path = os.environ[RESULT_PATH_ENV]
