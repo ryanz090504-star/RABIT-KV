@@ -1,0 +1,152 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-ln4CjmjoYC40x9El0D3PEM
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_ppl_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_rabit_quality.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_ppl_core.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_ppl_identity.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_model_snapshot.py
+└── 🔨 Created function run_ppl.
+CANONICAL_PPL_HARDWARE_CHECK={"gpus": [{"driver_version": "580.95.05", "memory.total": "81559", "memory.used": "4", "name": "NVIDIA H100 80GB HBM3"}], "passed": true, "required": "exactly 1 x NVIDIA H100 80GB"}
+CANONICAL_PPL_FILES={"passed": true, "repo_files": ["benchmarks/mlsys2027/canonical_ppl_core.py", "benchmarks/mlsys2027/canonical_ppl_identity.py", "benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/exp14_model_snapshot.py"], "sha256_lf": {"canonical_ppl_core.py": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44", "canonical_ppl_identity.py": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba", "canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5", "exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9"}}
+CANONICAL_PPL_ENVIRONMENT={"cuda_device": "NVIDIA H100 80GB HBM3", "packages": {"accelerate": "1.15.0", "modelscope": "1.40.1", "requests": "2.34.2", "safetensors": "0.8.0", "sentencepiece": "0.2.2", "tokenizers": "0.21.4", "transformers": "4.48.2"}, "python": "3.11.12", "torch": "2.11.0+cu130", "torch_cuda": "13.0"}
+CANONICAL_PPL_RUNTIME={"passed": true, "runtime": {"cuda_device": "NVIDIA H100 80GB HBM3", "python_minor": "3.11", "torch": "2.11.0+cu130", "torch_cuda": "13.0", "transformers": "4.48.2"}, "validated": {"cuda_device": "NVIDIA H100 80GB HBM3", "python_minor": "3.11", "torch": "2.11.0+cu130", "torch_cuda": "13.0", "transformers": "4.48.2"}}
+2026-10-03 16:36:53,909 | INFO    | modelscope_hub.download | Downloading 15 files from Qwen/Qwen2.5-7B-Instruct@16c174980d8a1492910551634b4969e69cdc2444
+
+[1ADownloading:   0%|          | 0/15 [00:00<?, ?file/s]
+[1ADownloading:  33%|███▎      | 5/15 [00:00<00:01,  8.93file/s]
+[1ADownloading:  53%|█████▎    | 8/15 [00:06<00:07,  1.02s/file]
+[1ADownloading:  73%|███████▎  | 11/15 [00:06<00:02,  1.59file/s]
+[1ADownloading:  87%|████████▋ | 13/15 [00:07<00:01,  1.91file/s]
+[1ADownloading: 100%|██████████| 15/15 [00:08<00:00,  2.14file/s]
+[1ADownloading: 100%|██████████| 15/15 [00:08<00:00,  1.86file/s]
+CANONICAL_PPL_MODEL={"dir": "/model_cache/models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444", "extra_files": [], "files_checked": 15, "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1", "mismatches": [], "model_id": "Qwen/Qwen2.5-7B-Instruct", "model_revision": "16c174980d8a1492910551634b4969e69cdc2444", "passed": true}
+CANONICAL_PPL_DATASET={"add_special_tokens": false, "context_tokens": 1024, "eval_tokens": 128, "pool_tokens": 36864, "samples": 32, "token_pool_sha256": "eb424fb71baccb8b64ae53688613a30c462a54a893f82359c9e6ea5385c0f63c", "url": "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt", "wikitext_sha256": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0"}
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  7.34it/s]
+[1ALoading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  7.73it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00,  7.65it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  8.24it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  7.99it/s]
+Running bf16_batched...
+  sample 1/32: PPL=2.3102
+  sample 2/32: PPL=5.8821
+  sample 3/32: PPL=7.1123
+  sample 4/32: PPL=6.0221
+  sample 5/32: PPL=5.6564
+  sample 6/32: PPL=9.8837
+  sample 7/32: PPL=12.8712
+  sample 8/32: PPL=6.6691
+  sample 9/32: PPL=6.5066
+  sample 10/32: PPL=5.0130
+  sample 11/32: PPL=3.3613
+  sample 12/32: PPL=1.3927
+  sample 13/32: PPL=8.4057
+  sample 14/32: PPL=5.3936
+  sample 15/32: PPL=7.9055
+  sample 16/32: PPL=6.3411
+  sample 17/32: PPL=7.5618
+  sample 18/32: PPL=5.8967
+  sample 19/32: PPL=9.2127
+  sample 20/32: PPL=4.1729
+  sample 21/32: PPL=12.6857
+  sample 22/32: PPL=5.3790
+  sample 23/32: PPL=4.7306
+  sample 24/32: PPL=11.4641
+  sample 25/32: PPL=15.6272
+  sample 26/32: PPL=9.1598
+  sample 27/32: PPL=7.4609
+  sample 28/32: PPL=9.8676
+  sample 29/32: PPL=15.5509
+  sample 30/32: PPL=5.6908
+  sample 31/32: PPL=7.2212
+  sample 32/32: PPL=9.7676
+
+Running bf16...
+  sample 1/32: PPL=2.3106
+  sample 2/32: PPL=5.8806
+  sample 3/32: PPL=7.1453
+  sample 4/32: PPL=6.0420
+  sample 5/32: PPL=5.6535
+  sample 6/32: PPL=9.8901
+  sample 7/32: PPL=12.8361
+  sample 8/32: PPL=6.6422
+  sample 9/32: PPL=6.4866
+  sample 10/32: PPL=5.0244
+  sample 11/32: PPL=3.3497
+  sample 12/32: PPL=1.3900
+  sample 13/32: PPL=8.4225
+  sample 14/32: PPL=5.3947
+  sample 15/32: PPL=7.9164
+  sample 16/32: PPL=6.3334
+  sample 17/32: PPL=7.5884
+  sample 18/32: PPL=5.8960
+  sample 19/32: PPL=9.2428
+  sample 20/32: PPL=4.1845
+  sample 21/32: PPL=12.6982
+  sample 22/32: PPL=5.3863
+  sample 23/32: PPL=4.7490
+  sample 24/32: PPL=11.4045
+  sample 25/32: PPL=15.6329
+  sample 26/32: PPL=9.2438
+  sample 27/32: PPL=7.5014
+  sample 28/32: PPL=9.8705
+  sample 29/32: PPL=15.5073
+  sample 30/32: PPL=5.6896
+  sample 31/32: PPL=7.2349
+  sample 32/32: PPL=9.7068
+
+Running rabit...
+  sample 1/32: PPL=18.5206
+  sample 2/32: PPL=199.8355
+  sample 3/32: PPL=137.8683
+  sample 4/32: PPL=129.8376
+  sample 5/32: PPL=234.2515
+  sample 6/32: PPL=182.7150
+  sample 7/32: PPL=209.9309
+  sample 8/32: PPL=176.5729
+  sample 9/32: PPL=153.7258
+  sample 10/32: PPL=80.6753
+  sample 11/32: PPL=23.0913
+  sample 12/32: PPL=14.3920
+  sample 13/32: PPL=147.0989
+  sample 14/32: PPL=63.8815
+  sample 15/32: PPL=179.4892
+  sample 16/32: PPL=75.2827
+  sample 17/32: PPL=173.6022
+  sample 18/32: PPL=68.8405
+  sample 19/32: PPL=300.8065
+  sample 20/32: PPL=64.0238
+  sample 21/32: PPL=236.0289
+  sample 22/32: PPL=51.5666
+  sample 23/32: PPL=42.3016
+  sample 24/32: PPL=254.6124
+  sample 25/32: PPL=424.7178
+  sample 26/32: PPL=124.2171
+  sample 27/32: PPL=91.9518
+  sample 28/32: PPL=156.6169
+  sample 29/32: PPL=151.0891
+  sample 30/32: PPL=63.9284
+  sample 31/32: PPL=118.4780
+  sample 32/32: PPL=290.7163
+
+CANONICAL_PPL_REMOTE={"completed": true, "model_key": "qwen2_5_7b", "ppl": {"bf16": 6.7870010008184805, "bf16_batched": 6.783683137667368, "rabit": 112.38555319178539}}
+CANONICAL_PPL_LOCAL={"payload_type": "str", "bytes": 264868, "sha256": "15222e1fa724286990abe089ea5df9dc16668afa6f56736f8789dcb56526b8fa", "model_key": "qwen2_5_7b"}
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-ln4CjmjoYC40x9El0D3PEM

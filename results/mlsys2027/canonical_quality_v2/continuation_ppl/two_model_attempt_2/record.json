@@ -1,0 +1,18 @@
+{
+  "kind": "canonical-quality-v2 continuation PPL: ONE registered two-model validation attempt",
+  "attempt": 2,
+  "order": [
+    "llama3_1_8b",
+    "qwen2_5_7b"
+  ],
+  "started_utc": "2026-10-03T16:30:06.511976+00:00",
+  "completed_utc": "2026-10-03T16:42:38.719654+00:00",
+  "runner_exit_codes": {
+    "llama3_1_8b": 0,
+    "qwen2_5_7b": 0
+  },
+  "models_not_run": [],
+  "rule": "one registered attempt = both models; valid only if BOTH runs pass every validity gate; if either fails the whole attempt is invalid and archived; neither result is accepted evidence on its own; no selective rerun",
+  "valid": true,
+  "status": "valid (awaiting review; not accepted evidence until reviewed)"
+}
