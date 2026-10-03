@@ -1,0 +1,88 @@
+{
+  "kind": "CANONICAL QUALITY EVIDENCE INDEX (canonical-quality-v2); status as of 2026-10-03",
+  "authoritative_canonical_quality_evidence": [
+    {
+      "item": "validated canonical evaluator / independent parity",
+      "commits": [
+        "c360697",
+        "8fa9a9c",
+        "257f0fb"
+      ],
+      "paths": [
+        "benchmarks/mlsys2027/canonical_rabit_quality.py",
+        "results/mlsys2027/quality_semantic_audit/"
+      ]
+    },
+    {
+      "item": "Llama and Qwen CPU / CUDA semantic conformance",
+      "commits": [
+        "8fa9a9c",
+        "ec80638",
+        "fd8d275",
+        "d7ba819"
+      ],
+      "paths": [
+        "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/"
+      ]
+    },
+    {
+      "item": "Registered Attempt 2 continuation PPL: Llama +1.56 %, Qwen +1555.9 % (Case 1)",
+      "commits": [
+        "01cced9",
+        "10b0973"
+      ],
+      "paths": [
+        "results/mlsys2027/canonical_quality_v2/continuation_ppl/two_model_attempt_2/",
+        "results/mlsys2027/canonical_quality_v2/canonical_ppl_paper_ready_record.json"
+      ]
+    }
+  ],
+  "two_model_n32_continuation_ppl_validation": "COMPLETE",
+  "invalid_attempts": [
+    {
+      "attempt": 1,
+      "status": "INVALID HARNESS / VALIDITY-GATE FAILURE; NO QUALITY RESULT PRODUCED",
+      "path": "results/mlsys2027/canonical_quality_v2/continuation_ppl/two_model_attempt_1/"
+    }
+  ],
+  "supporting_records": {
+    "llama_identity_audit": "results/mlsys2027/canonical_quality_v2/llama_identity_audit/ (3bde966)",
+    "offline_proof_diagnostic": "results/mlsys2027/canonical_quality_v2/ppl_offline_proof_diagnostic/ (bfe43db; the eb3f4b1 proof record is SUPERSEDED)",
+    "offline_proof": "continuation_ppl/offline_proof_record_v2.json (1e5a7ff)"
+  },
+  "legacy_logical_evaluator_results": {
+    "classification": "LEGACY LOGICAL-EVALUATOR RESULTS",
+    "rule": "kept unchanged; usable for historical / provenance discussion; NOT final canonical-RABIT quality evidence",
+    "experiments": {
+      "Exp1": "results/mlsys2027/quality_frontier/",
+      "Exp2": "results/mlsys2027/multilingual_frontier/",
+      "Exp7": "results/mlsys2027/ablations/k_bit/",
+      "Exp8": "results/mlsys2027/ablations/v_bit/",
+      "Exp9": "results/mlsys2027/ablations/group_size/",
+      "Exp10": "results/mlsys2027/ablations/residual_window/",
+      "Exp11": "results/mlsys2027/ablations/metadata/",
+      "Exp12 quality": "results/mlsys2027/variance/",
+      "Exp14 legacy quality": "results/mlsys2027/second_model/quality/"
+    }
+  },
+  "not_run_under_canonical_semantics": [
+    "NIAH",
+    "Passage Retrieval",
+    "HotpotQA",
+    "Qasper",
+    "multilingual PPL",
+    "K / V / group / residual / metadata ablations"
+  ],
+  "generalization_claims": {
+    "supported": [
+      "RABIT's physical representation and canonical cache semantics transfer across the tested Llama and Qwen KV geometries.",
+      "The same frozen operating point exhibits strongly model-dependent quality behavior."
+    ],
+    "not_supported": [
+      "RABIT quality generalizes across models.",
+      "The frozen K3/V2/G32/R4/META8g64 operating point is universally suitable.",
+      "Qwen degradation is caused by GQA, projection bias, outliers, fallback attention, or any other specific mechanism."
+    ],
+    "mechanism": "unknown"
+  }
+}

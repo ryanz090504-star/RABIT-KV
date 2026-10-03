@@ -46,6 +46,50 @@ result.
 
 ---
 
+## Canonical quality status (canonical-quality-v2) — as of 2026-10-03
+
+This section records the current state of the quality evidence. It does not rewrite the
+experiment descriptions below; index: `results/mlsys2027/canonical_quality_v2/EVIDENCE_INDEX.json`.
+
+- **Two-model N32 continuation-PPL validation: COMPLETE** (registered Attempt 2, accepted;
+  evidence `10b0973`, Llama run pushed uninspected as `01cced9`). Paper-ready record:
+  `results/mlsys2027/canonical_quality_v2/canonical_ppl_paper_ready_record.json`.
+
+  | Model | BF16 PPL | Canonical RABIT PPL | Relative delta | Paired-bootstrap 95% CI |
+  |---|---|---|---|---|
+  | Llama-3.1-8B-Instruct @ `359efdbb` | 7.515 | 7.633 | +1.56% | +1.12% to +2.05% |
+  | Qwen2.5-7B-Instruct @ `16c17498` | 6.787 | 112.39 | +1555.9% | +1320% to +1828% |
+
+  WikiText-2, N = 32 windows, context 1024, continuation 128, no BOS, K3/V2/G32/R4/META8g64,
+  one H100 80GB per model. Logical quality; not physical serving evidence.
+- **Interpretation (preregistered Case 1):** "The frozen operating point shows model-specific
+  quality sensitivity; mechanism remains undiagnosed." No numerical definition of "near BF16"
+  is introduced.
+- **Qualification:** the old logical evaluator materially distorted the *magnitude* of the Qwen
+  degradation (legacy Qwen RABIT PPL 299.62 vs canonical 112.39), but the severe Qwen
+  sensitivity remains under canonical semantics, so it is not merely an old-evaluator
+  artifact. The change is not attributed to the metadata-layout fix or the aging fix
+  individually; no causal decomposition has been run.
+- **Authoritative canonical quality evidence:** (1) the validated canonical evaluator and
+  independent parity (`c360697`, `8fa9a9c`); (2) Llama and Qwen CPU/CUDA semantic conformance
+  (`8fa9a9c`, `ec80638`, `fd8d275`; gate amendment `d7ba819`); (3) registered Attempt 2
+  continuation PPL. Attempt 1 is permanently INVALID with no quality result.
+- **Legacy logical-evaluator results:** Experiments 1, 2, 7, 8, 9, 10, 11, 12 (quality) and
+  14 (legacy quality) are kept unchanged and classified LEGACY LOGICAL-EVALUATOR RESULTS. They
+  may be used for historical/provenance discussion but not as final canonical-RABIT quality
+  evidence.
+- **Supported claims:** "RABIT's physical representation and canonical cache semantics
+  transfer across the tested Llama and Qwen KV geometries." "The same frozen operating point
+  exhibits strongly model-dependent quality behavior."
+- **Not supported:** "RABIT quality generalizes across models." "The frozen
+  K3/V2/G32/R4/META8g64 operating point is universally suitable." "Qwen degradation is caused
+  by GQA, projection bias, outliers, fallback attention, or any other specific mechanism."
+  Mechanism remains unknown.
+- **Not run under canonical semantics:** NIAH, Passage Retrieval, HotpotQA, Qasper,
+  multilingual PPL, and all K/V/group/residual/metadata ablations.
+
+---
+
 ## P0-A — Quality frontier
 
 ### Experiment 1 — BF16 / 8 / 4 / 3 / 2 quality-compression frontier
