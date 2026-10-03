@@ -1,0 +1,153 @@
+{
+  "kind": "canonical-quality-v2 continuation-PPL OFFLINE proofs (CPU; no GPU, no model weights; NOT a quality result)",
+  "environment": {
+    "python": "3.11.9",
+    "torch": "2.11.0+cpu",
+    "transformers": "4.48.2"
+  },
+  "protocol": {
+    "samples": 32,
+    "context_tokens": 1024,
+    "eval_tokens": 128,
+    "policy": {
+      "k_bits": 3,
+      "v_bits": 2,
+      "group_size": 32,
+      "residual_tokens": 4,
+      "metadata_bits": 8,
+      "metadata_group_size": 64
+    }
+  },
+  "bound_file_sha256_lf": {
+    "benchmarks/mlsys2027/canonical_ppl_core.py": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44",
+    "benchmarks/mlsys2027/canonical_ppl_identity.py": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba",
+    "benchmarks/mlsys2027/canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+    "benchmarks/mlsys2027/exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+    "benchmarks/mlsys2027/canonical_ppl_offline_proofs.py": "7d74958058ddf53de333a4a5219211dba79a59e2c2bda94ba21e9b7647c11f10",
+    "benchmarks/quality/continuation_ppl.py": "caaae5c3744e9ba03c4bf385337f563802f58331efdb3a239380741885781374"
+  },
+  "W_dataset_windows": {
+    "legacy_url_identical": true,
+    "wikitext_sha256": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0",
+    "wikitext_bytes": 1256449,
+    "models": {
+      "llama3_1_8b": {
+        "tokenizer_files_match_manifest": true,
+        "tokenizer_class": "PreTrainedTokenizerFast",
+        "windows_identical_to_legacy_n32": true,
+        "canonical_n8_windows_are_first_8": true,
+        "bos_token_id": 128000,
+        "no_bos_in_pool": true,
+        "pool_tokens": 36864,
+        "token_pool_sha256": "88dadfe6521c338ca71b1edfe5e85f08b8e2466e0884f8003b5b34a7ee3c849f",
+        "token_pool_sha256_pinned": true
+      },
+      "qwen2_5_7b": {
+        "tokenizer_files_match_manifest": true,
+        "tokenizer_class": "Qwen2TokenizerFast",
+        "windows_identical_to_legacy_n32": true,
+        "canonical_n8_windows_are_first_8": true,
+        "bos_token_id": null,
+        "no_bos_in_pool": true,
+        "pool_tokens": 36864,
+        "token_pool_sha256": "eb424fb71baccb8b64ae53688613a30c462a54a893f82359c9e6ea5385c0f63c",
+        "token_pool_sha256_pinned": true
+      }
+    },
+    "wikitext_pinned": true,
+    "passed": true
+  },
+  "S_scoring": {
+    "tiny_llama_gqa_4_2_d64": {
+      "legacy_bf16_loss_sum": 229.89210510253906,
+      "batched_loss_sum": 229.89210510253906,
+      "stepwise_bf16_loss_sum": 229.8859100341797,
+      "rabit_loss_sum": 230.03826904296875,
+      "legacy_equals_batched_exactly": true,
+      "stepwise_vs_batched_rel_diff": 2.694772122170879e-05,
+      "stepwise_matches_batched": true,
+      "first_token_from_prefill_logit_all_arms": true,
+      "identity_quantizer_rabit_equals_bf16_bitwise": true,
+      "identity_arm_used_canonical_cache": true,
+      "decode_forwards": [
+        39,
+        39
+      ],
+      "one_forward_per_token": true,
+      "quantized_arm_differs_from_bf16": true,
+      "passed": true
+    },
+    "tiny_qwen2_gqa_2_1_d128": {
+      "legacy_bf16_loss_sum": 234.2484130859375,
+      "batched_loss_sum": 234.2484130859375,
+      "stepwise_bf16_loss_sum": 234.24977111816406,
+      "rabit_loss_sum": 234.36532592773438,
+      "legacy_equals_batched_exactly": true,
+      "stepwise_vs_batched_rel_diff": 5.797402034327915e-06,
+      "stepwise_matches_batched": true,
+      "first_token_from_prefill_logit_all_arms": true,
+      "identity_quantizer_rabit_equals_bf16_bitwise": true,
+      "identity_arm_used_canonical_cache": true,
+      "decode_forwards": [
+        39,
+        39
+      ],
+      "one_forward_per_token": true,
+      "quantized_arm_differs_from_bf16": true,
+      "passed": true
+    }
+  },
+  "C_canonical_path": {
+    "tiny_llama_gqa_4_2_d64": {
+      "cache_class": "CanonicalRabitCache",
+      "decoded_calls": 123,
+      "expected_decoded_calls": 123,
+      "state_mismatches": 0,
+      "append_sizes": [
+        1,
+        70
+      ],
+      "max_n": 109,
+      "closed_tokens_seen": [
+        64,
+        96
+      ],
+      "prefill_state_parity": {
+        "layers": 3,
+        "tokens": 70,
+        "kv_heads": 2,
+        "head_dim": 64,
+        "model_dtype": "torch.bfloat16",
+        "mismatched_layers": [],
+        "passed": true
+      },
+      "passed": true
+    },
+    "tiny_qwen2_gqa_2_1_d128": {
+      "cache_class": "CanonicalRabitCache",
+      "decoded_calls": 123,
+      "expected_decoded_calls": 123,
+      "state_mismatches": 1,
+      "append_sizes": [
+        1,
+        70
+      ],
+      "max_n": 109,
+      "closed_tokens_seen": [
+        64,
+        96
+      ],
+      "prefill_state_parity": {
+        "layers": 3,
+        "tokens": 70,
+        "kv_heads": 1,
+        "head_dim": 128,
+        "model_dtype": "torch.bfloat16",
+        "mismatched_layers": [],
+        "passed": true
+      },
+      "passed": false
+    }
+  },
+  "passed": false
+}
