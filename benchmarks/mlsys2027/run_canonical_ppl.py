@@ -9,7 +9,9 @@ BF16 vs canonical RABIT (K3 / V2 / G32 / R4 / META8g64, canonical_rabit_quality.
 the canonical cache aging during decode. Nothing is retuned.
 
 Validity gates (never a quality threshold): process / cleanup, strict hardware, model snapshot manifest, pinned
-dataset and token pool, shipped-file hashes, GPU == CPU canonical state, result structure, legacy code unreachable,
+dataset and token pool, shipped-file hashes, validated runtime environment, pinned accepted CUDA conformance evidence
+for BOTH models (ec80638 Llama, fd8d275 Qwen; post-failure amendment d7ba819 -- the former cross-device 'GPU == CPU
+canonical state, bit-exact' gate was removed, no tolerance replaces it), result structure, legacy code unreachable,
 and BF16 CONTROL REPRODUCTION -- the legacy batched BF16 scorer must reproduce the accepted legacy BF16 aggregate PPL
 of the same model (Llama: Exp12; Qwen: Exp14 quality) within the original Exp1 tolerance (0.5 % relative), and the
 stepwise BF16 arm must agree with the batched one within the same tolerance.
@@ -57,6 +59,21 @@ HARNESS = [*[HERE / n for n in SHIPPED], MODAL_APP, Path(__file__).resolve(), ST
 RABIT_KV2 = ROOT / "vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py"
 RABIT_KV2_SHA256_LF = "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
 PARITY_RESULT_SHA256 = "98d3a5d9a16f83256a31d01556c9ecf26233c418f1c08e0bb971f1cb1d7f7d54"
+# accepted real-model CUDA canonical <-> CUDA frozen-oracle conformance evidence (prerequisite; the oracle itself is
+# never shipped into the scoring container)
+CONFORMANCE_BASE = "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic"
+CONFORMANCE = {
+    "llama3_1_8b": {"dir": f"{CONFORMANCE_BASE}/attempt_1", "evidence_commit": "ec80638",
+                    "record_sha256_lf": "65f37a9b6053bd3bcf1cb388d6c48cdc69c6ad5d785a0781477bbba3486d1a71",
+                    "result_sha256": "593e8a29ce63904278933a6d25855a41571a97b9a75a770d0bbdf6b163999106"},
+    "qwen2_5_7b": {"dir": f"{CONFORMANCE_BASE}/qwen2_5_7b/attempt_1", "evidence_commit": "fd8d275",
+                   "record_sha256_lf": "e8dc4cb23a7896b09ee5e2569622e85326ecc6fd3025f81f060823bd38ae2516",
+                   "result_sha256": "7f3693c452c6daf77bf444bdb535f4e1da9665bb80196570555100db9b83fd73"},
+}
+VALIDATED_RUNTIME = {"python_minor": "3.11", "torch": "2.11.0+cu130", "torch_cuda": "13.0",
+                     "cuda_device": "NVIDIA H100 80GB HBM3", "transformers": "4.48.2"}  # == canonical_ppl_modal.py
+SCIENTIFIC_FILES = ["benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/canonical_ppl_core.py",
+                    "benchmarks/mlsys2027/canonical_ppl_identity.py", "benchmarks/mlsys2027/exp14_model_snapshot.py"]
 # (frozen commit, paths that must be unchanged since it)
 FROZEN = {
     "canonical_impl_c360697": ("c36069781b259e2e9b4d8adf60b7c58ea5df5cac", ["benchmarks/mlsys2027/canonical_rabit_quality.py"]),
@@ -66,6 +83,16 @@ FROZEN = {
     "exp12_evidence_4f767ab": ("4f767ab03d83e043b2871dd0cd4cf2f8dc862e6b", ["results/mlsys2027/variance"]),
     "exp14_quality_evidence_4049642": ("4049642e197e6da0e12cd2e3a4da3fee4d73fff6", ["results/mlsys2027/second_model/quality"]),
     "exp14_model_identity": ("4049642e197e6da0e12cd2e3a4da3fee4d73fff6", ["benchmarks/mlsys2027/exp14_model_snapshot.py"]),
+    "ppl_scientific_code_1e5a7ff": ("1e5a7ff8f5c50cb7c85246dd1eb93b6de8418641",
+                                    ["benchmarks/mlsys2027/canonical_ppl_core.py",
+                                     "benchmarks/mlsys2027/canonical_ppl_identity.py",
+                                     "benchmarks/mlsys2027/run_canonical_ppl_two_model.py"]),
+    "llama_cuda_conformance_ec80638": ("ec80638", [f"{CONFORMANCE_BASE}/attempt_1"]),
+    "qwen_cuda_conformance_fd8d275": ("fd8d275", [f"{CONFORMANCE_BASE}/qwen2_5_7b/attempt_1"]),
+    "invalid_attempt_1_archive": ("2a5aec0", ["results/mlsys2027/canonical_quality_v2/continuation_ppl/llama3_1_8b/attempt_1",
+                                              "results/mlsys2027/canonical_quality_v2/continuation_ppl/two_model_attempt_1"]),
+    "gate_amendment_record_d7ba819": ("d7ba819", ["results/mlsys2027/canonical_quality_v2/continuation_ppl/"
+                                                  "post_failure_validity_gate_amendment_record.json"]),
 }
 LEGACY_LOG = {"llama3_1_8b": "results/mlsys2027/variance/continuation_ppl.log",  # accepted Exp12
               "qwen2_5_7b": "results/mlsys2027/second_model/quality/continuation_ppl.log"}  # accepted Exp14 quality
@@ -110,6 +137,37 @@ def legacy_reference(model: str) -> dict:
     return out
 
 
+def conformance_evidence(model: str) -> dict:
+    """The accepted CUDA canonical <-> CUDA oracle diagnostic of `model`: pinned bytes, valid, classification A, the
+    exact frozen model identity, the validated runtime, and the CURRENT scientific files (nothing changed since)."""
+    c, m = CONFORMANCE[model], ident.MODELS[model]
+    rec_p, res_p = ROOT / c["dir"] / "record.json", ROOT / c["dir"] / "result.json"
+    if not (rec_p.is_file() and res_p.is_file()):
+        return {"present": False}
+    rec, raw = json.loads(rec_p.read_text(encoding="utf-8")), res_p.read_bytes()
+    res = json.loads(raw.decode("utf-8"))
+    env_ = res["environment"]
+    return {
+        "present": True,
+        "record_pinned": sha256_lf(rec_p) == c["record_sha256_lf"],
+        "result_pinned": hashlib.sha256(raw).hexdigest() == c["result_sha256"] == rec.get("result_sha256"),
+        "valid_and_classification_a": rec.get("diagnostic_valid") is True and rec.get("classification") == "A"
+        and rec["evaluation"]["valid"] is True and all(rec["evaluation"]["validity"].values()),
+        "exact_model_identity": [res["model"][k] for k in ("model_id", "model_revision", "manifest_sha256")]
+        == [m["model_id"], m["revision"], m["manifest_sha256"]] and res["model"]["passed"] is True
+        and res["model"]["files_checked"] == len(m["files"]) and len(res["layers"]) == m["layers"],
+        "every_layer_cuda_canonical_equals_cuda_oracle": all(
+            r["summary"]["cuda_canonical_equals_cuda_oracle"] is True
+            and r["summary"]["canonical_cache_equals_cuda_oracle"] is True for r in res["layers"]),
+        "validated_runtime": {"python_minor": ".".join(env_["python"].split(".")[:2]), "torch": env_["torch"],
+                              "torch_cuda": env_["torch_cuda"], "cuda_device": env_["cuda_device"],
+                              "transformers": env_["packages"]["transformers"]} == VALIDATED_RUNTIME,
+        "scientific_files_unchanged_since_conformance": all(
+            res["files"]["sha256_lf"].get(f) == sha256_lf(ROOT / f) for f in SCIENTIFIC_FILES),
+        "no_scoring_in_diagnostic": res["no_scoring"]["continuation_tokens_scored"] == 0,
+    }
+
+
 def build_protocol() -> dict:
     ident.check_constants()
     return {
@@ -151,12 +209,29 @@ def build_protocol() -> dict:
             "model snapshot at the pinned revision equals the frozen manifest (every file: size + SHA-256; no extra file)",
             "WikiText SHA-256 and token-pool SHA-256 equal the pinned values",
             "shipped-file SHA-256 equal the committed harness; canonical_rabit_quality.py equals c360697",
-            "GPU canonical state == CPU canonical state, bit-exact, every layer (window 1 prefill), before any scoring",
+            "runtime torch / CUDA environment equals the runtime of the accepted CUDA conformance diagnostics",
+            "accepted real-model CUDA conformance evidence (CUDA canonical == CUDA frozen oracle, bit-exact, every "
+            "layer and field) is present, pinned by SHA-256, valid, classified A and refers to the exact frozen model "
+            "identity, for BOTH models; the scientific files are unchanged since that validation",
             "structure: 3 arms x 32 windows x 128 tokens; rabit rows use CanonicalRabitCache with 127 one-token forwards",
             "no legacy quality module imported in the container; only the four shipped files present",
             f"BF16 control reproduction: bf16_batched aggregate PPL within {CONTROL_REL_TOL:.1%} (relative) of the "
             "accepted legacy BF16 aggregate of the same model (Llama: Exp12 log; Qwen: Exp14 quality log)",
             f"stepwise BF16 aggregate PPL within {CONTROL_REL_TOL:.1%} (relative) of bf16_batched"],
+        "canonical_state_validation_model": {
+            "amendment": "post-failure validity-gate amendment d7ba819 (after the INVALID registered Attempt 1; before "
+                         "any quality result existed); removed gate: 'GPU canonical state == CPU canonical state, "
+                         "bit-exact, every layer (window 1 prefill), before any scoring'",
+            "cpu_canonical_semantics": "accepted CPU canonical <-> CPU frozen-oracle parity 8fa9a9c",
+            "cuda_llama_semantics": "accepted real-model CUDA canonical <-> CUDA frozen-oracle bit-exact diagnostic "
+                                    "ec80638",
+            "cuda_qwen_semantics": "accepted real-model CUDA canonical <-> CUDA frozen-oracle bit-exact diagnostic "
+                                   "fd8d275",
+            "cross_device_cpu_vs_cuda": "descriptive only; NOT required to be bit-exact; no tolerance defined",
+            "oracle_in_scoring_container": False,
+            "conformance_evidence": {k: {x: v[x] for x in ("dir", "evidence_commit", "record_sha256_lf",
+                                                         "result_sha256")} for k, v in CONFORMANCE.items()},
+            "validated_runtime": VALIDATED_RUNTIME},
         "quality_threshold": "NONE -- the result is reported, not gated; no acceptance threshold on the RABIT delta",
         "registered_attempt": "both models form ONE registered validation attempt, run Llama -> Qwen by "
                               "run_canonical_ppl_two_model.py with no human / model-dependent decision in between; "
@@ -216,6 +291,8 @@ def preflight(model: str, attempt: int, execute: bool) -> dict:
         "offline_proofs_bound_to_current_files": bool(proof) and all(
             sha256_lf(ROOT / f) == h for f, h in proof.get("bound_file_sha256_lf", {}).items()),
         "protocol_matches": PROTOCOL.exists() and load_protocol() is not None,
+        **{f"cuda_conformance_accepted_{k}": all(v is True for v in conformance_evidence(k).values())
+           for k in sorted(CONFORMANCE)},
         "attempt_dir_absent": not (OUT_BASE / model / f"attempt_{attempt}").exists(),
     }
     if execute and not all(checks.values()):
@@ -248,9 +325,10 @@ def evaluate(res: dict, model: str, ref: dict) -> dict:
         == [m["layers"], m["kv_heads"], m["head_dim"]]
         and res["policy"] == {"k_bits": 3, "v_bits": 2, "group_size": 32, "residual_tokens": 4, "metadata_bits": 8,
                               "metadata_group_size": 64},
-        "gpu_cpu_canonical_state_parity": res["prefill_state_parity"]["passed"] is True
-        and res["prefill_state_parity"]["layers"] == m["layers"]
-        and res["prefill_state_parity"]["tokens"] == ident.CONTEXT_TOKENS,
+        "runtime_environment": res["runtime_environment"]["passed"] is True
+        and res["runtime_environment"]["runtime"] == res["runtime_environment"]["validated"] == VALIDATED_RUNTIME
+        and res["environment"]["torch"] == VALIDATED_RUNTIME["torch"]
+        and res["environment"]["torch_cuda"] == VALIDATED_RUNTIME["torch_cuda"],
         "structure": list(arms) == ["bf16_batched", "bf16", "rabit"] and all(rows_ok(a) for a in arms)
         and all(x.get("cache_class") == "CanonicalRabitCache" and x.get("decode_forwards") == e - 1 for x in arms.get("rabit", []))
         and all(x.get("cache_class") == "DynamicCache" and x.get("decode_forwards") == e - 1 for x in arms.get("bf16", [])),

@@ -58,8 +58,6 @@ FROZEN = {
     "ppl_core_and_identity_1e5a7ff": ("1e5a7ff8f5c50cb7c85246dd1eb93b6de8418641",
                                       ["benchmarks/mlsys2027/canonical_ppl_core.py",
                                        "benchmarks/mlsys2027/canonical_ppl_identity.py",
-                                       "benchmarks/mlsys2027/canonical_ppl_modal.py",
-                                       "benchmarks/mlsys2027/canonical_ppl_protocol.json",
                                        "benchmarks/mlsys2027/exp14_model_snapshot.py"]),
     "llama_conformance_evidence_ec80638": ("ec80638", ["results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/attempt_1"]),
     "attempt_1_archive_3cba625": ("3cba625", ["results/mlsys2027/canonical_quality_v2/continuation_ppl/llama3_1_8b",

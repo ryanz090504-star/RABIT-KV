@@ -72,12 +72,42 @@
     "model snapshot at the pinned revision equals the frozen manifest (every file: size + SHA-256; no extra file)",
     "WikiText SHA-256 and token-pool SHA-256 equal the pinned values",
     "shipped-file SHA-256 equal the committed harness; canonical_rabit_quality.py equals c360697",
-    "GPU canonical state == CPU canonical state, bit-exact, every layer (window 1 prefill), before any scoring",
+    "runtime torch / CUDA environment equals the runtime of the accepted CUDA conformance diagnostics",
+    "accepted real-model CUDA conformance evidence (CUDA canonical == CUDA frozen oracle, bit-exact, every layer and field) is present, pinned by SHA-256, valid, classified A and refers to the exact frozen model identity, for BOTH models; the scientific files are unchanged since that validation",
     "structure: 3 arms x 32 windows x 128 tokens; rabit rows use CanonicalRabitCache with 127 one-token forwards",
     "no legacy quality module imported in the container; only the four shipped files present",
     "BF16 control reproduction: bf16_batched aggregate PPL within 0.5% (relative) of the accepted legacy BF16 aggregate of the same model (Llama: Exp12 log; Qwen: Exp14 quality log)",
     "stepwise BF16 aggregate PPL within 0.5% (relative) of bf16_batched"
   ],
+  "canonical_state_validation_model": {
+    "amendment": "post-failure validity-gate amendment d7ba819 (after the INVALID registered Attempt 1; before any quality result existed); removed gate: 'GPU canonical state == CPU canonical state, bit-exact, every layer (window 1 prefill), before any scoring'",
+    "cpu_canonical_semantics": "accepted CPU canonical <-> CPU frozen-oracle parity 8fa9a9c",
+    "cuda_llama_semantics": "accepted real-model CUDA canonical <-> CUDA frozen-oracle bit-exact diagnostic ec80638",
+    "cuda_qwen_semantics": "accepted real-model CUDA canonical <-> CUDA frozen-oracle bit-exact diagnostic fd8d275",
+    "cross_device_cpu_vs_cuda": "descriptive only; NOT required to be bit-exact; no tolerance defined",
+    "oracle_in_scoring_container": false,
+    "conformance_evidence": {
+      "llama3_1_8b": {
+        "dir": "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/attempt_1",
+        "evidence_commit": "ec80638",
+        "record_sha256_lf": "65f37a9b6053bd3bcf1cb388d6c48cdc69c6ad5d785a0781477bbba3486d1a71",
+        "result_sha256": "593e8a29ce63904278933a6d25855a41571a97b9a75a770d0bbdf6b163999106"
+      },
+      "qwen2_5_7b": {
+        "dir": "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/qwen2_5_7b/attempt_1",
+        "evidence_commit": "fd8d275",
+        "record_sha256_lf": "e8dc4cb23a7896b09ee5e2569622e85326ecc6fd3025f81f060823bd38ae2516",
+        "result_sha256": "7f3693c452c6daf77bf444bdb535f4e1da9665bb80196570555100db9b83fd73"
+      }
+    },
+    "validated_runtime": {
+      "python_minor": "3.11",
+      "torch": "2.11.0+cu130",
+      "torch_cuda": "13.0",
+      "cuda_device": "NVIDIA H100 80GB HBM3",
+      "transformers": "4.48.2"
+    }
+  },
   "quality_threshold": "NONE -- the result is reported, not gated; no acceptance threshold on the RABIT delta",
   "registered_attempt": "both models form ONE registered validation attempt, run Llama -> Qwen by run_canonical_ppl_two_model.py with no human / model-dependent decision in between; valid only if BOTH runs pass every validity gate; if either fails the whole attempt is invalid and archived; no selective rerun",
   "interpretation_cases": {

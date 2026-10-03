@@ -160,9 +160,8 @@ def test_hardware_predicate():
 
 def test_container_order_fails_closed_before_scoring():
     src = ast.unparse(run_ppl_def())
-    order = ["if not _hw_ok", "if not files_ok", "snapshot_download(", "ident.verify_dir(", "ident.WIKITEXT_SHA256",
-             "m['token_pool_sha256']", "AutoModelForCausalLM.from_pretrained(", "core.prefill_state_parity(",
-             "if not parity['passed']", "core.score("]
+    order = ["if not _hw_ok", "if not files_ok", "if not runtime_ok", "snapshot_download(", "ident.verify_dir(",
+             "ident.WIKITEXT_SHA256", "m['token_pool_sha256']", "AutoModelForCausalLM.from_pretrained(", "core.score("]
     pos = [src.index(s) for s in order]
     assert pos == sorted(pos), list(zip(order, pos))
     assert src.count("core.score(") == 1
@@ -212,12 +211,15 @@ def _synthetic(model: str = "qwen2_5_7b") -> tuple[dict, dict]:
            "model": {"passed": True, "model_id": m["model_id"], "model_revision": m["revision"],
                      "manifest_sha256": m["manifest_sha256"], "files_checked": len(m["files"])},
            "hardware": {"passed": True, "gpus": [{"name": "NVIDIA H100 80GB HBM3", "memory.total": "81559"}]},
-           "environment": {}, "files": {"passed": True, "sha256_lf": {n: runner.sha256_lf(HERE / n) for n in runner.SHIPPED}},
+           "environment": {"torch": "2.11.0+cu130", "torch_cuda": "13.0"},
+           "runtime_environment": {"runtime": dict(runner.VALIDATED_RUNTIME), "validated": dict(runner.VALIDATED_RUNTIME),
+                                   "passed": True},
+           "files": {"passed": True, "sha256_lf": {n: runner.sha256_lf(HERE / n) for n in runner.SHIPPED}},
            "dataset": {"wikitext_sha256": ident.WIKITEXT_SHA256, "token_pool_sha256": m["token_pool_sha256"]},
            "geometry": {"layers": m["layers"], "kv_heads": m["kv_heads"], "head_dim": m["head_dim"]},
            "policy": {"k_bits": 3, "v_bits": 2, "group_size": 32, "residual_tokens": 4, "metadata_bits": 8,
                       "metadata_group_size": 64},
-           "prefill_state_parity": {"passed": True, "layers": m["layers"], "tokens": 1024}, "logical_kv": {},
+           "logical_kv": {},
            "arms": {"bf16_batched": rows(ref["bf16"], None), "bf16": rows([p * 1.0001 for p in ref["bf16"]], "DynamicCache"),
                     "rabit": rows([p * 1.02 for p in ref["bf16"]], "CanonicalRabitCache")},
            "aggregates": {}, "timing": {},
@@ -249,7 +251,9 @@ def test_evaluate_rejects_each_invalid_condition():
     bad("dataset", lambda r: r["dataset"].update(token_pool_sha256="0" * 64))
     bad("shipped_files", lambda r: r["files"]["sha256_lf"].update({"canonical_rabit_quality.py": "0" * 64}))
     bad("geometry_and_policy", lambda r: r["policy"].update(residual_tokens=8))
-    bad("gpu_cpu_canonical_state_parity", lambda r: r["prefill_state_parity"].update(passed=False))
+    bad("runtime_environment", lambda r: r["runtime_environment"].update(passed=False))
+    bad("runtime_environment", lambda r: r["runtime_environment"]["runtime"].update(torch="2.12.0+cu130"))
+    bad("runtime_environment", lambda r: r["environment"].update(torch_cuda="12.8"))
     bad("structure", lambda r: r["arms"]["rabit"].pop())
     bad("structure", lambda r: r["arms"]["rabit"][0].update(cache_class="DynamicCache"))
     bad("structure", lambda r: r["arms"]["rabit"][0].update(decode_forwards=1))
@@ -295,6 +299,103 @@ def test_runner_never_executes_by_default():
         raise AssertionError(argv)
     src = Path(runner.__file__).read_text(encoding="utf-8")
     assert src.count('"modal", "run"') == 1 and "return run(a.model, a.attempt)" in src
+
+
+# ------------------------------------------------------------------------------------------------ post-failure amendment
+REMOVED_GATE = "GPU canonical state == CPU canonical state, bit-exact, every layer (window 1 prefill), before any scoring"
+TOLERANCE_NAMES = {"allclose", "isclose", "atol", "rtol", "tolerance", "eps", "epsilon"}
+
+
+def test_invalid_cross_device_gate_is_gone_and_no_tolerance_replaces_it():
+    src = MODAL.read_text(encoding="utf-8")
+    code = ast.unparse(run_ppl_def())
+    assert "prefill_state_parity" not in src and "parity" not in code and "STATE_PARITY" not in src
+    assert attrs_of(MODAL, "core") == {"build_token_pool", "wikitext_lines", "pool_sha256", "split_windows", "ARMS",
+                                       "score", "aggregate"}
+    assert ".cpu()" not in code  # nothing in the scoring container compares CPU with CUDA state
+    for p in (MODAL, Path(runner.__file__)):
+        assert not (identifiers(p) & TOLERANCE_NAMES), (p.name, identifiers(p) & TOLERANCE_NAMES)
+    # the ONLY tolerance of the harness is the pre-existing BF16 control-reproduction tolerance (unchanged)
+    tol = {n for n in identifiers(Path(runner.__file__)) | identifiers(MODAL) if "TOL" in n.upper().split("_")}
+    assert tol == {"CONTROL_REL_TOL"} and runner.CONTROL_REL_TOL == 0.005
+    p = runner.load_protocol()
+    assert REMOVED_GATE not in p["validity_gates"] and not any("CPU canonical state" in g for g in p["validity_gates"])
+    v = p["canonical_state_validation_model"]
+    assert REMOVED_GATE in v["amendment"] and "d7ba819" in v["amendment"]
+    assert v["cross_device_cpu_vs_cuda"] == "descriptive only; NOT required to be bit-exact; no tolerance defined"
+    assert "8fa9a9c" in v["cpu_canonical_semantics"] and "ec80638" in v["cuda_llama_semantics"]
+    assert "fd8d275" in v["cuda_qwen_semantics"] and v["oracle_in_scoring_container"] is False
+    res, ref = _synthetic()
+    gates = list(runner.evaluate(res, "qwen2_5_7b", ref)["gates"])
+    assert "gpu_cpu_canonical_state_parity" not in gates and "runtime_environment" in gates and len(gates) == 10
+
+
+def test_no_oracle_code_is_reachable_in_scoring():
+    mod = modal_app()
+    assert {"kvquant_k3", "vllm", "canonical_quality_parity_tests", "canonical_cuda_conformance"} <= set(mod.FORBIDDEN_MODULES)
+    assert mod.FILES == ["canonical_rabit_quality.py", "canonical_ppl_core.py", "canonical_ppl_identity.py",
+                         "exp14_model_snapshot.py"]
+    for p in (CORE, MODAL, IDENT, CRQ, HERE / "exp14_model_snapshot.py"):
+        assert not (imports(p) & {"kvquant_k3", "vllm", "canonical_quality_parity_tests", "canonical_cuda_conformance"})
+        names = identifiers(p)  # code identifiers (docstrings may NAME the oracle; no code may reference it)
+        assert "load_oracle" not in names and not [n for n in names if n.endswith("_ref")], p.name
+    # canonical_rabit_quality.py is the sole RABIT implementation of the scoring path (the cache comes from it only)
+    assert attrs_of(CORE, "crq") == {"make_canonical_cache_class", "canonical_state"}
+    assert attrs_of(MODAL, "crq") == {"POLICY", "logical_bytes", "__file__"}
+
+
+def test_runtime_environment_is_the_validated_conformance_runtime():
+    mod = modal_app()
+    assert mod.VALIDATED_RUNTIME == runner.VALIDATED_RUNTIME == {
+        "python_minor": "3.11", "torch": "2.11.0+cu130", "torch_cuda": "13.0", "cuda_device": "NVIDIA H100 80GB HBM3",
+        "transformers": "4.48.2"}
+    code = ast.unparse(run_ppl_def())
+    assert "runtime_ok = runtime == VALIDATED_RUNTIME" in code
+    guard = code.index("if not runtime_ok")
+    assert guard < code.index("snapshot_download(") < code.index("core.score(")
+
+
+def test_cuda_conformance_evidence_is_pinned_for_both_models():
+    assert set(runner.CONFORMANCE) == set(ident.MODELS)
+    assert runner.CONFORMANCE["llama3_1_8b"]["evidence_commit"] == "ec80638"
+    assert runner.CONFORMANCE["qwen2_5_7b"]["evidence_commit"] == "fd8d275"
+    for model, c in runner.CONFORMANCE.items():
+        ev = runner.conformance_evidence(model)
+        assert all(v is True for v in ev.values()) and len(ev) == 9, (model, ev)
+        res = json.loads((ROOT / c["dir"] / "result.json").read_text(encoding="utf-8"))
+        m = ident.MODELS[model]  # the record refers to the exact frozen model identity
+        assert (res["model"]["model_id"], res["model"]["model_revision"], res["model"]["manifest_sha256"]) == (
+            m["model_id"], m["revision"], m["manifest_sha256"]) and len(res["layers"]) == m["layers"]
+        assert res["files"]["sha256_lf"]["benchmarks/mlsys2027/canonical_rabit_quality.py"] == modal_app().CANONICAL_RABIT_QUALITY_SHA256_LF
+        assert runner.git("diff", "--name-only", c["evidence_commit"], "--", c["dir"]) == ""
+    # a different pin, or evidence of the other model, is rejected
+    saved = copy.deepcopy(runner.CONFORMANCE)
+    try:
+        runner.CONFORMANCE["qwen2_5_7b"]["record_sha256_lf"] = "0" * 64
+        assert runner.conformance_evidence("qwen2_5_7b")["record_pinned"] is False
+        runner.CONFORMANCE["qwen2_5_7b"] = dict(saved["llama3_1_8b"])
+        ev = runner.conformance_evidence("qwen2_5_7b")
+        assert ev["exact_model_identity"] is False and ev["record_pinned"] is True
+        runner.CONFORMANCE["llama3_1_8b"]["dir"] = runner.CONFORMANCE_BASE + "/missing"
+        assert runner.conformance_evidence("llama3_1_8b") == {"present": False}
+    finally:
+        runner.CONFORMANCE.clear()
+        runner.CONFORMANCE.update(saved)
+
+
+def test_registered_two_model_rule_and_scientific_code_unchanged_by_the_amendment():
+    base = "1e5a7ff8f5c50cb7c85246dd1eb93b6de8418641"
+    for f in ("canonical_rabit_quality.py", "canonical_ppl_core.py", "canonical_ppl_identity.py",
+              "run_canonical_ppl_two_model.py", "exp14_model_snapshot.py", "canonical_ppl_offline_proofs.py",
+              "proof_observer.py"):
+        assert runner.git("diff", "--name-only", base, "--", f"benchmarks/mlsys2027/{f}") == "", f
+    old = json.loads(runner.git("show", f"{base}:benchmarks/mlsys2027/canonical_ppl_protocol.json"))
+    new = runner.load_protocol()
+    changed = sorted(k for k in set(old) | set(new) if old.get(k) != new.get(k))
+    assert changed == ["canonical_state_validation_model", "validity_gates"], changed
+    assert new["registered_attempt"] == old["registered_attempt"] and new["interpretation_cases"] == old["interpretation_cases"]
+    assert [g for g in old["validity_gates"] if g not in new["validity_gates"]] == [REMOVED_GATE]
+    assert len(new["validity_gates"]) == len(old["validity_gates"]) + 1
 
 
 # ------------------------------------------------------------------------------------------------ proof observer

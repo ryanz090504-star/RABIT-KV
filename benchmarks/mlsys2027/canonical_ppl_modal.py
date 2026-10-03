@@ -11,9 +11,13 @@ canonical_rabit_quality.py is the sole RABIT implementation in the container; no
 (benchmarks/quality/*), no kvquant_k3 and no vLLM source is present.
 
 Order inside the container (every step aborts the run on failure, before any model output is scored):
-  hardware guard -> shipped-file hashes -> model snapshot at the pinned revision + file-by-file manifest verification
-  -> WikiText SHA-256 -> token-pool SHA-256 -> model load + geometry -> GPU canonical state == CPU canonical state
-  (bit-exact, every layer, window 1 prefill) -> warm-up -> arms in order (bf16_batched, bf16, rabit; windows 1..32).
+  hardware guard -> shipped-file hashes -> runtime torch / CUDA environment == the environment of the accepted CUDA
+  conformance diagnostics -> model snapshot at the pinned revision + file-by-file manifest verification
+  -> WikiText SHA-256 -> token-pool SHA-256 -> model load + geometry -> warm-up -> arms in order (bf16_batched, bf16,
+  rabit; windows 1..32).
+Post-failure amendment (d7ba819): the former 'GPU canonical state == CPU canonical state, bit-exact' gate was removed
+(cross-device bit-exactness is not a semantic requirement; no tolerance replaces it). CUDA semantics are validated
+separately against the frozen independent oracle (ec80638 Llama, fd8d275 Qwen); the oracle is NOT shipped here.
 The result crosses the RPC boundary as ONE strict-JSON str (parity Attempt 3 transport rule).
 """
 
@@ -33,10 +37,13 @@ CANONICAL_RABIT_QUALITY_SHA256_LF = "195cb4896c4708cc6ecc450930733962ea3e08e2144
 RESULT_PATH_ENV = "CANONICAL_PPL_RESULT_PATH"
 EXPECTED_SHA_ENV = "CANONICAL_PPL_EXPECTED_FILE_SHA256_LF"
 FORBIDDEN_MODULES = ("continuation_ppl", "multilingual_ppl", "niah", "passage_retrieval", "hotpotqa", "qasper",
-                     "run_suite", "kvquant_k3", "vllm", "canonical_quality_parity_tests")
+                     "run_suite", "kvquant_k3", "vllm", "canonical_quality_parity_tests", "canonical_cuda_conformance")
+# the runtime of the accepted CUDA conformance diagnostics (ec80638, fd8d275); a different runtime is not validated
+VALIDATED_RUNTIME = {"python_minor": "3.11", "torch": "2.11.0+cu130", "torch_cuda": "13.0",
+                     "cuda_device": "NVIDIA H100 80GB HBM3", "transformers": "4.48.2"}
 JSON_NATIVE = (dict, list, str, int, float, bool, type(None))
-RESULT_KEYS = ("model_key", "model", "hardware", "environment", "files", "dataset", "geometry", "policy",
-               "prefill_state_parity", "logical_kv", "arms", "aggregates", "legacy_unreachable", "timing")
+RESULT_KEYS = ("model_key", "model", "hardware", "environment", "runtime_environment", "files", "dataset", "geometry",
+               "policy", "logical_kv", "arms", "aggregates", "legacy_unreachable", "timing")
 
 app = modal.App("rabit-kv-canonical-quality-v2-ppl")
 model_cache = modal.Volume.from_name("modelscope-llama31-cache", create_if_missing=True)
@@ -140,6 +147,14 @@ def run_ppl(model_key: str, expected_file_sha256_lf: dict) -> str:
                    "packages": {p: str(md.version(p)) for p in ("transformers", "accelerate", "modelscope", "requests",
                                                                 "sentencepiece", "tokenizers", "safetensors")}}
     _emit("CANONICAL_PPL_ENVIRONMENT", environment)
+    runtime = {"python_minor": ".".join(environment["python"].split(".")[:2]), "torch": environment["torch"],
+               "torch_cuda": environment["torch_cuda"], "cuda_device": environment["cuda_device"],
+               "transformers": environment["packages"]["transformers"]}
+    runtime_ok = runtime == VALIDATED_RUNTIME
+    _emit("CANONICAL_PPL_RUNTIME", {"runtime": runtime, "validated": VALIDATED_RUNTIME, "passed": runtime_ok})
+    if not runtime_ok:
+        raise RuntimeError(f"runtime {runtime} is not the runtime of the accepted CUDA conformance diagnostics; "
+                           "no model loaded")
 
     # ---- model identity: pinned immutable revision, verified file by file BEFORE loading
     os.environ["MODELSCOPE_CACHE"] = "/model_cache"
@@ -191,12 +206,6 @@ def run_ppl(model_key: str, expected_file_sha256_lf: dict) -> str:
                       "metadata_group_size": 64}:
         raise RuntimeError("canonical policy is not K3 / V2 / G32 / R4 / META8g64")
 
-    # ---- the canonical state built on the GPU equals the CPU-validated canonical definition (no score computed)
-    parity = core.prefill_state_parity(model, windows[0][0])
-    _emit("CANONICAL_PPL_STATE_PARITY", parity)
-    if not parity["passed"]:
-        raise RuntimeError(f"GPU canonical state differs from the CPU canonical state: layers {parity['mismatched_layers']}")
-
     with torch.inference_mode():  # untimed warm-up (legacy protocol)
         _ = model(input_ids=windows[0][0][:, :32], use_cache=True)
     torch.cuda.synchronize()
@@ -232,8 +241,10 @@ def run_ppl(model_key: str, expected_file_sha256_lf: dict) -> str:
 
     res = {"kind": "canonical-quality-v2 continuation PPL (logical quality; NOT physical serving evidence)",
            "model_key": model_key, "model": verification, "hardware": {"gpus": _gpus, "passed": _hw_ok},
-           "environment": environment, "files": {"sha256_lf": file_sha, "passed": files_ok}, "dataset": dataset,
-           "geometry": geometry, "policy": dict(crq.POLICY), "prefill_state_parity": parity, "logical_kv": logical_kv,
+           "environment": environment,
+           "runtime_environment": {"runtime": runtime, "validated": dict(VALIDATED_RUNTIME), "passed": runtime_ok},
+           "files": {"sha256_lf": file_sha, "passed": files_ok}, "dataset": dataset,
+           "geometry": geometry, "policy": dict(crq.POLICY), "logical_kv": logical_kv,
            "arm_order": list(core.ARMS), "arms": arms, "aggregates": aggregates,
            "legacy_unreachable": legacy_unreachable,
            "timing": {"arm_seconds": seconds, "total_seconds": time.time() - t_start,

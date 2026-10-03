@@ -1,0 +1,96 @@
+{
+  "kind": "canonical-quality-v2 continuation PPL: pre-launch amendment 2 (implementation of the post-failure validity-gate amendment d7ba819; NOT run; no GPU scoring, no quality result)",
+  "date_utc": "2026-10-03",
+  "base_commit": "1e5a7ff8f5c50cb7c85246dd1eb93b6de8418641",
+  "amendment_record": "post_failure_validity_gate_amendment_record.json (d7ba819)",
+  "old_gate": "GPU canonical state == CPU canonical state, bit-exact, every layer (window 1 prefill), before any scoring",
+  "new_gates": [
+    "runtime torch / CUDA environment equals the runtime of the accepted CUDA conformance diagnostics",
+    "accepted real-model CUDA conformance evidence (CUDA canonical == CUDA frozen oracle, bit-exact, every layer and field) is present, pinned by SHA-256, valid, classified A and refers to the exact frozen model identity, for BOTH models; the scientific files are unchanged since that validation"
+  ],
+  "no_tolerance": "no CPU-vs-CUDA tolerance is defined anywhere; cross-device differences are descriptive only",
+  "oracle_in_scoring_container": false,
+  "scope": "canonical_ppl_modal.py (gate call removed; validated-runtime check added; forbidden-module list extended), run_canonical_ppl.py (gate replaced; pinned conformance evidence; protocol text), canonical_ppl_protocol.json (validity_gates, canonical_state_validation_model), test_canonical_ppl_harness.py (tests). Nothing else.",
+  "protocol_sha256_lf": {
+    "old": "add20212722c91bb29bb9ab0b6d168cf544bcc3097cc8234a5f671e8aab67aa4",
+    "new": "cfa990a75c74784cf6121a1231631af3438dddc5a367ce0c3a6e34769113eff4"
+  },
+  "protocol_keys_changed": [
+    "canonical_state_validation_model (added)",
+    "validity_gates (one gate removed, two added)"
+  ],
+  "file_sha256_lf": {
+    "canonical_ppl_protocol.json": {
+      "old": "add20212722c91bb29bb9ab0b6d168cf544bcc3097cc8234a5f671e8aab67aa4",
+      "new": "cfa990a75c74784cf6121a1231631af3438dddc5a367ce0c3a6e34769113eff4"
+    },
+    "canonical_ppl_modal.py": {
+      "old": "47e5499da96571465a35ded4b3285bd3c6576589e77db32c8aeba45d40f88a65",
+      "new": "2fd5cfd956fd6fd8d8f689935f3628c7a815878ababee7ad303baec484782966"
+    },
+    "run_canonical_ppl.py": {
+      "old": "3fb2585d4dae3bdea21d5bd34a4ff0aefa3140e1fdc9e8c66d6cc307627fba5f",
+      "new": "a025ebc709965b1a58c26aed9823abc3174b9a1f31160789a7e868ebdf2528e1"
+    },
+    "test_canonical_ppl_harness.py": {
+      "old": "b759357d9160af67c448de3c519367c303e0d02cf5854d1e0bbe62f97c5c0371",
+      "new": "0008c00074cebb237dfad3863e0fa02a9cfa58d0d3e43528a74bde768378ffaa"
+    },
+    "canonical_rabit_quality.py": {
+      "old": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+      "new": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5"
+    },
+    "canonical_ppl_core.py": {
+      "old": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44",
+      "new": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44"
+    },
+    "canonical_ppl_identity.py": {
+      "old": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba",
+      "new": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba"
+    },
+    "exp14_model_snapshot.py": {
+      "old": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+      "new": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9"
+    },
+    "run_canonical_ppl_two_model.py": {
+      "old": "4d09c57ae56b6db541680d04ee196b533978bab996efbca8e5dd482568c1b2df",
+      "new": "4d09c57ae56b6db541680d04ee196b533978bab996efbca8e5dd482568c1b2df"
+    },
+    "canonical_ppl_offline_proofs.py": {
+      "old": "a05a7dbebfead642dc266ff97f62cd885ae99cd30edbc3af690d4729b9c2f8ea",
+      "new": "a05a7dbebfead642dc266ff97f62cd885ae99cd30edbc3af690d4729b9c2f8ea"
+    },
+    "proof_observer.py": {
+      "old": "f0d6ceef2bf851a5c8aeebd33f82bf6bbbbf19ddf186e2d8262d2cda1f0bdd46",
+      "new": "f0d6ceef2bf851a5c8aeebd33f82bf6bbbbf19ddf186e2d8262d2cda1f0bdd46"
+    }
+  },
+  "unchanged_files": [
+    "canonical_rabit_quality.py",
+    "canonical_ppl_core.py",
+    "canonical_ppl_identity.py",
+    "exp14_model_snapshot.py",
+    "run_canonical_ppl_two_model.py",
+    "canonical_ppl_offline_proofs.py",
+    "proof_observer.py"
+  ],
+  "exact_textual_diff": "prelaunch_amendment_2.diff (git diff 1e5a7ff -- the PPL harness files; LF)",
+  "exact_textual_diff_sha256": "2cfe8a65c83691cad58f71f409fd9183e389f5f49a6dbdad07bb2f78b7b4017d",
+  "conformance_evidence": {
+    "llama3_1_8b": {
+      "commit": "ec80638",
+      "dir": "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/attempt_1",
+      "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct @ 359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "layers_bit_exact": "32 / 32"
+    },
+    "qwen2_5_7b": {
+      "commit": "fd8d275",
+      "dir": "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/qwen2_5_7b/attempt_1",
+      "model": "Qwen/Qwen2.5-7B-Instruct @ 16c174980d8a1492910551634b4969e69cdc2444",
+      "layers_bit_exact": "28 / 28"
+    }
+  },
+  "offline_proof": "offline_proof_record_v2.json is unchanged and still bound: none of its bound files changed (canonical_ppl_core.py still contains prefill_state_parity, used only by the CPU offline proofs)",
+  "next_attempt": "REGISTERED TWO-MODEL ATTEMPT 2 (not launched); Attempt 1 stays permanently INVALID and is never pooled",
+  "gpu_scoring_or_quality_result": false
+}
