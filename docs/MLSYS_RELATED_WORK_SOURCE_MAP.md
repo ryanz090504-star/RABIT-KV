@@ -298,3 +298,45 @@ term, or listed as a contribution in itself.
 8. SAW-INT4 — low-bit KV quantization evaluated inside a paged serving engine with throughput results.
 
 GEAR, ZipCache, MiKV, VecInfer and CacheGen are secondary citations if space permits.
+
+---
+
+## 4. TurboQuant snapshot provenance audit (read-only, 2026-10-04)
+
+Question: what is the relationship between the TurboQuant backend in our frozen engine snapshot (the one used in the
+matched four-method experiment) and upstream vLLM pull request #38479?
+
+Method: git blob hashes of the committed snapshot files (`git ls-tree`, identical at the Exp13 evidence commit
+`42c2799` and at HEAD) were compared with (a) the per-file blob hashes of PR #38479 from the GitHub API
+(PR head `ac46a983…`, merge commit `f4b42df0…`, merged 2026-04-15) and (b) the blob hashes of upstream vLLM at commit
+`f329ce405b12623fb8b1cf1830f12e5a712523be` (2026-07-04), which is the base commit of our snapshot. No serving run.
+
+| File (under `vllm/` unless noted) | Local blob | Upstream @ f329ce4 | PR #38479 head | Result |
+|---|---|---|---|---|
+| `v1/attention/backends/turboquant_attn.py` | `af4ab007…` | `af4ab007…` | `279fcb04…` | identical to upstream base; differs from PR |
+| `v1/attention/ops/triton_turboquant_decode.py` | `3adaf261…` | `3adaf261…` | `8b276e31…` | identical to upstream base; differs from PR |
+| `v1/attention/ops/triton_turboquant_store.py` | `3ad2d414…` | `3ad2d414…` | `3da3347d…` | identical to upstream base; differs from PR |
+| `model_executor/layers/quantization/turboquant/config.py` | `84e3940d…` | `84e3940d…` | `289bed12…` | identical to upstream base; differs from PR |
+| `model_executor/layers/quantization/turboquant/__init__.py` | `f9f4384e…` | `f9f4384e…` | `10ee032c…` | identical to upstream base; differs from PR |
+| `model_executor/layers/quantization/turboquant/centroids.py` | `49026574…` | `49026574…` | `49026574…` | identical to both |
+| `model_executor/layers/quantization/turboquant/quantizer.py` | absent | absent | `aea63c52…` | removed upstream after the PR |
+| `tests/quantization/test_turboquant.py` | `ccdc6907…` | `ccdc6907…` | `78c137e6…` | identical to upstream base; differs from PR |
+| shared: `config/attention.py`, `engine/arg_utils.py`, `model_executor/layers/attention/attention.py`, `platforms/cuda.py`, `v1/attention/backends/registry.py`, `v1/core/single_type_kv_cache_manager.py`, `v1/worker/utils.py` | — | — | — | each identical to upstream base |
+| shared: `config/cache.py` | `dc767ed0…` | `70a58004…` | — | differs: +11 lines, all adding our `kvquant_k3` / `rabit_kv2` cache types |
+| shared: `utils/torch_utils.py` | — | — | — | differs: +5 / −1 lines, all for our cache types |
+| shared: `v1/kv_cache_interface.py` | `71930a69…` | `323b1e76…` | — | differs: +298 / −1 lines, all for our cache types (the one changed line inserts a branch for our 3-bit mode before the existing 4-bit branch) |
+
+No changed line in the three differing shared files mentions TurboQuant.
+
+Tested preset (`turboquant_k3v4_nc`, from the snapshot's `config.py`): 3-bit keys, 4-bit values, norm correction
+enabled. Boundary layers: the backend's default keeps the first two and the last two layers of a dense model in full
+precision, which gives the 28 quantized + 4 BF16 layers recorded by the experiment.
+
+**Classification: A, with a precise referent.** Every TurboQuant-specific file in our snapshot is byte-identical
+(git blob hash) to **upstream vLLM at the snapshot's base commit `f329ce4`**. It is NOT byte-identical to PR #38479
+as merged: upstream changed the backend between the PR (April 2026) and that commit (July 2026), and our snapshot
+carries the later upstream revision. We made no modification to the TurboQuant backend; our changes to shared files
+only add our own cache types.
+
+Paper wording permitted by this audit: "Our engine snapshot is based on a later upstream revision and contains that
+revision's TurboQuant backend unmodified." Not permitted: "the backend of PR #38479" without "a later revision of".

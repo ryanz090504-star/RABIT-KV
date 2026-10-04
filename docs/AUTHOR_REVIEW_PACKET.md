@@ -351,10 +351,11 @@ Careful answer: The paper does not argue that RABIT-KV should replace it. It rep
 yields 1.724× the allocator capacity of the tested preset at +8.33% single-request TPOT, with worse TTFT and
 no TurboQuant quality measured. Which trade-off is preferable depends on the workload.
 
-**AUTHOR ACTION (provenance).** Our snapshot has the same four preset names and a TurboQuant attention
-backend, but it has not been verified that the code equals the merged PR. Check the snapshot's history. If it
-predates or differs from the PR, keep the current wording ("the backend in our snapshot; cf. the upstream
-integration"); if it is identical, the wording can be made more direct.
+**Provenance (audited, read-only).** Every TurboQuant-specific file in our snapshot is byte-identical (git blob
+hash) to upstream vLLM at the snapshot's base commit `f329ce4` (2026-07-04). That is a later upstream revision
+of the backend introduced by PR #38479, not the PR as merged (upstream changed several files in between). We did
+not modify the backend. Details: `docs/MLSYS_RELATED_WORK_SOURCE_MAP.md` section 4. The paper now says the
+snapshot "is based on a later upstream revision and contains that revision's TurboQuant backend unmodified".
 
 ### B.3 Minima-KV
 
@@ -451,7 +452,8 @@ and does not claim the cost is intrinsic.
 ## Part D. Things only the author can do before submission
 
 1. Read the four prior works at the pointers in Part B and confirm the paper's sentences about them.
-2. Resolve the TurboQuant snapshot provenance (Part B.2).
+2. (Done by audit.) The TurboQuant backend in our snapshot is the unmodified upstream backend at the snapshot's
+   base commit; see Part B.2.
 3. Read the main paper once end to end against Part A and mark any sentence you cannot defend orally.
 4. Decide whether the appendix promise "Exact revisions, file hashes, and seeds are recorded with the
    experiment artifacts" matches what you will release.
