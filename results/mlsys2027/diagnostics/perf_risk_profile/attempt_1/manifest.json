@@ -1,0 +1,197 @@
+{
+ "authorization": "docs/MLSYS_PAPER_STORY_LOCK.md section F (profiling only; no optimization)",
+ "branch": "research/mlsys-2027",
+ "cases": {
+  "c1": {
+   "concurrency": 8,
+   "max_num_seqs": 8,
+   "prompt_tokens": 2048
+  },
+  "c2": {
+   "concurrency": 32,
+   "max_num_seqs": 32,
+   "prompt_tokens": 8192
+  },
+  "c3": {
+   "concurrency": 1,
+   "max_num_seqs": 32,
+   "prompt_tokens": 32736
+  }
+ },
+ "command": [
+  "C:\\Users\\ryanz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+  "-m",
+  "modal",
+  "run",
+  "--detach",
+  "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RABIT-KV-upload\\benchmarks\\mlsys2027\\perf_profile_modal.py::main",
+  "--legs",
+  "c1_rabit_off=c1:rabit_kv2:off:64:96:900,c1_rabit_events=c1:rabit_kv2:cuda_events:64:96:1200,c1_rabit_torch=c1:rabit_kv2:torch_profiler:64:16:1200,c1_bf16_off=c1:bfloat16:off:64:96:900,c1_bf16_events=c1:bfloat16:cuda_events:64:96:900,c2_rabit_off=c2:rabit_kv2:off:64:96:1500,c2_rabit_events=c2:rabit_kv2:cuda_events:64:96:2400,c2_bf16_off=c2:bfloat16:off:64:96:900,c2_bf16_events=c2:bfloat16:cuda_events:64:96:900,c3_rabit_off=c3:rabit_kv2:off:0:1:1500,c3_rabit_events=c3:rabit_kv2:cuda_events:0:1:2400,c3_bf16_off=c3:bfloat16:off:0:1:900,c3_bf16_events=c3:bfloat16:cuda_events:0:1:900",
+  "--identity",
+  "{\"rabit_kv2.py\": \"7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae\", \"rabit_kv2_stage3c_shared_decode.py\": \"ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f\", \"triton_attn.py\": \"0c75dd06d3893c4f6240c4d70bd51d4888855100d220b673c6b77c1a0a4e16cf\"}",
+  "--run-id",
+  "perf_risk_profile_attempt_1",
+  "--launch-record",
+  "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RABIT-KV-upload\\results\\mlsys2027\\diagnostics\\perf_risk_profile\\attempt_1\\launch_record.json",
+  "--git-commit",
+  "601b89781ee6465be9427c6b671177fb4ed8799c"
+ ],
+ "git_commit": "601b89781ee6465be9427c6b671177fb4ed8799c",
+ "launched_utc": "2026-10-03T23:17:04.747849+00:00",
+ "legs": [
+  {
+   "case": "c1",
+   "conditioning": 64,
+   "dtype": "rabit_kv2",
+   "label": "c1_rabit_off",
+   "measured": 96,
+   "mode": "off",
+   "watchdog_s": 900
+  },
+  {
+   "case": "c1",
+   "conditioning": 64,
+   "dtype": "rabit_kv2",
+   "label": "c1_rabit_events",
+   "measured": 96,
+   "mode": "cuda_events",
+   "watchdog_s": 1200
+  },
+  {
+   "case": "c1",
+   "conditioning": 64,
+   "dtype": "rabit_kv2",
+   "label": "c1_rabit_torch",
+   "measured": 16,
+   "mode": "torch_profiler",
+   "watchdog_s": 1200
+  },
+  {
+   "case": "c1",
+   "conditioning": 64,
+   "dtype": "bfloat16",
+   "label": "c1_bf16_off",
+   "measured": 96,
+   "mode": "off",
+   "watchdog_s": 900
+  },
+  {
+   "case": "c1",
+   "conditioning": 64,
+   "dtype": "bfloat16",
+   "label": "c1_bf16_events",
+   "measured": 96,
+   "mode": "cuda_events",
+   "watchdog_s": 900
+  },
+  {
+   "case": "c2",
+   "conditioning": 64,
+   "dtype": "rabit_kv2",
+   "label": "c2_rabit_off",
+   "measured": 96,
+   "mode": "off",
+   "watchdog_s": 1500
+  },
+  {
+   "case": "c2",
+   "conditioning": 64,
+   "dtype": "rabit_kv2",
+   "label": "c2_rabit_events",
+   "measured": 96,
+   "mode": "cuda_events",
+   "watchdog_s": 2400
+  },
+  {
+   "case": "c2",
+   "conditioning": 64,
+   "dtype": "bfloat16",
+   "label": "c2_bf16_off",
+   "measured": 96,
+   "mode": "off",
+   "watchdog_s": 900
+  },
+  {
+   "case": "c2",
+   "conditioning": 64,
+   "dtype": "bfloat16",
+   "label": "c2_bf16_events",
+   "measured": 96,
+   "mode": "cuda_events",
+   "watchdog_s": 900
+  },
+  {
+   "case": "c3",
+   "conditioning": 0,
+   "dtype": "rabit_kv2",
+   "label": "c3_rabit_off",
+   "measured": 1,
+   "mode": "off",
+   "watchdog_s": 1500
+  },
+  {
+   "case": "c3",
+   "conditioning": 0,
+   "dtype": "rabit_kv2",
+   "label": "c3_rabit_events",
+   "measured": 1,
+   "mode": "cuda_events",
+   "watchdog_s": 2400
+  },
+  {
+   "case": "c3",
+   "conditioning": 0,
+   "dtype": "bfloat16",
+   "label": "c3_bf16_off",
+   "measured": 1,
+   "mode": "off",
+   "watchdog_s": 900
+  },
+  {
+   "case": "c3",
+   "conditioning": 0,
+   "dtype": "bfloat16",
+   "label": "c3_bf16_events",
+   "measured": 1,
+   "mode": "cuda_events",
+   "watchdog_s": 900
+  }
+ ],
+ "preflight": {
+  "all_passed": true,
+  "branch": "research/mlsys-2027",
+  "checks": {
+   "head_pushed": true,
+   "offline_tests_pass": true,
+   "quality_evidence_unchanged": true,
+   "serving_sources_equal_accepted_hashes": true,
+   "tree_clean": true,
+   "vllm_tree_unchanged_since_story_lock": true
+  },
+  "harness_sha256_lf": {
+   "exp3_correctness_gate.py": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce",
+   "exp3_watchdog.py": "05e6472e8172a0b7e264ecf7509752bb9a70818f08ba67da476c69db38164d21",
+   "exp6_workload.py": "72cefe788d82b68a36b9cea90ec1e66f10f521e5ccd761260fbb9c16d49cfa19",
+   "perf_profile_analysis.py": "ba1c466743f736c5d5a6f7a1a452728866d6663e90bc3b1cda47d7a02efd496b",
+   "perf_profile_modal.py": "415d0060f0b234149af414019d8209a3ab3ddb51a3ae0b3f086cf3b0ae565377",
+   "perf_profile_plugin.py": "2e0f02371b96412cf602713842323268df68d0efcf84189f916958fd5e641378",
+   "perf_profile_worker.py": "431b0e67dcd7dfa2d4f4b1fc7931fa0a44fe9a48b1bde08389f0642477cbc123",
+   "run_perf_profile_diagnostic.py": "9a6a518991c837331b534a6415fc38f859f1be184fd328c7b8655fb30ff9694c",
+   "test_perf_profile.py": "73971e1636cf348471d730ba0a217a975723c7c085584a334bfbebb4fdbc5e0e"
+  },
+  "head": "601b89781ee6465be9427c6b671177fb4ed8799c",
+  "offline_tests_tail": "PASS test_breakdown_shares\nPASS test_engine_kwargs_and_image_identical_to_accepted_harness\nPASS test_every_patched_name_exists_in_the_serving_source\nPASS test_fixed_cases_and_legs\nPASS test_gpu_domain_events_resolved_once_and_pooled\nPASS test_host_window_tree\nPASS test_install_is_noop_without_env\nPASS test_kernel_proxy_forwards\nPASS test_log_parsing\nPASS test_phase_file_switch_dumps_previous_phase\nPASS test_plugin_dir_is_a_discoverable_entry_point\nPASS test_step_kinds\nPASS test_vllm_tree_is_not_touched_by_the_profiler\nPASS test_wrapper_is_transparent\n14/14 passed\n",
+  "serving_source_sha256_lf": {
+   "rabit_kv2.py": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+   "rabit_kv2_stage3c_shared_decode.py": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f",
+   "triton_attn.py": "0c75dd06d3893c4f6240c4d70bd51d4888855100d220b673c6b77c1a0a4e16cf"
+  }
+ },
+ "run_id": "perf_risk_profile_attempt_1",
+ "vllm_kvquant_snapshot": {
+  "bytes": 41028504,
+  "path": "C:\\Users\\ryanz\\AppData\\Local\\Temp\\perf_vllm_snapshot_eh6sxoo_\\vllm_kvquant_snapshot.zip",
+  "sha256": "175daa940ec91797b41062d6facb4c18df5c6b45927bfdc4e5c2ff4469c60a00",
+  "source": "git archive --format=zip HEAD:vllm-kvquant (core.autocrlf=false)"
+ }
+}
