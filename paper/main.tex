@@ -1,0 +1,136 @@
+% RABIT-KV -- MLSys paper draft source.
+%
+% DRAFTING STATE: PHASE 1. Prose exists ONLY for the Abstract, the Introduction and the contribution
+% bullets. Every other section is a stub and must not be drafted before the framing is accepted.
+%
+% Authoritative planning sources (numbers and claim boundaries come from these, never from older prose):
+%   docs/MLSYS_PAPER_EVIDENCE_MAP.md   docs/MLSYS_PAPER_STORY_LOCK.md   docs/MLSYS_PAPER_BLUEPRINT.md
+% Citations in square brackets, e.g. [vLLM], are PLACEHOLDERS; no bibliography entry exists yet.
+% The class below is a placeholder; the MLSys style file is applied at final formatting.
+
+\documentclass[10pt,twocolumn]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+
+\title{RABIT-KV: A Physically Packed, Target-Bit-Aware KV Cache for LLM Serving}
+\author{Anonymous Authors}
+\date{}
+
+\begin{document}
+\maketitle
+
+% ============================================================================================ ABSTRACT
+\begin{abstract}
+Low-bit KV-cache quantization is usually described by its logical precision, but a serving system
+benefits only when that bit budget becomes allocator capacity. Between the two lie costs that a nominal
+bit-width omits: quantization metadata, full-precision residual tokens, partially filled groups, and
+the online aging of cache state. We present RABIT-KV, a target-bit-aware, physically packed KV-cache
+system that jointly accounts for asymmetric key/value precision, residual state, metadata, online cache
+aging, and allocator capacity, integrated into the vLLM serving engine [vLLM]. On the evaluated H100
+setup with Llama-3.1-8B, RABIT-KV provides $5.2785\times$ the physical KV capacity of BF16,
+$2.6409\times$ that of FP8, and $1.724\times$ that of the tested TurboQuant configuration [TurboQuant],
+at $+8.33\%$ median single-request time per output token relative to that configuration. Llama
+continuation perplexity rises by $1.56\%$, NIAH and Passage Retrieval retain their tested scores, and
+HotpotQA is approximately 1 F1 lower with a confidence interval spanning zero; Qwen2.5-7B, at the same
+operating point, shows severe model-specific quality sensitivity. The current correctness-first
+implementation does not convert its capacity advantage into higher throughput on the evaluated
+workloads. Physical capacity, quality, and serving cost must therefore be evaluated jointly.
+\end{abstract}
+
+% ======================================================================================== INTRODUCTION
+\section{Introduction}
+
+% P1 -- motivation (claims: C1, S2)
+Once model weights are loaded, the key--value (KV) cache is the main consumer of GPU memory in an LLM
+serving system. It grows linearly with context length and with the number of in-flight requests, and a
+paged allocator [vLLM] admits a request only when blocks are available for it. KV memory therefore
+bounds how much context and how many concurrent requests one GPU can hold. Quantizing the cache is a
+direct response [KIVI, KVQuant, TurboQuant], and such methods are commonly characterized by a logical
+bit-width: the number of bits per stored key or value element. The quantity a serving system can use,
+however, is physical: the number of tokens its allocator can place in a fixed memory budget. The two
+are related but not interchangeable.
+
+% P2 -- gap (claims: S1, S2, S3; novelty boundaries of evidence map section 12)
+A nominal low-bit cache falls short of its bit budget for reasons that are individually well known.
+Keys and values tolerate different precisions. Grouped affine quantization stores a minimum and a scale
+per group, and at two or three bits per element this metadata is a substantial fraction of the payload.
+The newest tokens are commonly kept at full precision. Groups are partially filled while a sequence is
+being generated, and cache state must be re-encoded online as tokens age from one representation to the
+next. The result must then fit the fixed-size blocks of the engine's allocator and be read by attention
+kernels at an acceptable cost. None of these ingredients is new. What is missing is a system that
+accounts for all of them together, so that a target bit budget is realized as measured capacity and its
+runtime cost is observed rather than assumed. This is the gap RABIT-KV targets.
+
+% P3 -- RABIT-KV and results (claims: S1, S2, C3, C5, C6, L1, L2, L5, V2-V5, Q1, Q2, Q4-Q6)
+RABIT-KV is a target-bit-aware, physically packed KV cache. One operating point fixes 3-bit keys, 2-bit
+values, 32-element groups, a four-token full-precision residual window, and 8-bit quantized group
+metadata, together with the lifecycle by which tokens age from the residual window into an open group
+and then into closed, packed pages. ``2-bit target'' is a label for this operating point: with group
+metadata included, a packed page stores about 3.03 bits per element (a derived figure). We implement
+these pages inside the paged allocator of vLLM [vLLM] and report capacity as the number of tokens the
+engine actually allocates. On one H100 with Llama-3.1-8B, RABIT-KV holds $5.2785\times$ the KV tokens of
+BF16, $2.6409\times$ those of FP8, and $1.724\times$ those of the tested TurboQuant configuration
+[TurboQuant]. In a matched single-request session, its median time per output token is $8.33\%$ above
+that configuration and $24.4\%$ above BF16. Quality is measured under the cache semantics of the serving
+implementation, with the evaluator checked bit-exactly against an independent reference. On
+Llama-3.1-8B, continuation perplexity rises by $1.56\%$, NIAH and Passage Retrieval scores are unchanged
+on the tested suites, and HotpotQA is about 1 F1 lower with a paired confidence interval that spans
+zero. On Qwen2.5-7B the same operating point gives the same capacity ratio but a severe quality loss
+(perplexity $+1555.9\%$), whose cause we do not diagnose. Quality at a fixed low-bit operating point is
+therefore model-dependent, and we do not assume that it transfers.
+
+% P4 -- systems lesson and limitation (claims: T2, T3, T4, X4, P4, P6; frozen limitation wording I.5)
+The broader lesson is that aggressive KV compression should be judged as a joint trade-off among
+physical capacity, quality, and serving cost, not by nominal bits alone. RABIT-KV makes the cost side
+explicit. Its capacity raises the admissible load: with 8192-token prompts, BF16 reaches its allocator
+ceiling at 47 in-flight requests, whereas RABIT-KV sustains 64. Yet in every concurrency workload we
+tested, RABIT-KV's throughput remains below that of BF16, and prompts that extend beyond the first
+16,384-token prefill chunk incur a large time-to-first-token penalty. The current implementation
+prioritizes correctness and physical packing over cross-request and cross-token kernel batching, so a
+capacity gain does not by itself yield an end-to-end serving benefit. We report these costs alongside
+the capacity result and leave a batched runtime to future work.
+
+% Contributions -- THREE bullets (blueprint section 2)
+\paragraph{Contributions.}
+\begin{itemize}
+\item \textbf{Design.} A target-bit-aware KV-cache representation and online cache lifecycle that
+  jointly handle asymmetric key/value precision, full-precision residual state, quantized group
+  metadata, open groups and closed pages, and cache aging. The individual ingredients are established;
+  the contribution is their joint accounting at one fixed operating point.
+\item \textbf{Physical system.} A physically packed integration into the vLLM serving engine, whose
+  benefit is measured as allocator-observed KV capacity rather than by logical compression accounting:
+  $5.2785\times$ BF16, $2.6409\times$ FP8, and $1.724\times$ the tested TurboQuant configuration on
+  Llama-3.1-8B, with the same ratio over BF16 on a second model geometry.
+\item \textbf{Evaluation.} A matched systems evaluation across BF16, FP8, TurboQuant, and RABIT-KV,
+  together with quality validation on Llama-3.1-8B and Qwen2.5-7B using an evaluator verified against
+  an independent reference. It exposes the capacity gain together with its latency, throughput, and
+  model-dependent quality trade-offs.
+\end{itemize}
+
+% ============================================================== STUBS -- NOT DRAFTED (phase 1 boundary)
+\section{Background and Motivation}
+% NOT DRAFTED. Blueprint section 4, rows 2.1-2.2. Budget 0.5 page.
+
+\section{RABIT-KV Design}
+% NOT DRAFTED. Blueprint rows 3.1-3.3; Figure 1. Budget 1.5 pages.
+
+\section{Physical Implementation}
+% NOT DRAFTED. Blueprint rows 4.1-4.3. Budget 1.0 page.
+
+\section{Methodology}
+% NOT DRAFTED. Blueprint rows 5.1-5.3. Budget 0.8 page.
+
+\section{Evaluation}
+% NOT DRAFTED. Blueprint rows 6.1-6.5; Table 1, Figure 2, Table 3, Table 2. Budget 3.4 pages.
+
+\section{Discussion and Limitations}
+% NOT DRAFTED. Blueprint rows 7.1-7.3; frozen limitation wording (story lock I.5). Budget 0.6 page.
+
+\section{Related Work}
+% NOT DRAFTED. Budget 0.5 page.
+
+\section{Conclusion}
+% NOT DRAFTED. Budget 0.2 page.
+
+\end{document}
