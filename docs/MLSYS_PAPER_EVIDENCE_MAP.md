@@ -1,6 +1,6 @@
 # RABIT-KV — MLSys Paper Evidence Map
 
-Status: paper-preparation document. All quality experiments are frozen at `164c17f`. Every
+Status: paper-preparation document. All quality experiments are frozen at `164c17f`. Experimental work is closed: QUALITY COMPLETE, SERVING COMPLETE, PERFORMANCE PROFILING COMPLETE, PERFORMANCE OPTIMIZATION NO-GO / CLOSED (`docs/MLSYS_PAPER_STORY_LOCK.md` section I). The final story is Story A (capacity-first system). Every
 number below was recovered from committed evidence files (paths given per claim), not from
 memory or from earlier prose. This document creates no new result.
 
@@ -112,6 +112,24 @@ Evidence: `context_scaling/attempt_2/context_scaling_summary.json` (e117e7a). RA
 | X2 | Allocator capacity is independent of request context | 393,024 vs 2,074,592 at every context | PHYSICAL | SUPPORTED | Derived live paged-KV bytes are DERIVED (5.28×), not measured live memory |
 | X3 | RABIT prefill is faster than BF16 at long context | TTFT lower at 8192 and 16384, but higher at 512–4096 and 26× higher at the 32K point | PHYSICAL | **NOT SUPPORTED** | Do NOT claim faster prefill. The sign changes with context and the 32K point is a severe slowdown |
 | X4 | Beyond the first 16,384-token prefill chunk RABIT has a chunked-prefill bottleneck | 32K point TTFT 114.4 s vs 4.4 s; diagnostic: ≈ 13–15 ms excess per second-chunk query token | Exp5; `diagnostics/stage3c_cliff/summary.json` (356b2e3); tile32 conclusion (6edae6d) | PHYSICAL (diagnostic) | SUPPORTED (as a limitation) | Must be disclosed. 32,768 is a nominal model-limit point, not a demonstrated maximum feasible context. No formal complexity law is claimed |
+
+---
+
+## 5a. Performance-risk profiling diagnostic (EXPLANATORY ONLY — not performance evidence)
+
+Evidence: `diagnostics/perf_risk_profile/attempt_1/` (`4d07cf6`; addendum `corrected_attribution.json`, `dadc2a0`).
+Final record: `docs/MLSYS_PAPER_STORY_LOCK.md` section I. Llama-3.1-8B, one H100, no quality scoring, serving sources
+unmodified. The profiler inflated RABIT wall time 3.7×–8.8×: component percentages are diagnostic only, must not be
+quoted as precise measurements, and never replace Exp5 / Exp6 / Exp13 numbers.
+
+| ID | Claim | Observation | Evidence | Class | Status | Wording constraint |
+|---|---|---|---|---|---|---|
+| P1 | The profiling diagnostic is valid | all gates passed; 13/13 legs; correctness gate passed; serving-source hashes equal the accepted ones | `summary.json` | PHYSICAL (diagnostic) | SUPPORTED | Diagnostic evidence only |
+| P2 | Unprofiled diagnostic legs reproduce the accepted points (workload identity) | 2048/C8: 1.848 vs 1.844 req/s; 8192/C32: 0.900 vs 0.870 req/s; 32K TTFT 118.3 s vs 114.4 s | `summary.json` vs Exp6 / Exp5 | PHYSICAL (diagnostic) | SWQ | Shortened runs (96 measured requests; 1 request at 32K). Identity check only; NOT additional performance results |
+| P3 | The profiler materially perturbed RABIT execution | profiled / unprofiled wall 3.74×, 6.29×, 8.82×; residual after bookkeeping correction 1.35×–1.63× | `corrected_attribution.json` | PHYSICAL (diagnostic) | SUPPORTED | Must be disclosed wherever the profile is discussed (appendix) |
+| P4 | Serialized per-request / per-token processing is the dominant qualitative bottleneck family | per-request Python loop per layer; per-token open-tail re-quantization + metadata re-encoding; per-token append / aging; ≈ 10.8 kernel launches per (layer, request, token) in decode, ≈ 6.9 per (layer, token) in a non-initial chunk; one `torch.profiler` cross-check directionally consistent | source (`triton_attn.py`, `rabit_kv2.py`, `rabit_kv2_stage3c_shared_decode.py`); `corrected_attribution.json` | PHYSICAL (diagnostic) | SWQ | Qualitative. Use the frozen sentence: "Profiling identified serialized per-request/per-token processing as the dominant qualitative bottleneck family, but eliminating it requires a substantial implementation redesign rather than a narrow optimization." Never "no dominant bottleneck". Not intrinsic to the representation |
+| P5 | The 32K path additionally contains substantial closed-page device work | shared closed-page decode kernel: on the order of 70 s of device span in the profiled 32K leg (approximate) | `corrected_attribution.json` | PHYSICAL (diagnostic) | SWQ | "long-context prefill also contains substantial closed-page device work, so the bottleneck is not solely host-loop overhead." No precise share |
+| P6 | Performance optimization is NO-GO for this submission | removing the mechanism needs cross-request / cross-token batching, runtime restructuring and / or new kernels in the hash-frozen serving implementation, with major revalidation | story lock section I | decision | SUPPORTED | Batched runtime / kernel design is future work |
 
 ---
 
@@ -245,12 +263,16 @@ packed KV-cache serving system** that jointly accounts for
 - physical allocator capacity (measured in the real engine, not a byte estimate),
 - serving-system cost (measured latency and throughput cost, reported honestly),
 
-together with **a validation methodology**: an independent oracle, same-device bit-exact conformance on
+Frozen central thesis (Story A): "RABIT-KV is a target-bit-aware, physically packed KV-cache serving system that jointly accounts for asymmetric K/V precision, residual state, metadata overhead, online cache aging, and allocator capacity. On the evaluated H100 setup, it substantially increases physical KV capacity relative to BF16, FP8, and the tested TurboQuant configuration, while exposing explicit latency and throughput tradeoffs."
+
+The contribution is argued
+ together with **a validation methodology**: an independent oracle, same-device bit-exact conformance on
 real K/V, and a registered, gate-checked quality protocol that exposed and corrected an evaluator mismatch.
 
 Boundaries:
 
 - Capacity ≠ throughput: RABIT is slower per token and lower in throughput at every tested concurrency.
+- Not a speedup paper; these costs are attributed to the current implementation (P4, P5), not claimed to be intrinsic to the representation, and no optimized result is claimed.
 - Quality is model-dependent at a single frozen operating point: Llama small loss, Qwen severe loss.
 - No claim of generality beyond two models, one GPU type, one engine snapshot.
 - TurboQuant comparison is method-native and system-level; FP8 and TurboQuant quality were not measured.
@@ -273,7 +295,7 @@ operating point is strongly model-dependent."
 | 5 | Experimental Methodology | Evidence classes; matched-session rule; registered attempts and validity gates; canonical evaluator and oracle conformance; BF16-only validity checks | V2–V7, Q8 | methodology table (small) or none | invalid attempts, amendments, identity audit, offline proofs |
 | 6.1 | Physical capacity | Measured allocator capacity for four methods | C1–C6 | **Table 1** | per-session capacity logs |
 | 6.2 | Serving latency / baselines | Per-token and TTFT cost vs BF16 / FP8 / TurboQuant | L1–L5 | **Figure 2** capacity vs latency | Exp3 / Exp4 / replication tables, order effects |
-| 6.3 | Concurrency / context scaling | Higher offered concurrency, lower throughput; flat TPOT overhead to 16k; 32K prefill bottleneck | T1–T4, X1, X2, X4 | **Figure 3** (two panels) | full per-point tables, JIT-contaminated attempts |
+| 6.3 | Concurrency / context scaling (compact) | Higher offered concurrency, lower throughput; flat TPOT overhead to 16k; 32K prefill bottleneck; one-sentence bottleneck explanation | T1–T4, X1, X2, X4, P4, P5 | **Table 3** compact scaling summary (main) | full concurrency and context-scaling curves (Figure A1), per-point tables, JIT-contaminated attempts, profiling diagnostic and profiler perturbation (P1–P3) |
 | 6.4 | Canonical quality | Llama PPL and long-context | Q1, Q4–Q8 | **Table 2** | per-window / per-example statistics, both HotpotQA scorers' details |
 | 6.5 | Cross-model behavior | Same representation and capacity on Qwen; severe quality loss; fallback latency | C6, L6, Q2, Q3, Q3b | part of Table 2 (+ one sentence on capacity) | Qwen legacy quality history |
 | 7 | Discussion / Limitations | What the system does and does not deliver | all NOT SUPPORTED items; §15 | — | — |
@@ -289,10 +311,11 @@ operating point is strongly model-dependent."
 | Figure 1 | RABIT cache lifecycle and physical page layout: BF16 residual (R4) → open group → closed 32-token page; K3 / V2 payload + META8g64 | design (S1–S3); page bytes from Exp13 / Exp14 summaries |
 | Table 1 | Method / storage / capacity: BF16, FP8, TurboQuant, RABIT — bytes per token (theoretical and implied), blocks, capacity tokens, ratio to BF16 | Exp13 `observed_capacity`, `theoretical_bytes_per_token`, `capacity_ratios` |
 | Figure 2 | Capacity vs latency trade-off: x = capacity ratio, y = TPOT (and TTFT) for the four methods, one session | Exp13 `latency_primary_cross_leg` |
-| Figure 3 | (a) throughput vs concurrency at 2048 and 8192 tokens, with BF16's ceiling at C64 / L8192 marked; (b) TPOT and TTFT vs context length, including the 32K point | Exp6 summaries; Exp5 `per_context` |
+| Table 3 (main, compact) | BF16 ceiling 47 vs RABIT sustained 64 at 8192 tokens; RABIT / BF16 throughput ratio range at 2048 and 8192 tokens; 32K TTFT 114.4 s vs 4.4 s | Exp6 summaries; Exp5 `per_context` |
+| Figure A1 (APPENDIX; formerly Figure 3) | (a) throughput vs concurrency at 2048 and 8192 tokens, with BF16's ceiling at C64 / L8192 marked; (b) TPOT and TTFT vs context length, including the 32K point | Exp6 summaries; Exp5 `per_context` |
 | Table 2 | Canonical quality: Llama + Qwen PPL (with CI); Llama NIAH, Passage Retrieval, HotpotQA primary and secondary (with CI) | `canonical_quality_final_record.json` |
 
-Appendix candidates: full legacy ablation history (Exp1, 2, 7–11) clearly labelled legacy; correctness /
+Appendix candidates: full concurrency and context-scaling curves; profiling diagnostic details and the profiler perturbation discussion (P1–P6); full legacy ablation history (Exp1, 2, 7–11) clearly labelled legacy; correctness /
 parity / conformance details and the CPU-vs-CUDA description; per-window and per-example quality statistics;
 invalid attempts and amendments; identity audit; Exp3 / Exp4 session tables.
 
@@ -303,14 +326,14 @@ invalid attempts and amendments; identity audit; Exp3 / Exp4 session tables.
 1. Only one frozen operating point (K3 / V2 / G32 / R4 / META8g64) was evaluated under canonical quality.
 2. Qwen2.5-7B shows severe quality sensitivity at that point (+1555.9% PPL); mechanism undiagnosed.
 3. No optimized kernel for the Qwen geometry: Qwen serving uses fallback paths (+80.7% TPOT).
-4. A capacity advantage does not imply a throughput advantage: throughput is lower at every tested concurrency.
+4. A capacity advantage does not imply a throughput advantage: throughput is lower at every tested concurrency. Frozen wording: "The current implementation prioritizes correctness and physical packing over cross-request and cross-token kernel batching. Profiling indicates serialized per-sequence/per-token work and long-context closed-page processing as major implementation bottlenecks. Consequently, the observed capacity advantage does not translate into higher throughput in the evaluated workloads." These costs are not claimed to be intrinsic to the representation; a batched runtime / kernel design is future work.
 5. Long-context quality is Llama-only.
 6. HotpotQA: N = 100; the CI spans zero, which does not establish equivalence.
 7. NIAH and Passage Retrieval are saturated for BF16; they cannot resolve small effects.
 8. WikiText-2 PPL: N = 32 windows (4096 scored tokens per arm).
 9. Canonical ablations were not rerun; all ablations are legacy-evaluator results.
 10. CPU and CUDA canonical states are not bit-identical; validation relies on same-device oracle conformance.
-11. Chunked-prefill bottleneck beyond 16,384 prompt tokens (32K point TTFT 114 s vs 4.4 s).
+11. Chunked-prefill bottleneck beyond 16,384 prompt tokens (32K point TTFT 114 s vs 4.4 s); long-context prefill also contains substantial closed-page device work, so the bottleneck is not solely host-loop overhead (P5).
 12. FP8 and TurboQuant quality were not measured; the TurboQuant comparison is method-native.
 13. One GPU type (H100 80GB), one engine snapshot, single-request latency for baselines; latency statistics are descriptive (no CIs).
 14. Greedy-decoding run-to-run variability exists (one BF16 HotpotQA example differs from Exp12).
@@ -322,5 +345,5 @@ invalid attempts and amendments; identity audit; Exp3 / Exp4 session tables.
 1. **The system is slower and lower-throughput than BF16 everywhere measured**, so the value proposition rests on capacity (more offered concurrency / longer aggregate context) — reviewers will ask for a workload where that wins end to end; none was measured.
 2. **Qwen quality collapse** at the frozen operating point, with no diagnosis and no canonical ablation to show a workable alternative.
 3. **No canonical ablations**: the design choices (K3 vs V2, G32, R4, META8g64) are justified only by legacy-evaluator experiments.
-4. **32K prefill bottleneck** (114 s TTFT) undermines a long-context story unless framed as a known limitation.
+4. **32K prefill bottleneck** (114 s TTFT) undermines a long-context story unless framed as a known limitation. Performance optimization is closed (NO-GO, P6): the paper cannot answer "can it be made fast?" with a measurement, only with the diagnosed mechanism (P4, P5) and future work.
 5. Baseline quality (FP8, TurboQuant) is absent, so the quality–capacity trade-off cannot be compared across methods.
