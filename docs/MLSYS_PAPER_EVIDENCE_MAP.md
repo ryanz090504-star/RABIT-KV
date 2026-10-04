@@ -191,6 +191,63 @@ Details belong in the appendix.
 
 ---
 
+## 8a. Quality-evaluator execution schedule vs serving (read-only source audit)
+
+Reconstructed from the frozen source, not from prose: `benchmarks/mlsys2027/canonical_ppl_core.py`
+(`score_stepwise`), `canonical_longctx_core.py` (`generate`), `canonical_rabit_quality.py`
+(`CanonicalRabitCache.from_prefill` / `update`, `CanonicalLayerState`), `canonical_ppl_protocol.json`,
+`canonical_longctx_tasks.py`; serving: `triton_attn.py` `_forward_rabit_kv2`, `rabit_kv2.py`
+`Rabit2SingleSequenceRuntime`. No experiment was run for this audit.
+
+**Continuation PPL** (per window: 1,024 context + 128 scored tokens; both models):
+
+1. The 1,024 context tokens are processed in ONE dense BF16 forward with a normal HF cache. Prefill attention sees
+   BF16 history only.
+2. The FIRST scored token is scored from the last logit of that BF16 prefill. It is identical in the BF16 and RABIT arms.
+3. `from_prefill` converts the raw BF16 prefill K / V of every layer, in one step, into the canonical state at length
+   1,024: 31 closed pages, 28 open-group tokens, 4 residual tokens.
+4. Scored tokens 2..128 come from 127 forwards, each feeding ONE teacher-forced token. In each layer the new token's
+   K / V are appended, the state ages, and the token attends to the canonical state at its own length (itself included,
+   exact, in R4). The last continuation token is never fed.
+5. Aging at every append: a token leaves R4 when four newer tokens exist; the open group (zero-padded K3 group, V2 per
+   token, META8g64) is recomputed from the raw BF16 tokens at every length; a full 32-token old group closes into a page
+   that is decoded once and never recomputed.
+6. No generated / teacher-forced token stays BF16 beyond R4. The evaluator never executes a later prefill chunk.
+
+**Long-context generation** (NIAH, Passage Retrieval, HotpotQA; Llama only; prompts at most 16,384 tokens):
+
+1. `prompt[:-1]` is processed in ONE dense BF16 forward. Prefill attention sees BF16 history only.
+2. `from_prefill` converts that prefix to the canonical state.
+3. The LAST prompt token is fed as the first one-token step on the converted state; its logit produces the first
+   generated token. Every generated token is therefore predicted from canonical RABIT state.
+4. Greedy argmax, one token per forward, each appended and aged as in PPL step 4–5; EOS stops and is not kept; at most
+   16 (NIAH) or 32 (LongBench) tokens are kept.
+5. No generated token stays BF16 beyond R4. The evaluator never executes a later prefill chunk.
+
+**Comparison (semantics, not kernel schedule):**
+
+| Row | Serving | PPL evaluator | Long-context evaluator | Classification |
+|---|---|---|---|---|
+| Initial prompt | first prefill chunk: the whole prompt when it fits the per-step token budget (16,384) | 1,024 context tokens, one forward | all but the last prompt token, one forward | DIFFERENT EXECUTION SCHEDULE (long-context holds back the last prompt token) |
+| Initial attention | dense causal attention over the chunk's exact K / V | dense BF16 | dense BF16 | SAME SEMANTIC STATE (exact history) |
+| Cache conversion | bulk encode of the chunk into closed pages + open group + residual | one-step `from_prefill` | one-step `from_prefill` | SAME SEMANTIC STATE (each side conforms to the reference: V1 for serving, V2–V6 for the evaluator; no direct serving-vs-evaluator comparison exists) |
+| First continuation token | from the exact prefill (last prompt token is inside the dense chunk) | from the BF16 prefill logit; identical in both arms | from a one-token step on RABIT state | PPL: SAME; long-context: DIFFERENT EXECUTION SCHEDULE (the last prompt token attends to quantized history; serving would not) |
+| Subsequent decode | append, then attend to the state at the token's own length | same | same | SAME SEMANTIC STATE |
+| R4 aging | newest 4 tokens exact | same | same | SAME SEMANTIC STATE |
+| Open group | exact open K kept, re-quantized as the group grows; V encoded on leaving R4 | recomputed from raw BF16 tokens at every length | same as PPL | SAME SEMANTIC STATE |
+| Closed pages | packed bytes in allocator blocks, decoded in-kernel | decoded once, cached as values | same as PPL | SAME SEMANTIC STATE, different machinery |
+| Chunked prefill (later chunks) | later-chunk tokens attend to the packed prefix + exact tail | never executed | never executed | NOT APPLICABLE — not covered by any quality measurement |
+| Attention kernels | Triton partial kernels over packed pages | HF attention over decoded K / V cast to the model dtype (BF16) | same as PPL | DIFFERENT EXECUTION SCHEDULE; numerics not shown identical; no serving-vs-evaluator output comparison exists |
+
+| ID | Claim | Status | Wording constraint |
+|---|---|---|---|
+| E1 | The evaluator reproduces the canonical stored-cache representation and aging semantics | SUPPORTED (V2–V6) | Say "reproduces the stored-cache representation and its aging", never "reproduces the serving execution" |
+| E2 | Prompt prefill is dense BF16 in both evaluators; only tokens after the prefill attend to RABIT state | SUPPORTED (source) | Never "every token attends to quantized state". In PPL, 127 of 128 scored tokens per window depend on RABIT state |
+| E3 | Quality of prompt tokens attending to an already packed prefix (serving later prefill chunks: prompts beyond 16,384 tokens, or a per-step budget shared among requests) is not measured | SUPPORTED (as a limitation) | Must be stated in Methodology and Limitations |
+| E4 | Serving outputs and evaluator outputs were never compared end to end; attention numerics are not shown to be identical (the evaluator attends over decoded values cast to BF16) | SUPPORTED (as a limitation) | Do not claim the quality numbers are the serving engine's outputs; they are logical quality of the representation |
+
+---
+
 ## 9. Legacy results — LEGACY LOGICAL-EVALUATOR RESULTS
 
 These are valid measurements of the OLD logical evaluator. They must NEVER be presented as final
