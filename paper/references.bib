@@ -1,0 +1,72 @@
+% RABIT-KV paper bibliography.
+% Only works whose metadata was read from the primary source (arXiv record / official repository) on
+% 2026-10-04 are listed. Venues are as stated on the arXiv record. Works still cited by a bracketed
+% placeholder in main.tex ([Llama3.1], [Qwen2.5], [Transformers], [WikiText], [NIAH], [LongBench],
+% [HotpotQA]) have NOT been verified yet and deliberately have no entry here.
+
+@inproceedings{kwon2023vllm,
+  title     = {Efficient Memory Management for Large Language Model Serving with {PagedAttention}},
+  author    = {Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E. and Zhang, Hao and Stoica, Ion},
+  booktitle = {Proceedings of the 29th Symposium on Operating Systems Principles (SOSP)},
+  year      = {2023},
+  note      = {arXiv:2309.06180}
+}
+
+@inproceedings{liu2024kivi,
+  title     = {{KIVI}: A Tuning-Free Asymmetric 2bit Quantization for {KV} Cache},
+  author    = {Liu, Zirui and Yuan, Jiayi and Jin, Hongye and Zhong, Shaochen and Xu, Zhaozhuo and Braverman, Vladimir and Chen, Beidi and Hu, Xia},
+  booktitle = {International Conference on Machine Learning (ICML)},
+  year      = {2024},
+  note      = {arXiv:2402.02750}
+}
+
+@inproceedings{hooper2024kvquant,
+  title     = {{KVQuant}: Towards 10 Million Context Length {LLM} Inference with {KV} Cache Quantization},
+  author    = {Hooper, Coleman and Kim, Sehoon and Mohammadzadeh, Hiva and Mahoney, Michael W. and Shao, Yakun Sophia and Keutzer, Kurt and Gholami, Amir},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2024},
+  note      = {arXiv:2401.18079}
+}
+
+@misc{duanmu2024skvq,
+  title  = {{SKVQ}: Sliding-window Key and Value Cache Quantization for Large Language Models},
+  author = {Duanmu, Haojie and Yuan, Zhihang and Li, Xiuhong and Duan, Jiangfei and Zhang, Xingcheng and Lin, Dahua},
+  year   = {2024},
+  note   = {arXiv:2405.06219}
+}
+
+@misc{tao2024asymkv,
+  title  = {{AsymKV}: Enabling 1-Bit Quantization of {KV} Cache with Layer-Wise Asymmetric Quantization Configurations},
+  author = {Tao, Qian and Yu, Wenyuan and Zhou, Jingren},
+  year   = {2024},
+  note   = {arXiv:2410.13212}
+}
+
+@misc{zandieh2025turboquant,
+  title  = {{TurboQuant}: Online Vector Quantization with Near-optimal Distortion Rate},
+  author = {Zandieh, Amir and Daliri, Majid and Hadian, Majid and Mirrokni, Vahab},
+  year   = {2025},
+  note   = {arXiv:2504.19874}
+}
+
+@misc{vllm2026turboquant,
+  title        = {{[Attention Backend] TurboQuant}: 2-bit {KV} cache compression with 4x capacity},
+  author       = {{vLLM contributors}},
+  year         = {2026},
+  howpublished = {vLLM pull request \#38479, merged 15 April 2026},
+  note         = {\url{https://github.com/vllm-project/vllm/pull/38479}}
+}
+
+@misc{jia2026sawint4,
+  title  = {{SAW-INT4}: System-AWare 4-Bit {KV}-Cache Quantization for Real-World {LLM} Serving},
+  author = {Jia, Jinda and Li, Jisen and Zhou, Zhongzhu and Heo, Jung Hwan and Wang, Jue and Dao, Tri and Song, Shuaiwen Leon and Athiwaratkun, Ben and Xu, Chenfeng and Zhang, Tianyi and Wu, Xiaoxia},
+  year   = {2026},
+  note   = {arXiv:2604.19157}
+}
+
+@misc{kozyrev2026minimakv,
+  title  = {{Minima-KV}: Retention-Preserving {KV} Cache Compression with Mixed-Format Paged Attention},
+  author = {Kozyrev, Sergii and Maiboroda, Davyd},
+  year   = {2026},
+  note   = {arXiv:2608.23834}
+}

@@ -1,17 +1,18 @@
 % RABIT-KV -- MLSys paper draft source.
 %
-% DRAFTING STATE: PHASE 4. Prose exists for the Abstract, Introduction, contribution bullets and
-% Sections 2-7 and 9. Section 6 is frozen. Section 8 (Related Work) is a stub and must not be
-% drafted before its source map is accepted.
+% DRAFTING STATE: PHASE 5. All sections have prose. Section 6 is frozen. Figures 1 and 2 are
+% placeholders. Appendix not drafted.
 %
 % Authoritative planning sources (numbers and claim boundaries come from these, never from older prose):
 %   docs/MLSYS_PAPER_EVIDENCE_MAP.md   docs/MLSYS_PAPER_STORY_LOCK.md   docs/MLSYS_PAPER_BLUEPRINT.md
-% Citations in square brackets, e.g. [vLLM], are PLACEHOLDERS; no bibliography entry exists yet.
+% \cite keys resolve to paper/references.bib (primary-source metadata). Citations still in square
+% brackets, e.g. [WikiText], are PLACEHOLDERS whose metadata has not been verified yet.
 % The class below is a placeholder; the MLSys style file is applied at final formatting.
 
 \documentclass[10pt,twocolumn]{article}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
+\usepackage{url}
 
 \title{RABIT-KV: A Physically Packed, Target-Bit-Aware KV Cache for LLM Serving}
 \author{Anonymous Authors}
@@ -22,14 +23,14 @@
 
 % ============================================================================================ ABSTRACT
 \begin{abstract}
-Low-bit KV-cache quantization is usually described by its logical precision, but a serving system
+Low-bit KV-cache quantization is often described by its logical precision, but a serving system
 benefits only when that bit budget becomes allocator capacity. Between the two lie costs that a nominal
 bit-width omits: quantization metadata, full-precision residual tokens, partially filled groups, and
 the online aging of cache state. We present RABIT-KV, a target-bit-aware, physically packed KV-cache
 system that jointly accounts for asymmetric key/value precision, residual state, metadata, online cache
-aging, and allocator capacity, integrated into the vLLM serving engine [vLLM]. On the evaluated H100
+aging, and allocator capacity, integrated into the vLLM serving engine~\cite{kwon2023vllm}. On the evaluated H100
 setup with Llama-3.1-8B, RABIT-KV provides $5.2785\times$ the physical KV capacity of BF16,
-$2.6409\times$ that of FP8, and $1.724\times$ that of the tested TurboQuant configuration [TurboQuant],
+$2.6409\times$ that of FP8, and $1.724\times$ that of the tested TurboQuant configuration~\cite{zandieh2025turboquant,vllm2026turboquant},
 at $+8.33\%$ median single-request time per output token relative to that configuration. Llama
 continuation perplexity rises by $1.56\%$, NIAH and Passage Retrieval retain their tested scores, and
 HotpotQA is approximately 1 F1 lower with a confidence interval spanning zero; Qwen2.5-7B, at the same
@@ -44,18 +45,18 @@ workloads. Physical capacity, quality, and serving cost must therefore be evalua
 % P1 -- motivation (claims: C1, S2)
 Once model weights are loaded, the key--value (KV) cache is the main consumer of GPU memory in an LLM
 serving system. It grows linearly with context length and with the number of in-flight requests, and a
-paged allocator [vLLM] admits a request only when blocks are available for it. KV memory therefore
+paged allocator~\cite{kwon2023vllm} admits a request only when blocks are available for it. KV memory therefore
 bounds how much context and how many concurrent requests one GPU can hold. Quantizing the cache is a
-direct response [KIVI, KVQuant, TurboQuant], and such methods are commonly characterized by a logical
-bit-width: the number of bits per stored key or value element. The quantity a serving system can use,
+direct response~\cite{liu2024kivi,hooper2024kvquant,zandieh2025turboquant}, and such methods are often
+characterized by a logical bit-width: the number of bits per stored key or value element. The quantity a serving system can use,
 however, is physical: the number of tokens its allocator can place in a fixed memory budget. The two
 are related but not interchangeable.
 
 % P2 -- gap (claims: S1, S2, S3; novelty boundaries of evidence map section 12)
 A nominal low-bit cache falls short of its bit budget for reasons that are individually well known.
-Keys and values tolerate different precisions. Grouped affine quantization stores a minimum and a scale
+Keys and values tolerate different precisions~\cite{liu2024kivi,tao2024asymkv}. Grouped affine quantization stores a minimum and a scale
 per group, and at two or three bits per element this metadata is a substantial fraction of the payload.
-The newest tokens are commonly kept at full precision. Groups are partially filled while a sequence is
+The newest tokens are commonly kept at full precision~\cite{liu2024kivi,duanmu2024skvq}. Groups are partially filled while a sequence is
 being generated, and cache state must be re-encoded online as tokens age from one representation to the
 next. The result must then fit the fixed-size blocks of the engine's allocator and be read by attention
 kernels at an acceptable cost. Our focus is the systems problem of accounting for these effects jointly
@@ -66,10 +67,10 @@ RABIT-KV is a target-bit-aware, physically packed KV cache. One fixed operating 
 keys, 2-bit values, 32-element groups, a four-token full-precision residual window, and 8-bit quantized
 group metadata, with an online lifecycle in which tokens age from the residual window into an open
 group and then into closed, packed pages. The ``2-bit target'' denotes this operating point rather than
-a literal end-to-end storage cost. The pages are stored in the paged allocator of vLLM [vLLM], and
+a literal end-to-end storage cost. The pages are stored in the paged allocator of vLLM~\cite{kwon2023vllm}, and
 capacity is reported as the number of tokens the engine allocates. On one H100 with Llama-3.1-8B,
 RABIT-KV holds $5.2785\times$ the KV tokens of BF16, $2.6409\times$ those of FP8, and $1.724\times$
-those of the tested TurboQuant configuration [TurboQuant], at $+8.33\%$ median time per output token
+those of the tested TurboQuant configuration~\cite{zandieh2025turboquant,vllm2026turboquant}, at $+8.33\%$ median time per output token
 relative to that configuration in a matched single-request session. Quality loss on Llama-3.1-8B is
 small (continuation perplexity $+1.56\%$), whereas Qwen2.5-7B shows severe sensitivity at the same
 operating point; we therefore do not assume that quality transfers across models.
@@ -115,7 +116,7 @@ of dimension $d$, a token therefore holds $2Hd$ elements per layer. For Llama-3.
 long as its request, so KV memory grows with the product of context length and concurrency.
 
 \paragraph{Paged allocation.}
-Serving engines such as vLLM [vLLM] manage this memory as a pool of fixed-size blocks. A block holds the
+Serving engines such as vLLM~\cite{kwon2023vllm} manage this memory as a pool of fixed-size blocks. A block holds the
 KV state of a fixed number of consecutive tokens (32 in our configuration), and a per-request block
 table maps token positions to blocks. The pool is sized once, at start-up: the number of blocks is the
 KV memory budget divided by the bytes that one block occupies. A request is admitted, and can grow,
@@ -123,11 +124,13 @@ only while free blocks remain. Throughout this paper, \emph{capacity} means the 
 the tokens per block as reported by the running engine. It is the quantity the scheduler can use.
 
 \paragraph{Logical precision is not physical capacity.}
-Quantized KV caches [KIVI, KVQuant, TurboQuant] are usually described by the bit-width of their codes.
-The bytes a block occupies depend on more than that. First, affine quantization stores a minimum and a
+Quantized KV caches~\cite{liu2024kivi,hooper2024kvquant,zandieh2025turboquant} are often described by
+the bit-width of their codes, although some work reports metadata-inclusive average
+bits~\cite{duanmu2024skvq} or peak memory~\cite{liu2024kivi}. The bytes a block occupies depend on more
+than the code width. First, affine quantization stores a minimum and a
 scale per group. With groups of 32 elements, two 16-bit parameters add one bit per element, which is a
 third of a 3-bit payload and half of a 2-bit one. Second, some state is kept at full precision: recent
-tokens in residual-window designs, or entire layers, as in the TurboQuant configuration we test, which
+tokens in residual-window designs, or entire layers, as in the TurboQuant configuration we test~\cite{vllm2026turboquant}, which
 leaves four boundary layers in BF16. Third, when quantization statistics span several tokens, the group
 at the end of a growing sequence is incomplete and has no final encoding yet. Whether each of these
 costs is stored inside the block pool, beside it, or not at all determines how many blocks fit in the
@@ -142,7 +145,13 @@ together with the runtime cost of reading the packed state.
 RABIT-KV is defined by a single operating point, written K3\,/\,V2\,/\,G32\,/\,R4\,/\,META8g64. It was
 fixed during earlier development and was not retuned for any experiment in this paper. We describe it
 as one configuration, not as the best member of a tuned family, and we do not claim that each component
-is individually optimal.
+is individually optimal. Its ingredients follow prior representations. Quantizing keys per channel
+along the token axis and values per token, with groups of 32, is the scheme of
+KIVI~\cite{liu2024kivi}, also used by KVQuant~\cite{hooper2024kvquant} and AsymKV~\cite{tao2024asymkv}.
+A window of recent full-precision tokens appears in KIVI and SKVQ~\cite{duanmu2024skvq}, unequal key
+and value precision in AsymKV and SKVQ, and reduced-precision quantization parameters counted in the
+effective bit-width in SKVQ. What this section specifies is how these mechanisms are combined into one
+online lifecycle with a fixed physical layout.
 
 \subsection{Operating point}
 
@@ -241,7 +250,9 @@ a statement about total device memory including all auxiliary state of active se
 
 % claims: C3, V1, L6, X4, P4 (design fact only)
 \paragraph{Integration.}
-RABIT-KV is implemented as an additional KV-cache type in the Triton attention backend of vLLM [vLLM].
+RABIT-KV is implemented as an additional KV-cache type in the Triton attention backend of
+vLLM~\cite{kwon2023vllm}, next to the engine's existing FP8 and TurboQuant~\cite{vllm2026turboquant}
+cache types.
 The scheduler, the block allocator, and the per-request block tables are unchanged. The engine sizes
 its block pool from the bytes per block, so declaring the packed page size as the block size is what
 turns the representation into capacity: the same memory budget yields more blocks, and the scheduler
@@ -290,11 +301,12 @@ with the reference on the tested cases; they are not a formal verification.
 
 % claims: C1-C6 (method), L1 (method), T1-T4 (method), X1 (method), V2-V7, Q1-Q8 (method)
 \paragraph{Setup.}
-Every run uses one NVIDIA H100 (80\,GB). The engine is a vLLM snapshot [vLLM] with our changes, in eager
+Every run uses one NVIDIA H100 (80\,GB). The engine is a vLLM snapshot~\cite{kwon2023vllm} with our changes, in eager
 mode, with 32-token blocks, a GPU memory fraction of 0.82, and a maximum model length of 32,768 tokens.
 The models are Llama-3.1-8B-Instruct [Llama3.1] and Qwen2.5-7B-Instruct [Qwen2.5] at pinned revisions with BF16
-weights. Baselines are the BF16 cache, the engine's native per-tensor FP8 cache, and one TurboQuant
-configuration [TurboQuant] that quantizes 28 layers and keeps four boundary layers in BF16. TurboQuant
+weights. Baselines are the BF16 cache, the engine's native per-tensor FP8 cache, and one configuration of
+the engine's TurboQuant backend~\cite{vllm2026turboquant} (3-bit keys, 4-bit values), which
+quantizes 28 layers and keeps four boundary layers in BF16. TurboQuant
 runs with its own attention backend, so comparisons with it are between systems as deployed, not
 between quantization kernels.
 
@@ -586,8 +598,8 @@ physical packing over cross-request and cross-token kernel batching, and it seri
 work per request and per token. Diagnostic profiling points to this serialized processing, and to
 closed-page work in long-context prefill, as the major bottleneck families. The profiler heavily
 perturbed execution, so its component shares are not precise performance measurements and we report
-none of them. We do not claim that these costs are intrinsic to the representation, and we have not
-shown that they are not: a runtime and kernels that batch across requests and tokens are future work.
+none of them. We do not claim that these costs are intrinsic to the representation; batched
+cross-request and cross-token execution remains future work.
 
 \paragraph{Quality is model-dependent.}
 At the fixed operating point, Llama-3.1-8B retains most of its quality and Qwen2.5-7B does not. The
@@ -615,10 +627,50 @@ is the best trade-off for either model; the earlier ablations appear only in the
 The serving results likewise cover one GPU type and one engine snapshot, and the latency statistics
 are descriptive.
 
-% ============================================================== STUB -- NOT DRAFTED (phase 4 boundary)
+% ====================================================================================== RELATED WORK
 \section{Related Work}
 \label{sec:related}
-% NOT DRAFTED. Source map: docs/MLSYS_RELATED_WORK_SOURCE_MAP.md. Budget 0.5 page.
+
+% PHASE 5. Every statement below was checked against the primary source (docs/MLSYS_RELATED_WORK_SOURCE_MAP.md).
+\paragraph{Low-bit KV representations.}
+KIVI~\cite{liu2024kivi} established that keys should be quantized per channel and values per token,
+and combined 2-bit group-wise quantization (groups of 32) with a full-precision residual of recent
+tokens that is quantized in batches once it fills. RABIT-KV adopts these axes and the group size.
+KVQuant~\cite{hooper2024kvquant} reaches sub-4-bit precision with per-channel keys quantized before
+the rotary embedding, non-uniform datatypes, and per-vector dense-and-sparse quantization, keeps the
+first token in full precision, and uses custom kernels. SKVQ~\cite{duanmu2024skvq} reorders channels
+into homogeneous groups, applies clipped dynamic quantization, keeps a sliding window of recent tokens
+at high precision, and stores quantization parameters in FP8 so that its reported average bits include
+them. AsymKV~\cite{tao2024asymkv} shows that the output is more sensitive to key than to value
+quantization and assigns the two different bit-widths by layer. TurboQuant~\cite{zandieh2025turboquant}
+is a data-oblivious vector quantizer based on random rotation and per-coordinate scalar quantization,
+evaluated on KV caches at 2.5 and 3.5 bits per channel. RABIT-KV contributes no new quantizer to this
+line. It differs in its operating point (3-bit keys, 2-bit values, a four-token residual), in
+re-quantizing the open group at every token instead of batching, and in quantizing the group parameters
+a second time to 8 bits.
+
+\paragraph{Serving-system integration.}
+vLLM~\cite{kwon2023vllm} introduced paged KV allocation, which RABIT-KV uses unchanged. Low-bit caches
+have since been built into paged engines. The TurboQuant backend of vLLM~\cite{vllm2026turboquant}
+stores rotated, scalar-quantized keys and uniformly quantized values in the paged cache, sizes pages by
+the packed slot, offers presets with unequal key and value precision, and can keep boundary layers in
+full precision; one of its presets is our baseline, and our results do not characterize the others.
+SAW-INT4~\cite{jia2026sawint4} treats KV quantization as a systems co-design problem: it identifies the
+constraints that paged layouts and fused attention kernels impose, shows that token-wise 4-bit
+quantization after block-diagonal Hadamard rotation satisfies them, and reports end-to-end serving
+throughput. It observes that a residual buffer of unquantized tokens fits poorly in uniform paged
+blocks; RABIT-KV keeps its residual and open-group state outside the block pool for the same reason.
+Minima-KV~\cite{kozyrev2026minimakv} is closest in structure: recent and protected pages stay in FP8,
+older pages move to a packed 3-bit format, format-specific kernels compute partial attention states
+that are merged by a global softmax, and memory is reported per live token against BF16 and FP8.
+
+RABIT-KV is therefore not the first packed or paged low-bit KV cache, nor the first to account for
+storage beyond nominal bits. Where SAW-INT4 targets a serving-friendly 4-bit point and Minima-KV a
+mixed-format hierarchy, RABIT-KV realizes one more aggressive asymmetric operating point end to end and
+measures what it yields: the capacity the allocator actually provides, in one matched session with
+BF16, FP8, and a TurboQuant configuration of the same engine; the latency and throughput it costs; and
+its quality under an evaluator checked against an independent reference, including a model on which
+that quality does not hold.
 
 % ======================================================================================== CONCLUSION
 \section{Conclusion}
@@ -636,5 +688,8 @@ and a large first-token delay beyond the first prefill chunk. Quality is retaine
 Llama-3.1-8B and degrades severely on Qwen2.5-7B at the same operating point. Physical capacity,
 quality, and serving cost are separate outcomes of a low-bit cache design, and they have to be
 evaluated jointly.
+
+\bibliographystyle{plain}
+\bibliography{references}
 
 \end{document}
