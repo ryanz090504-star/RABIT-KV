@@ -1,8 +1,8 @@
 % RABIT-KV -- MLSys paper draft source.
 %
-% DRAFTING STATE: PHASE 3. Prose exists for the Abstract, Introduction, contribution bullets and
-% Sections 2-6. Discussion and Limitations, Related Work and Conclusion are stubs and must not be
-% drafted before Section 6 is accepted.
+% DRAFTING STATE: PHASE 4. Prose exists for the Abstract, Introduction, contribution bullets and
+% Sections 2-7 and 9. Section 6 is frozen. Section 8 (Related Work) is a stub and must not be
+% drafted before its source map is accepted.
 %
 % Authoritative planning sources (numbers and claim boundaries come from these, never from older prose):
 %   docs/MLSYS_PAPER_EVIDENCE_MAP.md   docs/MLSYS_PAPER_STORY_LOCK.md   docs/MLSYS_PAPER_BLUEPRINT.md
@@ -365,7 +365,7 @@ the earlier results in the appendix, labeled as such.
 \section{Evaluation}
 \label{sec:eval}
 
-% PHASE 3. Claims: C1-C6, L1-L6, T1-T4, X1-X4, P3-P5, Q1-Q8, E2-E4. All numbers from committed evidence.
+% PHASE 3 (FROZEN after the phase-4 cleanup). Claims: C1-C6, L1-L6, T1-T4, X1-X4, P3-P5, Q1-Q8, E2-E4. All numbers from committed evidence.
 The evaluation answers four questions. \textbf{RQ1}: does RABIT-KV turn its representation into
 allocator-visible capacity? \textbf{RQ2}: what serving cost accompanies that capacity, relative to
 BF16, FP8, and the tested TurboQuant configuration? \textbf{RQ3}: how does the current implementation
@@ -383,7 +383,7 @@ is fast, and it is not.
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lrrr@{}}
 \hline
-Method & Bytes/token$^{a}$ & Tokens & vs.\ BF16 \\
+Method & Pool bytes/token$^{a}$ & Tokens & vs.\ BF16 \\
 \hline
 BF16 & 131,072 & 393,024 & $1.0000\times$ \\
 FP8 & 65,536 & 785,568 & $1.9988\times$ \\
@@ -393,8 +393,9 @@ RABIT-KV & 24,832 & 2,074,592 & $5.2785\times$ \\
 \end{tabular}
 \caption{Allocator-observed KV capacity on one H100 with Llama-3.1-8B, in one matched session with the
 same KV memory budget (about 48\,GiB). Capacity is the number of allocated 32-token blocks times 32 (12,282, 24,549, 37,600, and 64,831 blocks).
-$^{a}$Bytes that one token's KV state occupies in the block pool over all 32 layers, from each method's
-block layout; this is storage accounting, not the measured quantity. $^{b}$Tested configuration: 28
+$^{a}$Paged-pool bytes: what one token's KV state occupies in the block pool over all 32 layers, from
+each method's block layout. This is storage accounting, not the measured quantity, and it excludes
+RABIT-KV's per-sequence residual and open-group state, which is held outside the pool. $^{b}$Tested configuration: 28
 quantized layers and four boundary layers kept in BF16.}
 \label{tab:capacity}
 \end{table}
@@ -443,8 +444,8 @@ TurboQuant, and 30.10\,ms for RABIT-KV (Figure~\ref{fig:tradeoff}). RABIT-KV is 
 per output token: $+24.4\%$ relative to BF16, $+16.9\%$ relative to FP8, and $+8.33\%$ relative to
 TurboQuant. Its median TTFT is also the highest, 144.65\,ms against 59.99, 63.43, and 55.03\,ms.
 
-The comparison we consider most informative is with TurboQuant: RABIT-KV provides $1.724\times$ the
-observed capacity of the tested TurboQuant configuration at $+8.33\%$ median single-request TPOT. This
+Relative to the tested TurboQuant configuration, RABIT-KV provides $1.724\times$ the observed
+capacity at $+8.33\%$ median single-request TPOT. This
 statement has a narrow scope. It concerns one TurboQuant configuration, which keeps four boundary
 layers in BF16 and runs with its own attention backend, so it compares two systems as deployed and does
 not isolate the efficiency of either quantization kernel. It is a single-request result with two legs
@@ -488,16 +489,17 @@ whereas RABIT-KV sustains 64 (Table~\ref{tab:scaling}). Admission is not through
 completes fewer requests per second than BF16 at every concurrency we tested. At 8192 tokens its
 throughput is $0.88\times$ that of BF16 at $C{=}1$ and $0.37\times$ at $C{=}32$, and it falls in
 absolute terms beyond $C{=}16$ (1.424, 0.870, and 0.323 req/s at $C{=}16$, 32, and 64). At 2048 tokens
-the ratio declines from $0.70\times$ at $C{=}1$ to $0.12\times$ at $C{=}64$. Even at the point where
-BF16 is capacity-limited, BF16 with 47 requests in flight completes 2.366 req/s and RABIT-KV with 64 in
-flight completes 0.323.
+the ratio declines from $0.70\times$ at $C{=}1$ to $0.12\times$ at $C{=}64$. The 47-versus-64
+result therefore demonstrates admission capacity, not throughput.
 
 \paragraph{Context length.}
 For single requests, RABIT-KV's TPOT overhead over BF16 stays between $+31\%$ and $+39\%$ for prompts
 from 512 to 16,384 tokens. The 32,736-token point is different. The prompt no longer fits one prefill
 chunk, the remaining 16,352 tokens take the later-chunk path of Section~\ref{sec:impl}, and TTFT rises
 to 114.4\,s against 4.4\,s for BF16. This point is the nominal model limit of our configuration, not a
-demonstrated maximum context, and we claim no prefill advantage at any length.
+demonstrated maximum context. We do not interpret the lower RABIT-KV TTFT observed at 8K and 16K
+(appendix) as evidence of a general prefill advantage: the trend reverses sharply once the later-chunk
+path is exercised at 32K.
 
 \paragraph{Where the time goes.}
 Diagnostic profiling points to serialized per-request and per-token processing, and to closed-page work
@@ -571,14 +573,68 @@ confidence interval $+1320\%$ to $+1828\%$), with all 32 windows worse. We did n
 tasks for Qwen2.5-7B under this evaluator, and we do not diagnose the cause of the degradation. A single
 frozen low-bit operating point is not quality-robust across the two tested models.
 
-% ============================================================== STUBS -- NOT DRAFTED (phase 3 boundary)
+% ======================================================================================== DISCUSSION
 \section{Discussion and Limitations}
-% NOT DRAFTED. Blueprint rows 7.1-7.3; frozen limitation wording (story lock I.5). Budget 0.6 page.
+\label{sec:discussion}
 
+% PHASE 4. Claims: T2, T4, X4, P3-P6, Q1-Q8, Q3, E1-E4; evidence-map limitations 1-14.
+\paragraph{Capacity is not throughput.}
+RABIT-KV substantially increases allocator-visible KV capacity, and in the workloads we tested this
+did not yield higher throughput. Capacity determines what can be admitted; how fast admitted requests
+complete is determined by the execution paths. The current implementation prioritizes correctness and
+physical packing over cross-request and cross-token kernel batching, and it serializes substantial
+work per request and per token. Diagnostic profiling points to this serialized processing, and to
+closed-page work in long-context prefill, as the major bottleneck families. The profiler heavily
+perturbed execution, so its component shares are not precise performance measurements and we report
+none of them. We do not claim that these costs are intrinsic to the representation, and we have not
+shown that they are not: a runtime and kernels that batch across requests and tokens are future work.
+
+\paragraph{Quality is model-dependent.}
+At the fixed operating point, Llama-3.1-8B retains most of its quality and Qwen2.5-7B does not. The
+representation and its capacity transfer between the two geometries; the quality of a quantization
+policy does not follow from that. The operating point was deliberately not retuned per model, and the
+mechanism behind the Qwen2.5-7B degradation is undiagnosed. The results cover two models and should
+not be extrapolated to others in either direction.
+
+\paragraph{Scope of the quality evaluation.}
+Quality is measured logically, with an evaluator that reproduces the stored-cache representation and
+its aging but uses different execution machinery from the serving engine; serving outputs were not
+scored. The evaluator does not execute the later-chunk prefill path, in which new prompt tokens attend
+to an already packed prefix, so quality on that path is unmeasured. That path is taken at the 32K point
+and whenever concurrent requests share the per-step token budget. Long-context quality was measured
+for Llama-3.1-8B only. NIAH and Passage Retrieval are saturated for BF16 on the tested sets and cannot
+resolve small differences. HotpotQA uses 100 examples and perplexity uses 32 windows; a confidence
+interval that spans zero does not establish equivalence. We measured no quality for FP8 or TurboQuant,
+so the capacity comparison with them is not a quality-matched one.
+
+\paragraph{Scope of the design space.}
+All quality results concern one operating point, K3\,/\,V2\,/\,G32\,/\,R4\,/\,META8g64. Ablations of its
+components were run during development with an earlier evaluator and were not repeated with the
+validated one. We therefore do not claim that the individual choices are optimal, or that this point
+is the best trade-off for either model; the earlier ablations appear only in the appendix, as history.
+The serving results likewise cover one GPU type and one engine snapshot, and the latency statistics
+are descriptive.
+
+% ============================================================== STUB -- NOT DRAFTED (phase 4 boundary)
 \section{Related Work}
-% NOT DRAFTED. Budget 0.5 page.
+\label{sec:related}
+% NOT DRAFTED. Source map: docs/MLSYS_RELATED_WORK_SOURCE_MAP.md. Budget 0.5 page.
 
+% ======================================================================================== CONCLUSION
 \section{Conclusion}
-% NOT DRAFTED. Budget 0.2 page.
+\label{sec:conclusion}
+
+% PHASE 4. No new number or claim.
+A low-bit KV cache is commonly described by the precision of its codes, but a serving system benefits
+only from the capacity its allocator can actually provide. RABIT-KV realizes one fixed low-bit
+operating point as packed pages in a paged serving engine, accounting for asymmetric key and value
+precision, residual tokens, quantized metadata, and online aging. On the evaluated H100 setup it
+provides $5.2785\times$ the allocator-observed KV capacity of BF16, $2.6409\times$ that of FP8, and
+$1.724\times$ that of the tested TurboQuant configuration. That capacity has a measured cost: higher
+per-token latency than all three baselines, lower throughput than BF16 at every tested concurrency,
+and a large first-token delay beyond the first prefill chunk. Quality is retained closely on
+Llama-3.1-8B and degrades severely on Qwen2.5-7B at the same operating point. Physical capacity,
+quality, and serving cost are separate outcomes of a low-bit cache design, and they have to be
+evaluated jointly.
 
 \end{document}
