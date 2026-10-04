@@ -24,6 +24,9 @@
 
 \mlsystitlerunning{RABIT-KV: A Physically Packed, Target-Bit-Aware KV Cache for LLM Serving}
 
+\widowpenalty=10000
+\clubpenalty=10000
+
 \begin{document}
 
 \twocolumn[
@@ -107,6 +110,7 @@ the capacity result and leave a batched runtime to future work.
 
 % Contributions -- THREE bullets (blueprint section 2)
 \paragraph{Contributions.}
+\vspace{-0.6\baselineskip}
 \begin{itemize}
 \item \textbf{Design.} A target-bit-aware KV-cache representation with an online cache lifecycle
   covering asymmetric key/value precision, full-precision residual state, quantized group metadata,
@@ -327,8 +331,8 @@ and no background compaction.
 \paragraph{Packed pages and per-sequence state.}
 One allocator block holds one closed page per layer: packed 3-bit key codes, packed 2-bit value codes,
 and the four META8g64 metadata arrays. A page is written into its scheduler-assigned block at the
-moment its group closes. The residual window and the open group are kept in a small per-request
-structure outside the pool. It is bounded by 35 tokens per sequence.
+moment its group closes. The residual window and the open group are kept in a per-request
+structure outside the pool, of at most 35 tokens per sequence.\looseness=-1
 
 \paragraph{Execution paths.}
 Three paths read and write this state. \emph{Initial prefill:} for the first prefill chunk of a
@@ -368,11 +372,10 @@ with the reference on the tested cases; they are not a formal verification.
 \paragraph{Setup.}
 Every run uses one NVIDIA H100 (80\,GB). The engine is a vLLM snapshot~\citep{kwon2023vllm} with our changes, in eager
 mode, with 32-token blocks, a GPU memory fraction of 0.82, and a maximum model length of 32,768 tokens.
-The models are Llama-3.1-8B-Instruct~\citep{meta2024llama31} and Qwen2.5-7B-Instruct~\citep{yang2024qwen25} at pinned revisions with BF16
-weights. Baselines are the BF16 cache, the engine's native per-tensor FP8 cache, and one configuration of
-the TurboQuant backend in our snapshot (3-bit keys, 4-bit values; cf.\ the upstream
-integration~\citep{vllm2026turboquant}), which quantizes 28 layers and keeps four boundary layers in
-BF16. TurboQuant
+The models are Llama-3.1-8B-Instruct~\citep{meta2024llama31} and Qwen2.5-7B-Instruct~\citep{yang2024qwen25} with BF16
+weights; the quality experiments pin and verify the model revisions. Baselines are the BF16 cache, the engine's native per-tensor FP8 cache, and one configuration of
+the upstream TurboQuant backend~\citep{vllm2026turboquant}, unmodified in our snapshot (3-bit keys,
+4-bit values), which quantizes 28 layers and keeps four boundary layers in BF16. TurboQuant
 runs with its own attention backend, so comparisons with it are between systems as deployed, not
 between quantization kernels.
 
@@ -528,7 +531,7 @@ All four methods were served in one matched session (Section~\ref{sec:method}); 
 timings from different sessions. Median TPOT is 24.19\,ms for BF16, 25.75\,ms for FP8, 27.79\,ms for
 TurboQuant, and 30.10\,ms for RABIT-KV (Figure~\ref{fig:tradeoff}). RABIT-KV is the slowest of the four
 per output token: $+24.4\%$ relative to BF16, $+16.9\%$ relative to FP8, and $+8.33\%$ relative to
-TurboQuant. Its median TTFT is also the highest, 144.65\,ms against 59.99, 63.43, and 55.03\,ms.
+TurboQuant. Its median TTFT is also the highest, 144.65\,ms against 59.99, 63.43, and 55.03\,ms.\looseness=-1
 
 Relative to the tested TurboQuant configuration, RABIT-KV provides $1.724\times$ the observed
 capacity at $+8.33\%$ median single-request TPOT. This
@@ -728,9 +731,9 @@ vLLM~\citep{kwon2023vllm} introduced paged KV allocation, which RABIT-KV uses un
 have since been built into paged engines. Upstream vLLM integrates a TurboQuant backend~\citep{vllm2026turboquant}
 that stores rotated, scalar-quantized keys and uniformly quantized values in the paged cache, sizes
 pages by the packed slot, offers presets with unequal key and value precision, and can keep boundary
-layers in full precision. Our engine snapshot contains a TurboQuant backend with the same preset
-interface; all TurboQuant measurements in this paper refer to one preset of the backend in that
-snapshot and do not characterize the others.
+layers in full precision. Our engine snapshot is based on a later upstream revision and contains
+that revision's TurboQuant backend unmodified; all TurboQuant measurements in this paper refer to one
+preset of it and do not characterize the others.
 SAW-INT4~\citep{jia2026sawint4} treats KV quantization as a systems co-design problem: it identifies the
 constraints that paged layouts and fused attention kernels impose, shows that token-wise 4-bit
 quantization after block-diagonal Hadamard rotation satisfies them, and reports end-to-end serving
