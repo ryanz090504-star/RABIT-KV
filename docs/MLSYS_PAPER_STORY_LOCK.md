@@ -1,6 +1,6 @@
 # RABIT-KV — Paper Story Lock and Performance-Risk Diagnostic Plan
 
-Status: planning document. Quality evidence is frozen at `164c17f`; the evidence map is
+Status: **FINAL — Story A (capacity-first system) is frozen; performance optimization is NO-GO / CLOSED for this submission (section I).** Sections A–H are the pre-profiling plan and are kept unchanged except where marked. Quality evidence is frozen at `164c17f`; the evidence map is
 `docs/MLSYS_PAPER_EVIDENCE_MAP.md` (`8b4121f`). This document runs nothing, changes no scientific
 code and reports no new result. Every number is taken from committed evidence (paths given);
 every statement about code is taken from the committed source (file and line given).
@@ -27,14 +27,14 @@ Primary evidence, in this order:
 
 This is **not** a speedup paper. No headline compares RABIT speed with BF16.
 
-### Story B — capacity + performance system (**no claim allowed yet**)
+### Story B — capacity + performance system (**CLOSED for this submission; see section I**)
 
 Same system contribution, plus a performance claim. It is viable only if a narrowly scoped
 implementation bottleneck can be removed without changing K3 / V2 / G32 / R4 / META8g64 or the
 canonical quality semantics, and the improvement is then re-measured under the existing matched
 protocols. Until that happens nothing from Story B may be written.
 
-Recommendation as of current evidence: **Story A.**
+Recommendation as of current evidence: **Story A.** (Final after profiling: Story A; section I.)
 
 ---
 
@@ -163,6 +163,8 @@ chunk, and the second chunk runs through Stage3C `shared_decode` (chunk plan + c
 
 ## What remains unknown
 
+(As of the plan. The profiling diagnostic later addressed items 1–4 qualitatively; see section I.)
+
 1. For the **final `shared_decode` implementation**, how the 32K second-chunk time divides between the
    closed-page kernel, chunk-plan encoding, per-query tail work and host launch overhead. The only component
    profile predates `shared_decode`.
@@ -180,7 +182,7 @@ A minimal profile is justified.
 
 ---
 
-## E. Minimal profiling plan (proposed; not run)
+## E. Minimal profiling plan (as proposed; the run that was actually executed is recorded in section I)
 
 Not a quality experiment: fixed prompts, no scoring, greedy output hashes checked only against the
 already-recorded hashes (functional sanity). No RABIT parameter changes. No optimization. No variants.
@@ -296,15 +298,141 @@ facts are material to the capacity claim and must not be hidden, so the main pap
 3. a pointer to the appendix figure and tables.
 
 Revised main set: Figure 1 (lifecycle / layout), Table 1 (capacity, four methods), Figure 2 (capacity vs
-latency frontier, Exp13), Table 2 (canonical quality), plus the compact scaling table above. If a profile
-later yields GO and an accepted fix, this recommendation is revisited.
+latency frontier, Exp13), Table 2 (canonical quality), plus the compact scaling table above. The profile
+yielded NO-GO (section I), so this recommendation is final.
 
 ---
 
 ## Summary
 
-- Recommended position now: **Story A**.
+- Final position: **Story A** (frozen; section I).
 - The performance risk is fully reconstructed in section B from accepted evidence.
 - Existing diagnostics localize the 32K cost to the non-initial-chunk path and show that decode is not
   batched across requests; they do not attribute time by component for the shipped implementation.
-- A ≤ 1 GPU-hour profile with a pre-fixed GO / NO-GO rule is proposed and has not been run.
+- The profile was run once (valid; about 85 GPU-minutes). Outcome: **NO-GO for performance optimization**; performance evidence is frozen at the accepted Exp5 / Exp6 / Exp13 / Exp14 results (section I).
+
+
+---
+
+## I. FINAL DECISION — profiling result, NO-GO, Story A frozen
+
+This section is the final record. Where it differs from sections A–H above (which are kept as the
+pre-profiling plan), this section governs.
+
+### I.1 Outcome of the profiling diagnostic
+
+Evidence: `results/mlsys2027/diagnostics/perf_risk_profile/attempt_1/` — raw run `4d07cf6`
+(`summary.json`, `legs.json`, `remote_session.log`, `manifest.json`), overhead-corrected addendum `dadc2a0`
+(`corrected_attribution.json`); harness `33c00b8`, `601b897`, `ac9cfbb`. One run, one H100, 13 legs,
+Llama-3.1-8B, no quality scoring, no vLLM source file edited (the profiler attached from outside).
+
+1. **The diagnostic was VALID.** All validity gates passed: 13/13 legs exited 0, the frozen correctness
+   gate passed, and the three serving sources in the image equal the hashes of the accepted serving evidence.
+2. **The profiler materially perturbed RABIT execution.** Profiled / unprofiled wall time was 3.74×
+   (Case 1), 6.29× (Case 2) and 8.82× (Case 3). After removing the profiler's recorded bookkeeping a
+   residual of 1.35× to 1.63× remains. Component percentages are therefore **DIAGNOSTIC ONLY**: they must
+   never be presented as precise measurements and must never replace the accepted Exp5 / Exp6 / Exp13
+   performance measurements.
+3. **The unprofiled diagnostic legs reproduced the accepted performance points closely enough to validate
+   workload identity** (shortened runs; not new performance results):
+
+   | Case | Unprofiled diagnostic leg | Accepted point |
+   |---|---|---|
+   | 1 (2048 tokens, C = 8) | RABIT 1.848 req/s; BF16 7.473 req/s | Exp6: 1.844; 7.218 |
+   | 2 (8192 tokens, C = 32) | RABIT 0.900 req/s; BF16 2.265 req/s | Exp6: 0.870; 2.346 |
+   | 3 (32,736-token prompt) | RABIT TTFT 118.3 s; BF16 4.44 s | Exp5: 114.4 s; 4.435 s |
+
+4. **Dominant qualitative mechanism: serialized / unbatched per-sequence and per-token processing.**
+   - request-wise RABIT attention path (a Python loop over the requests of a step, per layer);
+   - per-token open-tail work (the open K group is re-quantized and its metadata re-encoded for every
+     request, layer and token before the tail attention kernel);
+   - append / cache-aging work, executed per request, layer and token;
+   - repeated launch / control overhead: about 10.8 kernel launches per (layer, request, token) in decode
+     and about 6.9 per (layer, token) inside a non-initial prefill chunk (launch counts are exact; time
+     shares are not).
+
+   The same mechanism appears in all three cases: through decode at 2048 tokens / C = 8, through both
+   chunked prefill and decode at 8192 tokens / C = 32, and through the 16,352-token second chunk
+   (523,264 layer-token iterations) at the 32K point. A single `torch.profiler` cross-check (Case 1) points
+   the same way: the RABIT kernels account for a small part of device time while the attention path's own
+   host time is about half of the traced wall.
+5. **The 32K path additionally has substantial closed-page device work** (on the order of 70 s of device
+   span for the shared closed-page decode kernel in the profiled leg; approximate). Removing host
+   serialization alone would therefore not eliminate the long-context cliff.
+6. **Fixing these issues is NOT a narrow optimization.** It requires batching across requests and tokens,
+   restructuring the per-sequence runtime, and / or new kernels.
+7. **Such changes would modify the currently frozen serving implementation** (`rabit_kv2.py`,
+   `triton_attn.py`, the Stage3C modules, whose hashes are recorded by the accepted serving evidence) and
+   would require major revalidation of correctness and of every accepted serving experiment.
+8. **Decision under the rule fixed in section F: NO-GO FOR PERFORMANCE OPTIMIZATION.**
+
+### I.2 Required wording
+
+Do NOT write "profiling found no dominant bottleneck". Write:
+
+> "Profiling identified serialized per-request/per-token processing as the dominant qualitative bottleneck family, but eliminating it requires a substantial implementation redesign rather than a narrow optimization."
+
+For the 32K path additionally state:
+
+> "long-context prefill also contains substantial closed-page device work, so the bottleneck is not solely host-loop overhead."
+
+Do not claim these costs are intrinsic to RABIT's representation. Frame a batched runtime / kernel design
+as future work.
+
+### I.3 Authoritative performance evidence (frozen)
+
+The authoritative performance results are ONLY the accepted unprofiled experiments:
+
+- Exp5 context scaling (`context_scaling/attempt_2/`, e117e7a);
+- Exp6 concurrency (`concurrency_scaling/L2048/…` 8512566, `L8192/…` 0f5f6ef);
+- Exp13 matched BF16 / FP8 / TurboQuant / RABIT comparison (`external_baseline/exp13/`, 42c2799);
+- Exp14 Qwen serving where applicable (`second_model/serving/`, 7dfaee4).
+
+The profiling diagnostic is explanatory evidence only. No accepted timing is replaced by a
+profiler-derived value, and the unprofiled diagnostic legs are not additional performance results.
+
+### I.4 Final Story A — central systems thesis (frozen)
+
+> "RABIT-KV is a target-bit-aware, physically packed KV-cache serving system that jointly accounts for asymmetric K/V precision, residual state, metadata overhead, online cache aging, and allocator capacity. On the evaluated H100 setup, it substantially increases physical KV capacity relative to BF16, FP8, and the tested TurboQuant configuration, while exposing explicit latency and throughput tradeoffs."
+
+The paper is NOT a speedup paper. Primary headline evidence:
+
+- **5.2785×** physical KV capacity vs BF16;
+- **2.6409×** vs FP8;
+- **1.7242×** (1.724×) vs the tested TurboQuant configuration;
+- matched TurboQuant TPOT cost of **+8.33%** (with its method-native qualification, section G);
+- canonical Llama quality retention;
+- model-specific Qwen quality sensitivity.
+
+Story B is closed for this submission: no performance claim beyond the accepted measurements may be made.
+
+### I.5 Performance limitation wording (frozen)
+
+> "The current implementation prioritizes correctness and physical packing over cross-request and cross-token kernel batching. Profiling indicates serialized per-sequence/per-token work and long-context closed-page processing as major implementation bottlenecks. Consequently, the observed capacity advantage does not translate into higher throughput in the evaluated workloads."
+
+### I.6 Main paper vs appendix (frozen)
+
+| Main paper | Appendix |
+|---|---|
+| capacity comparison | full concurrency curves |
+| matched BF16 / FP8 / TurboQuant / RABIT trade-off | full context-scaling curves |
+| compact latency / concurrency limitation summary | profiling diagnostic details |
+| canonical quality table | profiler perturbation discussion |
+| | legacy evaluator history |
+| | detailed correctness / parity records |
+
+The 32K result and the throughput limitation are NOT hidden: both are stated clearly in the main paper's
+compact evaluation text and in its limitations.
+
+### I.7 Experimental work — closed
+
+| Track | Status |
+|---|---|
+| QUALITY EXPERIMENTS | COMPLETE |
+| SERVING EXPERIMENTS | COMPLETE |
+| PERFORMANCE PROFILING | COMPLETE |
+| PERFORMANCE OPTIMIZATION | NO-GO / CLOSED |
+
+No benchmark, profile, kernel optimization or change to the scientific or serving implementation is to be
+made for this submission. No experiment is reopened unless a concrete paper-review need is identified later.
+The next artifact is `docs/MLSYS_PAPER_BLUEPRINT.md`.
