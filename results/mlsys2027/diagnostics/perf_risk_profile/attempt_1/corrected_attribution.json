@@ -1,0 +1,683 @@
+{
+ "cases": {
+  "c1": {
+   "approx_device_time_of_long_kernels": [],
+   "bf16_unprofiled_wall_s": 12.846502728000019,
+   "branch_detail": {
+    "decode.append_aging": [
+     {
+      "calls": 95232,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 7227.425854,
+      "share_of_corrected_step_time": 0.10333763467347405
+     },
+     {
+      "calls": 0,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "calls": 95232,
+      "component": "kernel._rabit2_final_v2_age_kernel",
+      "corrected_host_ms": 2810.30169,
+      "share_of_corrected_step_time": 0.040181654607046584
+     },
+     {
+      "calls": 95232,
+      "component": "kernel._rabit2_final_shift_recent_kernel",
+      "corrected_host_ms": 2291.045609,
+      "share_of_corrected_step_time": 0.03275733835886804
+     }
+    ],
+    "decode.attention": [
+     {
+      "calls": 95232,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 6431.737691,
+      "share_of_corrected_step_time": 0.0919608963487779
+     },
+     {
+      "calls": 95232,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 24703.437637,
+      "share_of_corrected_step_time": 0.3532094088932669
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 3286.284836,
+      "share_of_corrected_step_time": 0.046987255030447185
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 2340.46359,
+      "share_of_corrected_step_time": 0.03346391596617098
+     }
+    ],
+    "initial_prefill.bulk_append": [
+     {
+      "calls": 3072,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 7523.689005,
+      "share_of_corrected_step_time": 0.10757360109965418
+     },
+     {
+      "calls": 0,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     }
+    ],
+    "initial_prefill.dense_attention": [
+     {
+      "calls": 3072,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 661.984984,
+      "share_of_corrected_step_time": 0.009465052124755782
+     },
+     {
+      "calls": 0,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     }
+    ]
+   },
+   "chunk_shape": null,
+   "corrected_step_time_s": 69.93991953499999,
+   "cross_branch": [
+    {
+     "component": "per-token open-tail path (all branches)",
+     "corrected_host_ms": 24703.437637,
+     "share_of_corrected_step_time": 0.3532094088932669
+    },
+    {
+     "calls": 1029120,
+     "component": "all Triton kernel-launch windows (host time of the launches)",
+     "corrected_host_ms": 27966.345231,
+     "share_of_corrected_step_time": 0.3998624164416549
+    },
+    {
+     "component": "decode path (append_aging + decode.attention subtrees)",
+     "corrected_host_ms": 49090.696907,
+     "share_of_corrected_step_time": 0.7018981038780516
+    }
+   ],
+   "groups": [
+    {
+     "component": "OTHER MODEL TIME (execute_model / sample_tokens / attention wrapper, own time)",
+     "corrected_host_ms": 7230.588648,
+     "share_of_corrected_step_time": 0.1033828562582432
+    },
+    {
+     "calls": 12672,
+     "component": "HOST/CONTROL: per-request Python loop in _forward_rabit_kv2 (own time)",
+     "corrected_host_ms": 5432.959991,
+     "share_of_corrected_step_time": 0.07768038663929527
+    },
+    {
+     "calls": 3072,
+     "component": "initial_prefill.bulk_append (whole subtree)",
+     "corrected_host_ms": 7523.689005,
+     "share_of_corrected_step_time": 0.10757360109965418
+    },
+    {
+     "calls": 3072,
+     "component": "initial_prefill.dense_attention (whole subtree)",
+     "corrected_host_ms": 661.984984,
+     "share_of_corrected_step_time": 0.009465052124755782
+    },
+    {
+     "calls": 0,
+     "component": "chunked_prefill.shared_decode (whole subtree)",
+     "corrected_host_ms": 0,
+     "share_of_corrected_step_time": 0.0
+    },
+    {
+     "calls": 95232,
+     "component": "decode.append_aging (whole subtree)",
+     "corrected_host_ms": 12328.773153,
+     "share_of_corrected_step_time": 0.17627662763938867
+    },
+    {
+     "calls": 95232,
+     "component": "decode.attention (whole subtree)",
+     "corrected_host_ms": 36761.923754,
+     "share_of_corrected_step_time": 0.5256214762386631
+    }
+   ],
+   "instrumentation_wall_ratio": 3.7384614108016896,
+   "profiled_wall_s": 194.17009092,
+   "recorded_bookkeeping_s": 123.857077635,
+   "residual_corrected_over_unprofiled": 1.34659096577289,
+   "serial_iterations": {
+    "chunked prefill (layer x token)": 0,
+    "decode (layer x request x token)": 95232,
+    "kernel_launches": 1029120,
+    "kernel_launches_per_chunk_iteration": null,
+    "kernel_launches_per_decode_iteration": 10.806451612903226,
+    "unprofiled_wall_ms_per_serial_iteration": 0.5453891912382391
+   },
+   "unprofiled_wall_s": 51.93850345999999
+  },
+  "c2": {
+   "approx_device_time_of_long_kernels": [
+    {
+     "fraction_of_unprofiled_wall": 0.11848202763907496,
+     "gpu_span_s": 12.638778337,
+     "kernel": "chunked_prefill.shared_decode/kernel._rabit2_shared_decode_closed_page_partial_kernel",
+     "launches": 8000,
+     "ms_per_launch": 1.579847292125
+    }
+   ],
+   "bf16_unprofiled_wall_s": 42.38085741199984,
+   "branch_detail": {
+    "chunked_prefill.shared_decode": [
+     {
+      "calls": 1376,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 4856.131242,
+      "share_of_corrected_step_time": 0.03011876887326622
+     },
+     {
+      "calls": 231712,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 65558.667362,
+      "share_of_corrected_step_time": 0.4066089344616233
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 641.4640449999999,
+      "share_of_corrected_step_time": 0.003978497768917061
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 317.573656,
+      "share_of_corrected_step_time": 0.001969660017129775
+     },
+     {
+      "calls": 1376,
+      "component": "leaf.chunk_plan_init",
+      "corrected_host_ms": 8992.318364,
+      "share_of_corrected_step_time": 0.05577228969796105
+     },
+     {
+      "calls": 231712,
+      "component": "leaf.chunk_plan_apply_step",
+      "corrected_host_ms": 3238.5857,
+      "share_of_corrected_step_time": 0.02008640403515789
+     }
+    ],
+    "decode.append_aging": [
+     {
+      "calls": 95264,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 8789.870566,
+      "share_of_corrected_step_time": 0.054516664976757584
+     },
+     {
+      "calls": 0,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "calls": 95264,
+      "component": "kernel._rabit2_final_v2_age_kernel",
+      "corrected_host_ms": 2977.337869,
+      "share_of_corrected_step_time": 0.018466088881300868
+     },
+     {
+      "calls": 95264,
+      "component": "kernel._rabit2_final_shift_recent_kernel",
+      "corrected_host_ms": 2512.238441,
+      "share_of_corrected_step_time": 0.015581442343360301
+     }
+    ],
+    "decode.attention": [
+     {
+      "calls": 95264,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 6992.982405,
+      "share_of_corrected_step_time": 0.043371978699708366
+     },
+     {
+      "calls": 95264,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 27519.233927,
+      "share_of_corrected_step_time": 0.17068019888920855
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 3463.230996,
+      "share_of_corrected_step_time": 0.02147970240612693
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 2510.410792,
+      "share_of_corrected_step_time": 0.015570106871753529
+     }
+    ],
+    "initial_prefill.bulk_append": [
+     {
+      "calls": 3072,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 10093.93567,
+      "share_of_corrected_step_time": 0.06260475681483808
+     },
+     {
+      "calls": 0,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     }
+    ],
+    "initial_prefill.dense_attention": [
+     {
+      "calls": 3072,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 874.36547,
+      "share_of_corrected_step_time": 0.005423002425043353
+     },
+     {
+      "calls": 0,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     }
+    ]
+   },
+   "chunk_shape": {
+    "calls": 1376,
+    "context_tokens": 11040480,
+    "tokens": 231712
+   },
+   "corrected_step_time_s": 161.23272708899998,
+   "cross_branch": [
+    {
+     "component": "per-token open-tail path (all branches)",
+     "corrected_host_ms": 93077.901289,
+     "share_of_corrected_step_time": 0.5772891333508319
+    },
+    {
+     "calls": 2627520,
+     "component": "all Triton kernel-launch windows (host time of the launches)",
+     "corrected_host_ms": 77898.41574,
+     "share_of_corrected_step_time": 0.4831427040057463
+    },
+    {
+     "component": "decode path (append_aging + decode.attention subtrees)",
+     "corrected_host_ms": 54765.304996,
+     "share_of_corrected_step_time": 0.3396661830682161
+    }
+   ],
+   "groups": [
+    {
+     "component": "OTHER MODEL TIME (execute_model / sample_tokens / attention wrapper, own time)",
+     "corrected_host_ms": 5978.243123,
+     "share_of_corrected_step_time": 0.037078347745740405
+    },
+    {
+     "calls": 3680,
+     "component": "HOST/CONTROL: per-request Python loop in _forward_rabit_kv2 (own time)",
+     "corrected_host_ms": 5916.137461,
+     "share_of_corrected_step_time": 0.036693155092106765
+    },
+    {
+     "calls": 3072,
+     "component": "initial_prefill.bulk_append (whole subtree)",
+     "corrected_host_ms": 10093.93567,
+     "share_of_corrected_step_time": 0.06260475681483808
+    },
+    {
+     "calls": 3072,
+     "component": "initial_prefill.dense_attention (whole subtree)",
+     "corrected_host_ms": 874.36547,
+     "share_of_corrected_step_time": 0.005423002425043353
+    },
+    {
+     "calls": 1376,
+     "component": "chunked_prefill.shared_decode (whole subtree)",
+     "corrected_host_ms": 83604.740369,
+     "share_of_corrected_step_time": 0.5185345548540554
+    },
+    {
+     "calls": 95264,
+     "component": "decode.append_aging (whole subtree)",
+     "corrected_host_ms": 14279.446876,
+     "share_of_corrected_step_time": 0.08856419620141875
+    },
+    {
+     "calls": 95264,
+     "component": "decode.attention (whole subtree)",
+     "corrected_host_ms": 40485.85812,
+     "share_of_corrected_step_time": 0.25110198686679736
+    }
+   ],
+   "instrumentation_wall_ratio": 6.288735731386745,
+   "profiled_wall_s": 670.8353875499997,
+   "recorded_bookkeeping_s": 509.345772468,
+   "residual_corrected_over_unprofiled": 1.5114736502148949,
+   "serial_iterations": {
+    "chunked prefill (layer x token)": 231712,
+    "decode (layer x request x token)": 95264,
+    "kernel_launches": 2627520,
+    "kernel_launches_per_chunk_iteration": 6.896699350918381,
+    "kernel_launches_per_decode_iteration": 10.806516627477325,
+    "unprofiled_wall_ms_per_serial_iteration": 0.32623965005688466
+   },
+   "unprofiled_wall_s": 106.67253581699993
+  },
+  "c3": {
+   "approx_device_time_of_long_kernels": [
+    {
+     "fraction_of_unprofiled_wall": 0.608821581617781,
+     "gpu_span_s": 72.61699706399999,
+     "kernel": "chunked_prefill.shared_decode/kernel._rabit2_shared_decode_closed_page_partial_kernel",
+     "launches": 16384,
+     "ms_per_launch": 4.432189762207031
+    }
+   ],
+   "bf16_unprofiled_wall_s": 5.041043001999242,
+   "branch_detail": {
+    "chunked_prefill.shared_decode": [
+     {
+      "calls": 32,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 10960.445621,
+      "share_of_corrected_step_time": 0.056263132717856504
+     },
+     {
+      "calls": 523264,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 148827.400868,
+      "share_of_corrected_step_time": 0.7639740295820145
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 1243.616778,
+      "share_of_corrected_step_time": 0.006383844074433102
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 861.141919,
+      "share_of_corrected_step_time": 0.004420490165543666
+     },
+     {
+      "calls": 32,
+      "component": "leaf.chunk_plan_init",
+      "corrected_host_ms": 18522.749447,
+      "share_of_corrected_step_time": 0.09508262222837262
+     },
+     {
+      "calls": 523264,
+      "component": "leaf.chunk_plan_apply_step",
+      "corrected_host_ms": 7474.128737,
+      "share_of_corrected_step_time": 0.03836686131396629
+     }
+    ],
+    "decode.append_aging": [
+     {
+      "calls": 992,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 80.919722,
+      "share_of_corrected_step_time": 0.00041538430240965584
+     },
+     {
+      "calls": 0,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "calls": 992,
+      "component": "kernel._rabit2_final_v2_age_kernel",
+      "corrected_host_ms": 39.222294,
+      "share_of_corrected_step_time": 0.00020133936238802736
+     },
+     {
+      "calls": 992,
+      "component": "kernel._rabit2_final_shift_recent_kernel",
+      "corrected_host_ms": 26.186608,
+      "share_of_corrected_step_time": 0.00013442342148129368
+     }
+    ],
+    "decode.attention": [
+     {
+      "calls": 992,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 72.611585,
+      "share_of_corrected_step_time": 0.00037273623582251595
+     },
+     {
+      "calls": 992,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 281.714645,
+      "share_of_corrected_step_time": 0.0014461226311665882
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 45.430969,
+      "share_of_corrected_step_time": 0.00023321028421056242
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 26.336529,
+      "share_of_corrected_step_time": 0.00013519300927104853
+     }
+    ],
+    "initial_prefill.bulk_append": [
+     {
+      "calls": 32,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 627.171793,
+      "share_of_corrected_step_time": 0.003219453938884245
+     },
+     {
+      "calls": 0,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     }
+    ],
+    "initial_prefill.dense_attention": [
+     {
+      "calls": 32,
+      "component": "branch own Python / torch ops",
+      "corrected_host_ms": 9.41188,
+      "share_of_corrected_step_time": 4.831389816395306e-05
+     },
+     {
+      "calls": 0,
+      "component": "per-token open-tail path: tail_emit + tail_prep + their 6-7 kernel launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "closed-page (packed-page) attention launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     },
+     {
+      "component": "reduce-partials launches",
+      "corrected_host_ms": 0.0,
+      "share_of_corrected_step_time": 0.0
+     }
+    ]
+   },
+   "chunk_shape": {
+    "calls": 32,
+    "context_tokens": 524288,
+    "tokens": 523264
+   },
+   "corrected_step_time_s": 194.806884927,
+   "cross_branch": [
+    {
+     "component": "per-token open-tail path (all branches)",
+     "corrected_host_ms": 149109.115513,
+     "share_of_corrected_step_time": 0.765420152213181
+    },
+    {
+     "calls": 3608224,
+     "component": "all Triton kernel-launch windows (host time of the launches)",
+     "corrected_host_ms": 106313.338821,
+     "share_of_corrected_step_time": 0.5457370711555641
+    },
+    {
+     "component": "decode path (append_aging + decode.attention subtrees)",
+     "corrected_host_ms": 572.422352,
+     "share_of_corrected_step_time": 0.002938409246749692
+    }
+   ],
+   "groups": [
+    {
+     "component": "OTHER MODEL TIME (execute_model / sample_tokens / attention wrapper, own time)",
+     "corrected_host_ms": 5298.481965,
+     "share_of_corrected_step_time": 0.027198638112741758
+    },
+    {
+     "calls": 1056,
+     "component": "HOST/CONTROL: per-request Python loop in _forward_rabit_kv2 (own time)",
+     "corrected_host_ms": 409.913567,
+     "share_of_corrected_step_time": 0.002104204721273619
+    },
+    {
+     "calls": 32,
+     "component": "initial_prefill.bulk_append (whole subtree)",
+     "corrected_host_ms": 627.171793,
+     "share_of_corrected_step_time": 0.003219453938884245
+    },
+    {
+     "calls": 32,
+     "component": "initial_prefill.dense_attention (whole subtree)",
+     "corrected_host_ms": 9.41188,
+     "share_of_corrected_step_time": 4.831389816395306e-05
+    },
+    {
+     "calls": 32,
+     "component": "chunked_prefill.shared_decode (whole subtree)",
+     "corrected_host_ms": 187889.48337,
+     "share_of_corrected_step_time": 0.9644909800821867
+    },
+    {
+     "calls": 992,
+     "component": "decode.append_aging (whole subtree)",
+     "corrected_host_ms": 146.328624,
+     "share_of_corrected_step_time": 0.0007511470862789769
+    },
+    {
+     "calls": 992,
+     "component": "decode.attention (whole subtree)",
+     "corrected_host_ms": 426.093728,
+     "share_of_corrected_step_time": 0.002187262160470715
+    }
+   ],
+   "instrumentation_wall_ratio": 8.817598820996599,
+   "profiled_wall_s": 1051.7162450029996,
+   "recorded_bookkeeping_s": 856.8835084210001,
+   "residual_corrected_over_unprofiled": 1.6332627426986606,
+   "serial_iterations": {
+    "chunked prefill (layer x token)": 523264,
+    "decode (layer x request x token)": 992,
+    "kernel_launches": 3608224,
+    "kernel_launches_per_chunk_iteration": 6.875122309197652,
+    "kernel_launches_per_decode_iteration": 10.806451612903226,
+    "unprofiled_wall_ms_per_serial_iteration": 0.2275122769925374
+   },
+   "unprofiled_wall_s": 119.27467628699969
+  }
+ },
+ "method": "Why: the CUDA-event profiler perturbed the RABIT legs far more than intended (profiled / unprofiled wall 3.7x, 6.3x,\n8.8x for cases 1, 2, 3). Every window recorded its own bookkeeping time (`overhead_ms`, dominated by two\ntorch.cuda.Event.record() calls per window), but a parent's INCLUSIVE time contains the bookkeeping of all windows\nbelow it, so the inclusive shares in summary.json over-weight the windows with the most children.\n\nCorrection used here: the host EXCLUSIVE time of a window (inclusive minus the full child windows, i.e. minus the\nchildren AND their bookkeeping) contains no profiler bookkeeping of other windows. A flat profile of exclusive times\ntherefore sums to the overhead-corrected step time, and a subtree's corrected time is the sum of the exclusive times\nof the windows in it. The residual against the unprofiled wall is reported per case; it is NOT removed.\nThe GPU-span domain cannot be corrected the same way (while the host is bookkeeping, the device idles inside the\nspan); it is used only for the two kernels whose launches are few and long, where span ~= device time.",
+ "title": "Overhead-corrected host attribution (addendum to summary.json; DIAGNOSTIC evidence only)",
+ "torch_profiler_cross_check_c1": {
+  "attention_op_self_cpu_fraction_of_total_self_cpu": 0.5477426875881024,
+  "attention_op_self_cpu_fraction_of_traced_wall": 0.5029686021101273,
+  "attention_op_self_cpu_s": 6.831113042999242,
+  "device_busy_fraction_upper_bound": 0.37758266532181856,
+  "note": "vllm::unified_attention_with_output is the custom op that encloses TritonAttentionImpl.forward; its SELF cpu time is the Python / Triton-launch time of the RABIT attention path not inside a torch op.",
+  "rabit_triton_kernels_fraction_of_traced_wall": 0.08097973251232991,
+  "rabit_triton_kernels_self_device_s_in_top60": 1.0998334779999746,
+  "total_self_device_s": 5.128172730999897,
+  "traced_wall_s": 13.581589416000043
+ }
+}
