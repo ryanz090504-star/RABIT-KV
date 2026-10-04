@@ -1,6 +1,6 @@
 % RABIT-KV -- MLSys paper draft source.
 %
-% DRAFTING STATE: PHASE 2. Prose exists for the Abstract, Introduction, contribution bullets and
+% DRAFTING STATE: PHASE 2 (reviewed). Prose exists for the Abstract, Introduction, contribution bullets and
 % Sections 2-5. Evaluation, Discussion and Limitations, Related Work and Conclusion are stubs and must
 % not be drafted before Sections 2-5 are accepted.
 %
@@ -10,7 +10,6 @@
 % The class below is a placeholder; the MLSys style file is applied at final formatting.
 
 \documentclass[10pt,twocolumn]{article}
-\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
 
@@ -196,8 +195,10 @@ payload, the value payload, and the META8g64 metadata are written as one packed 
 never modified again.
 
 A sequence of $n \ge 4$ tokens thus consists of $\lfloor (n-4)/32 \rfloor$ closed pages, an open group
-of $(n-4) \bmod 32$ tokens, and four residual tokens. Attention reads all three: closed pages and the
-open group in quantized form, the residual window exactly. Aging is online. It happens as tokens are
+of $(n-4) \bmod 32$ tokens, and four residual tokens. Once this state exists, attention reads all
+three: closed pages and the open group in quantized form, the residual window exactly. (The serving
+engine computes the initial prefill of a prompt over exact keys and values before it builds this
+state; Section~\ref{sec:impl}.) Aging is online. It happens as tokens are
 appended during prefill and decoding, there is no offline compression pass, and the representation of a
 key keeps changing until its group closes. This is why we validate the lifecycle token by token and not only
 its final state (Section~\ref{sec:method}).
@@ -221,15 +222,18 @@ channel group) for values, which is $32 \cdot H \cdot d/32$. Stored directly in 
 $8Hd$ bytes, 40\% of the payload. Under META8g64 each array takes $Hd$ bytes of codes plus $Hd/16$ bytes
 of group parameters, $4.25Hd$ bytes in total. A page therefore occupies $24.25Hd$ bytes per layer. For
 Llama-3.1-8B ($Hd=1024$) this is 24,832 bytes per page, or 776 bytes per token per layer, against 4,096
-bytes in BF16. Dividing by the $2Hd=2048$ key and value elements of a token gives a derived cost of
-about 3.03 bits per element. This figure covers the payload and metadata of closed pages. It excludes
-the residual window and the open group, which are per-sequence state of at most 35 tokens held outside
-the block pool, and it excludes any rounding by the allocator.
+bytes in BF16. Dividing by the $2Hd=2048$ key and value elements of a token in one layer gives about 3.03 bits per
+element. This is a derived, closed-page figure and not our headline metric. It counts payload and
+metadata of closed pages only. It excludes the residual window, the open group, and any rounding by
+the allocator.
 
 \paragraph{Allocator-observed capacity.}
 The number of tokens the engine can place in its KV budget is the quantity we report as the result. The
 page bytes above predict a ratio of $4096/776 \approx 5.28$ over BF16. Section~6 reports the value
 measured in the running engine and compares it with FP8 and with the tested TurboQuant configuration.
+This capacity measures the paged KV pool. The residual window and the open group are per-sequence
+state of at most 35 tokens, held outside the pool and not counted in it, so the capacity ratio is not
+a statement about total device memory including all auxiliary state of active sequences.
 
 % ================================================================================ PHYSICAL IMPLEMENTATION
 \section{Physical Implementation}
@@ -270,7 +274,7 @@ correctness and physical packing first. Section~6 measures the consequence for l
 
 \paragraph{Model geometries.}
 The kernels are specialized for the Llama-3.1-8B attention geometry. Qwen2.5-7B has a different head
-layout and is served through exact general fallback paths: the same representation, pages, and capacity
+layout (four KV heads) and is served through exact general fallback paths: the same representation, pages, and capacity
 accounting, executed by unspecialized code. Its latency therefore measures the fallback paths and is
 not evidence about how the specialized kernels would transfer.
 
@@ -288,7 +292,7 @@ with the reference on the tested cases; they are not a formal verification.
 \paragraph{Setup.}
 Every run uses one NVIDIA H100 (80\,GB). The engine is a vLLM snapshot [vLLM] with our changes, in eager
 mode, with 32-token blocks, a GPU memory fraction of 0.82, and a maximum model length of 32,768 tokens.
-The models are Llama-3.1-8B-Instruct [Llama3.1] and Qwen2.5-7B [Qwen2.5] at pinned revisions with BF16
+The models are Llama-3.1-8B-Instruct [Llama3.1] and Qwen2.5-7B-Instruct [Qwen2.5] at pinned revisions with BF16
 weights. Baselines are the BF16 cache, the engine's native per-tensor FP8 cache, and one TurboQuant
 configuration [TurboQuant] that quantizes 28 layers and keeps four boundary layers in BF16. TurboQuant
 runs with its own attention backend, so comparisons with it are between systems as deployed, not
@@ -311,27 +315,45 @@ conditioning, and three trials per point.
 \paragraph{Quality evaluator.}
 Quality is measured logically, outside the serving engine, with a cache object for Hugging Face
 Transformers [Transformers] that implements the representation and lifecycle of
-Section~\ref{sec:design}. The model processes one token per forward pass, so every token attends to the
-cache state defined by that lifecycle and every generated token ages. BF16 and RABIT-KV are run on
-identical inputs. We measure continuation perplexity on WikiText-2 [WikiText] over 32 windows for both
-models and, for Llama-3.1-8B only, three long-context tasks with greedy decoding: needle-in-a-haystack
-retrieval (57 cases at 4,096, 8,192, and 16,384 tokens) and the Passage Retrieval (200 examples) and
-HotpotQA (100 examples) tasks of LongBench [LongBench, HotpotQA]. Confidence intervals are paired
+Section~\ref{sec:design}. Serving and logical evaluation use different execution machinery: the
+evaluator reproduces the stored-cache representation and its aging, not the serving kernels or their
+schedule. Every evaluation has two phases. The prompt is processed in one dense BF16 forward pass, so
+prompt tokens attend to exact history, as in the initial prefill of the serving engine. The resulting
+keys and values are then converted in one step into the RABIT-KV state for that length: closed pages,
+an open group, and four residual tokens. Every later token is processed one per forward pass. It is
+appended, the lifecycle advances, and the token attends to the state at its own position, so no token
+stays exact beyond the residual window. The BF16 arm runs the same loop on the same inputs with an
+unmodified cache.
+
+\paragraph{Tasks.}
+Continuation perplexity is measured on WikiText-2 [WikiText] for both models, over 32 windows of 1,024
+context tokens and 128 scored tokens. The first scored token is predicted by the BF16 prefill and is
+identical in both arms; the other 127 are teacher-forced against the RABIT-KV state. Long-context
+quality is measured for Llama-3.1-8B only, with greedy decoding: needle-in-a-haystack retrieval [NIAH]
+(57 cases at 4,096, 8,192, and 16,384 tokens) and the Passage Retrieval (200 examples) and HotpotQA
+(100 examples) tasks of LongBench [LongBench, HotpotQA]. Here all but the last prompt token are
+prefilled and the last prompt token is the first step on the converted state, so every generated token
+is predicted from RABIT-KV state. Prompts are at most 16,384 tokens and the evaluator never executes a
+later prefill chunk. The quality of prompt tokens that attend to an already packed prefix, which occurs
+in serving beyond the per-step token budget, is therefore not measured. Confidence intervals are paired
 percentile bootstraps with 10,000 resamples.
 
 \paragraph{Validation against an independent reference.}
-The evaluator is required to equal an independently written reference implementation of the
-representation bit for bit. We check this on synthetic states, including token-by-token aging, and on
-the GPU with the keys and values the models actually produce: in all 32 layers of Llama-3.1-8B, in all
-28 layers of Qwen2.5-7B, and for Llama-3.1-8B at a 16k-token context. CPU and GPU arithmetic differ in
-the last bit of some scales, which changes a small fraction of codes by one level. Conformance is
-therefore established on the device that runs the evaluation, and we define no cross-device tolerance.
+The state transformation and aging computed by the evaluator were checked bit for bit against an
+independently written, frozen reference implementation, on the same device. The check covers synthetic
+states, including token-by-token aging, and the keys and values the models actually produce on the GPU:
+every layer of both models, and a 16k-token context for Llama-3.1-8B. CPU and GPU arithmetic differ in
+the last bit of some scales, which moves a small fraction of codes by one level, so conformance is
+established on the device that runs the evaluation and we define no cross-device tolerance. This check
+establishes that the evaluator computes the intended stored state. It is not a formal verification, and
+it says nothing about model quality or serving performance. The serving implementation is tested
+against the same reference (Section~\ref{sec:impl}); we do not compare serving outputs with evaluator
+outputs end to end.
 
 \paragraph{Registered protocol.}
-Each quality run is specified before it is executed: prompts, example selection, scorers, bootstrap
-seeds, validity checks, and the rules for interpreting the outcome. Checks on output quality use only
-BF16 outputs, never the RABIT-KV scores. A run that fails a validity check is
-excluded, not repaired.
+Each quality run is frozen before execution: inputs, example selection, scorers, bootstrap seeds, and
+the rules for interpreting the outcome. Nothing is tuned in response to results. Validity checks on
+output quality use only BF16 outputs, and a run that fails a validity check is excluded.
 
 \paragraph{Scope of the quality evidence.}
 Earlier development results were produced with an evaluator that did not implement this lifecycle
