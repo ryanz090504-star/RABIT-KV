@@ -16,6 +16,73 @@ No bibliography entry has been created. Venues are as stated on the source page.
 
 ---
 
+## 0. Primary-source verification of every detail used in Section 8 (final pass, 2026-10-04)
+
+Method: the full text of each paper (arXiv HTML) and the GitHub API record of the pull request were downloaded and
+the passages were read directly; quotations below are from those texts. This supersedes the "FULL-TEXT (automated)"
+level in sections 1–2 for the details listed here. It is a direct reading by the drafting assistant, NOT an
+independent human check: an author should still confirm each quoted passage against the PDF before submission.
+Details not listed here remain at the level stated in sections 1–2, or UNKNOWN.
+
+| Work | Detail used in the paper | Primary-source passage | Status |
+|---|---|---|---|
+| KIVI | keys per channel, values per token | abstract: "the key cache should be quantized per-channel, i.e., group elements along the channel dimension and quantize them together. In contrast, the value cache should be quantized per-token" | PRIMARY SOURCE |
+| KIVI | groups of 32 | Sec. 4.1: "the group size in Algorithm 1 for quantization is set as 32 across all experiments, the residual length for key and value cache is set to 128" | PRIMARY SOURCE |
+| KIVI | full-precision residual, quantized in batches | Sec. 3: the residual key cache "is kept in full precision … once [it] reaches R tokens … we quantize [it] and concatenate it with the previously quantized" part; values: "keep the most recent value cache in full precision" in a queue of length R | PRIMARY SOURCE |
+| KIVI | zero-padding of incomplete groups | appears ONLY in the preliminary simulated-quantization study ("For per-channel quantization, if the number of tokens is not divided evenly into groups, we add zero-padding"); the KIVI algorithm itself keeps the incomplete part in the full-precision residual | PRIMARY SOURCE — the paper therefore does NOT say that KIVI zero-pads incomplete groups, and Section 8 does not claim it |
+| KIVI | implementation and memory metric | "We use the Hugging Face Transformers codebase and implement the KIVI algorithm upon it"; "report the peak memory usage and throughput" (single A100 80GB, batch size increased until out of memory) | PRIMARY SOURCE (only "peak memory" is used in the paper, in Section 2) |
+| KVQuant | methods | "Per-Channel Key Quantization", "Pre-RoPE Key Quantization", "Non-Uniform KV Cache Quantization, where we derive per-layer sensitivity-weighted non-uniform datatypes", "Per-Vector Dense-and-Sparse Quantization, where we isolate outliers separately for each vector" | PRIMARY SOURCE |
+| KVQuant | first token full precision; kernels | "keeping only the first token in fp16, we can attain perplexity benefits"; "custom CUDA kernels" | PRIMARY SOURCE |
+| SKVQ | channel reordering, clipped dynamic quantization, sliding window | abstract (verbatim, section 1 above) | PRIMARY SOURCE |
+| SKVQ | FP8 quantization parameters counted in average bits | "use FP8 to store quantization parameter so that the average bits is equal to …"; "storage overhead for quantization parameters, which is noted as average bits"; Table 4: group size 128 / 64 / 32 → 2.125 / 2.25 / 2.5 average bits | PRIMARY SOURCE |
+| AsymKV | key sensitivity; unequal K / V bits by layer | abstract: "the transformer's output loss is more sensitive to the quantization of key matrices"; Sec. 4: "adheres to the quantization scheme outlined in KIVI … per-channel quantization for the key matrix and per-token quantization for the value matrix, with a group size of 32. AsymKV utilizes a combination of higher 2-bit quantization and lower 1-bit quantization" | PRIMARY SOURCE |
+| TurboQuant (paper) | method; KV bit-widths | "randomly rotating input vectors … to simply apply optimal scalar quantizers per each coordinate"; "3.5 bits per channel and marginal quality degradation with 2.5 bits per channel"; evaluated on Llama-3.1-8B-Instruct needle-in-a-haystack | PRIMARY SOURCE |
+| vLLM TurboQuant backend | what it is; presets; boundary layers; page sizing | PR #38479 (GitHub API; merged 2026-04-15T02:57:14Z): "online KV cache compression to vLLM's v1 attention backend using PolarQuant (WHT rotation + Lloyd-Max scalar quantization) for keys and uniform quantization for values"; presets `turboquant_k8v4`, `turboquant_4bit_nc`, `turboquant_k3v4_nc` ("3-bit MSE + NC" keys, "4-bit uniform + NC" values), `turboquant_3bit_nc`; "Boundary layer protection — first/last N layers keep FP16 KV cache via kv_cache_dtype_skip_layers"; "TQFullAttentionSpec — proper spec subclass that overrides real_page_size_bytes with TQ slot bytes" | PRIMARY SOURCE (official repository). Our engine snapshot lists the same four preset names (`vllm-kvquant/vllm/config/cache.py`) and contains `turboquant_attn.py`; that our snapshot's backend is byte-identical to the merged PR is NOT verified |
+| SAW-INT4 | systems co-design; paged, fused kernel; throughput | abstract: "they often violate practical serving constraints such as paged memory layouts, regular memory access, and fused attention execution"; "token-wise INT4 quantization with block-diagonal Hadamard rotation"; "a fused rotation–quantization kernel that integrates directly into paged KV-cache layouts"; "effective KV-cache compression is fundamentally a systems co-design problem"; contributions: "jointly measures accuracy and real serving throughput" | PRIMARY SOURCE |
+| SAW-INT4 | residual buffers and paged blocks | Sec. 1: KIVI and Kitty "maintain a fixed-length residual buffer of unquantized key–value pairs … PagedAttention manages cache memory in fixed-size, uniform-type blocks; accommodating two distinct precisions within the same paged pool requires either fragmented memory layouts or separate page tables" | PRIMARY SOURCE |
+| SAW-INT4 | serving engine | the BF16 baseline and throughput figures are labelled SGLang; an explicit sentence "implemented in SGLang" was not located | PARTIAL — Section 8 says "paged engines" and does not name SGLang |
+| Minima-KV | lifecycle and formats | "Recent and Anchor pages use FP8, while Stale pages use TQ3"; "Old non-anchor pages are encoded with a three-bit rotated scalar quantizer inspired by TurboQuant. Packed codes, scales, and required metadata are stored next to the page" | PRIMARY SOURCE |
+| Minima-KV | attention | "Each format-specific kernel computes a partial maximum, exponential sum, and normalized partial output" merged through "a stable global softmax merge without constructing a cache-sized dense shadow" | PRIMARY SOURCE |
+| Minima-KV | memory accounting | "Deployment accounting reports 18.3 KiB per live token … 3.497× the BF16 footprint … 1.749× the FP8 footprint"; "We therefore use 18.3 KiB/token only as an owner-reported workload aggregate and label constant-rate capacity values as analytical scenarios rather than per-context measurements" | PRIMARY SOURCE |
+| Minima-KV | serving engine, K vs V precision | engine not named ("does not bind … the engine commit"); K / V asymmetry: "preserves this separation in its codec and kernel interfaces, even where a deployment selects the same nominal tier for both tensors" | UNKNOWN engine; not used in the paper |
+| vLLM / PagedAttention | paged KV allocation | abstract (verbatim, section 1 above) | PRIMARY SOURCE |
+
+### Exact overlaps with RABIT-KV
+
+**KIVI.** Same: per-channel keys along the token axis; per-token values; group size 32; a full-precision window of
+recent tokens; affine round-to-nearest codes. Different: bit allocation (KIVI 2 / 2; RABIT-KV 3 / 2); window length
+(KIVI 128 by default, 32 also evaluated; RABIT-KV 4); handling of the incomplete key group (KIVI keeps it exact
+inside the residual and quantizes whole batches; RABIT-KV re-quantizes a zero-padded open group at every token);
+second-level quantization of the group parameters (RABIT-KV only); KIVI is implemented in Hugging Face Transformers
+and reports peak memory and batch-size throughput, RABIT-KV is implemented in vLLM and reports allocator capacity.
+
+**Minima-KV.** Same in kind: a lifecycle in which recent state is stored at higher precision and older pages in a
+packed low-bit format under paged attention; per-format partial attention states merged by an online softmax; memory
+reported per token against BF16 and FP8. Different: Minima-KV has three tiers with FP8 for Recent and protected
+Anchor pages and a 3-bit rotated scalar quantizer for Stale pages, with a controller that can promote pages;
+RABIT-KV has one packed format (3-bit keys, 2-bit values, affine) for everything older than a four-token exact
+window, no promotion, and quantized metadata. Minima-KV's memory figure is an owner-reported aggregate and its
+capacities are labelled analytical; RABIT-KV reads block counts from the running allocator in a matched session.
+Minima-KV evaluates one model (Qwen3.6-27B); RABIT-KV two. Minima-KV reports near-parity throughput in a single
+pair; RABIT-KV reports lower throughput.
+
+**SAW-INT4.** Same in kind: low-bit KV quantization designed for and evaluated inside a paged serving engine, with
+dequantization fused into the attention kernel and end-to-end serving measurements. Different: SAW-INT4 uses 4-bit
+token-wise quantization for both keys and values with no full-precision buffer and reports throughput gains;
+RABIT-KV uses a lower, asymmetric bit budget with per-channel keys and an exact window, and reports lower throughput.
+
+### Final defensible novelty statement
+
+RABIT-KV is not introduced as the first physical, packed or paged low-bit KV system, nor as the first to account
+for storage beyond nominal bits, nor as the first mixed-precision cache lifecycle. Its contribution is the
+end-to-end realization and measurement of one specific aggressive asymmetric target-bit operating point, jointly
+exposing physical allocator capacity, asymmetric K / V payload, quantized metadata, residual and open-group state,
+online aging, serving cost and validated logical quality; its empirical contribution includes the matched
+physical-capacity comparison with BF16, FP8 and the tested TurboQuant configuration, and the model-dependent
+quality result. No "first" claim is made anywhere in the draft.
+
+---
+
 ## 1. Core works (required by the directive)
 
 ### KIVI
