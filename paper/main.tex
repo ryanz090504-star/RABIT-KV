@@ -1,7 +1,8 @@
 % RABIT-KV -- MLSys paper draft source.
 %
-% DRAFTING STATE: PHASE 1. Prose exists ONLY for the Abstract, the Introduction and the contribution
-% bullets. Every other section is a stub and must not be drafted before the framing is accepted.
+% DRAFTING STATE: PHASE 2. Prose exists for the Abstract, Introduction, contribution bullets and
+% Sections 2-5. Evaluation, Discussion and Limitations, Related Work and Conclusion are stubs and must
+% not be drafted before Sections 2-5 are accepted.
 %
 % Authoritative planning sources (numbers and claim boundaries come from these, never from older prose):
 %   docs/MLSYS_PAPER_EVIDENCE_MAP.md   docs/MLSYS_PAPER_STORY_LOCK.md   docs/MLSYS_PAPER_BLUEPRINT.md
@@ -58,27 +59,21 @@ per group, and at two or three bits per element this metadata is a substantial f
 The newest tokens are commonly kept at full precision. Groups are partially filled while a sequence is
 being generated, and cache state must be re-encoded online as tokens age from one representation to the
 next. The result must then fit the fixed-size blocks of the engine's allocator and be read by attention
-kernels at an acceptable cost. None of these ingredients is new. What is missing is a system that
-accounts for all of them together, so that a target bit budget is realized as measured capacity and its
-runtime cost is observed rather than assumed. This is the gap RABIT-KV targets.
+kernels at an acceptable cost. Our focus is the systems problem of accounting for these effects jointly
+and measuring the resulting allocator-visible capacity and runtime cost.
 
-% P3 -- RABIT-KV and results (claims: S1, S2, C3, C5, C6, L1, L2, L5, V2-V5, Q1, Q2, Q4-Q6)
-RABIT-KV is a target-bit-aware, physically packed KV cache. One operating point fixes 3-bit keys, 2-bit
-values, 32-element groups, a four-token full-precision residual window, and 8-bit quantized group
-metadata, together with the lifecycle by which tokens age from the residual window into an open group
-and then into closed, packed pages. ``2-bit target'' is a label for this operating point: with group
-metadata included, a packed page stores about 3.03 bits per element (a derived figure). We implement
-these pages inside the paged allocator of vLLM [vLLM] and report capacity as the number of tokens the
-engine actually allocates. On one H100 with Llama-3.1-8B, RABIT-KV holds $5.2785\times$ the KV tokens of
-BF16, $2.6409\times$ those of FP8, and $1.724\times$ those of the tested TurboQuant configuration
-[TurboQuant]. In a matched single-request session, its median time per output token is $8.33\%$ above
-that configuration and $24.4\%$ above BF16. Quality is measured under the cache semantics of the serving
-implementation, with the evaluator checked bit-exactly against an independent reference. On
-Llama-3.1-8B, continuation perplexity rises by $1.56\%$, NIAH and Passage Retrieval scores are unchanged
-on the tested suites, and HotpotQA is about 1 F1 lower with a paired confidence interval that spans
-zero. On Qwen2.5-7B the same operating point gives the same capacity ratio but a severe quality loss
-(perplexity $+1555.9\%$), whose cause we do not diagnose. Quality at a fixed low-bit operating point is
-therefore model-dependent, and we do not assume that it transfers.
+% P3 -- RABIT-KV and results (claims: S1, S2, C3, C5, L5, Q1, Q2)
+RABIT-KV is a target-bit-aware, physically packed KV cache. One fixed operating point combines 3-bit
+keys, 2-bit values, 32-element groups, a four-token full-precision residual window, and 8-bit quantized
+group metadata, with an online lifecycle in which tokens age from the residual window into an open
+group and then into closed, packed pages. The ``2-bit target'' denotes this operating point rather than
+a literal end-to-end storage cost. The pages are stored in the paged allocator of vLLM [vLLM], and
+capacity is reported as the number of tokens the engine allocates. On one H100 with Llama-3.1-8B,
+RABIT-KV holds $5.2785\times$ the KV tokens of BF16, $2.6409\times$ those of FP8, and $1.724\times$
+those of the tested TurboQuant configuration [TurboQuant], at $+8.33\%$ median time per output token
+relative to that configuration in a matched single-request session. Quality loss on Llama-3.1-8B is
+small (continuation perplexity $+1.56\%$), whereas Qwen2.5-7B shows severe sensitivity at the same
+operating point; we therefore do not assume that quality transfers across models.
 
 % P4 -- systems lesson and limitation (claims: T2, T3, T4, X4, P4, P6; frozen limitation wording I.5)
 The broader lesson is that aggressive KV compression should be judged as a joint trade-off among
@@ -94,10 +89,11 @@ the capacity result and leave a batched runtime to future work.
 % Contributions -- THREE bullets (blueprint section 2)
 \paragraph{Contributions.}
 \begin{itemize}
-\item \textbf{Design.} A target-bit-aware KV-cache representation and online cache lifecycle that
-  jointly handle asymmetric key/value precision, full-precision residual state, quantized group
-  metadata, open groups and closed pages, and cache aging. The individual ingredients are established;
-  the contribution is their joint accounting at one fixed operating point.
+\item \textbf{Design.} A target-bit-aware KV-cache representation with an online cache lifecycle
+  covering asymmetric key/value precision, full-precision residual state, quantized group metadata,
+  open groups, closed pages, and cache aging. Rather than treating these mechanisms independently,
+  RABIT-KV integrates them into one lifecycle whose target bit budget maps to a concrete physical
+  layout.
 \item \textbf{Physical system.} A physically packed integration into the vLLM serving engine, whose
   benefit is measured as allocator-observed KV capacity rather than by logical compression accounting:
   $5.2785\times$ BF16, $2.6409\times$ FP8, and $1.724\times$ the tested TurboQuant configuration on
@@ -108,19 +104,242 @@ the capacity result and leave a batched runtime to future work.
   model-dependent quality trade-offs.
 \end{itemize}
 
-% ============================================================== STUBS -- NOT DRAFTED (phase 1 boundary)
+% ========================================================================== BACKGROUND AND MOTIVATION
 \section{Background and Motivation}
-% NOT DRAFTED. Blueprint section 4, rows 2.1-2.2. Budget 0.5 page.
+\label{sec:background}
 
+% claims: C1, S2 (bytes), C4 (TurboQuant configuration)
+\paragraph{KV-cache memory.}
+For every token, each decoder layer stores one key and one value vector per KV head. With $H$ KV heads
+of dimension $d$, a token therefore holds $2Hd$ elements per layer. For Llama-3.1-8B ($H=8$, $d=128$,
+32 layers) this is 4,096 bytes per token per layer in BF16, or 128\,KiB per token. The state lives as
+long as its request, so KV memory grows with the product of context length and concurrency.
+
+\paragraph{Paged allocation.}
+Serving engines such as vLLM [vLLM] manage this memory as a pool of fixed-size blocks. A block holds the
+KV state of a fixed number of consecutive tokens (32 in our configuration), and a per-request block
+table maps token positions to blocks. The pool is sized once, at start-up: the number of blocks is the
+KV memory budget divided by the bytes that one block occupies. A request is admitted, and can grow,
+only while free blocks remain. Throughout this paper, \emph{capacity} means the number of blocks times
+the tokens per block as reported by the running engine. It is the quantity the scheduler can use.
+
+\paragraph{Logical precision is not physical capacity.}
+Quantized KV caches [KIVI, KVQuant, TurboQuant] are usually described by the bit-width of their codes.
+The bytes a block occupies depend on more than that. First, affine quantization stores a minimum and a
+scale per group. With groups of 32 elements, two 16-bit parameters add one bit per element, which is a
+third of a 3-bit payload and half of a 2-bit one. Second, some state is kept at full precision: recent
+tokens in residual-window designs, or entire layers, as in the TurboQuant configuration we test, which
+leaves four boundary layers in BF16. Third, when quantization statistics span several tokens, the group
+at the end of a growing sequence is incomplete and has no final encoding yet. Whether each of these
+costs is stored inside the block pool, beside it, or not at all determines how many blocks fit in the
+budget. A bit-width alone therefore does not determine capacity; it has to be measured in the engine,
+together with the runtime cost of reading the packed state.
+
+% ================================================================================================ DESIGN
 \section{RABIT-KV Design}
-% NOT DRAFTED. Blueprint rows 3.1-3.3; Figure 1. Budget 1.5 pages.
+\label{sec:design}
 
+% claims: S1, S2, S3, V6. FIGURE 1 goes here (lifecycle and page layout); not yet created.
+RABIT-KV is defined by a single operating point, written K3\,/\,V2\,/\,G32\,/\,R4\,/\,META8g64. It was
+fixed during earlier development and was not retuned for any experiment in this paper. We describe it
+as one configuration, not as the best member of a tuned family, and we do not claim that each component
+is individually optimal.
+
+\subsection{Operating point}
+
+\paragraph{K3: keys.}
+Keys are stored as 3-bit affine codes grouped along the \emph{sequence} axis. For each (head, channel)
+pair, 32 consecutive tokens form a group with one minimum and one scale, $s=(\max-\min)/7$.
+
+\paragraph{V2: values.}
+Values are stored as 2-bit affine codes grouped along the \emph{channel} axis. For each (token, head)
+pair, 32 consecutive channels form a group with one minimum and one scale, $s=(\max-\min)/3$.
+
+\paragraph{G32: group size.}
+Both groupings use 32 elements. Thirty-two tokens are also the unit of physical storage: one K group
+along the sequence, the values of the same 32 tokens, and their metadata form one page, and one page
+occupies one allocator block.
+
+\paragraph{R4: residual window.}
+The newest four tokens of every sequence are kept exactly, in BF16.
+
+\paragraph{META8g64: metadata.}
+The minimum and scale arrays are themselves quantized. Each array is split into groups of 64 values and
+stored as 8-bit codes with one BF16 minimum and scale per group. Keys and values are dequantized with
+the parameters decoded from this second level, not with the original ones.
+
+The two axes have different consequences. A value group lies within one token, so a token's values can
+be encoded once, as soon as the token leaves the residual window, independently of every other token.
+A key group spans 32 tokens, so its metadata is amortized over a page, with one minimum and scale per
+(head, channel), but its statistics are not final until all 32 tokens exist. Keys also receive one more
+bit than values. These choices define the lifecycle below; their effect on quality is measured only for
+the operating point as a whole.
+
+\subsection{Cache lifecycle}
+
+% Figure 1: residual window -> open group -> closed page.
+A token passes through three states (Figure~1).
+
+\paragraph{Residual.}
+A new token enters the residual window with exact keys and values.
+
+\paragraph{Open group.}
+When a fifth newer token arrives, the token leaves the window and joins the \emph{open group}, the
+incomplete K group at the end of the sequence. Its values are encoded to their final 2-bit form. Its
+keys cannot be: the open group is quantized as a 32-token group padded with zeros, so the group
+statistics, and with them the codes of every key already in the group, are recomputed as the group
+grows.
+
+\paragraph{Closed page.}
+When the open group reaches 32 tokens it closes. Its key codes and metadata become final, and the key
+payload, the value payload, and the META8g64 metadata are written as one packed page. A closed page is
+never modified again.
+
+A sequence of $n \ge 4$ tokens thus consists of $\lfloor (n-4)/32 \rfloor$ closed pages, an open group
+of $(n-4) \bmod 32$ tokens, and four residual tokens. Attention reads all three: closed pages and the
+open group in quantized form, the residual window exactly. Aging is online. It happens as tokens are
+appended during prefill and decoding, there is no offline compression pass, and the representation of a
+key keeps changing until its group closes. This is why we validate the lifecycle token by token and not only
+its final state (Section~\ref{sec:method}).
+
+\subsection{Physical accounting}
+
+We distinguish four quantities that are often conflated.
+
+\paragraph{Target-bit label.}
+``2-bit target'' names the operating point. It is not a storage cost.
+
+\paragraph{Logical payload bits.}
+A token has equally many key and value elements, so 3-bit keys and 2-bit values give 2.5 payload bits
+per element.
+
+\paragraph{Physical page bytes.}
+For one layer, a page holds $32Hd$ key elements and $32Hd$ value elements: $12Hd$ bytes of key payload
+and $8Hd$ bytes of value payload. There are four metadata arrays (minimum and scale, for keys and for
+values), each with $Hd$ entries per page: one per (head, channel) for keys, and one per (token, head,
+channel group) for values, which is $32 \cdot H \cdot d/32$. Stored directly in BF16 they would take
+$8Hd$ bytes, 40\% of the payload. Under META8g64 each array takes $Hd$ bytes of codes plus $Hd/16$ bytes
+of group parameters, $4.25Hd$ bytes in total. A page therefore occupies $24.25Hd$ bytes per layer. For
+Llama-3.1-8B ($Hd=1024$) this is 24,832 bytes per page, or 776 bytes per token per layer, against 4,096
+bytes in BF16. Dividing by the $2Hd=2048$ key and value elements of a token gives a derived cost of
+about 3.03 bits per element. This figure covers the payload and metadata of closed pages. It excludes
+the residual window and the open group, which are per-sequence state of at most 35 tokens held outside
+the block pool, and it excludes any rounding by the allocator.
+
+\paragraph{Allocator-observed capacity.}
+The number of tokens the engine can place in its KV budget is the quantity we report as the result. The
+page bytes above predict a ratio of $4096/776 \approx 5.28$ over BF16. Section~6 reports the value
+measured in the running engine and compares it with FP8 and with the tested TurboQuant configuration.
+
+% ================================================================================ PHYSICAL IMPLEMENTATION
 \section{Physical Implementation}
-% NOT DRAFTED. Blueprint rows 4.1-4.3. Budget 1.0 page.
+\label{sec:impl}
 
-\section{Methodology}
-% NOT DRAFTED. Blueprint rows 5.1-5.3. Budget 0.8 page.
+% claims: C3, V1, L6, X4, P4 (design fact only)
+\paragraph{Integration.}
+RABIT-KV is implemented as an additional KV-cache type in the Triton attention backend of vLLM [vLLM].
+The scheduler, the block allocator, and the per-request block tables are unchanged. The engine sizes
+its block pool from the bytes per block, so declaring the packed page size as the block size is what
+turns the representation into capacity: the same memory budget yields more blocks, and the scheduler
+admits requests against them as it does for any other cache type. There is no separate compressed pool
+and no background compaction.
 
+\paragraph{Packed pages and per-sequence state.}
+One allocator block holds one closed page per layer: packed 3-bit key codes, packed 2-bit value codes,
+and the four META8g64 metadata arrays. A page is written into its scheduler-assigned block at the
+moment its group closes. The residual window and the open group are kept in a small per-request
+structure outside the pool. It is bounded by 35 tokens per sequence.
+
+\paragraph{Execution paths.}
+Three paths read and write this state. \emph{Initial prefill:} for the first prefill chunk of a
+request, attention is computed densely over the exact keys and values of the chunk, and the chunk is
+then encoded in bulk into closed pages, an open group, and a residual window. \emph{Later prefill
+chunks:} when a prompt exceeds the per-step token budget (16,384 tokens in our configuration), or when
+that budget is shared among requests, the remaining tokens attend to the already packed prefix and to
+the exact tail under the causal order of the chunk; the decoding of closed pages is shared by blocks of
+32 queries. \emph{Decode:} each new token is appended, the lifecycle of Section~\ref{sec:design}
+advances by one step, and attention is computed in parts: over the closed pages, which are dequantized
+inside the kernel and never materialized in full precision, over the open group and the residual
+window, and a final reduction that combines the partial results.
+
+\paragraph{What is not batched.}
+In the current implementation these paths run once per request, and append, aging, and the open-group
+work run once per token. Requests in the same scheduler step are processed one after another within
+each layer, while the rest of the model is batched as usual. The implementation was built for
+correctness and physical packing first. Section~6 measures the consequence for latency and throughput.
+
+\paragraph{Model geometries.}
+The kernels are specialized for the Llama-3.1-8B attention geometry. Qwen2.5-7B has a different head
+layout and is served through exact general fallback paths: the same representation, pages, and capacity
+accounting, executed by unspecialized code. Its latency therefore measures the fallback paths and is
+not evidence about how the specialized kernels would transfer.
+
+\paragraph{Correctness.}
+A fixed test suite is run before every serving experiment. It checks the page layout, the page codec
+against a reference implementation, the online state against that reference at every step, the
+metadata encoding, grouped-query attention, and causal chunked prefill. These tests establish agreement
+with the reference on the tested cases; they are not a formal verification.
+
+% =========================================================================================== METHODOLOGY
+\section{Experimental Methodology}
+\label{sec:method}
+
+% claims: C1-C6 (method), L1 (method), T1-T4 (method), X1 (method), V2-V7, Q1-Q8 (method)
+\paragraph{Setup.}
+Every run uses one NVIDIA H100 (80\,GB). The engine is a vLLM snapshot [vLLM] with our changes, in eager
+mode, with 32-token blocks, a GPU memory fraction of 0.82, and a maximum model length of 32,768 tokens.
+The models are Llama-3.1-8B-Instruct [Llama3.1] and Qwen2.5-7B [Qwen2.5] at pinned revisions with BF16
+weights. Baselines are the BF16 cache, the engine's native per-tensor FP8 cache, and one TurboQuant
+configuration [TurboQuant] that quantizes 28 layers and keeps four boundary layers in BF16. TurboQuant
+runs with its own attention backend, so comparisons with it are between systems as deployed, not
+between quantization kernels.
+
+\paragraph{Physical capacity.}
+Capacity is read from the running engine as the number of allocated blocks times 32 tokens, under the
+same memory budget for every method. It is not computed from byte estimates.
+
+\paragraph{Latency and throughput.}
+Absolute latency varies between sessions, so methods are compared only within one session. The primary
+comparison serves all four methods in a mirrored order (A\,B\,C\,D\,D\,C\,B\,A), two legs per method
+and 30 single-request samples per leg, with a 2048-token prompt and 32 greedily decoded output tokens.
+We report medians of time per output token (TPOT) and time to first token (TTFT); these statistics are
+descriptive and carry no confidence intervals. Context scaling uses single requests with prompts from
+512 to 32,736 tokens and 15 samples per cell. Concurrency uses a closed loop at 1 to 64 in-flight
+requests with 2048- and 8192-token prompts, 256 measured requests per point after unmeasured
+conditioning, and three trials per point.
+
+\paragraph{Quality evaluator.}
+Quality is measured logically, outside the serving engine, with a cache object for Hugging Face
+Transformers [Transformers] that implements the representation and lifecycle of
+Section~\ref{sec:design}. The model processes one token per forward pass, so every token attends to the
+cache state defined by that lifecycle and every generated token ages. BF16 and RABIT-KV are run on
+identical inputs. We measure continuation perplexity on WikiText-2 [WikiText] over 32 windows for both
+models and, for Llama-3.1-8B only, three long-context tasks with greedy decoding: needle-in-a-haystack
+retrieval (57 cases at 4,096, 8,192, and 16,384 tokens) and the Passage Retrieval (200 examples) and
+HotpotQA (100 examples) tasks of LongBench [LongBench, HotpotQA]. Confidence intervals are paired
+percentile bootstraps with 10,000 resamples.
+
+\paragraph{Validation against an independent reference.}
+The evaluator is required to equal an independently written reference implementation of the
+representation bit for bit. We check this on synthetic states, including token-by-token aging, and on
+the GPU with the keys and values the models actually produce: in all 32 layers of Llama-3.1-8B, in all
+28 layers of Qwen2.5-7B, and for Llama-3.1-8B at a 16k-token context. CPU and GPU arithmetic differ in
+the last bit of some scales, which changes a small fraction of codes by one level. Conformance is
+therefore established on the device that runs the evaluation, and we define no cross-device tolerance.
+
+\paragraph{Registered protocol.}
+Each quality run is specified before it is executed: prompts, example selection, scorers, bootstrap
+seeds, validity checks, and the rules for interpreting the outcome. Checks on output quality use only
+BF16 outputs, never the RABIT-KV scores. A run that fails a validity check is
+excluded, not repaired.
+
+\paragraph{Scope of the quality evidence.}
+Earlier development results were produced with an evaluator that did not implement this lifecycle
+exactly: it ordered the value metadata differently, and it quantized the prompt once without aging
+generated tokens. We report quality only from the validated evaluator, never pool the two, and place
+the earlier results in the appendix, labeled as such.
+
+% ============================================================== STUBS -- NOT DRAFTED (phase 2 boundary)
 \section{Evaluation}
 % NOT DRAFTED. Blueprint rows 6.1-6.5; Table 1, Figure 2, Table 3, Table 2. Budget 3.4 pages.
 
