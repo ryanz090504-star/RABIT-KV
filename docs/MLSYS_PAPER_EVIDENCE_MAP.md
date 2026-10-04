@@ -265,8 +265,7 @@ packed KV-cache serving system** that jointly accounts for
 
 Frozen central thesis (Story A): "RABIT-KV is a target-bit-aware, physically packed KV-cache serving system that jointly accounts for asymmetric K/V precision, residual state, metadata overhead, online cache aging, and allocator capacity. On the evaluated H100 setup, it substantially increases physical KV capacity relative to BF16, FP8, and the tested TurboQuant configuration, while exposing explicit latency and throughput tradeoffs."
 
-The contribution is argued
- together with **a validation methodology**: an independent oracle, same-device bit-exact conformance on
+The contribution is argued together with **a validation methodology**: an independent oracle, same-device bit-exact conformance on
 real K/V, and a registered, gate-checked quality protocol that exposed and corrected an evaluator mismatch.
 
 Boundaries:
