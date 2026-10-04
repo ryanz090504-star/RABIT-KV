@@ -437,8 +437,8 @@ output quality use only BF16 outputs, and a run that fails a validity check is e
 \paragraph{Scope of the quality evidence.}
 Earlier development results were produced with an evaluator that did not implement this lifecycle
 exactly: it ordered the value metadata differently, and it quantized the prompt once without aging
-generated tokens. We report quality only from the validated evaluator, never pool the two, and place
-the earlier results in the appendix, labeled as such.
+generated tokens. We report quality only from the validated evaluator, never pool the two, and
+describe the status of the earlier results in the appendix.
 
 % ========================================================================================== EVALUATION
 \section{Evaluation}
@@ -697,7 +697,7 @@ so the capacity comparison with them is not a quality-matched one.
 All quality results concern one operating point, K3\,/\,V2\,/\,G32\,/\,R4\,/\,META8g64. Ablations of its
 components were run during development with an earlier evaluator and were not repeated with the
 validated one. We therefore do not claim that the individual choices are optimal, or that this point
-is the best trade-off for either model; the earlier ablations appear only in the appendix, as history.
+is the best trade-off for either model; the earlier ablations are mentioned only in the appendix, as history.
 The serving results likewise cover one GPU type and one engine snapshot, and the latency statistics
 are descriptive.
 
