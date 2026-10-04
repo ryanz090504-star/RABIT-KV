@@ -33,7 +33,7 @@ The paper is not a speedup paper.
 | 3 | **A matched four-method capacity / cost evaluation, with the costs reported**: per-token latency in one session (+8.33% TPOT against the tested TurboQuant configuration, +24.4% against BF16), lower throughput at every tested concurrency, a long-prefill cliff at the 32K point, and a diagnosed bottleneck family | L1–L6, T1–T4, X1–X4, P4, P5 |
 | 4 | **A validation methodology for low-bit KV quality claims**: an independent oracle, same-device bit-exact conformance on real K/V, and registered gate-checked quality runs, yielding canonical quality for Llama (small loss) and Qwen (severe loss) and exposing an evaluator mismatch in earlier results | V2–V7, Q1–Q8, Q3b |
 
-Three-bullet fallback if space is short: merge 2 and 3.
+**Phase-1 drafting decision (final for the draft): THREE main bullets** — Design (row 1), Physical system (row 2, with the headline capacity ratios), Evaluation (rows 3 and 4 merged: matched four-method evaluation plus canonical quality on Llama and Qwen). The independent-oracle validation methodology is mentioned inside the Evaluation bullet and in Methodology; it is not a separate main contribution. Working title (fixed for now): candidate 1 of section 3. Draft source: `paper/main.tex`.
 
 ---
 
@@ -49,7 +49,9 @@ Recommendation: 1 for neutrality, 4 if the submission should lead with the trade
 
 ---
 
-## 4. Section structure, claims and page budget (10 pages of body)
+## 4. Section structure, claims and page budget (target ≤ 9.8 pages before final formatting)
+
+Revised working budget (supersedes the Pages column below where they differ): Abstract 0.2 · Introduction 1.0 · Background / Motivation 0.5 · Design 1.5 · Physical Implementation 1.0 · Methodology 0.8 · Evaluation 3.4 · Discussion / Limitations 0.6 · Related Work 0.5 · Conclusion 0.2 = **9.7 pages**. Diagnostic and provenance detail goes to the appendix.
 
 | § | Section | Subsection | Must establish | Claim IDs | Float | Pages |
 |---|---|---|---|---|---|---|
