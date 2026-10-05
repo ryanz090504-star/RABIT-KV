@@ -1,10 +1,15 @@
 # RABIT-KV — MLSys Submission Freeze Record
 
-Freeze time: **2026-10-05T14:59:04Z**. Branch `research/mlsys-2027`.
+Freeze time: **2026-10-05T15:03:00Z**. Branch `research/mlsys-2027`.
 
 This record freezes the manuscript state. Nothing has been submitted.
 
-It supersedes the prior freeze of 2026-10-04T22:36:55Z (paper sources `26cb9a7`, `paper/main.tex` SHA-256
+It supersedes the immediately prior freeze of 2026-10-05T14:59:04Z (paper sources `a1af636`, `paper/main.tex`
+SHA-256 `88d693b5…36a8f16d`, `paper/frozen/main.pdf` SHA-256 `349188a7…952c25cd`, record commit `ba74d63`) only
+because of one typo correction in Section 5 of `paper/main.tex`: "prefetched" was corrected to "prefilled"
+(section 1b). No other prose, number, citation, experiment, or code changed.
+
+That freeze had in turn superseded the freeze of 2026-10-04T22:36:55Z (paper sources `26cb9a7`, `paper/main.tex` SHA-256
 `65667025…fb343a2e3`, `paper/frozen/main.pdf` SHA-256 `609458a8…9e6f2d98`, record commit `33cd36b`). The prior
 freeze was superseded by four human-requested factual/wording corrections to `paper/main.tex`, listed in
 section 1a. No experimental number, table, figure, or implementation changed; `paper/appendix.tex`,
@@ -14,13 +19,13 @@ section 1a. No experimental number, table, figure, or implementation changed; `p
 
 | Item | Commit |
 |---|---|
-| Paper sources (last commit touching `paper/main.tex`, `paper/appendix.tex`, `paper/references.bib`) | `a1af6365658c1e0fd7fbb34a89355a24a3509b32` |
-| Documentation (HEAD when the sources were hashed) | `a1af6365658c1e0fd7fbb34a89355a24a3509b32` |
+| Paper sources (last commit touching `paper/main.tex`, `paper/appendix.tex`, `paper/references.bib`) | `5ef5e23b71dd1779e99ca7be244f9105e42f75a4` |
+| Documentation (HEAD when the sources were hashed) | `5ef5e23b71dd1779e99ca7be244f9105e42f75a4` |
 | Frozen experimental evidence | quality `164c17f`; profiling diagnostic `4d07cf6` + `dadc2a0`; story lock `b4219c1` |
 
-The commit that updates this record and the rebuilt main PDF follows `a1af636`; it changes no source file.
+The commit that updates this record and the rebuilt main PDF follows `5ef5e23`; it changes no source file.
 
-### 1a. Corrections that superseded the prior freeze
+### 1a. Corrections that superseded the 2026-10-04 freeze
 
 All four are in `paper/main.tex`, commit `a1af636`, requested by the human author.
 
@@ -31,6 +36,7 @@ All four are in `paper/main.tex`, commit `a1af636`, requested by the human autho
    size of 32 is attributed to KIVI and AsymKV only (the earlier sentence implied it for KVQuant as well).
 3. Section 5, quality evaluator: the general statement now describes a dense BF16 prefill of a prompt prefix,
    since the long-context evaluator prefills all but the last prompt token. The Tasks paragraph is unchanged.
+   (The replacement text as committed in `a1af636` read "prefetched tokens"; see section 1b.)
 4. Section 6 opening: "We do not set out to show that RABIT-KV is fast, and it is not." is replaced by "Our
    evaluation focuses on the capacity--cost trade-off rather than a speedup claim." The reported performance
    limitations are unchanged.
@@ -41,13 +47,19 @@ apart from the punctuation after one citation year in the Section 3 sentence. Th
 `results/mlsys2027/second_model/serving/capacity_latency_summary.json` (`median_of_leg_median_tpot_ms`
 26.9561 and 48.7007) and left as they were.
 
+### 1b. Typo correction that superseded the immediately prior freeze
+
+Commit `5ef5e23`, requested by the human author: in Section 5 of `paper/main.tex`, "so those prefetched tokens
+attend to exact history" became "so those prefilled tokens attend to exact history". Wording only. The text
+extracted from the two main PDFs differs in that one word and nothing else.
+
 ## 2. Source hashes
 
 SHA-256 of the committed (LF) content, with the git blob id.
 
 | File | SHA-256 | Git blob |
 |---|---|---|
-| `paper/main.tex` | `88d693b59076e633c761c55e9c8597c8be5d91a765b36519892346fc36a8f16d` | `dc3fef98121603266b26edd38755f19e97e6328b` |
+| `paper/main.tex` | `66988882fecf961d3b1e4b414824c5e22e710b4464a2b0a79e3be149634a1c8e` | `9e618253f1fc8ae92f96855f25982a616eb35a6a` |
 | `paper/references.bib` | `87df77c967cdb8b70aab536a4975420f7327e45ab838e384513908bf70cb7063` | `0fb0c88b28912481977e774e35f4d67efdd0f99b` |
 | `paper/appendix.tex` | `35ef775e3f209e7fa96e593442bc4001393cb43ae06338379e58c8da876d27e8` | `789d89367cccc282e29f62aa0c6c2feb38593f7a` |
 | `paper/mlsys2025.sty` | `05a9842992b7ef71851fd2380a1058f83b0faafc106602cabc4c169d372ad8e2` | `7a942961bb77039dfd3d18794034b3427802be2c` |
@@ -64,7 +76,7 @@ compiled separately. Copies are stored in `paper/frozen/`.
 
 | PDF | SHA-256 | Pages |
 |---|---|---|
-| `paper/frozen/main.pdf` | `349188a76e13a0f74fd8cbd0ea340824a3d38802cdae537e0e18e16b952c25cd` | 10 |
+| `paper/frozen/main.pdf` | `4915bf8bf409cc805e444af65b01bb05e4bfe8381c6198a5259711435a71ef06` | 10 |
 | `paper/frozen/appendix.pdf` | `f7c795ef1854e0143ae555f508f94920b1b714d92afe0d0cd535868006d80afb` | 4 |
 
 A PDF hash identifies this build only: a rebuild with another TeX distribution, or at another time, need not
@@ -72,8 +84,9 @@ produce byte-identical files. The source hashes in section 2 are the stable iden
 submission PDF should be rebuilt and re-inspected by the author with the toolchain they will submit from.
 
 Compile status of this build: no errors, no undefined references or citations, no overfull boxes, in either PDF.
-The main PDF was rebuilt for this freeze and all 10 pages were inspected as rendered images: no table or figure
-overflows its column or the page. The appendix PDF is the prior build, not rebuilt; section, table and figure
+The main PDF was rebuilt for this freeze. All 10 pages were inspected as rendered images at the prior freeze and
+the affected page (page 5) was re-inspected after the typo correction: no table or figure overflows its column
+or the page, and the pagination did not move. The appendix PDF is the prior build, not rebuilt; section, table and figure
 numbering in the main paper did not change.
 
 ## 4. Page counts
