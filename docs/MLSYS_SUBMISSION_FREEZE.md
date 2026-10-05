@@ -1,19 +1,45 @@
 # RABIT-KV — MLSys Submission Freeze Record
 
-Freeze time: **2026-10-04T22:36:55Z**. Branch `research/mlsys-2027`.
+Freeze time: **2026-10-05T14:59:04Z**. Branch `research/mlsys-2027`.
 
-This record freezes the manuscript state. No manuscript prose was modified to create it. Nothing has been
-submitted.
+This record freezes the manuscript state. Nothing has been submitted.
+
+It supersedes the prior freeze of 2026-10-04T22:36:55Z (paper sources `26cb9a7`, `paper/main.tex` SHA-256
+`65667025…fb343a2e3`, `paper/frozen/main.pdf` SHA-256 `609458a8…9e6f2d98`, record commit `33cd36b`). The prior
+freeze was superseded by four human-requested factual/wording corrections to `paper/main.tex`, listed in
+section 1a. No experimental number, table, figure, or implementation changed; `paper/appendix.tex`,
+`paper/references.bib` and `paper/frozen/appendix.pdf` are unchanged.
 
 ## 1. Commits
 
 | Item | Commit |
 |---|---|
-| Paper sources (last commit touching `paper/main.tex`, `paper/appendix.tex`, `paper/references.bib`) | `26cb9a7d27292afd43d4769b69861d5ca24f7623` |
-| Documentation (HEAD when the sources were hashed) | `74cdc3181b4b4d5583edcc7810b0d5c4fd52d2e2` |
+| Paper sources (last commit touching `paper/main.tex`, `paper/appendix.tex`, `paper/references.bib`) | `a1af6365658c1e0fd7fbb34a89355a24a3509b32` |
+| Documentation (HEAD when the sources were hashed) | `a1af6365658c1e0fd7fbb34a89355a24a3509b32` |
 | Frozen experimental evidence | quality `164c17f`; profiling diagnostic `4d07cf6` + `dadc2a0`; story lock `b4219c1` |
 
-The commit that adds this record and the built PDFs follows `74cdc31`; it changes no source file.
+The commit that updates this record and the rebuilt main PDF follows `a1af636`; it changes no source file.
+
+### 1a. Corrections that superseded the prior freeze
+
+All four are in `paper/main.tex`, commit `a1af636`, requested by the human author.
+
+1. Introduction: the KV cache is described as "a major GPU-memory consumer in LLM serving" that "can become
+   dominant at long context lengths or high concurrency" (was "the main consumer of GPU memory in an LLM
+   serving system").
+2. Section 3: the per-channel key / per-token value axes are attributed to KIVI, KVQuant and AsymKV; the group
+   size of 32 is attributed to KIVI and AsymKV only (the earlier sentence implied it for KVQuant as well).
+3. Section 5, quality evaluator: the general statement now describes a dense BF16 prefill of a prompt prefix,
+   since the long-context evaluator prefills all but the last prompt token. The Tasks paragraph is unchanged.
+4. Section 6 opening: "We do not set out to show that RABIT-KV is fast, and it is not." is replaced by "Our
+   evaluation focuses on the capacity--cost trade-off rather than a speedup claim." The reported performance
+   limitations are unchanged.
+
+A comparison of the text extracted from the prior and rebuilt main PDFs finds the same numeric tokens in both,
+apart from the punctuation after one citation year in the Section 3 sentence. The Qwen2.5-7B TPOT values
+(26.96 ms, 48.70 ms, +80.7%) were rechecked against
+`results/mlsys2027/second_model/serving/capacity_latency_summary.json` (`median_of_leg_median_tpot_ms`
+26.9561 and 48.7007) and left as they were.
 
 ## 2. Source hashes
 
@@ -21,7 +47,7 @@ SHA-256 of the committed (LF) content, with the git blob id.
 
 | File | SHA-256 | Git blob |
 |---|---|---|
-| `paper/main.tex` | `65667025f56dbd5b34ff4efcac3d2ffcf2d144c20f36073e608a801fb343a2e3` | `4ae75df789f89c5ef14e43181f89d18e4ec9f863` |
+| `paper/main.tex` | `88d693b59076e633c761c55e9c8597c8be5d91a765b36519892346fc36a8f16d` | `dc3fef98121603266b26edd38755f19e97e6328b` |
 | `paper/references.bib` | `87df77c967cdb8b70aab536a4975420f7327e45ab838e384513908bf70cb7063` | `0fb0c88b28912481977e774e35f4d67efdd0f99b` |
 | `paper/appendix.tex` | `35ef775e3f209e7fa96e593442bc4001393cb43ae06338379e58c8da876d27e8` | `789d89367cccc282e29f62aa0c6c2feb38593f7a` |
 | `paper/mlsys2025.sty` | `05a9842992b7ef71851fd2380a1058f83b0faafc106602cabc4c169d372ad8e2` | `7a942961bb77039dfd3d18794034b3427802be2c` |
@@ -38,7 +64,7 @@ compiled separately. Copies are stored in `paper/frozen/`.
 
 | PDF | SHA-256 | Pages |
 |---|---|---|
-| `paper/frozen/main.pdf` | `609458a8f9f2ab5cc82bc0d04e28f9151600b34a71242668689fffd39e6f2d98` | 10 |
+| `paper/frozen/main.pdf` | `349188a76e13a0f74fd8cbd0ea340824a3d38802cdae537e0e18e16b952c25cd` | 10 |
 | `paper/frozen/appendix.pdf` | `f7c795ef1854e0143ae555f508f94920b1b714d92afe0d0cd535868006d80afb` | 4 |
 
 A PDF hash identifies this build only: a rebuild with another TeX distribution, or at another time, need not
@@ -46,12 +72,15 @@ produce byte-identical files. The source hashes in section 2 are the stable iden
 submission PDF should be rebuilt and re-inspected by the author with the toolchain they will submit from.
 
 Compile status of this build: no errors, no undefined references or citations, no overfull boxes, in either PDF.
+The main PDF was rebuilt for this freeze and all 10 pages were inspected as rendered images: no table or figure
+overflows its column or the page. The appendix PDF is the prior build, not rebuilt; section, table and figure
+numbering in the main paper did not change.
 
 ## 4. Page counts
 
 | Quantity | Value |
 |---|---|
-| Main-paper body before references | about 8.45 pages (the References heading is near the bottom of the left column of page 9) |
+| Main-paper body before references | about 8.4 pages (the References heading is near the bottom of the left column of page 9) |
 | References | about 0.75 page (rest of page 9 and part of page 10) |
 | Main PDF total | 10 pages |
 | Appendix (separate PDF) | 4 pages |
