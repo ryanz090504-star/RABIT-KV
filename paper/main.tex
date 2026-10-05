@@ -65,8 +65,8 @@ workloads. Physical capacity, quality, and serving cost must therefore be evalua
 \section{Introduction}
 
 % P1 -- motivation (claims: C1, S2)
-Once model weights are loaded, the key--value (KV) cache is the main consumer of GPU memory in an LLM
-serving system. It grows linearly with context length and with the number of in-flight requests, and a
+Once model weights are loaded, the key--value (KV) cache is a major GPU-memory consumer in LLM serving
+and can become dominant at long context lengths or high concurrency. It grows linearly with context length and with the number of in-flight requests, and a
 paged allocator~\citep{kwon2023vllm} admits a request only when blocks are available for it. KV memory therefore
 bounds how much context and how many concurrent requests one GPU can hold. Quantizing the cache is a
 direct response~\citep{liu2024kivi,hooper2024kvquant,zandieh2025turboquant}, and such methods are often
@@ -169,8 +169,9 @@ RABIT-KV is defined by a single operating point, written K3\,/\,V2\,/\,G32\,/\,R
 fixed during earlier development and was not retuned for any experiment in this paper. We describe it
 as one configuration, not as the best member of a tuned family, and we do not claim that each component
 is individually optimal. Its ingredients follow prior representations. Quantizing keys per channel
-along the token axis and values per token, with groups of 32, is the scheme of
-KIVI~\citep{liu2024kivi}, also used by KVQuant~\citep{hooper2024kvquant} and AsymKV~\citep{tao2024asymkv}.
+along the token axis and values per token follows KIVI~\citep{liu2024kivi},
+KVQuant~\citep{hooper2024kvquant}, and AsymKV~\citep{tao2024asymkv}. KIVI and AsymKV use groups of 32,
+which RABIT-KV also adopts.
 A window of recent full-precision tokens appears in KIVI and SKVQ~\citep{duanmu2024skvq}, unequal key
 and value precision in AsymKV and SKVQ, and reduced-precision quantization parameters counted in the
 effective bit-width in SKVQ. What this section specifies is how these mechanisms are combined into one
@@ -398,9 +399,9 @@ Quality is measured logically, outside the serving engine, with a cache object f
 Transformers~\citep{wolf2019transformers} that implements the representation and lifecycle of
 Section~\ref{sec:design}. Serving and logical evaluation use different execution machinery: the
 evaluator reproduces the stored-cache representation and its aging, not the serving kernels or their
-schedule. Every evaluation has two phases. The prompt is processed in one dense BF16 forward pass, so
-prompt tokens attend to exact history, as in the initial prefill of the serving engine. The resulting
-keys and values are then converted in one step into the RABIT-KV state for that length: closed pages,
+schedule. Each evaluation begins with a dense BF16 prefill of a prompt prefix, so those prefetched
+tokens attend to exact history, as in the initial prefill of the serving engine. The resulting keys and
+values for that prefix are then converted in one step into the RABIT-KV state for that length: closed pages,
 an open group, and four residual tokens. Every later token is processed one per forward pass. It is
 appended, the lifecycle advances, and the token attends to the state at its own position, so no token
 stays exact beyond the residual window. The BF16 arm runs the same loop on the same inputs with an
@@ -452,8 +453,8 @@ The evaluation answers four questions. \textbf{RQ1}: does RABIT-KV turn its repr
 allocator-visible capacity? \textbf{RQ2}: what serving cost accompanies that capacity, relative to
 BF16, FP8, and the tested TurboQuant configuration? \textbf{RQ3}: how does the current implementation
 behave as context length and concurrency grow? \textbf{RQ4}: what quality does the fixed operating
-point retain, and does that behavior transfer across models? We do not set out to show that RABIT-KV
-is fast, and it is not.
+point retain, and does that behavior transfer across models? Our evaluation focuses on the
+capacity--cost trade-off rather than a speedup claim.
 
 % ------------------------------------------------------------------------------------------------ 6.1
 \subsection{Physical Capacity}
