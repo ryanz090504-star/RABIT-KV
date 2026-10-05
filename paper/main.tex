@@ -399,7 +399,7 @@ Quality is measured logically, outside the serving engine, with a cache object f
 Transformers~\citep{wolf2019transformers} that implements the representation and lifecycle of
 Section~\ref{sec:design}. Serving and logical evaluation use different execution machinery: the
 evaluator reproduces the stored-cache representation and its aging, not the serving kernels or their
-schedule. Each evaluation begins with a dense BF16 prefill of a prompt prefix, so those prefetched
+schedule. Each evaluation begins with a dense BF16 prefill of a prompt prefix, so those prefilled
 tokens attend to exact history, as in the initial prefill of the serving engine. The resulting keys and
 values for that prefix are then converted in one step into the RABIT-KV state for that length: closed pages,
 an open group, and four residual tokens. Every later token is processed one per forward pass. It is
