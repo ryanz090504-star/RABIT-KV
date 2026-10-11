@@ -1,171 +1,67 @@
 # RABIT-KV
 
-**Target-bit-aware KV-cache quantization for LLM inference with a physically packed vLLM cache and custom Triton kernels.**
+RABIT-KV is a **target-bit-aware KV-cache quantization and physically packed serving system** for LLM inference. Its frozen **K3 / V2 / G32 / R4 / META8g64** operating point jointly accounts for asymmetric precision, metadata, residual state, online aging, and allocator capacity.
 
-> **5.28× physical KV capacity · 21.61 ms/token median TPOT · +1.53% WikiText-2 continuation PPL**
+The **2-bit target** names the operating point centered on 2-bit values: keys use 3 bits, values use 2 bits, metadata adds storage, and the newest four tokens remain BF16. It is not literal two-bit total storage. Capacity and quality below refer to this single frozen configuration.
 
-RABIT-KV compresses the KV cache used during LLM inference while preserving long-context retrieval and most downstream quality. The implementation is integrated into a custom vLLM fork and uses a physically packed cache rather than fake quantization.
+**Capacity first:** on the evaluated H100 configuration, RABIT-KV provides **5.28×** the paged KV capacity of BF16, **2.64×** that of FP8, and **1.72×** that of the tested TurboQuant configuration. This comes with higher latency and lower throughput in the evaluated workloads. Quality is strongly model-dependent.
 
-## Method
+## Matched serving results
 
-The final operating point is:
+Llama-3.1-8B-Instruct, one NVIDIA H100 80GB HBM3, eager execution, single request, 2,048 prompt tokens and 32 output tokens. Latencies are medians of the two leg medians; each leg has 30 measured requests. These are descriptive statistics without confidence intervals.
 
-**K3 / V2 / G32 / R4 / META8g64**
-
-- **K3** — 3-bit sequence-axis affine quantization for keys
-- **V2** — 2-bit affine quantization for values
-- **G32** — quantization group size 32
-- **R4** — newest four K/V tokens retained in BF16
-- **META8g64** — grouped UINT8 metadata with metadata group size 64
-- **`rabit_kv2`** — physically packed vLLM KV-cache dtype
-
-The “2-bit target” label refers to the operating point, not literal two-bit total storage. Keys use 3 bits, values use 2 bits, and the representation also includes metadata and a four-token BF16 residual window.
-
-The authoritative implementation is:
-
-```text
-vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py
-```
-
-## Results
-
-Final measurements use **Llama 3.1 8B Instruct** on an **NVIDIA H100 80GB HBM3** unless otherwise noted.
-
-### Quality
-
-| Benchmark | BF16 | RABIT-KV | Change / outcome |
+| Cache | Observed allocator capacity (tokens) | TPOT (ms/token) | TTFT (ms) |
 |---|---:|---:|---:|
-| WikiText-2 continuation PPL | 8.5020 | **8.6317** | **+1.53%** |
-| Chinese continuation PPL | 10.1176 | **10.3308** | **+2.11%** |
-| Spanish continuation PPL | 5.0035 | **5.1139** | **+2.21%** |
-| NIAH, 4K/8K/16K × 5 depths | 15/15 | **15/15** | **100% retained** |
-| Passage Retrieval | 100.0% | **100.0%** | **no loss** |
-| Qasper 8K+ | 35.9 F1 | **35.6 F1** | **−0.3 pt** |
-| HotpotQA 8K+ | 60.6 F1 | **55.2 F1** | **−5.4 pts** |
+| BF16 | 393,024 | 24.19 | 59.99 |
+| Native per-tensor FP8 e4m3 | 785,568 | 25.75 | 63.43 |
+| Tested TurboQuant K3/V4 | 1,203,200 | 27.79 | 55.03 |
+| RABIT-KV | 2,074,592 | 30.10 | 144.65 |
 
-WikiText-2 continuation evaluation used 1,024 context tokens, 128 scored continuation tokens, and 8 samples. Its logical KV storage fell from **128.000 MB** to **24.710 MB**, corresponding to **5.18× logical compression**.
+RABIT-KV TPOT is **24.42% higher than BF16** and **8.33% higher than tested TurboQuant**, computed from unrounded values. TurboQuant uses `turboquant_k3v4_nc`: 28 quantized layers and four BF16 boundary layers. Its own backend plus FlashAttention v2 on those boundary layers differs from the Triton backend used by the other methods. This is a matched, method-native **system comparison**, not an isolated quantizer-kernel comparison, quality comparison, or throughput claim.
 
-Across the long-context quality suite, measured logical KV compression is approximately **5.18–5.27×**.
+Source: [matched serving summary](results/experiments/matched_serving_baselines/exp13/matched_capacity_latency_summary.json). All methods use the same patched vLLM snapshot, including the recorded upstream TurboQuant cache-dtype dispatch fix; details are in [reproducibility](docs/REPRODUCIBILITY.md).
 
-### Physical capacity
+Capacity is the live engine's allocated blocks times block size. It measures the paged pool and excludes per-sequence residual/open-group state outside that pool; it is neither total-device-memory compression nor a throughput multiplier.
 
-Under the controlled H100 configuration:
+## Canonical quality
 
-| Cache | Allocator capacity |
-|---|---:|
-| BF16 | 393,024 tokens |
-| RABIT-KV | **2,074,592 tokens** |
+These results use a validated logical Hugging Face evaluator of stored-cache representation and online aging, separately from physical serving. They do not validate serving quality end to end.
 
-**Physical capacity gain: 5.2785×**
+| Model / task | BF16 | Canonical RABIT | Outcome |
+|---|---:|---:|---|
+| Llama-3.1-8B WikiText-2 continuation PPL | 7.515 | 7.633 | +1.56%; paired 95% CI [+1.12%, +2.05%] |
+| Qwen2.5-7B WikiText-2 continuation PPL | 6.787 | 112.39 | +1555.9%; paired 95% CI [+1320%, +1828%] |
+| Llama NIAH | 57/57 | 57/57 | No score loss on this deterministic grid |
+| Llama Passage Retrieval | 100.0% | 100.0% | 200 examples; saturated scores |
+| Llama HotpotQA, primary scorer | 59.30 F1 | 58.27 F1 | −1.03 points; paired 95% CI [−4.24, +2.20] |
+| Llama HotpotQA, official secondary scorer | 59.85 F1 | 58.71 F1 | −1.14 points; paired 95% CI [−4.30, +2.03] |
 
-This is a real allocator-capacity measurement, not a logical byte estimate.
+Continuation PPL uses 32 paired windows, 1,024 context tokens and 128 scored tokens per window. HotpotQA uses 100 examples from the pinned 8k+ subset. Its primary scorer retains historical article handling; the secondary scorer uses the official LongBench definition on the same predictions. A confidence interval spanning zero does **not** establish equivalence. Sources: [accepted canonical record](results/experiments/canonical_quality_v2/canonical_quality_final_record.json), [PPL attempt](results/experiments/canonical_quality_v2/continuation_ppl/two_model_attempt_2/summary.json), [long-context attempt](results/experiments/canonical_quality_v2/long_context/attempt_1/summary.json).
 
-### Deployment latency
+Qwen's severe quality failure occurs at the same frozen operating point; its cause is undiagnosed. Separately, Qwen serving increases paged capacity from **902,656 to 4,764,640 tokens**, while TPOT rises from **26.96 to 48.70 ms/token (+80.7%)** through untuned fallback paths. Capacity transfer does not establish quality transfer. Source: [Qwen serving](results/experiments/cross_model/serving/capacity_latency_summary.json).
 
-Final real-engine RABIT-KV decode measurement:
+## Scaling and limitations
 
-| Metric | Result |
-|---|---:|
-| Median TPOT | **21.61 ms/token** |
-| Median TTFT | **121.14 ms** |
-| Median wall time | **790.78 ms** |
-| Context | 2,048 tokens |
-| Generated tokens | 32 |
+- At 8,192-token prompts, RABIT sustained offered concurrency 64 while BF16 reached only 47 overlapping in-flight requests. RABIT throughput was lower at every tested concurrency. See [concurrency report](results/experiments/concurrency_scaling/L8192/shadow_conditioned/combined_report.json).
+- At 32,736 prompt tokens plus 32 output tokens, median TTFT was **114.38 s** for RABIT versus **4.435 s** for BF16. This is the maximum tested model-limit point, not a demonstrated maximum feasible context. See [context scaling](results/experiments/context_scaling/attempt_2/context_scaling_summary.json).
+- Current execution serializes per-request/per-token work. Profiling is diagnostic and materially perturbs timing; it does not replace accepted unprofiled results. Long-context prefill also has substantial closed-page device work. These costs have not been shown intrinsic to the representation.
+- Evaluation covers one GPU type and one frozen operating point. Eager latency comparisons need not transfer to CUDA graphs. There are no canonical ablations, Qwen long-context results, Qasper results, or multilingual results. Retrieval saturation cannot resolve small effects.
+- Logical evaluation uses exact dense initial prefill and does not measure quality of later serving prefill chunks over packed history. CPU/CUDA states are not bit-identical; validation uses a same-device independent oracle.
 
-The final deployment path passed **105 regression tests** plus targeted state/byte and attention exactness checks.
+## Code, paper, and evidence
 
-`21.61 ms/token` is reported as the measured RABIT-KV deployment TPOT. It is **not** presented as a matched BF16 speedup claim because the final frozen deployment benchmark did not include a directly matched BF16 TPOT measurement.
+- [Method and cache lifecycle](docs/METHOD.md)
+- [Evidence, environment, and public reproduction instructions](docs/REPRODUCIBILITY.md)
+- [Public reproduction adapter](benchmarks/public/reproduce.py)
+- [Public machine-readable summary](results/summary.json)
+- [Evidence directory index](results/README.md)
+- [Scientific source navigation](benchmarks/README.md)
+- [Historical documents](docs/history/README.md)
+- [Complete historical-to-current path manifest](docs/PATH_MIGRATION.json)
+- [Physical cache implementation](vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py)
+- [Canonical logical evaluator](benchmarks/experiments/canonical_rabit_quality.py)
+- [Preserved paper source](paper/main.tex), [supplement](paper/appendix.tex), [frozen paper PDF](paper/frozen/main.pdf), [frozen supplement PDF](paper/frozen/appendix.pdf)
 
-## Repository structure
+Historical quality evidence in `results/legacy/quality/` and the earlier experiment directories is **legacy logical-evaluator evidence**, not canonical quality. The earlier evaluator used different value-metadata ordering and did not age generated tokens. Historical deployment sessions remain physical evidence, but their absolute latencies must not be pooled with the matched session above. The old public summary is preserved at `research-backup-2026-10-11:results/summary.json`; the new summary records its provenance instead of relabeling it canonical.
 
-```text
-RABIT-KV/
-├── README.md
-├── .gitignore
-├── vllm-kvquant/                    # integrated RABIT-KV vLLM implementation
-├── benchmarks/
-│   ├── quality/
-│   │   ├── continuation_ppl.py
-│   │   ├── multilingual_ppl.py
-│   │   ├── niah.py
-│   │   ├── passage_retrieval.py
-│   │   ├── hotpotqa.py
-│   │   ├── qasper.py
-│   │   └── run_suite.py
-│   └── performance/
-│       └── benchmark_deployment.py
-├── results/
-│   ├── summary.json
-│   ├── quality/
-│   │   ├── continuation_ppl.log
-│   │   ├── multilingual_ppl.log
-│   │   ├── niah.log
-│   │   ├── passage_retrieval.log
-│   │   ├── hotpotqa.log
-│   │   └── qasper.log
-│   └── performance/
-│       ├── capacity.json
-│       ├── latency.json
-│       └── deployment.log
-└── docs/
-    ├── METHOD.md
-    └── REPRODUCIBILITY.md
-```
-
-## Benchmarks
-
-Quality benchmarks live under:
-
-```text
-benchmarks/quality/
-```
-
-They cover continuation perplexity, multilingual continuation, Needle-in-a-Haystack, passage retrieval, HotpotQA, and Qasper.
-
-The integrated deployment benchmark is:
-
-```text
-benchmarks/performance/benchmark_deployment.py
-```
-
-It validates the final compressed-cache path and measures the deployment configuration used for the reported performance results.
-
-## Result sources
-
-The compact source of truth is:
-
-```text
-results/summary.json
-```
-
-Raw quality evidence:
-
-```text
-results/quality/
-```
-
-Deployment evidence and machine-readable performance summaries:
-
-```text
-results/performance/
-```
-
-Canonical committed results should be treated as immutable evidence. Reproduced runs should be written to separate output paths rather than overwriting the committed files.
-
-## Reproduction
-
-See:
-
-```text
-docs/REPRODUCIBILITY.md
-```
-
-for the recorded environment, controlled engine configuration, and benchmark entry points.
-
-## Limitations
-
-- Evaluation is centered on **Llama 3.1 8B Instruct** and **NVIDIA H100 80GB HBM3**.
-- HotpotQA is the clearest quality regression in the final suite: **60.6 → 55.2 F1**.
-- Broader model families, GPUs, concurrency regimes, and serving workloads remain untested.
-- Quality-suite memory values are logical packed-prefix KV measurements; the **5.2785×** capacity result is a separate physical allocator measurement.
-- “2-bit target” is an operating-point label, not literal two-bit total storage.
+The public adapter supports read-only planning and explicit reproduction into fresh external output directories. It preserves the frozen workers, protocols, statistics, and validity gates and never commits or pushes. See the reproduction guide for the clean-source and environment prerequisites. Frozen scientific files, evidence, historical documents and paper assets retain their original bytes. The public directory mapping is applied; embedded historical paths remain unchanged and resolve through the path manifest or the pinned preserved source checkout. The migration record and schema-consumer audit are maintained in [public release history](docs/PUBLIC_RELEASE_HISTORY.md).

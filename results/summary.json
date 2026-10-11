@@ -1,119 +1,296 @@
 {
+  "schema_version": 2,
   "project": "RABIT-KV",
-  "status": "final unified quality complete; performance frozen",
-  "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+  "status": "Public documentation derived from accepted frozen evidence; no new experiments",
   "policy": "K3/V2/G32/R4/META8g64",
-  "final_quality": {
-    "continuation_ppl_wikitext2": {
-      "context_tokens": 1024,
-      "eval_tokens": 128,
-      "samples": 8,
-      "bf16_ppl": 8.502,
-      "rabit_ppl": 8.6317,
-      "relative_ppl_delta_percent": 1.53,
-      "bf16_avg_logical_kv_mb": 128.0,
-      "rabit_avg_logical_kv_mb": 24.71,
-      "logical_compression_x": 5.18,
-      "scored_tokens_per_method": 1024
+  "provenance": {
+    "starting_commit": "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746",
+    "preservation_tag": "research-backup-2026-10-11",
+    "release_branch": "release/public-v1",
+    "source_sha256_raw": {
+      "results/experiments/matched_serving_baselines/exp13/matched_capacity_latency_summary.json": "90fd0e985a7613cc77aeef3be2c36ef3b749b1c5b84aa09bb0c9fc9b49b3ec58",
+      "results/experiments/canonical_quality_v2/continuation_ppl/two_model_attempt_2/summary.json": "6c4125ec4c70d38e66edab1f33c3eb7698d4fea9fe6df69f68584fd599bab940",
+      "results/experiments/canonical_quality_v2/long_context/attempt_1/summary.json": "a67673da5fa8f835419a6e4a8f66225c3d140aa6e7e5459791a6c3982f000b5d",
+      "results/experiments/cross_model/serving/capacity_latency_summary.json": "ba86f495d0be9215d5ee5256232f4e591dcbd5e4d31385ec97e5c412dfc13506",
+      "results/experiments/context_scaling/attempt_2/context_scaling_summary.json": "7bd18305284d2c45b56378f69ddcea935fd3804f4bd3b6661a23266be16af3c3",
+      "results/experiments/concurrency_scaling/L8192/shadow_conditioned/combined_report.json": "551612577a65a4012db2e1a99fa1080a61b6dc978627feea1a59a7a9e2ec9eea"
     },
-    "multilingual_continuation_ppl": {
-      "languages": [
-        "zh",
-        "es"
-      ],
-      "samples_per_language": 8,
-      "context_tokens": 1024,
-      "eval_tokens": 128,
-      "chinese": {
-        "bf16_ppl": 10.1176,
-        "rabit_ppl": 10.3308,
-        "relative_ppl_delta_percent": 2.11
-      },
-      "spanish": {
-        "bf16_ppl": 5.0035,
-        "rabit_ppl": 5.1139,
-        "relative_ppl_delta_percent": 2.21
-      },
-      "mean_relative_ppl_delta_percent": 2.16,
-      "worst_relative_ppl_delta_percent": 2.21,
-      "logical_compression_x": 5.18
-    },
-    "needle_in_a_haystack": {
-      "context_lengths": [
-        4096,
-        8192,
-        16384
-      ],
-      "depths": [
-        0.1,
-        0.25,
-        0.5,
-        0.75,
-        0.9
-      ],
-      "total_cases_per_method": 15,
-      "bf16_passed": 15,
-      "rabit_passed": 15,
-      "bf16_accuracy_percent": 100.0,
-      "rabit_accuracy_percent": 100.0,
-      "rabit_avg_logical_kv_mb": 226.786,
-      "avg_logical_compression_x": 5.263
-    },
-    "longbench_passage_retrieval": {
-      "samples": 10,
-      "bf16_accuracy_percent": 100.0,
-      "rabit_accuracy_percent": 100.0,
-      "bf16_avg_logical_kv_mb": 1517.375,
-      "rabit_avg_logical_kv_mb": 288.09,
-      "logical_compression_x": 5.267017251553335
-    },
-    "longbench_hotpotqa_e": {
-      "length_bucket": "8k+",
-      "samples": 20,
-      "bf16_f1_percent": 60.6,
-      "rabit_f1_percent": 55.2,
-      "absolute_f1_delta_points": -5.399999999999999,
-      "relative_f1_delta_percent": -8.910891089108908,
-      "bf16_avg_logical_kv_mb": 1896.106,
-      "rabit_avg_logical_kv_mb": 359.85,
-      "logical_compression_x": 5.269156593024871
-    },
-    "longbench_qasper_e": {
-      "length_bucket": "8k+",
-      "samples": 24,
-      "bf16_f1_percent": 35.9,
-      "rabit_f1_percent": 35.6,
-      "absolute_f1_delta_points": -0.29999999999999716,
-      "relative_f1_delta_percent": -0.8356545961002659,
-      "bf16_avg_logical_kv_mb": 1783.531,
-      "rabit_avg_logical_kv_mb": 338.428,
-      "logical_compression_x": 5.270045622702614
-    },
-    "suite_status": "ALL PASSED",
-    "rerun_policy": "No rerun or parameter tuning from these results."
+    "manuscript_source": "paper/main.tex",
+    "manuscript_supplement": "paper/appendix.tex",
+    "frozen_pdfs": [
+      "paper/frozen/main.pdf",
+      "paper/frozen/appendix.pdf"
+    ],
+    "canonical_final_record": "results/experiments/canonical_quality_v2/canonical_quality_final_record.json",
+    "historical_source_git_objects": [
+      "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746:results/mlsys2027/external_baseline/exp13/matched_capacity_latency_summary.json",
+      "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746:results/mlsys2027/canonical_quality_v2/continuation_ppl/two_model_attempt_2/summary.json",
+      "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746:results/mlsys2027/canonical_quality_v2/long_context/attempt_1/summary.json",
+      "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746:results/mlsys2027/second_model/serving/capacity_latency_summary.json",
+      "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746:results/mlsys2027/context_scaling/attempt_2/context_scaling_summary.json",
+      "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746:results/mlsys2027/concurrency_scaling/L8192/shadow_conditioned/combined_report.json"
+    ],
+    "path_migration_manifest": "docs/PATH_MIGRATION.json"
   },
-  "frozen_deployment": {
+  "canonical_quality": {
+    "evidence_class": "LOGICAL quality; canonical stored-cache representation and online aging; not physical serving or end-to-end serving quality",
+    "continuation_ppl": {
+      "source": "results/experiments/canonical_quality_v2/continuation_ppl/two_model_attempt_2/summary.json",
+      "source_field_map": "models.<model>: model, dataset, scored_tokens_per_arm, bf16_ppl, rabit_ppl, delta_pct, delta_pct_ci95_paired_bootstrap",
+      "acceptance_record": "results/experiments/canonical_quality_v2/continuation_ppl/two_model_attempt_2/acceptance_record.json",
+      "models": {
+        "llama3_1_8b": {
+          "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+          "model_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+          "windows": 32,
+          "context_tokens": 1024,
+          "scored_tokens_per_window": 128,
+          "scored_tokens_per_arm": 4096,
+          "bf16_ppl": 7.515395843214247,
+          "rabit_ppl": 7.6325218956943175,
+          "relative_delta_percent": 1.558481481528684,
+          "relative_delta_percent_ci95": [
+            1.1169214551782547,
+            2.0482972302842573
+          ]
+        },
+        "qwen2_5_7b": {
+          "model_id": "Qwen/Qwen2.5-7B-Instruct",
+          "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+          "windows": 32,
+          "context_tokens": 1024,
+          "scored_tokens_per_window": 128,
+          "scored_tokens_per_arm": 4096,
+          "bf16_ppl": 6.7870010008184805,
+          "rabit_ppl": 112.38555319178539,
+          "relative_delta_percent": 1555.8941597066544,
+          "relative_delta_percent_ci95": [
+            1320.3867153563212,
+            1827.772098941309
+          ]
+        }
+      },
+      "statistics": "Paired percentile bootstrap over windows, 10000 resamples; PPL = exp(total NLL / scored tokens)"
+    },
+    "llama_long_context": {
+      "source": "results/experiments/canonical_quality_v2/long_context/attempt_1/summary.json",
+      "acceptance_record": "results/experiments/canonical_quality_v2/long_context/attempt_1/acceptance_record.json",
+      "source_field_map": "niah.<arm>.cases/passed; passage_retrieval.n/bf16/rabit; hotpotqa.<scorer>.n/bf16/rabit/delta_points/ci_low/ci_high",
+      "niah": {
+        "cases": 57,
+        "bf16_passed": 57,
+        "rabit_passed": 57,
+        "context_lengths": [
+          4096,
+          8192,
+          16384
+        ],
+        "depths_per_context": 19,
+        "inference": "Deterministic shared-construction grid; no independent-draw confidence interval"
+      },
+      "passage_retrieval": {
+        "samples": 200,
+        "bf16_accuracy_percent": 100.0,
+        "rabit_accuracy_percent": 100.0
+      },
+      "hotpotqa": {
+        "primary_legacy_scorer": {
+          "samples": 100,
+          "bf16_f1_percent": 59.29949070537306,
+          "rabit_f1_percent": 58.27376099319833,
+          "delta_f1_points": -1.02572971217473,
+          "delta_f1_points_ci95": [
+            -4.235586408476436,
+            2.1993342264442006
+          ]
+        },
+        "secondary_official_scorer": {
+          "samples": 100,
+          "bf16_f1_percent": 59.85098039215686,
+          "rabit_f1_percent": 58.71457431457432,
+          "delta_f1_points": -1.1364060775825493,
+          "delta_f1_points_ci95": [
+            -4.2980222391987155,
+            2.025210084033617
+          ]
+        }
+      },
+      "scorer_note": "Primary retains historical article handling; secondary is official LongBench scorer on identical canonical predictions. Legacy in the scorer name does not classify these predictions as legacy.",
+      "confidence_interval_note": "95% paired bootstrap intervals conditional on recorded greedy generations; spanning zero does not establish equivalence"
+    },
+    "unmeasured": [
+      "Qwen canonical long-context quality",
+      "Canonical Qasper",
+      "Canonical multilingual PPL",
+      "Canonical ablations",
+      "End-to-end serving quality",
+      "Later serving prefill-chunk quality"
+    ]
+  },
+  "matched_llama_serving": {
+    "source": "results/experiments/matched_serving_baselines/exp13/matched_capacity_latency_summary.json",
+    "source_field_map": "observed_capacity.<method>; latency_primary_cross_leg.<method>; capacity_ratios; rabit_comparisons",
+    "evidence_class": "PHYSICAL observed allocator capacity and within-session single-request latency",
+    "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
     "gpu": "NVIDIA H100 80GB HBM3",
-    "kv_cache_dtype": "rabit_kv2",
-    "physical_capacity_tokens": {
-      "bf16": 393024,
-      "rabit": 2074592,
-      "ratio_x": 5.278537697443413
+    "prompt_tokens": 2048,
+    "output_tokens": 32,
+    "legs_per_method": 2,
+    "measured_requests_per_leg": 30,
+    "methods": {
+      "bf16": {
+        "observed_allocator_capacity_tokens": 393024,
+        "num_gpu_blocks": 12282,
+        "tpot_ms_median_of_leg_medians": 24.194412612903108,
+        "ttft_ms_median_of_leg_medians": 59.98945236206055
+      },
+      "fp8": {
+        "observed_allocator_capacity_tokens": 785568,
+        "num_gpu_blocks": 24549,
+        "tpot_ms_median_of_leg_medians": 25.74625630645018,
+        "ttft_ms_median_of_leg_medians": 63.42869997024536
+      },
+      "turboquant": {
+        "observed_allocator_capacity_tokens": 1203200,
+        "num_gpu_blocks": 37600,
+        "tpot_ms_median_of_leg_medians": 27.78774941129042,
+        "ttft_ms_median_of_leg_medians": 55.03135919570923
+      },
+      "rabit": {
+        "observed_allocator_capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831,
+        "tpot_ms_median_of_leg_medians": 30.10371646774177,
+        "ttft_ms_median_of_leg_medians": 144.6537971496582
+      }
     },
-    "real_engine_benchmark": {
-      "context_tokens": 2048,
+    "capacity_ratios": {
+      "rabit_over_turboquant": 1.7242287234042553,
+      "rabit_over_bf16": 5.278537697443413,
+      "rabit_over_fp8": 2.6408815023015193,
+      "turboquant_over_bf16": 3.0613906529881127,
+      "turboquant_over_fp8": 1.5316306163183837,
+      "fp8_over_bf16": 1.9987787005373718
+    },
+    "rabit_tpot_cost_percent": {
+      "vs_bf16": 24.424250133219495,
+      "vs_fp8": 16.924635991446713,
+      "vs_tested_turboquant": 8.334489498132402
+    },
+    "qualification": "A matched, method-native system comparison in ONE H100 session (default V2 runner, eager, single request, 2048-token prompt, 32 output tokens). TurboQuant uses its method-required attention backend (TURBOQUANT + FlashAttention v2 on its four BF16 boundary layers) while BF16 / FP8 / RABIT use TRITON_ATTN; latency differences are therefore system-level, not quantizer-kernel-level. No throughput claim (single request), no quality claim, no generalization beyond this configuration. Exp3 / Exp4 absolute TPOT are not comparable as the same experiment (different snapshot / session).",
+    "turboquant_disclosure": "TurboQuant was evaluated using our vendored vLLM snapshot (upstream base f329ce4) with the official upstream TurboQuant V2 cache-dtype integration fix from fa4321de3d894c50c5ca0766dffa352d3fb07423 (PR #47609; first released in vLLM v0.25.0) backported. The change only restores the intended cache-dtype dispatch for TurboQuant specs in the model runner's KV-cache reshape; TurboQuant's quantizer, packed cache format, boundary-layer policy, and kernels were unchanged. All four methods ran on the same patched snapshot.",
+    "statistics": "descriptive only: two fresh-engine legs per condition; no significance tests or CIs",
+    "auxiliary_state_note": "Allocator capacity is paged pool only; open group and residual are per-sequence state outside the pool. Not total-device-memory compression or a throughput multiplier."
+  },
+  "qwen_serving": {
+    "source": "results/experiments/cross_model/serving/capacity_latency_summary.json",
+    "source_field_map": "observed_capacity; capacity_ratio_rabit_over_bf16; latency_primary_cross_leg; rabit_vs_bf16",
+    "evidence_class": "PHYSICAL serving, distinct from canonical Qwen quality",
+    "bf16_capacity_tokens": 902656,
+    "rabit_capacity_tokens": 4764640,
+    "capacity_ratio": 5.27846710153148,
+    "bf16_tpot_ms": 26.956099193549406,
+    "rabit_tpot_ms": 48.700652620966835,
+    "tpot_cost_percent": 80.66654329800396,
+    "qualification": "One matched H100 session, eager, single request, 2048 prompt / 32 output tokens; untuned exact fallback paths. Capacity does not establish quality robustness or transfer of optimized Llama kernels."
+  },
+  "scaling_limitations": {
+    "context": {
+      "source": "results/experiments/context_scaling/attempt_2/context_scaling_summary.json",
+      "source_field": "per_context.32768",
+      "prompt_tokens": 32736,
       "output_tokens": 32,
-      "tpot_ms_median": 21.609469967742253,
-      "ttft_ms_median": 121.13785743713379,
-      "wall_ms_median": 790.778457000016
+      "bf16_ttft_ms": 4435.004711151123,
+      "rabit_ttft_ms": 114376.83296203613,
+      "qualification": "Maximum tested model-limit point, not a demonstrated maximum feasible context"
     },
-    "correctness": {
-      "final_fast_decode_append_exactness": "PASSED",
-      "regression_tests_passed": 105
+    "concurrency": {
+      "source": "results/experiments/concurrency_scaling/L8192/shadow_conditioned/combined_report.json",
+      "source_field": "capacity.<method>.realized_max_inflight_per_trial.64; interpretation",
+      "prompt_tokens": 8192,
+      "offered_concurrency": 64,
+      "bf16_max_inflight_by_trial": {
+        "1": 47,
+        "2": 47,
+        "3": 47
+      },
+      "rabit_max_inflight_by_trial": {
+        "1": 64,
+        "2": 64,
+        "3": 64
+      },
+      "interpretation": "Across three independent H100 trials, RABIT-KV sustained the offered 64-request concurrency while BF16 was limited to 47 overlapping in-flight requests, matching its allocator-derived full-length KV ceiling. However, RABIT-KV had lower request throughput than BF16 at every tested offered concurrency, with the gap widening at high concurrency. Thus the physical capacity advantage did not translate into a throughput advantage in the current implementation."
+    }
+  },
+  "historical_provenance": {
+    "status": "Preserved, never pooled with canonical quality or primary matched latency",
+    "previous_summary_git_object": "research-backup-2026-10-11:results/summary.json",
+    "previous_summary_git_blob": "8afa79a5f9c30ba711862381e172a03a165fb51a",
+    "previous_summary_commit": "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746",
+    "original_quality": "results/legacy/quality/",
+    "original_physical_deployment": "results/legacy/performance/",
+    "legacy_evaluator_paths": [
+      "results/legacy/quality_frontier/",
+      "results/legacy/multilingual_frontier/",
+      "results/legacy/ablations/",
+      "results/legacy/quality_variance/",
+      "results/experiments/cross_model/quality/"
+    ],
+    "historical_physical_paths": [
+      "results/experiments/deployment_validation/",
+      "results/experiments/fp8_baseline/"
+    ],
+    "semantic_difference": "Legacy V metadata ordering differed and generated tokens did not age. No causal decomposition of their individual effects was run.",
+    "original_qasper_and_multilingual": "Legacy only; not revalidated canonically",
+    "schema_migration": "Old final_quality and frozen_deployment keys are superseded; historical contents remain recoverable from the recorded Git blob.",
+    "original_paths_before_migration": {
+      "original_quality": "results/quality/",
+      "original_physical_deployment": "results/performance/",
+      "legacy_evaluator_paths": [
+        "results/mlsys2027/quality_frontier/",
+        "results/mlsys2027/multilingual_frontier/",
+        "results/mlsys2027/ablations/",
+        "results/mlsys2027/variance/",
+        "results/mlsys2027/second_model/quality/"
+      ],
+      "historical_physical_paths": [
+        "results/mlsys2027/deployment/",
+        "results/mlsys2027/fp8_baseline/"
+      ]
     }
   },
   "interpretation": {
-    "headline": "RABIT-KV preserves retrieval and Qasper quality closely while reducing logical KV storage by about 5.18-5.27x; the clearest quality regression in the final suite is HotpotQA, where F1 falls from 60.6 to 55.2.",
-    "reporting_note": "Call the 8.5020 -> 8.6317 result 'WikiText-2 continuation perplexity' rather than generic full-dataset perplexity. Quality-suite KV numbers are logical packed-prefix storage measurements; deployment capacity is a separate physical allocator result."
+    "headline": "Capacity-first system with explicit latency and throughput costs; logical quality robustness is strongly model-dependent.",
+    "limitations": [
+      "One GPU type and one frozen policy; eager-mode comparisons do not establish graph-enabled behavior",
+      "Severe Qwen continuation-PPL failure; cause undiagnosed",
+      "No canonical Qwen long-context, Qasper, multilingual, or ablation evidence",
+      "Logical quality validates representation/aging, not serving execution or later prefill chunks",
+      "Saturated retrieval and conditional bootstrap intervals cannot establish general equivalence",
+      "CPU and CUDA states are not bit-identical; same-device oracle conformance only",
+      "Serialized request/token work and substantial long-context closed-page processing; profiling is diagnostic and perturbs timing",
+      "Public adapter preserves frozen gates and external output isolation; offline-tested only. Requires a clean preserved source checkout with matching upstream and the recorded execution environment."
+    ],
+    "migration_plan": "docs/PUBLIC_RELEASE_HISTORY.md",
+    "evidence_moved": true,
+    "new_experiments_run": false,
+    "migration_applied": {
+      "tracked_paths": 6730,
+      "moved_paths": 911,
+      "frozen_bytes_modified": false,
+      "historical_refs_unchanged": true
+    }
+  },
+  "public_reproduction": {
+    "adapter": "benchmarks/public/reproduce.py",
+    "offline_tests": "benchmarks/public/test_reproduce.py",
+    "instructions": "docs/REPRODUCIBILITY.md",
+    "release_history_and_schema_audit": "docs/PUBLIC_RELEASE_HISTORY.md",
+    "source_commit": "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746",
+    "explicit_execution_required": true,
+    "external_fresh_output_required": true,
+    "git_publication_allowed": false,
+    "gpu_execution_validated": false,
+    "source_path_policy": "Original paths in separate pinned preserved-source Git checkout; public mapped workers are browsing archives",
+    "offline_preserved_source_environment": "RABIT_PRESERVED_SOURCE"
   }
 }
