@@ -1,0 +1,552 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-xCjSCCQYj9ULwhGs5HPLhz
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\quality\hotpotqa.py
+└── 🔨 Created function run_longbench.
+GPU: NVIDIA H100 80GB HBM3
+Model: LLM-Research/Meta-Llama-3.1-8B-Instruct
+Dataset: LongBench-E hotpotqa_e
+Length bucket: 8k+
+Samples: 100, starting at filtered index 0
+Maximum input length: 16384 tokens
+Methods: ['bf16', 'rabit2']
+Metric: official LongBench QA token-level F1
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+
+2026-09-30 00:48:40,646 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  44%|████▍     | 8/18 [00:01<00:02,  4.05file/s]
+[1ADownloading:  56%|█████▌    | 10/18 [00:06<00:06,  1.31file/s]
+[1ADownloading: 100%|██████████| 18/18 [00:21<00:00,  1.40s/file]Downloading: 100%|██████████| 18/18 [00:21<00:00,  1.17s/file]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  7.35it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00,  9.74it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  9.01it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  8.98it/s]
+
+[1AGenerating test split: 0 examples [00:00, ? examples/s]Generating test split: 300 examples [00:00, 5852.84 examples/s]
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Sample 1/100 (dataset index 200): 16192 original tokens, 16192 used tokens
+Ground truth: ['331 episodes']
+  bf16     score=0.667 KV=2023.875 MB answer='331'
+  rabit2   score=0.667 KV=383.906 MB answer='331'
+
+Sample 2/100 (dataset index 201): 14845 original tokens, 14845 used tokens
+Ground truth: ['2016–17 NHL season']
+  bf16     score=0.500 KV=1855.500 MB answer='2016–17'
+  rabit2   score=0.000 KV=352.046 MB answer='2016-17'
+
+Sample 3/100 (dataset index 202): 14376 original tokens, 14376 used tokens
+Ground truth: ['Neneh Cherry']
+  bf16     score=0.190 KV=1796.875 MB answer='The Clash, Will Self, Jock Scott, Shane MacGowan, Neneh Cherry, Joe Rush of Mutoid Waste, Keith and Kevin Allen,'
+  rabit2   score=0.190 KV=341.231 MB answer='The Clash, Will Self, Jock Scott, Shane MacGowan, Neneh Cherry, Joe Rush of Mutoid Waste, Keith and Kevin Allen,'
+
+Sample 4/100 (dataset index 203): 16148 original tokens, 16148 used tokens
+Ground truth: ['Passion Pit is an American indietronica band']
+  bf16     score=0.100 KV=2018.375 MB answer='Both bands have had a lead guitarist leave the band and then return.'
+  rabit2   score=0.000 KV=383.029 MB answer='Both bands have had their music featured in various video games, with Sum 41\'s "Underclass Hero" being used in the EA Sports video game Madden'
+
+Sample 5/100 (dataset index 204): 15636 original tokens, 15636 used tokens
+Ground truth: ['1924November 22, 1993']
+  bf16     score=0.000 KV=1954.375 MB answer='July 14, 1978'
+  rabit2   score=0.000 KV=370.904 MB answer='July 14, 1978'
+
+Sample 6/100 (dataset index 205): 16044 original tokens, 16044 used tokens
+Ground truth: ['Beauty and the Beast']
+  bf16     score=1.000 KV=2005.375 MB answer='Beauty and the Beast'
+  rabit2   score=1.000 KV=380.677 MB answer='Beauty and the Beast'
+
+Sample 7/100 (dataset index 206): 14362 original tokens, 14362 used tokens
+Ground truth: ['Ohio River']
+  bf16     score=1.000 KV=1795.125 MB answer='Ohio River'
+  rabit2   score=1.000 KV=340.651 MB answer='Ohio River'
+
+Sample 8/100 (dataset index 207): 16115 original tokens, 16115 used tokens
+Ground truth: ['Vice President']
+  bf16     score=1.000 KV=2014.250 MB answer='Vice President.'
+  rabit2   score=0.500 KV=382.260 MB answer='Vice President of the United States.'
+
+Sample 9/100 (dataset index 208): 14950 original tokens, 14950 used tokens
+Ground truth: ['no']
+  bf16     score=1.000 KV=1868.625 MB answer='No'
+  rabit2   score=1.000 KV=354.852 MB answer='No'
+
+Sample 10/100 (dataset index 209): 13686 original tokens, 13686 used tokens
+Ground truth: ['4']
+  bf16     score=1.000 KV=1710.625 MB answer='4'
+  rabit2   score=1.000 KV=324.698 MB answer='4'
+
+Sample 11/100 (dataset index 210): 15471 original tokens, 15471 used tokens
+Ground truth: ['Appointed Deputy Führer']
+  bf16     score=0.800 KV=1933.750 MB answer='Deputy Führer'
+  rabit2   score=0.800 KV=367.064 MB answer='Deputy Führer'
+
+Sample 12/100 (dataset index 211): 16353 original tokens, 16353 used tokens
+Ground truth: ['at age 27']
+  bf16     score=0.000 KV=2044.000 MB answer='1970'
+  rabit2   score=0.000 KV=387.703 MB answer='October 4, 1970'
+
+Sample 13/100 (dataset index 212): 11642 original tokens, 11642 used tokens
+Ground truth: ['New York Giants']
+  bf16     score=1.000 KV=1455.125 MB answer='New York Giants'
+  rabit2   score=1.000 KV=276.237 MB answer='New York Giants'
+
+Sample 14/100 (dataset index 213): 15905 original tokens, 15905 used tokens
+Ground truth: ['Duchess Eleanor of Aquitaine']
+  bf16     score=0.222 KV=1988.000 MB answer='King Richard I of England.'
+  rabit2   score=0.222 KV=377.093 MB answer='King Richard I of England.'
+
+Sample 15/100 (dataset index 214): 15982 original tokens, 15982 used tokens
+Ground truth: ['published campaign settings']
+  bf16     score=0.667 KV=1997.625 MB answer='published campaign setting'
+  rabit2   score=0.667 KV=379.181 MB answer='published campaign setting'
+
+Sample 16/100 (dataset index 215): 15240 original tokens, 15240 used tokens
+Ground truth: ['Two of his novels, "The Prince of Tides" and "The Great Santini", were made into Oscar-nominated films.']
+  bf16     score=0.000 KV=1904.875 MB answer='Pat Conroy'
+  rabit2   score=0.000 KV=361.692 MB answer='Pat Conroy'
+
+Sample 17/100 (dataset index 216): 15948 original tokens, 15948 used tokens
+Ground truth: ['Chris Corbould and Neil Corbould']
+  bf16     score=1.000 KV=1993.375 MB answer='Chris Corbould and Neil Corbould.'
+  rabit2   score=1.000 KV=378.403 MB answer='Chris Corbould and Neil Corbould.'
+
+Sample 18/100 (dataset index 217): 12094 original tokens, 12094 used tokens
+Ground truth: ['yes']
+  bf16     score=1.000 KV=1511.625 MB answer='Yes'
+  rabit2   score=1.000 KV=286.886 MB answer='Yes'
+
+Sample 19/100 (dataset index 218): 16418 original tokens, 16384 used tokens
+Ground truth: ['40 million']
+  bf16     score=0.000 KV=2047.875 MB answer='There is no information in the given passages about Josh Abraham selling albums with the help of Adam Lambert.'
+  rabit2   score=0.000 KV=388.453 MB answer='There is no information in the given passages about Josh Abraham selling albums with Adam Lambert.'
+
+Sample 20/100 (dataset index 219): 16024 original tokens, 16024 used tokens
+Ground truth: ['Duke Cunningham']
+  bf16     score=1.000 KV=2002.875 MB answer='Duke Cunningham'
+  rabit2   score=1.000 KV=380.038 MB answer='Duke Cunningham'
+
+Sample 21/100 (dataset index 220): 14635 original tokens, 14635 used tokens
+Ground truth: ['76,416']
+  bf16     score=1.000 KV=1829.250 MB answer='76,416'
+  rabit2   score=1.000 KV=347.321 MB answer='76,416'
+
+Sample 22/100 (dataset index 221): 14318 original tokens, 14318 used tokens
+Ground truth: ['hardcore pornography']
+  bf16     score=1.000 KV=1789.625 MB answer='hardcore pornography'
+  rabit2   score=1.000 KV=339.775 MB answer='hardcore pornography'
+
+Sample 23/100 (dataset index 222): 14154 original tokens, 14154 used tokens
+Ground truth: ['1964 to 1974']
+  bf16     score=0.000 KV=1769.125 MB answer='1964-1974'
+  rabit2   score=0.000 KV=335.946 MB answer='1964-1974'
+
+Sample 24/100 (dataset index 223): 16309 original tokens, 16309 used tokens
+Ground truth: ['Ang Lee']
+  bf16     score=1.000 KV=2038.500 MB answer='Ang Lee'
+  rabit2   score=1.000 KV=386.826 MB answer='Ang Lee'
+
+Sample 25/100 (dataset index 224): 15265 original tokens, 15265 used tokens
+Ground truth: ['between the 8th and 16th centuries']
+  bf16     score=0.000 KV=1908.000 MB answer='East Frisia'
+  rabit2   score=0.000 KV=361.937 MB answer='East Frisia'
+
+Sample 26/100 (dataset index 225): 12590 original tokens, 12590 used tokens
+Ground truth: ['west']
+  bf16     score=0.500 KV=1573.625 MB answer='The West Coast.'
+  rabit2   score=0.667 KV=298.853 MB answer='West Coast.'
+
+Sample 27/100 (dataset index 226): 16116 original tokens, 16116 used tokens
+Ground truth: ['Berber']
+  bf16     score=0.000 KV=2014.375 MB answer='Siwi'
+  rabit2   score=0.000 KV=382.271 MB answer='Siwi'
+
+Sample 28/100 (dataset index 227): 15114 original tokens, 15114 used tokens
+Ground truth: ['Odawa']
+  bf16     score=0.000 KV=1889.125 MB answer='Ottawa'
+  rabit2   score=0.000 KV=358.680 MB answer='Ottawa'
+
+Sample 29/100 (dataset index 228): 16134 original tokens, 16134 used tokens
+Ground truth: ['Vikram']
+  bf16     score=1.000 KV=2016.625 MB answer='Vikram'
+  rabit2   score=1.000 KV=382.891 MB answer='Vikram'
+
+Sample 30/100 (dataset index 229): 14578 original tokens, 14578 used tokens
+Ground truth: ['8 April 1912']
+  bf16     score=1.000 KV=1822.125 MB answer='April 8, 1912'
+  rabit2   score=1.000 KV=345.877 MB answer='8 April 1912'
+
+Sample 31/100 (dataset index 230): 11529 original tokens, 11529 used tokens
+Ground truth: ['Katarina Witt']
+  bf16     score=1.000 KV=1441.000 MB answer='Katarina Witt'
+  rabit2   score=1.000 KV=273.793 MB answer='Katarina Witt'
+
+Sample 32/100 (dataset index 231): 15133 original tokens, 15133 used tokens
+Ground truth: ['1994']
+  bf16     score=1.000 KV=1891.500 MB answer='1994'
+  rabit2   score=1.000 KV=358.866 MB answer='1994'
+
+Sample 33/100 (dataset index 232): 16355 original tokens, 16355 used tokens
+Ground truth: ['1982']
+  bf16     score=1.000 KV=2044.250 MB answer='1982'
+  rabit2   score=1.000 KV=387.722 MB answer='1982'
+
+Sample 34/100 (dataset index 233): 12490 original tokens, 12490 used tokens
+Ground truth: ['The Galtür avalanche']
+  bf16     score=0.667 KV=1561.125 MB answer='1999 Galtür avalanche'
+  rabit2   score=0.667 KV=296.540 MB answer='1999 Galtür avalanche'
+
+Sample 35/100 (dataset index 234): 16336 original tokens, 16336 used tokens
+Ground truth: ['British']
+  bf16     score=1.000 KV=2041.875 MB answer='British'
+  rabit2   score=1.000 KV=387.537 MB answer='British'
+
+Sample 36/100 (dataset index 235): 12399 original tokens, 12399 used tokens
+Ground truth: ['Sri Lankabhimanya Lester James Peries']
+  bf16     score=0.000 KV=1549.750 MB answer='Jean Vigo'
+  rabit2   score=0.000 KV=294.314 MB answer='Jean Vigo'
+
+Sample 37/100 (dataset index 236): 16100 original tokens, 16100 used tokens
+Ground truth: ['Rafael Palmeiro Corrales']
+  bf16     score=0.800 KV=2012.375 MB answer='Rafael Palmeiro'
+  rabit2   score=0.800 KV=381.672 MB answer='Rafael Palmeiro'
+
+Sample 38/100 (dataset index 237): 15772 original tokens, 15772 used tokens
+Ground truth: ['Pandosia and Heraclea']
+  bf16     score=1.000 KV=1971.375 MB answer='Pandosia and Heraclea.'
+  rabit2   score=1.000 KV=374.015 MB answer='Pandosia and Heraclea.'
+
+Sample 39/100 (dataset index 238): 16001 original tokens, 16001 used tokens
+Ground truth: ['yes']
+  bf16     score=1.000 KV=2000.000 MB answer='Yes'
+  rabit2   score=1.000 KV=379.367 MB answer='Yes'
+
+Sample 40/100 (dataset index 239): 15108 original tokens, 15108 used tokens
+Ground truth: ['Broad Peak']
+  bf16     score=0.000 KV=1888.375 MB answer='Nanda Devi'
+  rabit2   score=0.000 KV=358.180 MB answer='Nanda Devi'
+
+Sample 41/100 (dataset index 240): 15569 original tokens, 15569 used tokens
+Ground truth: ['Dollhouse']
+  bf16     score=0.000 KV=1946.000 MB answer='Angel'
+  rabit2   score=0.000 KV=369.357 MB answer='Angel'
+
+Sample 42/100 (dataset index 241): 14893 original tokens, 14893 used tokens
+Ground truth: ['yes']
+  bf16     score=1.000 KV=1861.500 MB answer='Yes'
+  rabit2   score=1.000 KV=353.403 MB answer='Yes'
+
+Sample 43/100 (dataset index 242): 14864 original tokens, 14864 used tokens
+Ground truth: ['1861–65']
+  bf16     score=0.000 KV=1857.875 MB answer='1861–1865'
+  rabit2   score=0.000 KV=352.677 MB answer='1861–1865'
+
+Sample 44/100 (dataset index 243): 15428 original tokens, 15428 used tokens
+Ground truth: ['Matthew Ward Winer']
+  bf16     score=0.400 KV=1928.375 MB answer='Matt Winer'
+  rabit2   score=0.400 KV=365.758 MB answer='Matt Winer'
+
+Sample 45/100 (dataset index 244): 14136 original tokens, 14136 used tokens
+Ground truth: ['Gary Lightbody']
+  bf16     score=0.000 KV=1766.875 MB answer='Martha Wainwright'
+  rabit2   score=0.000 KV=335.327 MB answer='Martha Wainwright'
+
+Sample 46/100 (dataset index 245): 15199 original tokens, 15199 used tokens
+Ground truth: ['Mr. Smithers']
+  bf16     score=0.000 KV=1899.750 MB answer='Principal Skinner'
+  rabit2   score=0.000 KV=360.402 MB answer='Principal Skinner'
+
+Sample 47/100 (dataset index 246): 13091 original tokens, 13091 used tokens
+Ground truth: ['Nobel Prize']
+  bf16     score=0.667 KV=1636.250 MB answer='Nobel Prize in Physics'
+  rabit2   score=0.667 KV=310.426 MB answer='Nobel Prize in Physics'
+
+Sample 48/100 (dataset index 247): 11833 original tokens, 11833 used tokens
+Ground truth: ['novel with a key']
+  bf16     score=0.000 KV=1479.000 MB answer='roman à clef'
+  rabit2   score=0.000 KV=280.772 MB answer='roman à clef'
+
+Sample 49/100 (dataset index 248): 14021 original tokens, 14021 used tokens
+Ground truth: ['about 700 km']
+  bf16     score=0.118 KV=1752.500 MB answer='There is no information about the birthplace of Ezequiel Lázaro in the given passages.'
+  rabit2   score=0.118 KV=332.422 MB answer='There is no information about the birthplace of Ezequiel Lazaro in the given passages.'
+
+Sample 50/100 (dataset index 249): 16016 original tokens, 16016 used tokens
+Ground truth: ['yes']
+  bf16     score=1.000 KV=2001.875 MB answer='Yes'
+  rabit2   score=1.000 KV=379.958 MB answer='Yes'
+
+Sample 51/100 (dataset index 250): 15709 original tokens, 15709 used tokens
+Ground truth: ['no']
+  bf16     score=1.000 KV=1963.500 MB answer='No'
+  rabit2   score=1.000 KV=372.507 MB answer='No'
+
+Sample 52/100 (dataset index 251): 14561 original tokens, 14561 used tokens
+Ground truth: ['Charice']
+  bf16     score=1.000 KV=1820.000 MB answer='Charice'
+  rabit2   score=1.000 KV=345.265 MB answer='Charice'
+
+Sample 53/100 (dataset index 252): 15913 original tokens, 15913 used tokens
+Ground truth: ['Gaspare Luigi Pacifico Spontini']
+  bf16     score=0.000 KV=1989.000 MB answer='Wolfgang Amadeus Mozart'
+  rabit2   score=0.000 KV=377.614 MB answer='Wolfgang Amadeus Mozart'
+
+Sample 54/100 (dataset index 253): 14723 original tokens, 14723 used tokens
+Ground truth: ['stoneware']
+  bf16     score=1.000 KV=1840.250 MB answer='stoneware'
+  rabit2   score=1.000 KV=349.074 MB answer='Stoneware.'
+
+Sample 55/100 (dataset index 254): 16145 original tokens, 16145 used tokens
+Ground truth: ['Man Haron']
+  bf16     score=0.800 KV=2018.000 MB answer='Man Haron Monis'
+  rabit2   score=0.800 KV=382.998 MB answer='Man Haron Monis'
+
+Sample 56/100 (dataset index 255): 16254 original tokens, 16254 used tokens
+Ground truth: ['writer']
+  bf16     score=0.000 KV=2031.625 MB answer='English authors.'
+  rabit2   score=0.000 KV=385.402 MB answer='English authors.'
+
+Sample 57/100 (dataset index 256): 13900 original tokens, 13900 used tokens
+Ground truth: ['Larnelle Harris']
+  bf16     score=1.000 KV=1737.375 MB answer='Larnelle Harris'
+  rabit2   score=1.000 KV=329.903 MB answer='Larnelle Harris'
+
+Sample 58/100 (dataset index 257): 16308 original tokens, 16308 used tokens
+Ground truth: ['Pennsylvania']
+  bf16     score=1.000 KV=2038.375 MB answer='Pennsylvania'
+  rabit2   score=0.000 KV=386.818 MB answer='United Airlines Flight 93'
+
+Sample 59/100 (dataset index 258): 16180 original tokens, 16180 used tokens
+Ground truth: ["Holinshed's Chronicle"]
+  bf16     score=0.400 KV=2022.375 MB answer="Raphael Holinshed's Chronicles"
+  rabit2   score=0.400 KV=383.787 MB answer="Raphael Holinshed's Chronicles"
+
+Sample 60/100 (dataset index 259): 11585 original tokens, 11585 used tokens
+Ground truth: ['Europe']
+  bf16     score=0.000 KV=1448.000 MB answer='The University of Southern California.'
+  rabit2   score=0.000 KV=274.789 MB answer='The University of Southern California.'
+
+Sample 61/100 (dataset index 260): 15836 original tokens, 15836 used tokens
+Ground truth: ['Caligula']
+  bf16     score=0.000 KV=1979.375 MB answer='Augustus'
+  rabit2   score=0.000 KV=375.530 MB answer='Augustus'
+
+Sample 62/100 (dataset index 261): 16214 original tokens, 16214 used tokens
+Ground truth: ['South America']
+  bf16     score=0.000 KV=2026.625 MB answer='Brazil'
+  rabit2   score=0.000 KV=384.565 MB answer='Brazil.'
+
+Sample 63/100 (dataset index 262): 15860 original tokens, 15860 used tokens
+Ground truth: ['Emilia-Romagna Region']
+  bf16     score=0.667 KV=1982.375 MB answer='Emilia-Romagna'
+  rabit2   score=0.667 KV=376.209 MB answer='Emilia-Romagna'
+
+Sample 64/100 (dataset index 263): 15031 original tokens, 15031 used tokens
+Ground truth: ['Christopher Nolan']
+  bf16     score=1.000 KV=1878.750 MB answer='Christopher Nolan'
+  rabit2   score=1.000 KV=356.533 MB answer='Christopher Nolan'
+
+Sample 65/100 (dataset index 264): 14984 original tokens, 14984 used tokens
+Ground truth: ['Franco Dragone']
+  bf16     score=1.000 KV=1872.875 MB answer='Franco Dragone'
+  rabit2   score=1.000 KV=355.629 MB answer='Franco Dragone'
+
+Sample 66/100 (dataset index 265): 16205 original tokens, 16205 used tokens
+Ground truth: ['Rear Adm. J. Edward Snyder']
+  bf16     score=0.667 KV=2025.500 MB answer='Captain J. Edward Snyder'
+  rabit2   score=0.667 KV=384.474 MB answer='Captain J. Edward Snyder.'
+
+Sample 67/100 (dataset index 266): 16393 original tokens, 16384 used tokens
+Ground truth: ['March 9, 1961']
+  bf16     score=1.000 KV=2047.875 MB answer='March 9, 1961'
+  rabit2   score=1.000 KV=388.453 MB answer='March 9, 1961'
+
+Sample 68/100 (dataset index 267): 16054 original tokens, 16054 used tokens
+Ground truth: ['17 December 1998']
+  bf16     score=0.000 KV=2006.625 MB answer='11 September 1996'
+  rabit2   score=0.000 KV=380.776 MB answer='11 September 1996'
+
+Sample 69/100 (dataset index 268): 12425 original tokens, 12425 used tokens
+Ground truth: ['Kongo']
+  bf16     score=1.000 KV=1553.000 MB answer='Kongo'
+  rabit2   score=1.000 KV=295.012 MB answer='Kongo'
+
+Sample 70/100 (dataset index 269): 16309 original tokens, 16309 used tokens
+Ground truth: ['yes']
+  bf16     score=1.000 KV=2038.500 MB answer='Yes'
+  rabit2   score=1.000 KV=386.826 MB answer='Yes'
+
+Sample 71/100 (dataset index 270): 15847 original tokens, 15847 used tokens
+Ground truth: ['Kurt Vonnegut']
+  bf16     score=1.000 KV=1980.750 MB answer='Kurt Vonnegut'
+  rabit2   score=1.000 KV=376.078 MB answer='Kurt Vonnegut'
+
+Sample 72/100 (dataset index 271): 16126 original tokens, 16126 used tokens
+Ground truth: ['held in Kingdom of Dalmatia']
+  bf16     score=0.750 KV=2015.625 MB answer='Kingdom of Dalmatia'
+  rabit2   score=0.750 KV=382.370 MB answer='Kingdom of Dalmatia'
+
+Sample 73/100 (dataset index 272): 12220 original tokens, 12220 used tokens
+Ground truth: ['2002 Winter Olympics']
+  bf16     score=0.500 KV=1527.375 MB answer='2002'
+  rabit2   score=0.500 KV=289.897 MB answer='2002'
+
+Sample 74/100 (dataset index 273): 14630 original tokens, 14630 used tokens
+Ground truth: ['more than 330 million people']
+  bf16     score=0.889 KV=1828.625 MB answer='more than 330 million'
+  rabit2   score=0.889 KV=347.274 MB answer='more than 330 million'
+
+Sample 75/100 (dataset index 274): 14034 original tokens, 14034 used tokens
+Ground truth: ['no']
+  bf16     score=0.000 KV=1754.125 MB answer='Yes'
+  rabit2   score=0.000 KV=332.994 MB answer='Yes'
+
+Sample 76/100 (dataset index 275): 11273 original tokens, 11273 used tokens
+Ground truth: ['God Lives Underwater']
+  bf16     score=0.000 KV=1409.000 MB answer='The Dear Hunter'
+  rabit2   score=0.000 KV=267.731 MB answer='The Dear Hunter'
+
+Sample 77/100 (dataset index 276): 12048 original tokens, 12048 used tokens
+Ground truth: ['Honolulu']
+  bf16     score=0.000 KV=1505.875 MB answer='Hawaii'
+  rabit2   score=0.000 KV=285.990 MB answer='Hawaii'
+
+Sample 78/100 (dataset index 277): 12753 original tokens, 12753 used tokens
+Ground truth: ['no']
+  bf16     score=1.000 KV=1594.000 MB answer='No'
+  rabit2   score=1.000 KV=302.669 MB answer='No'
+
+Sample 79/100 (dataset index 278): 14731 original tokens, 14731 used tokens
+Ground truth: ["NYPD's 83rd Precinct"]
+  bf16     score=0.364 KV=1841.250 MB answer="The New York City Police Department's 83rd Precinct."
+  rabit2   score=0.364 KV=349.594 MB answer="The New York City Police Department's 83rd Precinct."
+
+Sample 80/100 (dataset index 279): 16235 original tokens, 16235 used tokens
+Ground truth: ['Hamlet']
+  bf16     score=1.000 KV=2029.250 MB answer='Hamlet'
+  rabit2   score=1.000 KV=385.212 MB answer='Hamlet'
+
+Sample 81/100 (dataset index 280): 15260 original tokens, 15260 used tokens
+Ground truth: ['Atsushi Ogata']
+  bf16     score=0.000 KV=1907.375 MB answer='Samuel Cooper'
+  rabit2   score=0.000 KV=361.890 MB answer='Samuel Cooper'
+
+Sample 82/100 (dataset index 281): 11663 original tokens, 11663 used tokens
+Ground truth: ['Barnoldswick']
+  bf16     score=1.000 KV=1457.750 MB answer='Barnoldswick'
+  rabit2   score=1.000 KV=276.884 MB answer='Barnoldswick'
+
+Sample 83/100 (dataset index 282): 13279 original tokens, 13279 used tokens
+Ground truth: ['1902']
+  bf16     score=0.000 KV=1659.750 MB answer='1926'
+  rabit2   score=0.000 KV=314.933 MB answer='1926'
+
+Sample 84/100 (dataset index 283): 12261 original tokens, 12261 used tokens
+Ground truth: ['no']
+  bf16     score=1.000 KV=1532.500 MB answer='No'
+  rabit2   score=1.000 KV=290.742 MB answer='No'
+
+Sample 85/100 (dataset index 284): 16214 original tokens, 16214 used tokens
+Ground truth: ['Marlon Stöckinger']
+  bf16     score=1.000 KV=2026.625 MB answer='Marlon Stöckinger'
+  rabit2   score=1.000 KV=384.565 MB answer='Marlon Stöckinger'
+
+Sample 86/100 (dataset index 285): 14508 original tokens, 14508 used tokens
+Ground truth: ['from around 1520']
+  bf16     score=0.500 KV=1813.375 MB answer='1520'
+  rabit2   score=0.500 KV=344.302 MB answer='1520'
+
+Sample 87/100 (dataset index 286): 15848 original tokens, 15848 used tokens
+Ground truth: ['Tharangambadi']
+  bf16     score=0.000 KV=1980.875 MB answer='Mayiladuthurai'
+  rabit2   score=0.000 KV=376.090 MB answer='Mayiladuthurai'
+
+Sample 88/100 (dataset index 287): 12337 original tokens, 12337 used tokens
+Ground truth: ['Netflix']
+  bf16     score=1.000 KV=1542.000 MB answer='Netflix'
+  rabit2   score=1.000 KV=292.818 MB answer='Netflix'
+
+Sample 89/100 (dataset index 288): 15959 original tokens, 15959 used tokens
+Ground truth: ['Battle of Matewan']
+  bf16     score=0.857 KV=1994.750 MB answer='The Battle of Matewan.'
+  rabit2   score=0.857 KV=378.510 MB answer='The Battle of Matewan.'
+
+Sample 90/100 (dataset index 289): 16203 original tokens, 16203 used tokens
+Ground truth: ['Eastern Conference champion Orlando Magic against the Western Conference champion Houston Rockets.']
+  bf16     score=0.696 KV=2025.250 MB answer='Eastern Conference champions Orlando Magic and Western Conference champions Houston Rockets.'
+  rabit2   score=0.696 KV=384.454 MB answer='Eastern Conference champions Orlando Magic and Western Conference champions Houston Rockets.'
+
+Sample 91/100 (dataset index 290): 14131 original tokens, 14131 used tokens
+Ground truth: ['MMA']
+  bf16     score=0.000 KV=1766.250 MB answer='Pride Fighting Championships'
+  rabit2   score=0.000 KV=335.275 MB answer='Pride Fighting Championships'
+
+Sample 92/100 (dataset index 291): 13978 original tokens, 13978 used tokens
+Ground truth: ['Jay Van Andel']
+  bf16     score=1.000 KV=1747.125 MB answer='Jay Van Andel'
+  rabit2   score=1.000 KV=331.557 MB answer='Jay Van Andel'
+
+Sample 93/100 (dataset index 292): 13250 original tokens, 13250 used tokens
+Ground truth: ['yes']
+  bf16     score=1.000 KV=1656.125 MB answer='Yes'
+  rabit2   score=1.000 KV=314.207 MB answer='Yes'
+
+Sample 94/100 (dataset index 293): 13657 original tokens, 13657 used tokens
+Ground truth: ['Sizzurp']
+  bf16     score=1.000 KV=1707.000 MB answer='Sizzurp'
+  rabit2   score=1.000 KV=323.967 MB answer='Sizzurp'
+
+Sample 95/100 (dataset index 294): 16204 original tokens, 16204 used tokens
+Ground truth: ['yes']
+  bf16     score=1.000 KV=2025.375 MB answer='Yes'
+  rabit2   score=1.000 KV=384.466 MB answer='Yes'
+
+Sample 96/100 (dataset index 295): 15872 original tokens, 15872 used tokens
+Ground truth: ['he turned 51, he died of cancer']
+  bf16     score=0.250 KV=1983.875 MB answer='Cancer'
+  rabit2   score=0.250 KV=376.328 MB answer='Cancer'
+
+Sample 97/100 (dataset index 296): 16273 original tokens, 16273 used tokens
+Ground truth: ['National Basketball Development League']
+  bf16     score=0.889 KV=2034.000 MB answer='National Basketball Development League (NBDL)'
+  rabit2   score=0.889 KV=386.029 MB answer='National Basketball Development League (NBDL)'
+
+Sample 98/100 (dataset index 297): 16356 original tokens, 16356 used tokens
+Ground truth: ['My Backyard']
+  bf16     score=1.000 KV=2044.375 MB answer='My Backyard'
+  rabit2   score=1.000 KV=387.734 MB answer='My Backyard'
+
+Sample 99/100 (dataset index 298): 15562 original tokens, 15562 used tokens
+Ground truth: ['Brenton Thwaites']
+  bf16     score=1.000 KV=1945.125 MB answer='Brenton Thwaites'
+  rabit2   score=1.000 KV=369.290 MB answer='Brenton Thwaites.'
+
+Sample 100/100 (dataset index 299): 16242 original tokens, 16242 used tokens
+Ground truth: ['Figaro']
+  bf16     score=0.000 KV=2030.125 MB answer='Humphrey'
+  rabit2   score=0.000 KV=385.283 MB answer='Humphrey the Bear'
+
+==================================================================================================
+LongBench-E HotpotQA Results
+==================================================================================================
+Method        F1 %          F1 total      Avg KV MB     Samples   
+--------------------------------------------------------------------------------------------------
+bf16          59.5          59.52         1857.896      100       
+rabit2        57.6          57.59         352.612       100       
+
+Important: the reported run time is only for experiment planning. It is not deployment latency.
+Stopping app - local entrypoint completed.
+Runner terminated.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-xCjSCCQYj9ULwhGs5HPLhz

@@ -1,0 +1,588 @@
+[
+  {
+    "benchmark": "continuation_ppl",
+    "rows": {
+      "bf16": {
+        "ppl": 8.502,
+        "avg_logical_kv_mb": 128.0,
+        "count": 1024
+      },
+      "rabit2_mbf": {
+        "ppl": 8.6329,
+        "avg_logical_kv_mb": 28.453,
+        "count": 1024
+      },
+      "rabit2_m32": {
+        "ppl": 8.6343,
+        "avg_logical_kv_mb": 24.96,
+        "count": 1024
+      },
+      "rabit2": {
+        "ppl": 8.6317,
+        "avg_logical_kv_mb": 24.71,
+        "count": 1024
+      },
+      "rabit2_m128": {
+        "ppl": 8.6305,
+        "avg_logical_kv_mb": 24.586,
+        "count": 1024
+      }
+    },
+    "regression": {
+      "benchmark": "continuation_ppl",
+      "checks": [
+        {
+          "metric": "bf16.ppl",
+          "canonical": 8.502,
+          "observed": 8.502,
+          "abs_diff": 0.0,
+          "tolerance": 0.042510000000000006,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 128.0,
+          "observed": 128.0,
+          "abs_diff": 0.0,
+          "tolerance": 0.128,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.ppl",
+          "canonical": 8.6317,
+          "observed": 8.6317,
+          "abs_diff": 0.0,
+          "tolerance": 0.0431585,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 24.71,
+          "observed": 24.71,
+          "abs_diff": 0.0,
+          "tolerance": 0.024710000000000003,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    "control_rule": "original control-reproduction rule",
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_control_reproduce_canonical": true
+    },
+    "passed": true
+  },
+  {
+    "benchmark": "niah",
+    "rows": {
+      "bf16": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 1194.542,
+        "count": 15
+      },
+      "rabit2_mbf": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 261.775,
+        "count": 15
+      },
+      "rabit2_m32": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 229.117,
+        "count": 15
+      },
+      "rabit2": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 226.786,
+        "count": 15
+      },
+      "rabit2_m128": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 225.62,
+        "count": 15
+      }
+    },
+    "regression": {
+      "benchmark": "niah",
+      "checks": [
+        {
+          "metric": "bf16.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1194.542,
+          "observed": 1194.542,
+          "abs_diff": 0.0,
+          "tolerance": 1.194542,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 226.786,
+          "observed": 226.786,
+          "abs_diff": 0.0,
+          "tolerance": 0.22678600000000002,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    "control_rule": "original control-reproduction rule",
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_control_reproduce_canonical": true
+    },
+    "passed": true
+  },
+  {
+    "benchmark": "passage_retrieval",
+    "rows": {
+      "bf16": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 1517.375,
+        "count": 10
+      },
+      "rabit2_mbf": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 332.557,
+        "count": 10
+      },
+      "rabit2_m32": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 291.054,
+        "count": 10
+      },
+      "rabit2": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 288.09,
+        "count": 10
+      },
+      "rabit2_m128": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 286.61,
+        "count": 10
+      }
+    },
+    "regression": {
+      "benchmark": "passage_retrieval",
+      "checks": [
+        {
+          "metric": "bf16.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1517.375,
+          "observed": 1517.375,
+          "abs_diff": 0.0,
+          "tolerance": 1.5173750000000001,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 288.09,
+          "observed": 288.09,
+          "abs_diff": 0.0,
+          "tolerance": 0.28808999999999996,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    "control_rule": "original control-reproduction rule",
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_control_reproduce_canonical": true
+    },
+    "passed": true
+  },
+  {
+    "benchmark": "hotpotqa",
+    "rows": {
+      "bf16": {
+        "f1_pct": 60.7,
+        "avg_logical_kv_mb": 1896.106,
+        "count": 20
+      },
+      "rabit2_mbf": {
+        "f1_pct": 55.2,
+        "avg_logical_kv_mb": 415.413,
+        "count": 20
+      },
+      "rabit2_m32": {
+        "f1_pct": 57.7,
+        "avg_logical_kv_mb": 363.553,
+        "count": 20
+      },
+      "rabit2": {
+        "f1_pct": 57.7,
+        "avg_logical_kv_mb": 359.85,
+        "count": 20
+      },
+      "rabit2_m128": {
+        "f1_pct": 55.2,
+        "avg_logical_kv_mb": 358.0,
+        "count": 20
+      }
+    },
+    "regression": {
+      "benchmark": "hotpotqa",
+      "checks": [
+        {
+          "metric": "bf16.f1_pct",
+          "canonical": 60.6,
+          "observed": 60.7,
+          "abs_diff": 0.10000000000000142,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1896.106,
+          "observed": 1896.106,
+          "abs_diff": 0.0,
+          "tolerance": 1.896106,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.f1_pct",
+          "canonical": 55.2,
+          "observed": 57.7,
+          "abs_diff": 2.5,
+          "tolerance": 1.0,
+          "within_tolerance": false
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 359.85,
+          "observed": 359.85,
+          "abs_diff": 0.0,
+          "tolerance": 0.35985,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": false
+    },
+    "qa_control_gate": {
+      "benchmark": "hotpotqa",
+      "checks": {
+        "dataset_header_identical": true,
+        "sample_indices_order_ground_truth_identical": true
+      },
+      "controls": {
+        "bf16": {
+          "rows_complete_and_ordered": true,
+          "score_mismatch_count": 1,
+          "score_mismatch_indices": [
+            3
+          ],
+          "l1_score_distance": 0.035,
+          "max_allowed_mismatch_count": 1,
+          "max_allowed_l1_score_distance": 0.065,
+          "mismatch_count_within_bound": true,
+          "l1_within_bound": true,
+          "text_only_answer_differences": [
+            7
+          ],
+          "mismatch_details": [
+            {
+              "index": 3,
+              "dataset_index": 203,
+              "reference_score": 0.065,
+              "run_score": 0.1,
+              "reference_answer": "Both bands have had a member who has struggled with mental health issues, specifically Deryck Whibley of Sum 41 and Michael Angelakos of Passion",
+              "run_answer": "Both bands have had a lead guitarist leave the band and then return."
+            }
+          ],
+          "aggregate_f1": 60.7,
+          "aggregate_f1_envelope_report_only": [
+            60.2,
+            60.7
+          ],
+          "aggregate_inside_envelope_report_only": true,
+          "passed": true
+        },
+        "rabit2": {
+          "rows_complete_and_ordered": true,
+          "score_mismatch_count": 1,
+          "score_mismatch_indices": [
+            1
+          ],
+          "l1_score_distance": 0.5,
+          "max_allowed_mismatch_count": 1,
+          "max_allowed_l1_score_distance": 0.5,
+          "mismatch_count_within_bound": true,
+          "l1_within_bound": true,
+          "text_only_answer_differences": [],
+          "mismatch_details": [
+            {
+              "index": 1,
+              "dataset_index": 201,
+              "reference_score": 0.0,
+              "run_score": 0.5,
+              "reference_answer": "2016-17",
+              "run_answer": "2016–17"
+            }
+          ],
+          "aggregate_f1": 57.7,
+          "aggregate_f1_envelope_report_only": [
+            55.2,
+            57.7
+          ],
+          "aggregate_inside_envelope_report_only": true,
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "control_rule": "frozen post-failure per-example QA control gate",
+    "aggregate_f1_control_check_report_only": [
+      {
+        "metric": "bf16.f1_pct",
+        "canonical": 60.6,
+        "observed": 60.7,
+        "abs_diff": 0.10000000000000142,
+        "tolerance": 1.0,
+        "within_tolerance": true
+      },
+      {
+        "metric": "rabit2.f1_pct",
+        "canonical": 55.2,
+        "observed": 57.7,
+        "abs_diff": 2.5,
+        "tolerance": 1.0,
+        "within_tolerance": false
+      }
+    ],
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_control_logical_kv_mb_reproduce_canonical": true,
+      "qa_control_gate_passed": true
+    },
+    "passed": true
+  },
+  {
+    "benchmark": "qasper",
+    "rows": {
+      "bf16": {
+        "f1_pct": 35.5,
+        "avg_logical_kv_mb": 1783.531,
+        "count": 24
+      },
+      "rabit2_mbf": {
+        "f1_pct": 34.7,
+        "avg_logical_kv_mb": 390.68,
+        "count": 24
+      },
+      "rabit2_m32": {
+        "f1_pct": 34.8,
+        "avg_logical_kv_mb": 341.91,
+        "count": 24
+      },
+      "rabit2": {
+        "f1_pct": 34.8,
+        "avg_logical_kv_mb": 338.428,
+        "count": 24
+      },
+      "rabit2_m128": {
+        "f1_pct": 34.7,
+        "avg_logical_kv_mb": 336.687,
+        "count": 24
+      }
+    },
+    "regression": {
+      "benchmark": "qasper",
+      "checks": [
+        {
+          "metric": "bf16.f1_pct",
+          "canonical": 35.9,
+          "observed": 35.5,
+          "abs_diff": 0.3999999999999986,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1783.531,
+          "observed": 1783.531,
+          "abs_diff": 0.0,
+          "tolerance": 1.783531,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.f1_pct",
+          "canonical": 35.6,
+          "observed": 34.8,
+          "abs_diff": 0.8000000000000043,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 338.428,
+          "observed": 338.428,
+          "abs_diff": 0.0,
+          "tolerance": 0.338428,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    "qa_control_gate": {
+      "benchmark": "qasper",
+      "checks": {
+        "dataset_header_identical": true,
+        "sample_indices_order_ground_truth_identical": true
+      },
+      "controls": {
+        "bf16": {
+          "rows_complete_and_ordered": true,
+          "score_mismatch_count": 1,
+          "score_mismatch_indices": [
+            7
+          ],
+          "l1_score_distance": 0.096,
+          "max_allowed_mismatch_count": 1,
+          "max_allowed_l1_score_distance": 0.096,
+          "mismatch_count_within_bound": true,
+          "l1_within_bound": true,
+          "text_only_answer_differences": [],
+          "mismatch_details": [
+            {
+              "index": 7,
+              "dataset_index": 207,
+              "reference_score": 0.429,
+              "run_score": 0.333,
+              "reference_answer": "The UN General Debate Corpus and the Correlates of War (COW) project's Militarized Interstate Dispute (MID) dataset.",
+              "run_answer": "The UN General Debate Corpus, which contains every country statement in the UN General Debate between 1970 and 2014."
+            }
+          ],
+          "aggregate_f1": 35.5,
+          "aggregate_f1_envelope_report_only": [
+            35.5,
+            35.9
+          ],
+          "aggregate_inside_envelope_report_only": true,
+          "passed": true
+        },
+        "rabit2": {
+          "rows_complete_and_ordered": true,
+          "score_mismatch_count": 2,
+          "score_mismatch_indices": [
+            18,
+            20
+          ],
+          "l1_score_distance": 0.185,
+          "max_allowed_mismatch_count": 2,
+          "max_allowed_l1_score_distance": 0.185,
+          "mismatch_count_within_bound": true,
+          "l1_within_bound": true,
+          "text_only_answer_differences": [
+            22
+          ],
+          "mismatch_details": [
+            {
+              "index": 18,
+              "dataset_index": 218,
+              "reference_score": 0.389,
+              "run_score": 0.378,
+              "reference_answer": "The evaluation metrics looked at included time taken to answer an utterance, other resource consumption metrics (e.g., memory, CPU, network bandwidth), and correctness of",
+              "run_answer": "The evaluation metrics looked at included time taken to answer an utterance, other resource consumption metrics (memory, CPU, network bandwidth), and correctness of the chatbot"
+            },
+            {
+              "index": 20,
+              "dataset_index": 220,
+              "reference_score": 0.174,
+              "run_score": 0.0,
+              "reference_answer": "Different registers and domains pose challenges to this task due to their properties, such as document length, readability, and linguistic variability.",
+              "run_answer": "Different registers and domains pose challenges to this task, including varying levels of agreement among annotators, document length, readability, and the presence of rhetorical questions, narratives"
+            }
+          ],
+          "aggregate_f1": 34.8,
+          "aggregate_f1_envelope_report_only": [
+            34.8,
+            36.2
+          ],
+          "aggregate_inside_envelope_report_only": true,
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "control_rule": "frozen post-failure per-example QA control gate",
+    "aggregate_f1_control_check_report_only": [
+      {
+        "metric": "bf16.f1_pct",
+        "canonical": 35.9,
+        "observed": 35.5,
+        "abs_diff": 0.3999999999999986,
+        "tolerance": 1.0,
+        "within_tolerance": true
+      },
+      {
+        "metric": "rabit2.f1_pct",
+        "canonical": 35.6,
+        "observed": 34.8,
+        "abs_diff": 0.8000000000000043,
+        "tolerance": 1.0,
+        "within_tolerance": true
+      }
+    ],
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_control_logical_kv_mb_reproduce_canonical": true,
+      "qa_control_gate_passed": true
+    },
+    "passed": true
+  }
+]

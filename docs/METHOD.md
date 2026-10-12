@@ -1,88 +1,34 @@
-# RABIT-KV Method
+# RABIT-KV method
 
-## Overview
+RABIT-KV prioritizes physical KV capacity while exposing serving cost and model-dependent quality. One frozen operating point is evaluated: **K3 / V2 / G32 / R4 / META8g64**. It is not a universally suitable or individually optimal set of choices; the development ablations remain legacy-evaluator evidence.
 
-RABIT-KV is a target-bit-aware KV-cache quantization method designed to reduce KV memory during LLM inference while preserving model quality and supporting a physically compressed deployment path.
+## Representation and lifecycle
 
-The final operating point is:
+- **K3:** 3-bit affine keys grouped along the sequence axis, one minimum/scale pair per head and channel over 32 tokens. Incomplete groups are zero-padded for quantization statistics.
+- **V2:** 2-bit affine values grouped over 32 channels per token and head.
+- **R4:** up to four newest tokens remain exact BF16. When appending would exceed four residual tokens, the oldest residual token ages into the open group.
+- **META8g64:** each primary minimum/scale array is encoded in groups of 64 with UINT8 codes and BF16 secondary minimum/scale parameters. Decoding uses the metadata-decoded parameters. Value metadata follows canonical `(token, head, channel-group)` ordering.
 
-**K3 / V2 / G32 / R4 / META8g64**
+An open group holds fewer than 32 aged tokens. Its key statistics and codes change as it grows. Once it reaches 32 tokens it closes into an immutable physical page. For a sequence of at least four tokens, the state consists of `floor((n - 4) / 32)` closed pages, `(n - 4) mod 32` open-group tokens, and four residual tokens.
 
-## Quantization policy
+The [physical implementation](../vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py) integrates `rabit_kv2` pages into vLLM's allocator. Closed pages contain packed K/V payloads and metadata. Open-group and residual state are outside the paged pool and total at most 35 tokens per sequence. Initial serving prefill uses exact dense attention before encoding the state; later chunks attend to packed history. Decode appends and ages a token before attending to the state at its position. Current paths run per request and perform aging/open-tail work per token.
 
-### Keys: K3
+## Storage and capacity accounting
 
-Keys use **3-bit sequence-axis affine quantization** with group size 32.
+“2-bit target” names the operating point, not total storage. Equal-sized K/V payloads average **2.5 bits per element**, derived from `(3 + 2) / 2`, before metadata and auxiliary state.
 
-The key path keeps more precision than the value path because aggressively reducing key precision caused larger quality degradation during development.
+For Llama geometry, one layer's closed page occupies **24,832 bytes per 32 tokens**, or **776 bytes per token-layer**, versus **4,096 bytes** in BF16. Derived closed-page storage is **3.03125 bits per K/V element**, from `776 * 8 / 2048`. These figures include page metadata but exclude residual/open-group state and allocator rounding. Source: [matched summary, theoretical byte accounting](../results/experiments/matched_serving_baselines/exp13/matched_capacity_latency_summary.json).
 
-### Values: V2
+The headline is instead **observed allocator capacity**, blocks times block size: **393,024 BF16 versus 2,074,592 RABIT tokens (5.2785×)**. This does not measure total device memory or predict throughput. The matched serving table in the [README](../README.md) shows the cost beside capacity: **30.10 versus 24.19 ms/token TPOT** and **144.65 versus 59.99 ms TTFT**. The tested TurboQuant system has different required backends and BF16 boundary layers; comparison is between deployed systems, not quantizer kernels.
 
-Values use **2-bit affine quantization** with group size 32 over the last dimension.
+## Canonical quality versus serving
 
-### Residual window: R4
+The [canonical evaluator](../benchmarks/experiments/canonical_rabit_quality.py) reproduces stored-cache representation and online aging through a Hugging Face cache object. It does not reproduce serving kernels or scheduling.
 
-The newest **four K/V tokens remain in BF16**. Older entries are aged into the packed low-bit cache.
+Continuation PPL begins with 1,024 exact BF16 context tokens. The first scored token uses the prefill logit, identical between arms; the remaining 127 tokens are teacher-forced one at a time against the evolving cache. Across 32 windows, each arm scores 4,096 tokens. PPL is `exp(total NLL / total scored tokens)`.
 
-The residual window protects the most recent attention context while keeping the dominant long-context storage compressed.
+Long-context generation prefills all but the last prompt token in BF16, converts that prefix to canonical state, then steps the last prompt token and generated tokens through the aging cache. Every generated token is predicted from canonical state. The evaluator never executes a later serving prefill chunk, so its quality is unmeasured. Same-device independent-oracle conformance validates stored state and aging; it is not formal verification or end-to-end serving/evaluator output parity. CPU and CUDA arithmetic can produce different codes; no cross-device tolerance is defined.
 
-### Metadata: META8g64
+At this policy, Llama continuation PPL is **7.515 → 7.633 (+1.56%)**, while Qwen is **6.787 → 112.39 (+1555.9%)**. Llama retains NIAH **57/57** and Passage Retrieval **100%** on 200 examples; HotpotQA is **59.30 → 58.27 F1**, with a paired confidence interval spanning zero, which does not establish equivalence. [Canonical evidence](../results/experiments/canonical_quality_v2/canonical_quality_final_record.json) supplies full precision, confidence intervals, and acceptance status.
 
-Primary quantization metadata is stored as grouped **UINT8** values with metadata group size 64, together with higher-precision secondary parameters required by the physical page codec.
-
-Metadata is included in reported logical storage rather than treated as free overhead.
-
-## Physical representation
-
-The deployment KV-cache dtype is:
-
-```text
-rabit_kv2
-```
-
-The authoritative implementation is:
-
-```text
-vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py
-```
-
-The implementation stores packed K/V payloads and metadata in physical vLLM KV pages. It is therefore distinct from fake quantization approaches that quantize and immediately dequantize back into a full-precision cache.
-
-The final decode path includes packed-page updates, a four-token BF16 residual, low-bit tail preparation, INT3 key packing, grouped metadata handling, V2 ageing, and compressed attention execution through custom Triton kernels.
-
-## What “2-bit target” means
-
-RABIT-KV should not be described as literal two-bit total storage.
-
-The final representation contains:
-
-- 3-bit keys;
-- 2-bit values;
-- grouped metadata;
-- a four-token BF16 residual window.
-
-“2-bit target” refers to the selected operating point centered on 2-bit values.
-
-## Metrics
-
-RABIT-KV reports four different quantities that should not be conflated:
-
-1. **Quality** — continuation perplexity and downstream benchmark scores.
-2. **Logical KV compression** — packed prefix-KV payload + metadata + residual accounting used by the quality harness.
-3. **Physical allocator capacity** — the number of KV tokens that the vLLM allocator can hold under a fixed GPU configuration.
-4. **Deployment latency** — real-engine TTFT, TPOT, and wall-clock measurements.
-
-## Final operating results
-
-On Llama 3.1 8B Instruct:
-
-- WikiText-2 continuation PPL: **8.5020 → 8.6317 (+1.53%)**
-- logical KV compression: approximately **5.18–5.27×**
-- physical KV capacity: **393,024 → 2,074,592 tokens (5.2785×)**
-- NIAH: **15/15 → 15/15**
-- Passage Retrieval: **100% → 100%**
-- Qasper 8K+: **35.9 → 35.6 F1**
-- HotpotQA 8K+: **60.6 → 55.2 F1**
-- RABIT-KV median TPOT: **21.61 ms/token**
-
-The HotpotQA result is the clearest quality regression and is retained as part of the reported result set.
+Qwen serves with the same representation through untuned fallback kernels, but shows severe logical quality loss. Its cause is unknown. No canonical Qwen long-context, Qasper, multilingual, or ablation measurements exist. Legacy evaluator results cannot support canonical quality claims or isolate causes of the legacy-to-canonical differences. See [reproducibility and provenance](REPRODUCIBILITY.md).

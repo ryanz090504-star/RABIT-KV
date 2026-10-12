@@ -1,0 +1,849 @@
+{
+  "kind": "canonical-quality-v2 Llama long-context suite: registered Attempt 1 -- summary (logical quality; NOT physical serving evidence)",
+  "attempt": 1,
+  "valid": true,
+  "status": "valid (awaiting review; not accepted evidence until reviewed)",
+  "source_commit": "432033cb58f17ba8fff41b8803502b151e411478",
+  "gates": {
+    "hardware": true,
+    "runtime_environment": true,
+    "model_snapshot": true,
+    "datasets": true,
+    "shipped_files": true,
+    "geometry_and_policy": true,
+    "structure": true,
+    "legacy_unreachable": true,
+    "prompt_sets": true,
+    "scores_equal_frozen_scorers": true,
+    "examples_equal_exp12": true,
+    "bf16_control_niah": true,
+    "bf16_control_passage_retrieval": true,
+    "bf16_control_hotpotqa": true
+  },
+  "bf16_validity_checks": {
+    "niah": {
+      "rule": "BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks.",
+      "historical_exp12_rule": "on the canonical subset, bf16 and rabit2 reproduce the canonical targets within the original Exp1 tolerances",
+      "arm": "bf16 only (no RABIT gate)",
+      "canonical_subset_units": 15,
+      "target_accuracy_pct": 100.0,
+      "tolerance_absolute_points": 1.0,
+      "canonical_subset_units_present": true,
+      "observed_accuracy_pct": 100.0,
+      "passed": true
+    },
+    "passage_retrieval": {
+      "rule": "BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks.",
+      "historical_exp12_rule": "on the canonical subset, bf16 and rabit2 reproduce the canonical targets within the original Exp1 tolerances",
+      "arm": "bf16 only (no RABIT gate)",
+      "canonical_subset_units": 10,
+      "target_accuracy_pct": 100.0,
+      "tolerance_absolute_points": 1.0,
+      "canonical_subset_units_present": true,
+      "observed_accuracy_pct": 100.0,
+      "passed": true
+    },
+    "hotpotqa": {
+      "rule": "BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks.",
+      "historical_exp12_rule": "frozen per-example QA control gate on the canonical subset (results/quality/hotpotqa.log), applied in Exp12 to bf16 and legacy rabit2",
+      "arm": "bf16 only (no RABIT gate)",
+      "n_canonical_subset": 20,
+      "canonical_subset_identity": true,
+      "max_allowed_mismatch_count": 1,
+      "max_allowed_l1_score_distance": 0.065,
+      "score_mismatch_count": 1,
+      "score_mismatch_indices": [
+        3
+      ],
+      "l1_score_distance": 0.035,
+      "passed": true
+    }
+  },
+  "examples_equal_exp12": {
+    "niah": true,
+    "passage_retrieval": true,
+    "hotpotqa": true
+  },
+  "started_utc": "2026-10-03T18:40:39.374983+00:00",
+  "completed_utc": "2026-10-03T20:26:23.689500+00:00",
+  "elapsed_s": 6343.1,
+  "container_seconds": {
+    "task_seconds": {
+      "niah": 806.4641261100769,
+      "passage_retrieval": 3423.518334388733,
+      "hotpotqa": 2004.9893236160278
+    },
+    "total_seconds": 6323.227651357651,
+    "note": "experiment planning only; not deployment latency"
+  },
+  "modal_returncode": 0,
+  "timed_out": false,
+  "app_ids": [
+    "ap-BQkWkr8DcHqc2MMJONbYKQ"
+  ],
+  "app_final_states": {
+    "ap-BQkWkr8DcHqc2MMJONbYKQ": {
+      "App ID": "ap-BQkWkr8DcHqc2MMJONbYKQ",
+      "Description": "rabit-kv-canonical-quality-v2-longctx",
+      "State": "stopped",
+      "Tasks": "0",
+      "Created at": "2026-10-03 14:40:41-04:00",
+      "Stopped at": "2026-10-03 16:26:17-04:00"
+    }
+  },
+  "cleanup_verified": true,
+  "result_sha256": "692d5902e2689a733aabbadfd45ae940efe808a275286aac33c69ad866883d46",
+  "result_sha256_matches_file": true,
+  "protocol_sha256_lf": "64513be602c1a0efb6a0035bcd2975471c608d05fb121a74e0a3761eae654675",
+  "hardware": [
+    {
+      "name": "NVIDIA H100 80GB HBM3",
+      "memory.total": "81559",
+      "memory.used": "4",
+      "driver_version": "580.95.05"
+    }
+  ],
+  "runtime_environment": {
+    "runtime": {
+      "python_minor": "3.11",
+      "torch": "2.11.0+cu130",
+      "torch_cuda": "13.0",
+      "cuda_device": "NVIDIA H100 80GB HBM3",
+      "transformers": "4.48.2"
+    },
+    "validated": {
+      "python_minor": "3.11",
+      "torch": "2.11.0+cu130",
+      "torch_cuda": "13.0",
+      "cuda_device": "NVIDIA H100 80GB HBM3",
+      "transformers": "4.48.2"
+    },
+    "passed": true
+  },
+  "environment": {
+    "python": "3.11.12",
+    "torch": "2.11.0+cu130",
+    "torch_cuda": "13.0",
+    "cuda_device": "NVIDIA H100 80GB HBM3",
+    "packages": {
+      "transformers": "4.48.2",
+      "accelerate": "1.15.0",
+      "modelscope": "1.40.1",
+      "requests": "2.34.2",
+      "sentencepiece": "0.2.2",
+      "tokenizers": "0.21.4",
+      "safetensors": "0.8.0",
+      "datasets": "5.0.1",
+      "pyarrow": "25.0.1",
+      "huggingface_hub": "0.36.2"
+    }
+  },
+  "model": {
+    "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+    "model_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+    "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+    "files_checked": 18,
+    "passed": true
+  },
+  "datasets": {
+    "passage_retrieval": {
+      "repo": "zai-org/LongBench",
+      "revision": "915b0c6ec0b6dfae1cd44224b7d8995317837f27",
+      "filename": "passage_retrieval_en/test-00000-of-00001.parquet",
+      "bytes": 7029836,
+      "sha256": "452f03dbb0e394de2b26d6e016bf1e715a3ebac9dc93844fde73c0e8e74cfd68",
+      "rows": 200
+    },
+    "hotpotqa": {
+      "repo": "zai-org/LongBench",
+      "revision": "92b6c5fbfb0c97b91e92d9ef79802f95ce74b05e",
+      "filename": "hotpotqa_e/test-00000-of-00001.parquet",
+      "bytes": 7196922,
+      "sha256": "44ca413b8c2435a771cd7987b1d9298ab8fce512684533994b5a55c67b539dc3",
+      "rows": 300
+    },
+    "wikitext_sha256": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0"
+  },
+  "prompt_sets": {
+    "niah": {
+      "units": 57,
+      "prompt_set_sha256": "452dbe81bf7cc331f163dfd485dca8d4b7691613a7065a7aba79b00ee8e4f962",
+      "passed": true
+    },
+    "passage_retrieval": {
+      "units": 200,
+      "prompt_set_sha256": "c59428c8210bd4a49ff127995ca5e160b24481f06ab616afe34d532755b81260",
+      "passed": true
+    },
+    "hotpotqa": {
+      "units": 100,
+      "prompt_set_sha256": "01e6976cc58d161c2b06f084101fc4b416437433c6279f7eba80b09bb2a16b1a",
+      "passed": true
+    }
+  },
+  "policy": {
+    "k_bits": 3,
+    "v_bits": 2,
+    "group_size": 32,
+    "residual_tokens": 4,
+    "metadata_bits": 8,
+    "metadata_group_size": 64
+  },
+  "canonical_rabit_quality_sha256_lf": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+  "artifact_persistence": {
+    "path": "/artifacts/attempt_1/rows.jsonl",
+    "rows_written": 357,
+    "errors": 0
+  },
+  "incremental_rows_copied": true,
+  "niah": {
+    "bf16": {
+      "passed": 57,
+      "cases": 57,
+      "accuracy_pct": 100.0,
+      "per_context": {
+        "4096": {
+          "passed": 19,
+          "cases": 19
+        },
+        "8192": {
+          "passed": 19,
+          "cases": 19
+        },
+        "16384": {
+          "passed": 19,
+          "cases": 19
+        }
+      },
+      "failed_coordinates": [],
+      "failed_answers": []
+    },
+    "rabit": {
+      "passed": 57,
+      "cases": 57,
+      "accuracy_pct": 100.0,
+      "per_context": {
+        "4096": {
+          "passed": 19,
+          "cases": 19
+        },
+        "8192": {
+          "passed": 19,
+          "cases": 19
+        },
+        "16384": {
+          "passed": 19,
+          "cases": 19
+        }
+      },
+      "failed_coordinates": [],
+      "failed_answers": []
+    },
+    "delta_points": 0.0,
+    "cases_outcome_changed": [],
+    "cases_answer_text_changed": 23,
+    "statistics": "none (deterministic grid; cases are not independent draws)",
+    "generation": {
+      "bf16": {
+        "mean_kept_tokens": 10.157894736842104,
+        "stopped_on_eos": 37,
+        "seconds_total": 38.31122491599987
+      },
+      "rabit": {
+        "mean_kept_tokens": 11.894736842105264,
+        "stopped_on_eos": 26,
+        "seconds_total": 743.4963709700002
+      }
+    }
+  },
+  "passage_retrieval": {
+    "n": 200,
+    "bf16": 100.0,
+    "rabit": 100.0,
+    "delta_points": 0.0,
+    "relative_delta_pct": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "confidence": 0.95,
+    "resamples": 10000,
+    "seed": 20270931,
+    "examples_score_changed": 0,
+    "examples_rabit_worse": 0,
+    "examples_rabit_better": 0,
+    "examples_prediction_text_changed": 79,
+    "ci_contains_zero": true,
+    "per_example_delta_points": {
+      "min": 0.0,
+      "q25": 0.0,
+      "median": 0.0,
+      "q75": 0.0,
+      "max": 0.0,
+      "mean": 0.0
+    },
+    "concentration": {
+      "top1_by_abs": {
+        "units": [
+          {
+            "key": 0,
+            "delta": 0.0,
+            "contribution": 0.0
+          }
+        ],
+        "sum_contribution": 0.0,
+        "share_of_aggregate_delta": null,
+        "share_of_total_abs_contribution": null
+      },
+      "top3_by_abs": {
+        "units": [
+          {
+            "key": 0,
+            "delta": 0.0,
+            "contribution": 0.0
+          },
+          {
+            "key": 1,
+            "delta": 0.0,
+            "contribution": 0.0
+          },
+          {
+            "key": 2,
+            "delta": 0.0,
+            "contribution": 0.0
+          }
+        ],
+        "sum_contribution": 0.0,
+        "share_of_aggregate_delta": null,
+        "share_of_total_abs_contribution": null
+      },
+      "worst1": {
+        "units": [
+          {
+            "key": 0,
+            "delta": 0.0,
+            "contribution": 0.0
+          }
+        ],
+        "sum_contribution": 0.0,
+        "share_of_aggregate_delta": null,
+        "share_of_total_abs_contribution": null
+      },
+      "worst3": {
+        "units": [
+          {
+            "key": 0,
+            "delta": 0.0,
+            "contribution": 0.0
+          },
+          {
+            "key": 1,
+            "delta": 0.0,
+            "contribution": 0.0
+          },
+          {
+            "key": 2,
+            "delta": 0.0,
+            "contribution": 0.0
+          }
+        ],
+        "sum_contribution": 0.0,
+        "share_of_aggregate_delta": null,
+        "share_of_total_abs_contribution": null
+      }
+    },
+    "worst_examples": [
+      {
+        "key": 0,
+        "delta_points": 0.0,
+        "answers": [
+          "Paragraph 15"
+        ],
+        "bf16_prediction": "Paragraph 15",
+        "rabit_prediction": "Paragraph 15"
+      },
+      {
+        "key": 1,
+        "delta_points": 0.0,
+        "answers": [
+          "Paragraph 8"
+        ],
+        "bf16_prediction": "Paragraph 8",
+        "rabit_prediction": "Paragraph 8."
+      },
+      {
+        "key": 2,
+        "delta_points": 0.0,
+        "answers": [
+          "Paragraph 18"
+        ],
+        "bf16_prediction": "Paragraph 18",
+        "rabit_prediction": "Paragraph 18."
+      },
+      {
+        "key": 3,
+        "delta_points": 0.0,
+        "answers": [
+          "Paragraph 17"
+        ],
+        "bf16_prediction": "Paragraph 17",
+        "rabit_prediction": "Paragraph 17."
+      },
+      {
+        "key": 4,
+        "delta_points": 0.0,
+        "answers": [
+          "Paragraph 14"
+        ],
+        "bf16_prediction": "Paragraph 14",
+        "rabit_prediction": "Paragraph 14"
+      }
+    ],
+    "changed_examples": [],
+    "generation": {
+      "bf16": {
+        "mean_kept_tokens": 3.015,
+        "stopped_on_eos": 200,
+        "seconds_total": 144.81974572500076
+      },
+      "rabit": {
+        "mean_kept_tokens": 3.41,
+        "stopped_on_eos": 200,
+        "seconds_total": 3199.1608730179996
+      }
+    }
+  },
+  "hotpotqa": {
+    "primary_legacy_scorer": {
+      "n": 100,
+      "bf16": 59.29949070537306,
+      "rabit": 58.27376099319833,
+      "delta_points": -1.02572971217473,
+      "relative_delta_pct": -1.7297445559372904,
+      "ci_low": -4.235586408476436,
+      "ci_high": 2.1993342264442006,
+      "confidence": 0.95,
+      "resamples": 10000,
+      "seed": 20270932,
+      "examples_score_changed": 8,
+      "examples_rabit_worse": 5,
+      "examples_rabit_better": 3,
+      "examples_prediction_text_changed": 20,
+      "ci_contains_zero": true,
+      "per_example_delta_points": {
+        "min": -100.0,
+        "q25": 0.0,
+        "median": 0.0,
+        "q75": 0.0,
+        "max": 100.0,
+        "mean": -1.025729712174725
+      },
+      "concentration": {
+        "top1_by_abs": {
+          "units": [
+            {
+              "key": 226,
+              "delta": 100.0,
+              "contribution": 1.0
+            }
+          ],
+          "sum_contribution": 1.0,
+          "share_of_aggregate_delta": -0.9749156996532998,
+          "share_of_total_abs_contribution": 0.2625229399840992
+        },
+        "top3_by_abs": {
+          "units": [
+            {
+              "key": 226,
+              "delta": 100.0,
+              "contribution": 1.0
+            },
+            {
+              "key": 257,
+              "delta": -100.0,
+              "contribution": -1.0
+            },
+            {
+              "key": 201,
+              "delta": -50.0,
+              "contribution": -0.5
+            }
+          ],
+          "sum_contribution": -0.5,
+          "share_of_aggregate_delta": 0.4874578498266499,
+          "share_of_total_abs_contribution": 0.656307349960248
+        },
+        "worst1": {
+          "units": [
+            {
+              "key": 257,
+              "delta": -100.0,
+              "contribution": -1.0
+            }
+          ],
+          "sum_contribution": -1.0,
+          "share_of_aggregate_delta": 0.9749156996532998,
+          "share_of_total_abs_contribution": 0.2625229399840992
+        },
+        "worst3": {
+          "units": [
+            {
+              "key": 257,
+              "delta": -100.0,
+              "contribution": -1.0
+            },
+            {
+              "key": 201,
+              "delta": -50.0,
+              "contribution": -0.5
+            },
+            {
+              "key": 207,
+              "delta": -50.0,
+              "contribution": -0.5
+            }
+          ],
+          "sum_contribution": -2.0,
+          "share_of_aggregate_delta": 1.9498313993065997,
+          "share_of_total_abs_contribution": 0.5250458799681984
+        }
+      },
+      "worst_examples": [
+        {
+          "key": 257,
+          "delta_points": -100.0,
+          "answers": [
+            "Pennsylvania"
+          ],
+          "bf16_prediction": "Pennsylvania",
+          "rabit_prediction": "United Airlines Flight 93"
+        },
+        {
+          "key": 201,
+          "delta_points": -50.0,
+          "answers": [
+            "2016–17 NHL season"
+          ],
+          "bf16_prediction": "2016–17",
+          "rabit_prediction": "2016-17"
+        },
+        {
+          "key": 207,
+          "delta_points": -50.0,
+          "answers": [
+            "Vice President"
+          ],
+          "bf16_prediction": "Vice President.",
+          "rabit_prediction": "Vice President of the United States."
+        },
+        {
+          "key": 273,
+          "delta_points": -31.746031746031743,
+          "answers": [
+            "more than 330 million people"
+          ],
+          "bf16_prediction": "more than 330 million",
+          "rabit_prediction": "330 million"
+        },
+        {
+          "key": 203,
+          "delta_points": -10.0,
+          "answers": [
+            "Passion Pit is an American indietronica band"
+          ],
+          "bf16_prediction": "Both bands have had a lead guitarist leave the band and then return.",
+          "rabit_prediction": "Both bands have had their music featured in various video games, with Sum 41's \"Underclass Hero\" being featured in Madden 08 and NBA 08"
+        }
+      ],
+      "changed_examples": [
+        {
+          "key": 201,
+          "bf16": 0.5,
+          "rabit": 0.0
+        },
+        {
+          "key": 203,
+          "bf16": 0.1,
+          "rabit": 0.0
+        },
+        {
+          "key": 207,
+          "bf16": 1.0,
+          "rabit": 0.5
+        },
+        {
+          "key": 225,
+          "bf16": 0.5,
+          "rabit": 0.6666666666666666
+        },
+        {
+          "key": 226,
+          "bf16": 0.0,
+          "rabit": 1.0
+        },
+        {
+          "key": 257,
+          "bf16": 1.0,
+          "rabit": 0.0
+        },
+        {
+          "key": 273,
+          "bf16": 0.888888888888889,
+          "rabit": 0.5714285714285715
+        },
+        {
+          "key": 289,
+          "bf16": 0.47058823529411764,
+          "rabit": 0.6956521739130435
+        }
+      ]
+    },
+    "secondary_official_scorer": {
+      "n": 100,
+      "bf16": 59.85098039215686,
+      "rabit": 58.71457431457432,
+      "delta_points": -1.1364060775825493,
+      "relative_delta_pct": -1.8987259191688393,
+      "ci_low": -4.2980222391987155,
+      "ci_high": 2.025210084033617,
+      "confidence": 0.95,
+      "resamples": 10000,
+      "seed": 20270932,
+      "examples_score_changed": 7,
+      "examples_rabit_worse": 5,
+      "examples_rabit_better": 2,
+      "examples_prediction_text_changed": 20,
+      "ci_contains_zero": true,
+      "per_example_delta_points": {
+        "min": -100.0,
+        "q25": 0.0,
+        "median": 0.0,
+        "q75": 0.0,
+        "max": 100.0,
+        "mean": -1.1364060775825482
+      },
+      "concentration": {
+        "top1_by_abs": {
+          "units": [
+            {
+              "key": 226,
+              "delta": 100.0,
+              "contribution": 1.0
+            }
+          ],
+          "sum_contribution": 1.0,
+          "share_of_aggregate_delta": -0.8799671347475351,
+          "share_of_total_abs_contribution": 0.2784777213095379
+        },
+        "top3_by_abs": {
+          "units": [
+            {
+              "key": 226,
+              "delta": 100.0,
+              "contribution": 1.0
+            },
+            {
+              "key": 257,
+              "delta": -100.0,
+              "contribution": -1.0
+            },
+            {
+              "key": 201,
+              "delta": -50.0,
+              "contribution": -0.5
+            }
+          ],
+          "sum_contribution": -0.5,
+          "share_of_aggregate_delta": 0.43998356737376754,
+          "share_of_total_abs_contribution": 0.6961943032738447
+        },
+        "worst1": {
+          "units": [
+            {
+              "key": 257,
+              "delta": -100.0,
+              "contribution": -1.0
+            }
+          ],
+          "sum_contribution": -1.0,
+          "share_of_aggregate_delta": 0.8799671347475351,
+          "share_of_total_abs_contribution": 0.2784777213095379
+        },
+        "worst3": {
+          "units": [
+            {
+              "key": 257,
+              "delta": -100.0,
+              "contribution": -1.0
+            },
+            {
+              "key": 201,
+              "delta": -50.0,
+              "contribution": -0.5
+            },
+            {
+              "key": 207,
+              "delta": -42.85714285714285,
+              "contribution": -0.4285714285714285
+            }
+          ],
+          "sum_contribution": -1.9285714285714284,
+          "share_of_aggregate_delta": 1.6970794741559603,
+          "share_of_total_abs_contribution": 0.5370641768112516
+        }
+      },
+      "worst_examples": [
+        {
+          "key": 257,
+          "delta_points": -100.0,
+          "answers": [
+            "Pennsylvania"
+          ],
+          "bf16_prediction": "Pennsylvania",
+          "rabit_prediction": "United Airlines Flight 93"
+        },
+        {
+          "key": 201,
+          "delta_points": -50.0,
+          "answers": [
+            "2016–17 NHL season"
+          ],
+          "bf16_prediction": "2016–17",
+          "rabit_prediction": "2016-17"
+        },
+        {
+          "key": 207,
+          "delta_points": -42.85714285714285,
+          "answers": [
+            "Vice President"
+          ],
+          "bf16_prediction": "Vice President.",
+          "rabit_prediction": "Vice President of the United States."
+        },
+        {
+          "key": 273,
+          "delta_points": -31.746031746031743,
+          "answers": [
+            "more than 330 million people"
+          ],
+          "bf16_prediction": "more than 330 million",
+          "rabit_prediction": "330 million"
+        },
+        {
+          "key": 203,
+          "delta_points": -11.764705882352942,
+          "answers": [
+            "Passion Pit is an American indietronica band"
+          ],
+          "bf16_prediction": "Both bands have had a lead guitarist leave the band and then return.",
+          "rabit_prediction": "Both bands have had their music featured in various video games, with Sum 41's \"Underclass Hero\" being featured in Madden 08 and NBA 08"
+        }
+      ],
+      "changed_examples": [
+        {
+          "key": 201,
+          "bf16": 0.5,
+          "rabit": 0.0
+        },
+        {
+          "key": 203,
+          "bf16": 0.11764705882352942,
+          "rabit": 0.0
+        },
+        {
+          "key": 207,
+          "bf16": 1.0,
+          "rabit": 0.5714285714285715
+        },
+        {
+          "key": 226,
+          "bf16": 0.0,
+          "rabit": 1.0
+        },
+        {
+          "key": 257,
+          "bf16": 1.0,
+          "rabit": 0.0
+        },
+        {
+          "key": 273,
+          "bf16": 0.888888888888889,
+          "rabit": 0.5714285714285715
+        },
+        {
+          "key": 289,
+          "bf16": 0.5000000000000001,
+          "rabit": 0.7272727272727273
+        }
+      ]
+    },
+    "generation": {
+      "bf16": {
+        "mean_kept_tokens": 4.34,
+        "stopped_on_eos": 99,
+        "seconds_total": 88.8083334540006
+      },
+      "rabit": {
+        "mean_kept_tokens": 4.73,
+        "stopped_on_eos": 98,
+        "seconds_total": 1875.6394988270058
+      }
+    }
+  },
+  "legacy_comparison": {
+    "niah": {
+      "label": "LEGACY LOGICAL-EVALUATOR RESULTS",
+      "log": "results/mlsys2027/variance/niah.log",
+      "n": 57,
+      "bf16": 100.0,
+      "rabit2": 100.0,
+      "delta_points": 0.0,
+      "summary_lines_in_log": [
+        "results/mlsys2027/variance/niah.log:392: bf16        57          57          100.0         1194.542        1.000",
+        "results/mlsys2027/variance/niah.log:393: rabit2      57          57          100.0         226.786         5.263"
+      ],
+      "bf16_reproducibility": {
+        "note": "this run's BF16 arm vs the accepted Exp12 BF16 arm, per example (3-decimal printed scores)",
+        "examples_differing": 0,
+        "indices": [],
+        "l1_distance": 0.0
+      }
+    },
+    "passage_retrieval": {
+      "label": "LEGACY LOGICAL-EVALUATOR RESULTS",
+      "log": "results/mlsys2027/variance/passage_retrieval.log",
+      "n": 200,
+      "bf16": 100.0,
+      "rabit2": 99.5,
+      "delta_points": -0.5,
+      "summary_lines_in_log": [
+        "results/mlsys2027/variance/passage_retrieval.log:1046: bf16          100.0         200.00        1569.362      200",
+        "results/mlsys2027/variance/passage_retrieval.log:1047: rabit2        99.5          199.00        297.932       200"
+      ],
+      "bf16_reproducibility": {
+        "note": "this run's BF16 arm vs the accepted Exp12 BF16 arm, per example (3-decimal printed scores)",
+        "examples_differing": 0,
+        "indices": [],
+        "l1_distance": 0.0
+      }
+    },
+    "hotpotqa": {
+      "label": "LEGACY LOGICAL-EVALUATOR RESULTS",
+      "log": "results/mlsys2027/variance/hotpotqa.log",
+      "n": 100,
+      "bf16": 59.526999999999994,
+      "rabit2": 57.594,
+      "delta_points": -1.9329999999999927,
+      "summary_lines_in_log": [
+        "results/mlsys2027/variance/hotpotqa.log:545: bf16          59.5          59.52         1857.896      100",
+        "results/mlsys2027/variance/hotpotqa.log:546: rabit2        57.6          57.59         352.612       100"
+      ],
+      "bf16_reproducibility": {
+        "note": "this run's BF16 arm vs the accepted Exp12 BF16 arm, per example (3-decimal printed scores)",
+        "examples_differing": 1,
+        "indices": [
+          89
+        ],
+        "l1_distance": 0.225
+      }
+    }
+  }
+}

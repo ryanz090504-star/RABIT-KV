@@ -1,0 +1,43 @@
+{
+  "scope": "q_len 16352 FEASIBILITY request only (shared_decode fixed QB); NOT Experiment 5 evidence; NOT a paper latency claim; one request.",
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 23,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "query_block": 32,
+  "expected_from_frozen_exp5": {
+    "source": "results/mlsys2027/context_scaling/failed_attempt_1/rabit_kv2_ctx32768.log",
+    "prompt_tokens": 32736,
+    "prompt_token_ids_sha256": "dbc5bd884143e25fc9b417b9a9af888aaf92092e6556e4b8fdd1d6ca7d63b969",
+    "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26",
+    "recorded_by": "3 completed reference-Stage3C warmups of the failed attempt"
+  },
+  "request": {
+    "prompt_tokens": 32736,
+    "output_tokens": 32,
+    "ttft_ms": 114752.8076171875,
+    "wall_ms": 115668.66270399999,
+    "tpot_ms": 29.531200354839374,
+    "prompt_token_ids_sha256": "dbc5bd884143e25fc9b417b9a9af888aaf92092e6556e4b8fdd1d6ca7d63b969",
+    "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26",
+    "gpu_memory_used_mib_after": [
+      77641
+    ],
+    "jit_lines": 0,
+    "timing_jit_contaminated": false,
+    "prompt_hash_matches_frozen_exp5": true,
+    "output_hash_matches_frozen_exp5": true
+  },
+  "exp5_watchdog_projection": {
+    "cell_requests": 20,
+    "observed_wall_s": 115.66866270399998,
+    "projected_cell_request_time_s": 2313.3732540799997,
+    "original_cell_watchdog_s": 900,
+    "watchdog_over_projected": 0.38904227772699784,
+    "statement": "The original 900 s cell watchdog is operationally insufficient for the unchanged 5-warmup + 15-measurement protocol even though individual requests succeed.",
+    "note": "request time only (excludes engine start and conditioning); not an algorithm failure criterion"
+  }
+}

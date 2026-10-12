@@ -1,0 +1,64 @@
+{
+  "kind": "PROOF-HARNESS diagnostic (NOT evidence; NOT a quality result): flaky canonical-state spy in the canonical-quality-v2 continuation-PPL offline proofs",
+  "date_utc": "2026-10-03",
+  "classification_of_old_record": "SUPERSEDED OFFLINE-PROOF RESULT",
+  "old_record": {
+    "path": "results/mlsys2027/canonical_quality_v2/continuation_ppl/offline_proof_record.json",
+    "commit": "eb3f4b1377beb7ecf8c0da39b89d81490db54a74",
+    "sha256_lf": "47c5bd48b34b200b9b228ed9097f332a73c09e9a5712e8c35e3b8219f0cef335",
+    "reported": "passed = true (C_canonical_path state_mismatches = 0 for both tiny models)",
+    "status": "kept in place, unmodified; no longer reliable evidence: the proof that produced it passes or fails nondeterministically (see full_runs), so a single passing record does not establish the property"
+  },
+  "proof_file_at_fault": {
+    "path": "benchmarks/mlsys2027/canonical_ppl_offline_proofs.py",
+    "sha256_lf": "7d74958058ddf53de333a4a5219211dba79a59e2c2bda94ba21e9b7647c11f10",
+    "function": "canonical_path_proofs"
+  },
+  "observer_bug": {
+    "summary": "the canonical-state spy keyed its reference tensors by Python id(obj)",
+    "detail": "canonical_path_proofs stores the raw K / V appended to every CanonicalLayerState in a dict keyed by id(self). It first runs core.score(model, ctx, cont, 'rabit') (3 layer states, 109 tokens each) and then core.prefill_state_parity(model, ctx), which builds a NEW cache with 3 new layer states (70 tokens each). The first cache is freed in between. When CPython allocates a new layer state at the address of a freed one, raw[id(self)] still holds the 109 stale tokens of the dead object; the spy concatenates the new 70 tokens onto them and compares decoded() of the new object (n = 70) against canonical_state() of 179 tokens. The comparison fails although the canonical implementation is correct.",
+    "why_nondeterministic": "whether a freed address is reused depends on the allocator state of the process"
+  },
+  "full_proof_executions": {
+    "note": "five complete executions of the UNCHANGED proof file (local CPU; python 3.11.9, torch 2.11.0+cpu, transformers 4.48.2); records in full_runs/. Only canonical_ppl_identity.py differed from eb3f4b1 (provenance wording), which changes one bound-file hash and nothing else.",
+    "runs": [
+      {"file": "full_runs/run_0.json", "passed": false, "state_mismatches": {"tiny_llama_gqa_4_2_d64": 0, "tiny_qwen2_gqa_2_1_d128": 1}},
+      {"file": "full_runs/run_1.json", "passed": true, "state_mismatches": {"tiny_llama_gqa_4_2_d64": 0, "tiny_qwen2_gqa_2_1_d128": 0}},
+      {"file": "full_runs/run_2.json", "passed": false, "state_mismatches": {"tiny_llama_gqa_4_2_d64": 1, "tiny_qwen2_gqa_2_1_d128": 0}},
+      {"file": "full_runs/run_3.json", "passed": true, "state_mismatches": {"tiny_llama_gqa_4_2_d64": 0, "tiny_qwen2_gqa_2_1_d128": 0}},
+      {"file": "full_runs/run_4.json", "passed": false, "state_mismatches": {"tiny_llama_gqa_4_2_d64": 0, "tiny_qwen2_gqa_2_1_d128": 1}}
+    ],
+    "failed": 3,
+    "passed": 2,
+    "W_dataset_windows_passed_in_all": true,
+    "S_scoring_passed_in_all": true,
+    "summed_losses": "legacy / batched / stepwise-BF16 / rabit loss sums of both tiny models are identical in all five executions and identical to the eb3f4b1 record",
+    "correction": "an earlier chat summary said 'two of five' executions failed; the records show three of five"
+  },
+  "instrumented_runs": {
+    "script": "scripts/diag_proof_c.py (argument 12 -> 12 iterations x 2 tiny models, one process)",
+    "runs": 24,
+    "runs_with_id_keyed_mismatch": 4,
+    "id_reuse_events": 4,
+    "every_mismatch_coincided_with_id_reuse": true,
+    "runs_with_object_identity_safe_mismatch": 0,
+    "console_output_verbatim": [
+      "0 tiny_qwen2_gqa_2_1_d128 [('ID_REUSE', 'parity', 2847736442384, 109), ('MISMATCH', 'parity', 'id_keyed_ok=False', 'object_keyed_ok=True', 'n=70', 'id_keyed_raw_tokens=179', 'object_raw_tokens=70')]",
+      "4 tiny_llama_gqa_4_2_d64 [('ID_REUSE', 'parity', 2847757071056, 109), ('MISMATCH', 'parity', 'id_keyed_ok=False', 'object_keyed_ok=True', 'n=70', 'id_keyed_raw_tokens=179', 'object_raw_tokens=70')]",
+      "8 tiny_qwen2_gqa_2_1_d128 [('ID_REUSE', 'parity', 2847757105616, 109), ('MISMATCH', 'parity', 'id_keyed_ok=False', 'object_keyed_ok=True', 'n=70', 'id_keyed_raw_tokens=179', 'object_raw_tokens=70')]",
+      "10 tiny_llama_gqa_4_2_d64 [('ID_REUSE', 'parity', 2847757151312, 109), ('MISMATCH', 'parity', 'id_keyed_ok=False', 'object_keyed_ok=True', 'n=70', 'id_keyed_raw_tokens=179', 'object_raw_tokens=70')]",
+      "{'runs': 24, 'runs_with_id_keyed_mismatch': 4, 'runs_with_object_keyed_mismatch': 0, 'id_reuse_events': 4}"
+    ],
+    "output_provenance": "copied from the session console; the script did not write a file. The instrumented runs did not record loss sums (those are established by the five full executions above)."
+  },
+  "exploratory_fix_check": {
+    "script": "scripts/diag_fix.py (argument 20)",
+    "what": "canonical_path_proofs executed from a patched in-memory copy (raw.clear() before the parity phase); 40 runs, 40 passed, 0 state mismatches, decoded_calls 123",
+    "status": "exploratory only; it is NOT the committed fix and NOT the registered regenerated proof"
+  },
+  "conclusion": "PROOF-HARNESS defect (observer bookkeeping). No evidence of a canonical-state mismatch: every observed mismatch is explained by id reuse, and the identity-safe comparison shows none.",
+  "no_gpu_or_model_execution": true,
+  "model_weights_used": false,
+  "scientific_code_changed": false,
+  "unchanged_since_eb3f4b1": ["benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/canonical_ppl_core.py", "benchmarks/mlsys2027/canonical_ppl_offline_proofs.py"]
+}

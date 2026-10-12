@@ -1,0 +1,780 @@
+{
+  "kind": "FINAL PAPER-READY CANONICAL QUALITY RECORD (canonical-quality-v2; logical quality; NOT physical serving evidence)",
+  "status": "FROZEN 2026-10-03",
+  "policy": "K3 / V2 / G32 / R4 / META8g64 (one frozen operating point; never retuned)",
+  "summary": {
+    "llama_continuation_ppl": "7.515 -> 7.633 (+1.56 %)",
+    "llama_long_context": {
+      "niah": "no score loss (57 / 57 vs 57 / 57)",
+      "passage_retrieval": "no score loss (100.0 vs 100.0)",
+      "hotpotqa": "about -1 F1 (59.30 -> 58.27); paired 95 % CI [-4.24, +2.20] spans zero"
+    },
+    "qwen_continuation_ppl": "6.787 -> 112.39 (+1555.9 %)",
+    "conclusion": "RABIT's physical representation and canonical cache semantics transfer across the tested Llama and Qwen geometries, but the quality robustness of a single frozen low-bit operating point is strongly model-dependent."
+  },
+  "continuation_ppl": {
+    "status": "ACCEPTED (2026-10-03): the authoritative canonical continuation-PPL evidence",
+    "protocol": {
+      "dataset": "WikiText-2 test (raw text), sha256 d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0",
+      "windows": "N = 32 consecutive non-overlapping windows; context 1024 tokens; continuation 128 tokens; no BOS",
+      "scoring": "BF16 prefill; first continuation token scored from the prefill logit; remaining tokens teacher-forced one at a time; canonical cache aging at every decode step; identical paired token inputs in both arms",
+      "arms": "BF16 vs canonical RABIT (canonical_rabit_quality.py, c360697)",
+      "policy": "K3 / V2 / G32 / R4 / META8g64 (frozen; no retuning)",
+      "statistics": "PPL = exp(total NLL / total tokens); delta = 100 * (exp(mean per-window NLL difference) - 1); paired percentile bootstrap over windows, 10000 resamples, seed 20270929",
+      "hardware": "one NVIDIA H100 80GB per model",
+      "registered_attempt": 2,
+      "protocol_file": "benchmarks/mlsys2027/canonical_ppl_protocol.json (sha256_lf cfa990a7...; commit 05eb29e)"
+    },
+    "models": {
+      "llama3_1_8b": {
+        "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+        "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+        "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+        "files": 18,
+        "geometry": {
+          "layers": 32,
+          "kv_heads": 8,
+          "attention_heads": 32,
+          "head_dim": 128,
+          "architecture": "LlamaForCausalLM"
+        },
+        "hardware": "NVIDIA H100 80GB HBM3",
+        "runtime": {
+          "python_minor": "3.11",
+          "torch": "2.11.0+cu130",
+          "torch_cuda": "13.0",
+          "cuda_device": "NVIDIA H100 80GB HBM3",
+          "transformers": "4.48.2"
+        },
+        "modal_app": "ap-HL07VGNI2BS7tILFTbKcPA",
+        "scored_tokens_per_arm": 4096,
+        "windows": 32,
+        "bf16_ppl": 7.515395843214247,
+        "rabit_ppl": 7.6325218956943175,
+        "relative_delta_pct": 1.558481481528684,
+        "relative_delta_pct_ci95_paired_bootstrap": [
+          1.1169214551782547,
+          2.0482972302842573
+        ],
+        "mean_nll": {
+          "bf16": 2.016953695565462,
+          "rabit": 2.0324183143675327
+        },
+        "rounded": {
+          "bf16_ppl": 7.515,
+          "rabit_ppl": 7.633,
+          "relative_delta_pct": 1.56,
+          "ci95_pct": [
+            1.12,
+            2.05
+          ]
+        },
+        "per_window_paired_nll_delta": {
+          "mean": 0.015464618802070618,
+          "median": 0.013599395751953125,
+          "stdev": 0.013579189514187866,
+          "min": -0.006300210952758789,
+          "max": 0.05903959274291992,
+          "windows_positive": 30,
+          "windows_negative": 2
+        },
+        "largest_positive_windows": [
+          {
+            "window": 32,
+            "delta_nll": 0.05903959274291992,
+            "bf16_ppl": 5.241733226949613,
+            "rabit_ppl": 5.560520977632496
+          },
+          {
+            "window": 6,
+            "delta_nll": 0.03935050964355469,
+            "bf16_ppl": 10.547142689257484,
+            "rabit_ppl": 10.970452230617717
+          },
+          {
+            "window": 10,
+            "delta_nll": 0.03924000263214111,
+            "bf16_ppl": 5.271527961155748,
+            "rabit_ppl": 5.482494833050191
+          }
+        ],
+        "smallest_windows": [
+          {
+            "window": 11,
+            "delta_nll": -0.006300210952758789,
+            "bf16_ppl": 6.925640186783949,
+            "rabit_ppl": 6.882144352960642
+          },
+          {
+            "window": 28,
+            "delta_nll": -0.0003781318664550781,
+            "bf16_ppl": 8.379675517292277,
+            "rabit_ppl": 8.376507493951674
+          },
+          {
+            "window": 21,
+            "delta_nll": 0.0002601146697998047,
+            "bf16_ppl": 10.656747872070914,
+            "rabit_ppl": 10.659520209071928
+          }
+        ],
+        "concentration": {
+          "share_of_summed_window_delta_from_top_1": 0.11930376667087424,
+          "share_from_top_3": 0.27811489160378605,
+          "share_from_top_8_of_32": 0.5446636340072826,
+          "aggregate_delta_pct_without_top_3_windows": 1.239472700414046,
+          "tokens_with_positive_delta_of_4096": 2306
+        },
+        "legacy_logical_evaluator_context_only": {
+          "source": [
+            "results/mlsys2027/variance/continuation_ppl.log:113: bf16        7.5138      0.00        7.6084              128.000       1.000         4096",
+            "results/mlsys2027/variance/continuation_ppl.log:114: rabit2      7.6006      1.16        7.7274              24.710        5.180         4096"
+          ],
+          "bf16_ppl": 7.513773391425638,
+          "legacy_rabit_ppl": 7.6006423020331155,
+          "legacy_relative_delta_pct": 1.156128965861658
+        },
+        "bf16_reproducibility": {
+          "legacy_bf16_ppl": 7.513773391425638,
+          "bf16_batched_control_ppl": 7.513780420171705,
+          "relative_difference": 9.354482362978031e-07,
+          "stepwise_vs_batched_relative_difference": 0.0002149947100137204
+        }
+      },
+      "qwen2_5_7b": {
+        "model_id": "Qwen/Qwen2.5-7B-Instruct",
+        "revision": "16c174980d8a1492910551634b4969e69cdc2444",
+        "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+        "files": 15,
+        "geometry": {
+          "layers": 28,
+          "kv_heads": 4,
+          "attention_heads": 28,
+          "head_dim": 128,
+          "architecture": "Qwen2ForCausalLM"
+        },
+        "hardware": "NVIDIA H100 80GB HBM3",
+        "runtime": {
+          "python_minor": "3.11",
+          "torch": "2.11.0+cu130",
+          "torch_cuda": "13.0",
+          "cuda_device": "NVIDIA H100 80GB HBM3",
+          "transformers": "4.48.2"
+        },
+        "modal_app": "ap-ln4CjmjoYC40x9El0D3PEM",
+        "scored_tokens_per_arm": 4096,
+        "windows": 32,
+        "bf16_ppl": 6.7870010008184805,
+        "rabit_ppl": 112.38555319178539,
+        "relative_delta_pct": 1555.8941597066544,
+        "relative_delta_pct_ci95_paired_bootstrap": [
+          1320.3867153563212,
+          1827.772098941309
+        ],
+        "mean_nll": {
+          "bf16": 1.9150091651827097,
+          "rabit": 4.721935398876667
+        },
+        "rounded": {
+          "bf16_ppl": 6.787,
+          "rabit_ppl": 112.39,
+          "relative_delta_pct": 1555.9,
+          "ci95_pct": [
+            1320.0,
+            1828.0
+          ]
+        },
+        "per_window_paired_nll_delta": {
+          "mean": 2.8069262336939573,
+          "median": 2.7951658964157104,
+          "stdev": 0.45061141156416634,
+          "min": 1.9305983781814575,
+          "max": 3.724118947982788,
+          "windows_positive": 32,
+          "windows_negative": 0
+        },
+        "largest_positive_windows": [
+          {
+            "window": 5,
+            "delta_nll": 3.724118947982788,
+            "bf16_ppl": 5.6535077953621515,
+            "rabit_ppl": 234.2514589398789
+          },
+          {
+            "window": 2,
+            "delta_nll": 3.525831937789917,
+            "bf16_ppl": 5.880621618051746,
+            "rabit_ppl": 199.8354766910256
+          },
+          {
+            "window": 19,
+            "delta_nll": 3.482621431350708,
+            "bf16_ppl": 9.242807858591663,
+            "rabit_ppl": 300.80648518740986
+          }
+        ],
+        "smallest_windows": [
+          {
+            "window": 11,
+            "delta_nll": 1.9305983781814575,
+            "bf16_ppl": 3.349653609258533,
+            "rabit_ppl": 23.091286035314244
+          },
+          {
+            "window": 1,
+            "delta_nll": 2.0813645124435425,
+            "bf16_ppl": 2.3106306135482217,
+            "rabit_ppl": 18.52062530838073
+          },
+          {
+            "window": 23,
+            "delta_nll": 2.1868816614151,
+            "bf16_ppl": 4.749041214388534,
+            "rabit_ppl": 42.30157881066342
+          }
+        ],
+        "concentration": {
+          "share_of_summed_window_delta_from_top_1": 0.0414612666793548,
+          "share_from_top_3": 0.11948760209089092,
+          "share_from_top_8_of_32": 0.3007070804719492,
+          "aggregate_delta_pct_without_top_3_windows": 1429.0155844274796,
+          "tokens_with_positive_delta_of_4096": 3583
+        },
+        "legacy_logical_evaluator_context_only": {
+          "source": [
+            "results/mlsys2027/second_model/quality/continuation_ppl.log:27273: bf16        6.7837      0.00        6.8907              56.000        1.000         4096",
+            "results/mlsys2027/second_model/quality/continuation_ppl.log:27274: rabit2      299.6214    4316.80     324.2389            10.811        5.180         4096"
+          ],
+          "bf16_ppl": 6.7836727695765315,
+          "legacy_rabit_ppl": 299.6214416013361,
+          "legacy_relative_delta_pct": 4316.802693447724
+        },
+        "bf16_reproducibility": {
+          "legacy_bf16_ppl": 6.7836727695765315,
+          "bf16_batched_control_ppl": 6.783683137667368,
+          "relative_difference": 1.528388999399002e-06,
+          "stepwise_vs_batched_relative_difference": 0.0004890946531227952
+        }
+      }
+    },
+    "interpretation": {
+      "case": 1,
+      "condition": "Llama remains near its BF16 control while Qwen still shows severe degradation.",
+      "interpretation": "The frozen operating point shows model-specific quality sensitivity; mechanism remains undiagnosed.",
+      "applied": "descriptively, by review decision; no numerical definition of 'near BF16' is introduced"
+    },
+    "qualification": {
+      "statement": "The old logical evaluator materially distorted the MAGNITUDE of the Qwen degradation (legacy Qwen RABIT PPL 299.62 vs canonical 112.39), but the severe Qwen sensitivity remains under canonical semantics. The Qwen degradation is therefore NOT merely an old-evaluator artifact.",
+      "no_causal_decomposition": "The change from 299.62 to 112.39 is not attributed to the metadata-layout fix or to the aging fix individually; no causal decomposition has been run."
+    }
+  },
+  "long_context": {
+    "status": "ACCEPTED (2026-10-03): the final canonical long-context quality evidence",
+    "evidence_commit": "7896fcd",
+    "registered_attempt": 1,
+    "validity_gates_passed": "14 / 14",
+    "model": {
+      "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+      "model_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+      "files_checked": 18,
+      "passed": true
+    },
+    "hardware": "NVIDIA H100 80GB HBM3",
+    "runtime": {
+      "python_minor": "3.11",
+      "torch": "2.11.0+cu130",
+      "torch_cuda": "13.0",
+      "cuda_device": "NVIDIA H100 80GB HBM3",
+      "transformers": "4.48.2"
+    },
+    "modal_app": "ap-BQkWkr8DcHqc2MMJONbYKQ",
+    "wall_clock_seconds": 6343.1,
+    "protocol": {
+      "file": "benchmarks/mlsys2027/canonical_longctx_protocol.json (sha256_lf 64513be602c1a0efb6a0035bcd2975471c608d05fb121a74e0a3761eae654675)",
+      "arms": "BF16 vs canonical RABIT (K3 / V2 / G32 / R4 / META8g64), identical prompt token ids per pair",
+      "generation": {
+        "prefill": "prompt[:-1] in BF16",
+        "first_decode_step": "the last prompt token",
+        "decoding": "greedy argmax, one token per forward",
+        "stop": "tokenizer EOS (not kept) or the token limit",
+        "answer": "tokenizer.decode(kept ids, skip_special_tokens=True).strip()"
+      },
+      "tasks": {
+        "niah": {
+          "cases": 57,
+          "contexts": [
+            4096,
+            8192,
+            16384
+          ],
+          "depths": [
+            0.05,
+            0.1,
+            0.15,
+            0.2,
+            0.25,
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5,
+            0.55,
+            0.6,
+            0.65,
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95
+          ],
+          "max_new_tokens": 16,
+          "order": "context-major, then depth",
+          "prompt": "instruction + WikiText-2 filler with the needle at round(filler x depth) + question; no chat template; token ids without special tokens",
+          "filler": {
+            "url": "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt",
+            "sha256": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0"
+          },
+          "warmup": "one unreported BF16 case at 4096 tokens, depth 0.05",
+          "metric": "exact match: regex RABIT-\\d{4} on the upper-cased answer equals RABIT-7291"
+        },
+        "passage_retrieval": {
+          "revision": "915b0c6ec0b6dfae1cd44224b7d8995317837f27",
+          "filename": "passage_retrieval_en/test-00000-of-00001.parquet",
+          "bytes": 7029836,
+          "sha256": "452f03dbb0e394de2b26d6e016bf1e715a3ebac9dc93844fde73c0e8e74cfd68",
+          "samples": 200,
+          "repo": "zai-org/LongBench",
+          "selection": "dataset rows [0, 200)",
+          "max_input_tokens": 16384,
+          "max_new_tokens": 32,
+          "metric": "LongBench retrieval score, mean x 100"
+        },
+        "hotpotqa": {
+          "revision": "92b6c5fbfb0c97b91e92d9ef79802f95ce74b05e",
+          "filename": "hotpotqa_e/test-00000-of-00001.parquet",
+          "bytes": 7196922,
+          "sha256": "44ca413b8c2435a771cd7987b1d9298ab8fce512684533994b5a55c67b539dc3",
+          "samples": 100,
+          "repo": "zai-org/LongBench",
+          "selection": "rows with length >= 8000 (bucket 8k+), filtered positions [0, 100)",
+          "max_input_tokens": 16384,
+          "max_new_tokens": 32,
+          "metric_primary": "qa_f1_score_legacy: the accepted Exp12 scorer verbatim, including its historical article behaviour (articles are NOT removed); max over references; mean x 100",
+          "metric_secondary": "qa_f1_score_official: standards-aligned LongBench qa_f1_score (articles removed); computed from the identical predictions; secondary only"
+        }
+      },
+      "prompt_sets": {
+        "definition": "sha256 of the ordered 'key<TAB>token count<TAB>int64-LE token-id sha256' lines",
+        "niah": {
+          "units": 57,
+          "prompt_set_sha256": "452dbe81bf7cc331f163dfd485dca8d4b7691613a7065a7aba79b00ee8e4f962"
+        },
+        "passage_retrieval": {
+          "units": 200,
+          "prompt_set_sha256": "c59428c8210bd4a49ff127995ca5e160b24481f06ab616afe34d532755b81260"
+        },
+        "hotpotqa": {
+          "units": 100,
+          "prompt_set_sha256": "01e6976cc58d161c2b06f084101fc4b416437433c6279f7eba80b09bb2a16b1a"
+        }
+      },
+      "statistics": {
+        "niah": "deterministic grid only (no inferential statistics): exact-retrieval counts overall and per context, failed coordinates, cases changed",
+        "passage_retrieval_hotpotqa": "aggregate = mean score x 100; delta = rabit - bf16 (points); paired percentile bootstrap over examples (Exp12 procedure and seeds)",
+        "resamples": 10000,
+        "confidence": 0.95,
+        "seed": {
+          "passage_retrieval": 20270931,
+          "hotpotqa": 20270932
+        },
+        "descriptive": "examples changed, per-example delta distribution, concentration (top-1 / top-3 contributions), worst examples; nothing is removed"
+      }
+    },
+    "niah": {
+      "n": 57,
+      "bf16_passed": 57,
+      "rabit_passed": 57,
+      "delta": 0,
+      "per_context": {
+        "4096": {
+          "bf16": "19 / 19",
+          "rabit": "19 / 19"
+        },
+        "8192": {
+          "bf16": "19 / 19",
+          "rabit": "19 / 19"
+        },
+        "16384": {
+          "bf16": "19 / 19",
+          "rabit": "19 / 19"
+        }
+      },
+      "score_changes": 0,
+      "answer_text_changed": 23,
+      "inferential_statistics": "none (deterministic grid; cases are not independent draws)"
+    },
+    "passage_retrieval": {
+      "n": 200,
+      "bf16": 100.0,
+      "rabit": 100.0,
+      "delta_points": 0.0,
+      "ci95_paired_bootstrap": [
+        0.0,
+        0.0
+      ],
+      "score_changes": 0,
+      "prediction_text_changed": 79
+    },
+    "hotpotqa_primary_legacy_compatible_scorer": {
+      "n": 100,
+      "bf16_f1": 59.29949070537306,
+      "rabit_f1": 58.27376099319833,
+      "delta_points": -1.02572971217473,
+      "relative_delta_pct": -1.7297445559372904,
+      "ci95_paired_bootstrap": [
+        -4.235586408476436,
+        2.1993342264442006
+      ],
+      "ci_contains_zero": true,
+      "scores_changed": 8,
+      "worse": 5,
+      "better": 3,
+      "identical_scores": 92,
+      "median_paired_delta_points": 0.0,
+      "prediction_text_changed": 20,
+      "changed_examples": [
+        {
+          "key": 201,
+          "bf16": 0.5,
+          "rabit": 0.0
+        },
+        {
+          "key": 203,
+          "bf16": 0.1,
+          "rabit": 0.0
+        },
+        {
+          "key": 207,
+          "bf16": 1.0,
+          "rabit": 0.5
+        },
+        {
+          "key": 225,
+          "bf16": 0.5,
+          "rabit": 0.6666666666666666
+        },
+        {
+          "key": 226,
+          "bf16": 0.0,
+          "rabit": 1.0
+        },
+        {
+          "key": 257,
+          "bf16": 1.0,
+          "rabit": 0.0
+        },
+        {
+          "key": 273,
+          "bf16": 0.888888888888889,
+          "rabit": 0.5714285714285715
+        },
+        {
+          "key": 289,
+          "bf16": 0.47058823529411764,
+          "rabit": 0.6956521739130435
+        }
+      ],
+      "rounded": {
+        "bf16": 59.3,
+        "rabit": 58.27,
+        "delta": -1.03,
+        "relative_delta_pct": -1.73,
+        "ci95": [
+          -4.24,
+          2.2
+        ]
+      }
+    },
+    "hotpotqa_secondary_official_scorer": {
+      "n": 100,
+      "bf16_f1": 59.85098039215686,
+      "rabit_f1": 58.71457431457432,
+      "delta_points": -1.1364060775825493,
+      "relative_delta_pct": -1.8987259191688393,
+      "ci95_paired_bootstrap": [
+        -4.2980222391987155,
+        2.025210084033617
+      ],
+      "ci_contains_zero": true,
+      "scores_changed": 7,
+      "worse": 5,
+      "better": 2,
+      "identical_scores": 93,
+      "median_paired_delta_points": 0.0,
+      "prediction_text_changed": 20,
+      "changed_examples": [
+        {
+          "key": 201,
+          "bf16": 0.5,
+          "rabit": 0.0
+        },
+        {
+          "key": 203,
+          "bf16": 0.11764705882352942,
+          "rabit": 0.0
+        },
+        {
+          "key": 207,
+          "bf16": 1.0,
+          "rabit": 0.5714285714285715
+        },
+        {
+          "key": 226,
+          "bf16": 0.0,
+          "rabit": 1.0
+        },
+        {
+          "key": 257,
+          "bf16": 1.0,
+          "rabit": 0.0
+        },
+        {
+          "key": 273,
+          "bf16": 0.888888888888889,
+          "rabit": 0.5714285714285715
+        },
+        {
+          "key": 289,
+          "bf16": 0.5000000000000001,
+          "rabit": 0.7272727272727273
+        }
+      ],
+      "rounded": {
+        "bf16": 59.85,
+        "rabit": 58.71,
+        "delta": -1.14,
+        "relative_delta_pct": -1.9,
+        "ci95": [
+          -4.3,
+          2.03
+        ]
+      }
+    },
+    "hotpotqa_scorer_note": "PRIMARY = the accepted Exp12 scorer verbatim (articles not removed), for comparability with Exp12; SECONDARY = standards-aligned LongBench qa_f1_score; both preregistered and computed from the identical predictions",
+    "concentration": {
+      "niah": "0 / 57 score changes",
+      "passage_retrieval": "0 / 200 score changes",
+      "hotpotqa_primary": "8 / 100 score changes (5 worse, 3 better); 92 / 100 identical scores; median paired delta 0; the difference is concentrated rather than broadly distributed",
+      "notable_examples_descriptive_only": [
+        {
+          "key": 257,
+          "delta_points": -100.0,
+          "answers": [
+            "Pennsylvania"
+          ],
+          "bf16_prediction": "Pennsylvania",
+          "rabit_prediction": "United Airlines Flight 93"
+        },
+        {
+          "key": 201,
+          "delta_points": -50.0,
+          "answers": [
+            "2016–17 NHL season"
+          ],
+          "bf16_prediction": "2016–17",
+          "rabit_prediction": "2016-17"
+        },
+        {
+          "key": 207,
+          "delta_points": -50.0,
+          "answers": [
+            "Vice President"
+          ],
+          "bf16_prediction": "Vice President.",
+          "rabit_prediction": "Vice President of the United States."
+        },
+        {
+          "key": 273,
+          "delta_points": -31.746031746031743,
+          "answers": [
+            "more than 330 million people"
+          ],
+          "bf16_prediction": "more than 330 million",
+          "rabit_prediction": "330 million"
+        },
+        {
+          "key": 203,
+          "delta_points": -10.0,
+          "answers": [
+            "Passion Pit is an American indietronica band"
+          ],
+          "bf16_prediction": "Both bands have had a lead guitarist leave the band and then return.",
+          "rabit_prediction": "Both bands have had their music featured in various video games, with Sum 41's \"Underclass Hero\" being featured in Madden 08 and NBA 08"
+        }
+      ],
+      "rule": "nothing is excluded; formatting-sensitive examples are NOT removed post hoc"
+    },
+    "bf16_reproducibility_vs_exp12": {
+      "niah": "57 / 57 reproduced",
+      "passage_retrieval": "200 / 200 scores reproduced",
+      "hotpotqa": "99 / 100 scores reproduced; one example (dataset index 289) differs, the known greedy-decoding run-to-run variability; the accepted BF16 validity gate passed; not rerun",
+      "detail": {
+        "niah": {
+          "note": "this run's BF16 arm vs the accepted Exp12 BF16 arm, per example (3-decimal printed scores)",
+          "examples_differing": 0,
+          "indices": [],
+          "l1_distance": 0.0
+        },
+        "passage_retrieval": {
+          "note": "this run's BF16 arm vs the accepted Exp12 BF16 arm, per example (3-decimal printed scores)",
+          "examples_differing": 0,
+          "indices": [],
+          "l1_distance": 0.0
+        },
+        "hotpotqa": {
+          "note": "this run's BF16 arm vs the accepted Exp12 BF16 arm, per example (3-decimal printed scores)",
+          "examples_differing": 1,
+          "indices": [
+            89
+          ],
+          "l1_distance": 0.225
+        }
+      }
+    },
+    "bf16_validity_checks": {
+      "niah": {
+        "rule": "BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks.",
+        "historical_exp12_rule": "on the canonical subset, bf16 and rabit2 reproduce the canonical targets within the original Exp1 tolerances",
+        "arm": "bf16 only (no RABIT gate)",
+        "canonical_subset_units": 15,
+        "target_accuracy_pct": 100.0,
+        "tolerance_absolute_points": 1.0,
+        "canonical_subset_units_present": true,
+        "observed_accuracy_pct": 100.0,
+        "passed": true
+      },
+      "passage_retrieval": {
+        "rule": "BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks.",
+        "historical_exp12_rule": "on the canonical subset, bf16 and rabit2 reproduce the canonical targets within the original Exp1 tolerances",
+        "arm": "bf16 only (no RABIT gate)",
+        "canonical_subset_units": 10,
+        "target_accuracy_pct": 100.0,
+        "tolerance_absolute_points": 1.0,
+        "canonical_subset_units_present": true,
+        "observed_accuracy_pct": 100.0,
+        "passed": true
+      },
+      "hotpotqa": {
+        "rule": "BF16-only validity checks adapted from the historical Exp12 canonical-subset sanity checks.",
+        "historical_exp12_rule": "frozen per-example QA control gate on the canonical subset (results/quality/hotpotqa.log), applied in Exp12 to bf16 and legacy rabit2",
+        "arm": "bf16 only (no RABIT gate)",
+        "n_canonical_subset": 20,
+        "canonical_subset_identity": true,
+        "max_allowed_mismatch_count": 1,
+        "max_allowed_l1_score_distance": 0.065,
+        "score_mismatch_count": 1,
+        "score_mismatch_indices": [
+          3
+        ],
+        "l1_score_distance": 0.035,
+        "passed": true
+      }
+    },
+    "legacy_exp12_side_by_side_provenance_only": {
+      "niah": {
+        "label": "LEGACY LOGICAL-EVALUATOR RESULTS",
+        "legacy_bf16": 100.0,
+        "legacy_rabit2": 100.0,
+        "source": [
+          "results/mlsys2027/variance/niah.log:392: bf16        57          57          100.0         1194.542        1.000",
+          "results/mlsys2027/variance/niah.log:393: rabit2      57          57          100.0         226.786         5.263"
+        ]
+      },
+      "passage_retrieval": {
+        "label": "LEGACY LOGICAL-EVALUATOR RESULTS",
+        "legacy_bf16": 100.0,
+        "legacy_rabit2": 99.5,
+        "source": [
+          "results/mlsys2027/variance/passage_retrieval.log:1046: bf16          100.0         200.00        1569.362      200",
+          "results/mlsys2027/variance/passage_retrieval.log:1047: rabit2        99.5          199.00        297.932       200"
+        ]
+      },
+      "hotpotqa": {
+        "label": "LEGACY LOGICAL-EVALUATOR RESULTS",
+        "legacy_bf16": 59.526999999999994,
+        "legacy_rabit2": 57.594,
+        "source": [
+          "results/mlsys2027/variance/hotpotqa.log:545: bf16          59.5          59.52         1857.896      100",
+          "results/mlsys2027/variance/hotpotqa.log:546: rabit2        57.6          57.59         352.612       100"
+        ]
+      }
+    },
+    "interpretation": "On Llama-3.1-8B, the frozen canonical RABIT operating point preserves exact retrieval on the tested NIAH and Passage Retrieval suites. On the 100-example HotpotQA subset, canonical RABIT is approximately 1 F1 point below BF16, with the paired confidence interval spanning zero and the observed differences concentrated in a small number of examples."
+  },
+  "claims": {
+    "supported": [
+      "RABIT's physical representation and canonical cache semantics transfer across the tested Llama and Qwen geometries, but the quality robustness of a single frozen low-bit operating point is strongly model-dependent.",
+      "On Llama-3.1-8B, the frozen canonical RABIT operating point preserves exact retrieval on the tested NIAH and Passage Retrieval suites. On the 100-example HotpotQA subset, canonical RABIT is approximately 1 F1 point below BF16, with the paired confidence interval spanning zero and the observed differences concentrated in a small number of examples.",
+      "The same frozen operating point exhibits strongly model-dependent quality behavior (Llama continuation PPL +1.56 %; Qwen continuation PPL +1555.9 %)."
+    ],
+    "not_supported": [
+      "RABIT quality generalizes across models.",
+      "The frozen K3/V2/G32/R4/META8g64 operating point is universally suitable.",
+      "Qwen degradation is caused by GQA, projection bias, outliers, fallback attention, or any other specific mechanism.",
+      "HotpotQA is statistically equivalent",
+      "HotpotQA is proven unaffected",
+      "RABIT causes no degradation",
+      "quality is universally preserved"
+    ],
+    "note": "a confidence interval spanning zero does NOT establish equivalence; mechanism of the Qwen degradation unknown"
+  },
+  "limitations": [
+    "Logical quality (HF transformers; canonical cache semantics); not a physical serving measurement.",
+    "One frozen operating point; no retuning and no ablation under canonical semantics.",
+    "Long-context evidence is Llama-only: Qwen NIAH / Passage Retrieval / HotpotQA were NOT run.",
+    "Qwen shows severe continuation-PPL degradation at this operating point; the mechanism is undiagnosed and no causal decomposition of the legacy-vs-canonical difference has been run.",
+    "HotpotQA: 100 examples of one pinned 8k+ bucket; the confidence interval spans zero, which does NOT establish equivalence; the bootstrap is conditional on this run's greedy generations and does not model run-to-run GPU variability (one BF16 example differs from Exp12).",
+    "NIAH and Passage Retrieval are saturated for BF16 (100 %) on these suites; they show no loss but cannot resolve small effects. NIAH cases share one needle / filler construction and are not independent draws.",
+    "Continuation PPL: WikiText-2, N = 32 windows, 4096 scored tokens per arm.",
+    "Qasper and multilingual PPL have NOT been run under canonical semantics.",
+    "CPU and CUDA canonical states are not bit-identical; validity rests on same-device conformance with the independent oracle (no cross-device tolerance).",
+    "The HotpotQA primary scorer keeps the historical Exp12 article behaviour; the official scorer is reported as secondary.",
+    "The Llama revision was recovered by content matching of the preserved historical cache; the dataset file hashes are newly recovered provenance (Exp12 recorded commits only)."
+  ],
+  "quality_experiments_complete": [
+    "canonical evaluator validation",
+    "CPU / CUDA semantic conformance",
+    "two-model canonical continuation PPL",
+    "Llama canonical long-context validation"
+  ],
+  "not_to_be_launched_unless_reopened": [
+    "Qwen NIAH",
+    "Qwen Passage Retrieval",
+    "Qwen HotpotQA",
+    "Qasper",
+    "multilingual",
+    "K / V / group / residual / metadata ablations",
+    "quality retuning"
+  ],
+  "legacy": "Exp1, Exp2, Exp7-Exp11, Exp12 (quality) and Exp14 (legacy quality) are LEGACY LOGICAL-EVALUATOR RESULTS: kept unchanged; shown side by side for provenance only; never pooled with canonical measurements",
+  "evidence": {
+    "canonical_implementation": "c360697 (canonical_rabit_quality.py, sha256_lf 195cb489...)",
+    "cpu_canonical_vs_cpu_oracle_parity": "8fa9a9c",
+    "llama_identity_audit": "3bde966",
+    "cuda_conformance_llama_1k": "ec80638",
+    "cuda_conformance_qwen_1k": "fd8d275",
+    "cuda_conformance_llama_16k": "2637457",
+    "validity_gate_amendment": "d7ba819",
+    "continuation_ppl_attempt_2": "10b0973 (Llama run 01cced9); accepted bae70af",
+    "long_context_harness_and_protocol": "a4d8ac5 (protocol sha256_lf 64513be6...)",
+    "long_context_smoke_test": "432033c",
+    "long_context_attempt_1": "7896fcd",
+    "invalid": "continuation PPL Attempt 1: INVALID, NO QUALITY RESULT (5d8d212, 3cba625); never pooled"
+  },
+  "full_detail": [
+    "continuation_ppl/two_model_attempt_2/summary.json",
+    "long_context/attempt_1/summary.json"
+  ]
+}

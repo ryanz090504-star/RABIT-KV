@@ -1,0 +1,8 @@
+{
+  "kind": "ERRATUM / addendum to the accepted 16k CUDA conformance diagnostic (evidence commit 2637457); the evidence files are NOT modified",
+  "applies_to": "attempt_1/result.json, field no_scoring.note",
+  "incorrect_text": "one prefill for the raw K / V and one inside the unchanged core.prefill_state_parity; no loss, no PPL",
+  "correction": "for the input niah_16384_depth_0.50 exactly ONE prefill ran (no_scoring.prefill_forwards = 1). The second prefill mentioned by the static note (inside core.prefill_state_parity) is performed only for the ppl_window_1 input and was skipped here (attempt1_gate_reevaluated = {\"skipped\": ...}).",
+  "effect_on_result": "none: the diagnostic result is unchanged (32 / 32 layers, 38 / 38 compared fields, 0 differing elements; CUDA canonical == CUDA independent oracle bit-exactly; no scoring, no generation, logits unread)",
+  "evidence_overwritten": false
+}

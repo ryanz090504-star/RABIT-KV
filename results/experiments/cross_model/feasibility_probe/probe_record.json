@@ -1,0 +1,810 @@
+{
+  "experiment": 14,
+  "kind": "feasibility_probe",
+  "non_evidence": true,
+  "status": "passed",
+  "git_head": "c05eb401c086af88a71ed9b7df197dedaeb42cf5",
+  "started_utc": "2026-09-30T18:54:24.236535+00:00",
+  "harness_sha256": {
+    "run_experiment14_second_model.py": "3054246ffa2f665b0ff02b8569ff5422d1a7d1ad60f017f3050766568dc0b026",
+    "exp14_deployment_modal.py": "33eab0ad7588d58c8782107215a5a433ebb48fbff102dc13bcb892ddab4ec7c6",
+    "exp14_engine_worker.py": "80297e4569846388229fd7a8ab32579a376a7223f15885161f86a120957be7bc",
+    "exp14_probe_worker.py": "b6651c24f4dc1bc8bf28e5fb288e75944a3cdfc4166c5e98361717f8df8475b9",
+    "exp14_shape_gate.py": "a6054a3b73b217895f6d6fcc818f2d09868ac9801dd78a2c2ef78a12fbc64398",
+    "exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+    "exp14_model_snapshot_modal.py": "ee691d7e9963f042939cf06d5ea3d5b691b6ad7643219a7575d08f0f51ee7f09",
+    "exp14_second_model_protocol.json": "7ebb7a44a180b7cfabb9703b95c20f0a8618b90282cd25166a17df7597a2cfb3",
+    "test_experiment14_second_model.py": "ca7ab1b37433ebd871ecc822601e7cb5d5ad02b2a7dcf0879efa5ce1cfcd0b5a",
+    "exp3_correctness_gate.py": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce",
+    "exp3_watchdog.py": "05e6472e8172a0b7e264ecf7509752bb9a70818f08ba67da476c69db38164d21"
+  },
+  "protocol_sha256": "7ebb7a44a180b7cfabb9703b95c20f0a8618b90282cd25166a17df7597a2cfb3",
+  "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+  "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+  "model_manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+  "modal_returncode": 0,
+  "completed_utc": "2026-09-30T19:03:30.547160+00:00",
+  "modal_app_ids": [
+    "ap-FBtDZaGASbdACItc2Eu03H"
+  ],
+  "session_log_sha256": "1878530fc004d46c9eed93c4adfd70ecc111e987f49b58cf88bfbea331095a2d",
+  "result": {
+    "checks": {
+      "rabit_gate_passed": true,
+      "shape_gate_passed": true,
+      "no_watchdog_timeout": true,
+      "session_complete": true,
+      "gpu_is_h100_80gb": true,
+      "model_is_model_b": true,
+      "model_revision_frozen": true,
+      "model_snapshot_verified": true,
+      "P1_exit_0": true,
+      "P1_gpu_clean_before": true,
+      "P1_v2_runner": true,
+      "P1_block_size_32": true,
+      "P1_engine_cache_dtype": true,
+      "P1_kv_quant_mode": true,
+      "P1_rabit_policy_frozen": true,
+      "P1_geometry": true,
+      "P1_backend_evidence": true,
+      "P1_physical_layout_consistent": true,
+      "P1_workload_generation": true,
+      "P1_sanity_generation_completed": true,
+      "P2_exit_0": true,
+      "P2_gpu_clean_before": true,
+      "P2_v2_runner": true,
+      "P2_block_size_32": true,
+      "P2_engine_cache_dtype": true,
+      "P2_kv_quant_mode": true,
+      "P2_rabit_policy_frozen": true,
+      "P2_geometry": true,
+      "P2_backend_evidence": true,
+      "P2_physical_layout_consistent": true,
+      "P2_workload_generation": true,
+      "P2_sanity_generation_completed": true
+    },
+    "passed": true,
+    "gates": {
+      "rabit_gate_result": {
+        "passed": true
+      },
+      "rabit_gate_passed": true,
+      "shape_gate_summary": {
+        "criterion": {
+          "C1": "max|y - r| <= u * max|r| (y == 0 if max|r| == 0)",
+          "C2": "|y_i - r_i| / |r_i| <= u where |r_i| >= floor * max|r|",
+          "floor": 0.01,
+          "kind": "fixed dtype-aware numerical conformance checks",
+          "r": "unrounded FP32 kernel-semantics output from the independent Rabit2OnlineStateRef state",
+          "u": 0.00390625
+        },
+        "cuda_available": true,
+        "diagnostic_old_max_abs_tol_non_gating": 0.005,
+        "geometries": {
+          "control_llama3_1_8b": {
+            "boundary_replays": [
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.00390625,
+                  "max_ulp_vs_bf16_rounded_ref": 1,
+                  "old_5e-3_would_fail": 8,
+                  "old_max_abs_vs_reference_state_fp32": 0.009876489639282227,
+                  "old_max_abs_vs_runtime_state_fp32": 0.009876489639282227,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8119405663879397,
+                  "runtime_state_max_C2_ratio": 0.9918061080919269
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8119405663879397,
+                "max_C2_ratio": 0.9918061080919269,
+                "prefill": 1,
+                "seed": 140101,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.0009765625,
+                  "max_ulp_vs_bf16_rounded_ref": 1,
+                  "old_5e-3_would_fail": 9,
+                  "old_max_abs_vs_reference_state_fp32": 0.008916139602661133,
+                  "old_max_abs_vs_runtime_state_fp32": 0.008916139602661133,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.6977118294003324,
+                  "runtime_state_max_C2_ratio": 0.9955901594902411
+                },
+                "failures": [],
+                "max_C1_ratio": 0.6977118294003324,
+                "max_C2_ratio": 0.9955901594902411,
+                "prefill": 4,
+                "seed": 140104,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.0001220703125,
+                  "max_ulp_vs_bf16_rounded_ref": 2,
+                  "old_5e-3_would_fail": 9,
+                  "old_max_abs_vs_reference_state_fp32": 0.008708000183105469,
+                  "old_max_abs_vs_runtime_state_fp32": 0.008708000183105469,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.7832963025578179,
+                  "runtime_state_max_C2_ratio": 0.9931717023031774
+                },
+                "failures": [],
+                "max_C1_ratio": 0.7832963025578179,
+                "max_C2_ratio": 0.9931717023031774,
+                "prefill": 5,
+                "seed": 140105,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.0009765625,
+                  "max_ulp_vs_bf16_rounded_ref": 1,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.0037478208541870117,
+                  "old_max_abs_vs_runtime_state_fp32": 0.0037478208541870117,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8117939320745773,
+                  "runtime_state_max_C2_ratio": 0.9952005297015465
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8117939320745773,
+                "max_C2_ratio": 0.9952005297015465,
+                "prefill": 35,
+                "seed": 140135,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.001953125,
+                  "max_ulp_vs_bf16_rounded_ref": 1,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.003928542137145996,
+                  "old_max_abs_vs_runtime_state_fp32": 0.003928542137145996,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.9613358057024097,
+                  "runtime_state_max_C2_ratio": 0.9953765407176954
+                },
+                "failures": [],
+                "max_C1_ratio": 0.9613358057024097,
+                "max_C2_ratio": 0.9953765407176954,
+                "prefill": 36,
+                "seed": 140136,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.001953125,
+                  "max_ulp_vs_bf16_rounded_ref": 7,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.004304349422454834,
+                  "old_max_abs_vs_runtime_state_fp32": 0.004304349422454834,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.745270417530654,
+                  "runtime_state_max_C2_ratio": 0.9954070576634595
+                },
+                "failures": [],
+                "max_C1_ratio": 0.745270417530654,
+                "max_C2_ratio": 0.9954070576634595,
+                "prefill": 37,
+                "seed": 140137,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.00048828125,
+                  "max_ulp_vs_bf16_rounded_ref": 148,
+                  "old_5e-3_would_fail": 1,
+                  "old_max_abs_vs_reference_state_fp32": 0.005567312240600586,
+                  "old_max_abs_vs_runtime_state_fp32": 0.005567312240600586,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.6979622302005362,
+                  "runtime_state_max_C2_ratio": 0.9959878271616549
+                },
+                "failures": [],
+                "max_C1_ratio": 0.6979622302005362,
+                "max_C2_ratio": 0.9959878271616549,
+                "prefill": 68,
+                "seed": 140168,
+                "steps": 8
+              }
+            ],
+            "checks": {
+              "alignment_invariants": true,
+              "boundary_state_and_attention": true,
+              "dispatch_matches_predicates": true,
+              "main_workload_state_and_attention": true,
+              "page_bytes_expected": true,
+              "predicates_as_expected": true
+            },
+            "diagnostic_old_5e-3_would_fail": 27,
+            "diagnostic_old_max_abs_fp32": 0.009876489639282227,
+            "geometry": {
+              "head_dim": 128,
+              "kv_heads": 8,
+              "q_heads": 32
+            },
+            "main_dispatch_counts": {
+              "append_calls": 62,
+              "append_fallback_calls": 0,
+              "decode_calls": 64,
+              "decode_fallback_calls": 0,
+              "decode_step_quant_fallback_calls_total": 0,
+              "decode_steps_with_quant_fallback": 0
+            },
+            "main_workload_replays": [
+              {
+                "checkpoints": 32,
+                "decode_step_quant_fallback_calls": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.00048828125,
+                  "max_ulp_vs_bf16_rounded_ref": 4,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.0004981458187103271,
+                  "old_max_abs_vs_runtime_state_fp32": 0.0004981458187103271,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.896864580326373,
+                  "runtime_state_max_C2_ratio": 0.9950713716586652
+                },
+                "failures": [],
+                "max_C1_ratio": 0.896864580326373,
+                "max_C2_ratio": 0.9950713716586652,
+                "prefill": 2048,
+                "seed": 140001,
+                "steps": 31
+              },
+              {
+                "checkpoints": 32,
+                "decode_step_quant_fallback_calls": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.00048828125,
+                  "max_ulp_vs_bf16_rounded_ref": 3,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.0004906654357910156,
+                  "old_max_abs_vs_runtime_state_fp32": 0.0004906654357910156,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8220094244103352,
+                  "runtime_state_max_C2_ratio": 0.9955638983641356
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8220094244103352,
+                "max_C2_ratio": 0.9955638983641356,
+                "prefill": 2048,
+                "seed": 140002,
+                "steps": 31
+              }
+            ],
+            "max_C1_ratio": 0.9613358057024097,
+            "max_C2_ratio": 0.9959878271616549,
+            "page_bytes": 24832,
+            "passed": true,
+            "predicates": {
+              "fast_append_engaged": true,
+              "gqa4_engaged": true
+            }
+          },
+          "model_b_qwen2_5_7b": {
+            "boundary_replays": [
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.0,
+                  "max_ulp_vs_bf16_rounded_ref": 0,
+                  "old_5e-3_would_fail": 7,
+                  "old_max_abs_vs_reference_state_fp32": 0.007697582244873047,
+                  "old_max_abs_vs_runtime_state_fp32": 0.007697582244873047,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8789104644928388,
+                  "runtime_state_max_C2_ratio": 0.9949187874009296
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8789104644928388,
+                "max_C2_ratio": 0.9949187874009296,
+                "prefill": 1,
+                "seed": 140101,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 1.9073486328125e-06,
+                  "max_ulp_vs_bf16_rounded_ref": 1,
+                  "old_5e-3_would_fail": 9,
+                  "old_max_abs_vs_reference_state_fp32": 0.011920928955078125,
+                  "old_max_abs_vs_runtime_state_fp32": 0.011920928955078125,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8211547707810791,
+                  "runtime_state_max_C2_ratio": 0.992111854258112
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8211547707810791,
+                "max_C2_ratio": 0.992111854258112,
+                "prefill": 4,
+                "seed": 140104,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.0009765625,
+                  "max_ulp_vs_bf16_rounded_ref": 1,
+                  "old_5e-3_would_fail": 9,
+                  "old_max_abs_vs_reference_state_fp32": 0.009585261344909668,
+                  "old_max_abs_vs_runtime_state_fp32": 0.009585261344909668,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8978544588579722,
+                  "runtime_state_max_C2_ratio": 0.9928436594837275
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8978544588579722,
+                "max_C2_ratio": 0.9928436594837275,
+                "prefill": 5,
+                "seed": 140105,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.0009765625,
+                  "max_ulp_vs_bf16_rounded_ref": 1,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.004381716251373291,
+                  "old_max_abs_vs_runtime_state_fp32": 0.004381716251373291,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8031267815445844,
+                  "runtime_state_max_C2_ratio": 0.9897801575482353
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8031267815445844,
+                "max_C2_ratio": 0.9897801575482353,
+                "prefill": 35,
+                "seed": 140135,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.001953125,
+                  "max_ulp_vs_bf16_rounded_ref": 2,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.0038895606994628906,
+                  "old_max_abs_vs_runtime_state_fp32": 0.0038895606994628906,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8792651936632158,
+                  "runtime_state_max_C2_ratio": 0.9908601126538731
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8792651936632158,
+                "max_C2_ratio": 0.9908601126538731,
+                "prefill": 36,
+                "seed": 140136,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 6.103515625e-05,
+                  "max_ulp_vs_bf16_rounded_ref": 1,
+                  "old_5e-3_would_fail": 1,
+                  "old_max_abs_vs_reference_state_fp32": 0.005245685577392578,
+                  "old_max_abs_vs_runtime_state_fp32": 0.005245685577392578,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8447038999588737,
+                  "runtime_state_max_C2_ratio": 0.9911428426217034
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8447038999588737,
+                "max_C2_ratio": 0.9911428426217034,
+                "prefill": 37,
+                "seed": 140137,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.000244140625,
+                  "max_ulp_vs_bf16_rounded_ref": 1,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.0038275718688964844,
+                  "old_max_abs_vs_runtime_state_fp32": 0.0038275718688964844,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8576580371847927,
+                  "runtime_state_max_C2_ratio": 0.9944000022798973
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8576580371847927,
+                "max_C2_ratio": 0.9944000022798973,
+                "prefill": 68,
+                "seed": 140168,
+                "steps": 8
+              }
+            ],
+            "checks": {
+              "alignment_invariants": true,
+              "boundary_state_and_attention": true,
+              "dispatch_matches_predicates": true,
+              "main_workload_state_and_attention": true,
+              "page_bytes_expected": true,
+              "predicates_as_expected": true
+            },
+            "diagnostic_old_5e-3_would_fail": 26,
+            "diagnostic_old_max_abs_fp32": 0.011920928955078125,
+            "geometry": {
+              "head_dim": 128,
+              "kv_heads": 4,
+              "q_heads": 28
+            },
+            "main_dispatch_counts": {
+              "append_calls": 62,
+              "append_fallback_calls": 62,
+              "decode_calls": 64,
+              "decode_fallback_calls": 64,
+              "decode_step_quant_fallback_calls_total": 62,
+              "decode_steps_with_quant_fallback": 62
+            },
+            "main_workload_replays": [
+              {
+                "checkpoints": 32,
+                "decode_step_quant_fallback_calls": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.00048828125,
+                  "max_ulp_vs_bf16_rounded_ref": 9,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.0005859285593032837,
+                  "old_max_abs_vs_runtime_state_fp32": 0.0005859285593032837,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8826626971107132,
+                  "runtime_state_max_C2_ratio": 0.9953822141622866
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8826626971107132,
+                "max_C2_ratio": 0.9953822141622866,
+                "prefill": 2048,
+                "seed": 140001,
+                "steps": 31
+              },
+              {
+                "checkpoints": 32,
+                "decode_step_quant_fallback_calls": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "diagnostics": {
+                  "max_abs_vs_bf16_rounded_ref": 0.000244140625,
+                  "max_ulp_vs_bf16_rounded_ref": 5,
+                  "old_5e-3_would_fail": 0,
+                  "old_max_abs_vs_reference_state_fp32": 0.0004919618368148804,
+                  "old_max_abs_vs_runtime_state_fp32": 0.0004919618368148804,
+                  "runtime_state_conformance_failures": 0,
+                  "runtime_state_max_C1_ratio": 0.8296642126915077,
+                  "runtime_state_max_C2_ratio": 0.9957153016679129
+                },
+                "failures": [],
+                "max_C1_ratio": 0.8296642126915077,
+                "max_C2_ratio": 0.9957153016679129,
+                "prefill": 2048,
+                "seed": 140002,
+                "steps": 31
+              }
+            ],
+            "max_C1_ratio": 0.8978544588579722,
+            "max_C2_ratio": 0.9957153016679129,
+            "page_bytes": 12416,
+            "passed": true,
+            "predicates": {
+              "fast_append_engaged": false,
+              "gqa4_engaged": false
+            }
+          }
+        },
+        "passed": true
+      },
+      "shape_gate_passed": true
+    },
+    "facts": {
+      "P1": {
+        "kv_cache_dtype": "bfloat16",
+        "capacity_tokens": 902656,
+        "kv": {
+          "attention_backend": "AttentionBackendEnum.TRITON_ATTN",
+          "block_size": 32,
+          "capacity_tokens": 902656,
+          "engine_cache_dtype": "bfloat16",
+          "kv_cache_dtype_skip_layers": [],
+          "kv_quant_mode": "NONE",
+          "num_gpu_blocks": 28208
+        },
+        "reported_kv_cache_gib": 48.21,
+        "implied_bytes_per_token": 57347.53143505388,
+        "geometry": {
+          "architectures": [
+            "Qwen2ForCausalLM"
+          ],
+          "head_dim": 128,
+          "num_attention_heads": 28,
+          "num_hidden_layers": 28,
+          "num_kv_heads": 4,
+          "rabit_fast_append_engaged": false,
+          "rabit_gqa4_decode_engaged": false,
+          "sliding_window": null
+        },
+        "workload_generation": {
+          "bos_token_id": null,
+          "filler_token_id": 279,
+          "output_token_ids_sha256": "c2b3c61f361dac096b39a32c11d97b0ee495b6b3d6c354bc9ee7f82816d452ae",
+          "output_tokens": 32,
+          "prompt_tokens": 2048
+        },
+        "sanity_generation": {
+          "output_tokens": 2,
+          "question": "What is the capital of France? Answer in one word.",
+          "text": "Paris"
+        }
+      },
+      "P2": {
+        "kv_cache_dtype": "rabit_kv2",
+        "capacity_tokens": 4764640,
+        "kv": {
+          "attention_backend": "AttentionBackendEnum.TRITON_ATTN",
+          "block_size": 32,
+          "capacity_tokens": 4764640,
+          "engine_cache_dtype": "rabit_kv2",
+          "kv_cache_dtype_skip_layers": [],
+          "kv_quant_mode": "RABIT_KV2",
+          "num_gpu_blocks": 148895
+        },
+        "reported_kv_cache_gib": 48.21,
+        "implied_bytes_per_token": 10864.429072299272,
+        "geometry": {
+          "architectures": [
+            "Qwen2ForCausalLM"
+          ],
+          "head_dim": 128,
+          "num_attention_heads": 28,
+          "num_hidden_layers": 28,
+          "num_kv_heads": 4,
+          "rabit_fast_append_engaged": false,
+          "rabit_gqa4_decode_engaged": false,
+          "sliding_window": null
+        },
+        "workload_generation": {
+          "bos_token_id": null,
+          "filler_token_id": 279,
+          "output_token_ids_sha256": "d6b29b18068adcc2bfb6a7aee71303f03e01b37ac037ac8d95c2c983c5691128",
+          "output_tokens": 32,
+          "prompt_tokens": 2048
+        },
+        "sanity_generation": {
+          "output_tokens": 2,
+          "question": "What is the capital of France? Answer in one word.",
+          "text": "Paris"
+        }
+      }
+    },
+    "model": {
+      "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "revision": "16c174980d8a1492910551634b4969e69cdc2444",
+      "snapshot_dir": "/model_cache/models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444",
+      "verification": {
+        "dir": "/model_cache/models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444",
+        "extra_files": [],
+        "files_checked": 15,
+        "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+        "mismatches": [],
+        "model_id": "Qwen/Qwen2.5-7B-Instruct",
+        "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+        "observed": {
+          ".gitattributes": {
+            "bytes": 1519,
+            "sha256": "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+          },
+          "LICENSE": {
+            "bytes": 11343,
+            "sha256": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e"
+          },
+          "README.md": {
+            "bytes": 6240,
+            "sha256": "f366f33bbf6bcadbb7d87f0a21a7b65584a56b8d58b0743c77c88bee625b93a6"
+          },
+          "config.json": {
+            "bytes": 663,
+            "sha256": "7463bb0ea78315365e6c6b74de4e73bbcc8359dfb0c5a737584e077d42c0b03c"
+          },
+          "configuration.json": {
+            "bytes": 2,
+            "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+          },
+          "generation_config.json": {
+            "bytes": 243,
+            "sha256": "3a8f9087e486054c8a4a08dae2e5a3ba62e23da212b5b8c08bc42cb983c3459f"
+          },
+          "merges.txt": {
+            "bytes": 1671839,
+            "sha256": "599bab54075088774b1733fde865d5bd747cbcc7a547c5bc12610e874e26f5e3"
+          },
+          "model-00001-of-00004.safetensors": {
+            "bytes": 3945441440,
+            "sha256": "a1333e6293854747c481288ea83b348226af178dd565c49b6f9495ba1966aba7"
+          },
+          "model-00002-of-00004.safetensors": {
+            "bytes": 3864726352,
+            "sha256": "f5d25a2772cb825164a2a2c0fb6d51a87e282abf21e4dd75bc5cfb3cd0ea6185"
+          },
+          "model-00003-of-00004.safetensors": {
+            "bytes": 3864726424,
+            "sha256": "8efdec4c1bc12317ae1a38dc42b595ce777738a64deea3fcb8a0a91381bcdfd5"
+          },
+          "model-00004-of-00004.safetensors": {
+            "bytes": 3556377672,
+            "sha256": "1a72d403cdf0c1ec3cb7f289f17b394a01e64394c2e9b3c0f94dbce3faf879bd"
+          },
+          "model.safetensors.index.json": {
+            "bytes": 27752,
+            "sha256": "624bf7c47cd12468fdc16e38a47cf4f19e0415b859a223ba3c027eed2f0e1028"
+          },
+          "tokenizer.json": {
+            "bytes": 7031645,
+            "sha256": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539"
+          },
+          "tokenizer_config.json": {
+            "bytes": 7305,
+            "sha256": "5b5d4f65d0acd3b2d56a35b56d374a36cbc1c8fa5cf3b3febbbfabf22f359583"
+          },
+          "vocab.json": {
+            "bytes": 2776833,
+            "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910"
+          }
+        },
+        "passed": true
+      }
+    }
+  }
+}

@@ -1,0 +1,981 @@
+{
+  "experiment": "MLSys 2027 Experiment 3 -- matched BF16 vs RABIT-KV physical capacity and latency (ABBA), attempt 2",
+  "status_of_run": "passed",
+  "derivation": "Derived ONLY from bf16_deployment.log, rabit_kv2_deployment.log, manifest.json, integrity_check.json and matched_config_diff.json. The runner's matched_capacity_latency_summary.json and the historical canonical latency are not used. p90 = statistics.quantiles(values, n=10, method='inclusive')[8]. Pooled = both legs of a dtype (30 samples). Signed deltas are rabit_kv2 - bf16 on pooled statistics.",
+  "generated_by": "benchmarks/mlsys2027/build_exp3_summary.py",
+  "validated_by": "benchmarks/mlsys2027/validate_exp3_summary.py",
+  "result_files_sha256": {
+    "modal_session.log": {
+      "raw": "c90f66ac6db958fbeb99527124d78e9b2e054f03ccc7d17e80086c63fd46a20f",
+      "lf_normalized": "00e7a798f98443c74761d89c3cabca099d8d9a502064545d313a632487028aa4"
+    },
+    "correctness_gate.log": {
+      "raw": "b9aabc4a5308e060f81cf79c7341ce7df04591bc0853fc579cda97176c5863d3",
+      "lf_normalized": "30ea792b4ce2b5d9d209426e5913d08865e6488f9c9571e9c6ec813113170142"
+    },
+    "bf16_deployment.log": {
+      "raw": "fc74d72011ec12457b0d83cecd68bf90ff8b98528ffeb6c762a7518e0ec7c842",
+      "lf_normalized": "7ab734968789448bd5fc7ad902e4c0dfb95b8c3351d7ce0170b25b648083a70a"
+    },
+    "rabit_kv2_deployment.log": {
+      "raw": "c5a4c7b2d455d5c4b28fa4414877f7b810579be7ef4821bf05939fadb9c272cb",
+      "lf_normalized": "ab3b9fc2f636cff3a1670a13a561e1d9602760b4a645177eb63737851537a91e"
+    },
+    "manifest.json": {
+      "raw": "43a2fa32ac2442d0632148e66157df9feec53c5f3bce1e6b49ff5c5b5eb44a56",
+      "lf_normalized": "87d09e090e675125481dd26d1bbe4daa9c763ff3cc9106325cbaa45da4783b6e"
+    },
+    "matched_config_diff.json": {
+      "raw": "2fccff38201ad53f9e4719d29a4d8997d378f0fff8bcd69c887d624c4234466f",
+      "lf_normalized": "744d024ccfb9854176ce836d34ade63660fec40c4b33778f66ea7193c7bcb336"
+    },
+    "integrity_check.json": {
+      "raw": "26a8aeca162f76c9f5643c9ab184feb8340c79c55d1274c583766255b5e4c1fd",
+      "lf_normalized": "58a51a17ae5b160b01c0fa2a8f9f01ae59a150357c41577fcd195b555f105275"
+    },
+    "matched_capacity_latency_summary.json": {
+      "raw": "947ac568e2301d861776e682255c6093d77ee7f3a30a814d696474afc0589210",
+      "lf_normalized": "3bc9978c8bec53bd01d36f2c6718d24c9ed2c45ca95e375ac0dfbd8125939bda"
+    }
+  },
+  "input_files": [
+    "bf16_deployment.log",
+    "rabit_kv2_deployment.log",
+    "manifest.json",
+    "integrity_check.json",
+    "matched_config_diff.json"
+  ],
+  "labels": {
+    "capacity": "PHYSICAL real-engine vLLM allocator KV capacity (num_gpu_blocks x block_size)",
+    "latency": "PHYSICAL real-engine single-request latency (batch 1, 2048-token prompt, 32 output tokens, eager mode)",
+    "not_logical": "These are NOT logical fake-quant memory figures."
+  },
+  "design": {
+    "warmups_per_leg_excluded": 5,
+    "measured_reps_per_leg": 15,
+    "measured_reps_per_dtype": 30,
+    "context_tokens": 2048,
+    "output_tokens": 32,
+    "same_container_same_gpu": true,
+    "fresh_process_per_leg": true,
+    "dtype_induced_allowlist": [
+      "requested.kv_cache_dtype",
+      "kv_dtype.requested_kv_cache_dtype",
+      "kv_dtype.engine_cache_dtype",
+      "kv_dtype.resolved_kv_torch_dtype"
+    ],
+    "gpu_clean_tolerance_mib": 256,
+    "gpu_clean_max_wait_s": 60,
+    "gate_timeout_s": 600,
+    "leg_timeout_s": 900
+  },
+  "capacity": {
+    "bf16_capacity_tokens": 393024,
+    "rabit_kv2_capacity_tokens": 2074592,
+    "ratio_rabit_over_bf16": 5.278537697443413,
+    "signed_delta_tokens": 1681568,
+    "per_leg": {
+      "A1": {
+        "num_gpu_blocks": 12282,
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "engine_log_gpu_kv_cache_size_tokens": 393024,
+        "engine_log_available_kv_cache_memory_gib": 47.98
+      },
+      "B1": {
+        "num_gpu_blocks": 64831,
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "engine_log_gpu_kv_cache_size_tokens": 2074592,
+        "engine_log_available_kv_cache_memory_gib": 47.98
+      },
+      "B2": {
+        "num_gpu_blocks": 64831,
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "engine_log_gpu_kv_cache_size_tokens": 2074592,
+        "engine_log_available_kv_cache_memory_gib": 47.98
+      },
+      "A2": {
+        "num_gpu_blocks": 12282,
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "engine_log_gpu_kv_cache_size_tokens": 393024,
+        "engine_log_available_kv_cache_memory_gib": 47.98
+      }
+    },
+    "duplicate_capacity_identical": {
+      "bfloat16": true,
+      "rabit_kv2": true
+    }
+  },
+  "per_leg": {
+    "A1": {
+      "index": 1,
+      "kv_cache_dtype": "bfloat16",
+      "source_log": "deployment/bf16_deployment.log",
+      "resolved_kv_dtype": {
+        "engine_cache_dtype": "bfloat16",
+        "requested_kv_cache_dtype": "bfloat16",
+        "resolved_kv_torch_dtype": "torch.bfloat16"
+      },
+      "capacity": {
+        "num_gpu_blocks": 12282,
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "engine_log_gpu_kv_cache_size_tokens": 393024,
+        "engine_log_available_kv_cache_memory_gib": 47.98
+      },
+      "workload_prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+      "tpot_ms_samples": [
+        20.580732387097743,
+        21.059642322581432,
+        20.73506293548403,
+        20.54351419355,
+        21.194609645161314,
+        20.913727000000165,
+        20.9112163870963,
+        20.521027161290448,
+        20.556373741935513,
+        21.215270354838548,
+        20.942311129033442,
+        21.100901870967864,
+        20.436499096774696,
+        21.641142645161118,
+        20.971528322580788
+      ],
+      "ttft_ms_samples": [
+        60.72425842285156,
+        61.023712158203125,
+        61.82503700256348,
+        61.40398979187012,
+        61.88702583312988,
+        61.075687408447266,
+        61.75947189331055,
+        61.972618103027344,
+        61.43999099731445,
+        61.75589561462402,
+        61.525821685791016,
+        61.68174743652344,
+        61.47170066833496,
+        61.63787841796875,
+        61.59567832946777
+      ],
+      "wall_ms_samples": [
+        698.3232260000136,
+        713.6945090000495,
+        704.0636230000246,
+        697.8745540000091,
+        718.3887630000072,
+        708.9453510000112,
+        709.2469430000392,
+        697.5138390000097,
+        698.2397270000433,
+        719.2456099999731,
+        710.402203000001,
+        715.2264620000324,
+        694.8449660000051,
+        731.933706999996,
+        711.3842999999633
+      ],
+      "sample_log_lines": [
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87
+      ],
+      "warmup_tpot_ms_excluded": [
+        21.026534354838816,
+        21.017249741935338,
+        20.999864451613714,
+        21.081514000000407,
+        21.0625280322589
+      ],
+      "tpot_ms": {
+        "n": 15,
+        "median": 20.913727000000165,
+        "p90": 21.207006070967655,
+        "mean": 20.888237279570227,
+        "stdev": 0.33157911345545504,
+        "min": 20.436499096774696,
+        "max": 21.641142645161118
+      },
+      "ttft_ms": {
+        "n": 15,
+        "median": 61.59567832946777,
+        "p90": 61.86223030090332,
+        "mean": 61.51870091756185,
+        "stdev": 0.3474928720599365,
+        "min": 60.72425842285156,
+        "max": 61.972618103027344
+      },
+      "wall_ms": {
+        "n": 15,
+        "median": 709.2469430000392,
+        "p90": 718.9028711999867,
+        "mean": 708.6218522000119,
+        "stdev": 10.336035689824536,
+        "min": 694.8449660000051,
+        "max": 731.933706999996
+      }
+    },
+    "B1": {
+      "index": 2,
+      "kv_cache_dtype": "rabit_kv2",
+      "source_log": "deployment/rabit_kv2_deployment.log",
+      "resolved_kv_dtype": {
+        "engine_cache_dtype": "rabit_kv2",
+        "requested_kv_cache_dtype": "rabit_kv2",
+        "resolved_kv_torch_dtype": "torch.uint8"
+      },
+      "capacity": {
+        "num_gpu_blocks": 64831,
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "engine_log_gpu_kv_cache_size_tokens": 2074592,
+        "engine_log_available_kv_cache_memory_gib": 47.98
+      },
+      "workload_prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+      "tpot_ms_samples": [
+        28.021357193548255,
+        28.15634451612933,
+        28.569472419354543,
+        27.34686280645028,
+        29.209017322581268,
+        27.81194316128955,
+        29.68635912903085,
+        29.107264580644706,
+        28.594200451612824,
+        28.5263686451623,
+        29.072287032257066,
+        28.4962627096771,
+        28.87949280645055,
+        28.71188196774065,
+        28.665154032257906
+      ],
+      "ttft_ms_samples": [
+        150.90060234069824,
+        150.2056121826172,
+        152.14991569519043,
+        147.37796783447266,
+        148.73099327087402,
+        151.28087997436523,
+        148.82397651672363,
+        152.59766578674316,
+        147.04394340515137,
+        148.06008338928223,
+        145.22600173950195,
+        143.04590225219727,
+        144.40035820007324,
+        145.20549774169922,
+        146.1658477783203
+      ],
+      "wall_ms_samples": [
+        1018.5186820000354,
+        1022.4826460000145,
+        1037.3062790000063,
+        994.7101110000176,
+        1053.924462999987,
+        1012.9910290000339,
+        1068.8006679999944,
+        1053.2024620000016,
+        1032.5654569999756,
+        1031.6130239999666,
+        1045.938805999981,
+        1025.6927809999752,
+        1039.1053639999654,
+        1034.6134989999882,
+        1033.7703120000015
+      ],
+      "sample_log_lines": [
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127
+      ],
+      "warmup_tpot_ms_excluded": [
+        185.49676170967786,
+        28.820307999999095,
+        29.07112406451747,
+        28.72806561290344,
+        28.546381548388183
+      ],
+      "tpot_ms": {
+        "n": 15,
+        "median": 28.594200451612824,
+        "p90": 29.16831622580664,
+        "mean": 28.590284584945813,
+        "stdev": 0.5894977478854477,
+        "min": 27.34686280645028,
+        "max": 29.68635912903085
+      },
+      "ttft_ms": {
+        "n": 15,
+        "median": 148.06008338928223,
+        "p90": 151.80230140686035,
+        "mean": 148.08101654052734,
+        "stdev": 2.942193837579287,
+        "min": 143.04590225219727,
+        "max": 152.59766578674316
+      },
+      "wall_ms": {
+        "n": 15,
+        "median": 1033.7703120000015,
+        "p90": 1053.6356625999929,
+        "mean": 1033.6823721999963,
+        "stdev": 18.10566357564493,
+        "min": 994.7101110000176,
+        "max": 1068.8006679999944
+      }
+    },
+    "B2": {
+      "index": 3,
+      "kv_cache_dtype": "rabit_kv2",
+      "source_log": "deployment/rabit_kv2_deployment.log",
+      "resolved_kv_dtype": {
+        "engine_cache_dtype": "rabit_kv2",
+        "requested_kv_cache_dtype": "rabit_kv2",
+        "resolved_kv_torch_dtype": "torch.uint8"
+      },
+      "capacity": {
+        "num_gpu_blocks": 64831,
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "engine_log_gpu_kv_cache_size_tokens": 2074592,
+        "engine_log_available_kv_cache_memory_gib": 47.98
+      },
+      "workload_prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+      "tpot_ms_samples": [
+        27.811864064517522,
+        28.054519999999126,
+        27.942582677419814,
+        28.034507129032797,
+        28.167636032259406,
+        27.7738737741937,
+        27.89337129032234,
+        27.73437706451703,
+        28.428920806451544,
+        29.1577504516142,
+        28.13747525806504,
+        27.975069806451128,
+        27.8398773548379,
+        27.922907999999143,
+        28.070794999999016
+      ],
+      "ttft_ms_samples": [
+        143.7685489654541,
+        147.76039123535156,
+        146.38137817382812,
+        143.63789558410645,
+        142.7154541015625,
+        143.2626247406006,
+        144.62876319885254,
+        143.89371871948242,
+        143.05496215820312,
+        150.85291862487793,
+        143.88465881347656,
+        150.80857276916504,
+        142.2739028930664,
+        144.58036422729492,
+        143.52941513061523
+      ],
+      "wall_ms_samples": [
+        1005.4128329999799,
+        1016.6095170000062,
+        1012.1515820000013,
+        1012.343498000007,
+        1015.2242670000078,
+        1003.7422329999686,
+        1008.9455030000067,
+        1003.261990999988,
+        1023.7191830000256,
+        1054.2821159999676,
+        1015.4089569999769,
+        1017.5119900000027,
+        1004.2057690000092,
+        1009.5290639999916,
+        1013.1333040000072
+      ],
+      "sample_log_lines": [
+        244,
+        245,
+        246,
+        247,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        260
+      ],
+      "warmup_tpot_ms_excluded": [
+        29.629786419355522,
+        28.078734870968173,
+        28.309542032258697,
+        28.002016322580683,
+        28.217022161290895
+      ],
+      "tpot_ms": {
+        "n": 15,
+        "median": 27.975069806451128,
+        "p90": 28.32440689677469,
+        "mean": 28.06303524731198,
+        "stdev": 0.3510075342979678,
+        "min": 27.73437706451703,
+        "max": 29.1577504516142
+      },
+      "ttft_ms": {
+        "n": 15,
+        "median": 143.88465881347656,
+        "p90": 149.58930015563965,
+        "mean": 145.00223795572916,
+        "stdev": 2.7424264526126323,
+        "min": 142.2739028930664,
+        "max": 150.85291862487793
+      },
+      "wall_ms": {
+        "n": 15,
+        "median": 1012.343498000007,
+        "p90": 1021.2363058000165,
+        "mean": 1014.3654537999964,
+        "stdev": 12.47963403860548,
+        "min": 1003.261990999988,
+        "max": 1054.2821159999676
+      }
+    },
+    "A2": {
+      "index": 4,
+      "kv_cache_dtype": "bfloat16",
+      "source_log": "deployment/bf16_deployment.log",
+      "resolved_kv_dtype": {
+        "engine_cache_dtype": "bfloat16",
+        "requested_kv_cache_dtype": "bfloat16",
+        "resolved_kv_torch_dtype": "torch.bfloat16"
+      },
+      "capacity": {
+        "num_gpu_blocks": 12282,
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "engine_log_gpu_kv_cache_size_tokens": 393024,
+        "engine_log_available_kv_cache_memory_gib": 47.98
+      },
+      "workload_prompt_token_ids_sha256": "5fa017aac2a8cfb170d68a2e0a1ecd71149d83185c90d8e789ed2604c06e5f58",
+      "tpot_ms_samples": [
+        21.991271225805384,
+        22.838638967740618,
+        22.84927532257957,
+        23.41184548386962,
+        22.87464919354974,
+        22.708928483870103,
+        23.04111251612906,
+        22.875244645162287,
+        22.15820858064475,
+        23.19953951612866,
+        22.109553774194247,
+        22.721146967743636,
+        22.304270193549126,
+        22.19847506451757,
+        21.930528225806803
+      ],
+      "ttft_ms_samples": [
+        62.73770332336426,
+        61.72919273376465,
+        62.72768974304199,
+        63.46750259399414,
+        61.933279037475586,
+        62.125444412231445,
+        61.73968315124512,
+        61.898231506347656,
+        62.1027946472168,
+        62.17765808105469,
+        62.88480758666992,
+        62.18695640563965,
+        62.03341484069824,
+        62.48331069946289,
+        61.88082695007324
+      ],
+      "wall_ms_samples": [
+        743.6993320000056,
+        769.122437999954,
+        770.5721639999865,
+        788.1769300000201,
+        770.8499759999654,
+        765.6245030000264,
+        775.672003000011,
+        770.4423129999896,
+        748.2999430000064,
+        781.1494550000475,
+        747.4588279999921,
+        765.4417370000033,
+        752.929187999996,
+        749.7177360000364,
+        740.9159899999622
+      ],
+      "sample_log_lines": [
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180
+      ],
+      "warmup_tpot_ms_excluded": [
+        22.25915512903223,
+        22.63088929032253,
+        22.420548354839486,
+        22.350104935484186,
+        22.74714258064595
+      ],
+      "tpot_ms": {
+        "n": 15,
+        "median": 22.721146967743636,
+        "p90": 23.13616871612882,
+        "mean": 22.614179210752745,
+        "stdev": 0.4636858920269181,
+        "min": 21.930528225806803,
+        "max": 23.41184548386962
+      },
+      "ttft_ms": {
+        "n": 15,
+        "median": 62.125444412231445,
+        "p90": 62.825965881347656,
+        "mean": 62.273899714152016,
+        "stdev": 0.491536015570164,
+        "min": 61.72919273376465,
+        "max": 63.46750259399414
+      },
+      "wall_ms": {
+        "n": 15,
+        "median": 765.6245030000264,
+        "p90": 778.9584742000329,
+        "mean": 762.6715024000001,
+        "stdev": 14.497789127996226,
+        "min": 740.9159899999622,
+        "max": 788.1769300000201
+      }
+    }
+  },
+  "pooled_per_dtype": {
+    "bfloat16": {
+      "legs": [
+        "A1",
+        "A2"
+      ],
+      "capacity_tokens": 393024,
+      "num_gpu_blocks": 12282,
+      "block_size": 32,
+      "duplicate_capacity_identical": true,
+      "physical_bytes_per_token_implied": 131081.39125223903,
+      "tpot_ms": {
+        "n": 30,
+        "median": 21.78583543548396,
+        "p90": 22.891831432258964,
+        "mean": 21.751208245161486,
+        "stdev": 0.9629490807756097,
+        "min": 20.436499096774696,
+        "max": 23.41184548386962
+      },
+      "ttft_ms": {
+        "n": 30,
+        "median": 61.85293197631836,
+        "p90": 62.72869110107422,
+        "mean": 61.896300315856934,
+        "stdev": 0.5678290320059339,
+        "min": 60.72425842285156,
+        "max": 63.46750259399414
+      },
+      "wall_ms": {
+        "n": 30,
+        "median": 736.4248484999791,
+        "p90": 771.3321786999699,
+        "mean": 735.646677300006,
+        "stdev": 30.142482609407512,
+        "min": 694.8449660000051,
+        "max": 788.1769300000201
+      }
+    },
+    "rabit_kv2": {
+      "legs": [
+        "B1",
+        "B2"
+      ],
+      "capacity_tokens": 2074592,
+      "num_gpu_blocks": 64831,
+      "block_size": 32,
+      "duplicate_capacity_identical": true,
+      "physical_bytes_per_token_implied": 24832.89857259644,
+      "tpot_ms": {
+        "n": 30,
+        "median": 28.146909887097188,
+        "p90": 29.112313167741654,
+        "mean": 28.326659916128897,
+        "stdev": 0.5469329327480849,
+        "min": 27.34686280645028,
+        "max": 29.68635912903085
+      },
+      "ttft_ms": {
+        "n": 30,
+        "median": 145.69592475891113,
+        "p90": 150.93863010406494,
+        "mean": 146.54162724812826,
+        "stdev": 3.2033134018780567,
+        "min": 142.2739028930664,
+        "max": 152.59766578674316
+      },
+      "wall_ms": {
+        "n": 30,
+        "median": 1018.015336000019,
+        "p90": 1053.2746621000001,
+        "mean": 1024.0239129999964,
+        "stdev": 18.164348838494785,
+        "min": 994.7101110000176,
+        "max": 1068.8006679999944
+      }
+    }
+  },
+  "signed_deltas_rabit_minus_bf16_pooled": {
+    "tpot_median": {
+      "bf16": 21.78583543548396,
+      "rabit_kv2": 28.146909887097188,
+      "signed_delta_ms": 6.361074451613227,
+      "signed_delta_pct": 29.198212161524673
+    },
+    "tpot_p90": {
+      "bf16": 22.891831432258964,
+      "rabit_kv2": 29.112313167741654,
+      "signed_delta_ms": 6.220481735482689,
+      "signed_delta_pct": 27.173368604824
+    },
+    "ttft_median": {
+      "bf16": 61.85293197631836,
+      "rabit_kv2": 145.69592475891113,
+      "signed_delta_ms": 83.84299278259277,
+      "signed_delta_pct": 135.55217206953705
+    },
+    "wall_median": {
+      "bf16": 736.4248484999791,
+      "rabit_kv2": 1018.015336000019,
+      "signed_delta_ms": 281.5904875000399,
+      "signed_delta_pct": 38.23750489593208
+    }
+  },
+  "drift": {
+    "bf16_A1_vs_A2": {
+      "legs": [
+        "A1",
+        "A2"
+      ],
+      "tpot_ms": {
+        "A1_median": 20.913727000000165,
+        "A2_median": 22.721146967743636,
+        "median_diff_ms": 1.8074199677434706,
+        "median_diff_pct": 8.642266238549713,
+        "A1_range": [
+          20.436499096774696,
+          21.641142645161118
+        ],
+        "A2_range": [
+          21.930528225806803,
+          23.41184548386962
+        ],
+        "ranges_overlap": false
+      },
+      "ttft_ms": {
+        "A1_median": 61.59567832946777,
+        "A2_median": 62.125444412231445,
+        "median_diff_ms": 0.5297660827636719,
+        "median_diff_pct": 0.860070214553077,
+        "A1_range": [
+          60.72425842285156,
+          61.972618103027344
+        ],
+        "A2_range": [
+          61.72919273376465,
+          63.46750259399414
+        ],
+        "ranges_overlap": true
+      },
+      "wall_ms": {
+        "A1_median": 709.2469430000392,
+        "A2_median": 765.6245030000264,
+        "median_diff_ms": 56.37755999998717,
+        "median_diff_pct": 7.94893239321075,
+        "A1_range": [
+          694.8449660000051,
+          731.933706999996
+        ],
+        "A2_range": [
+          740.9159899999622,
+          788.1769300000201
+        ],
+        "ranges_overlap": false
+      }
+    },
+    "rabit_kv2_B1_vs_B2": {
+      "legs": [
+        "B1",
+        "B2"
+      ],
+      "tpot_ms": {
+        "B1_median": 28.594200451612824,
+        "B2_median": 27.975069806451128,
+        "median_diff_ms": -0.6191306451616967,
+        "median_diff_pct": -2.165231534308476,
+        "B1_range": [
+          27.34686280645028,
+          29.68635912903085
+        ],
+        "B2_range": [
+          27.73437706451703,
+          29.1577504516142
+        ],
+        "ranges_overlap": true
+      },
+      "ttft_ms": {
+        "B1_median": 148.06008338928223,
+        "B2_median": 143.88465881347656,
+        "median_diff_ms": -4.175424575805664,
+        "median_diff_pct": -2.8200879536367407,
+        "B1_range": [
+          143.04590225219727,
+          152.59766578674316
+        ],
+        "B2_range": [
+          142.2739028930664,
+          150.85291862487793
+        ],
+        "ranges_overlap": true
+      },
+      "wall_ms": {
+        "B1_median": 1033.7703120000015,
+        "B2_median": 1012.343498000007,
+        "median_diff_ms": -21.426813999994465,
+        "median_diff_pct": -2.072686142296032,
+        "B1_range": [
+          994.7101110000176,
+          1068.8006679999944
+        ],
+        "B2_range": [
+          1003.261990999988,
+          1054.2821159999676
+        ],
+        "ranges_overlap": true
+      }
+    }
+  },
+  "matched_config": {
+    "status": "passed",
+    "matched": true,
+    "fields_compared": 47,
+    "fields_differing_between_dtypes": [
+      "kv_dtype.engine_cache_dtype",
+      "kv_dtype.requested_kv_cache_dtype",
+      "kv_dtype.resolved_kv_torch_dtype",
+      "requested.kv_cache_dtype"
+    ],
+    "violations": [],
+    "dtype_induced_allowlist": [
+      "requested.kv_cache_dtype",
+      "kv_dtype.requested_kv_cache_dtype",
+      "kv_dtype.engine_cache_dtype",
+      "kv_dtype.resolved_kv_torch_dtype"
+    ]
+  },
+  "correctness_gate": {
+    "pytest_passed": 105,
+    "pytest_warnings": 14,
+    "pytest_exit": 0,
+    "result": {
+      "passed": true
+    },
+    "regression_passed_line": true,
+    "pytest_command": [
+      "/usr/local/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "--tb=short",
+      "--confcutdir=/root/vllm-kvquant/tests/quantization",
+      "/root/vllm-kvquant/tests/quantization/test_kvquant_k3.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_layout.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_physical.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b1.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b2.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_fixed.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py",
+      "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py"
+    ],
+    "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+  },
+  "gpu_clean_state": {
+    "baseline_memory_used_mib": [
+      4
+    ],
+    "baseline_compute_apps": [],
+    "tolerance_mib": 256,
+    "pre_leg": {
+      "A1": {
+        "clean": true,
+        "readings": 1,
+        "wait_s": 0.0,
+        "memory_used_mib": [
+          4
+        ],
+        "compute_apps": []
+      },
+      "B1": {
+        "clean": true,
+        "readings": 1,
+        "wait_s": 0.0,
+        "memory_used_mib": [
+          4
+        ],
+        "compute_apps": []
+      },
+      "B2": {
+        "clean": true,
+        "readings": 1,
+        "wait_s": 0.0,
+        "memory_used_mib": [
+          4
+        ],
+        "compute_apps": []
+      },
+      "A2": {
+        "clean": true,
+        "readings": 1,
+        "wait_s": 0.0,
+        "memory_used_mib": [
+          4
+        ],
+        "compute_apps": []
+      }
+    }
+  },
+  "processes": {
+    "gate": {
+      "elapsed_s": 71.454,
+      "returncode": 0,
+      "timed_out": false,
+      "signals_sent": [],
+      "group_processes_after_leader_exit": [],
+      "group_processes_remaining": []
+    },
+    "A1": {
+      "elapsed_s": 153.297,
+      "returncode": 0,
+      "timed_out": false,
+      "signals_sent": [],
+      "group_processes_after_leader_exit": [],
+      "group_processes_remaining": []
+    },
+    "B1": {
+      "elapsed_s": 64.146,
+      "returncode": 0,
+      "timed_out": false,
+      "signals_sent": [],
+      "group_processes_after_leader_exit": [],
+      "group_processes_remaining": []
+    },
+    "B2": {
+      "elapsed_s": 55.924,
+      "returncode": 0,
+      "timed_out": false,
+      "signals_sent": [],
+      "group_processes_after_leader_exit": [],
+      "group_processes_remaining": []
+    },
+    "A2": {
+      "elapsed_s": 45.084,
+      "returncode": 0,
+      "timed_out": false,
+      "signals_sent": [],
+      "group_processes_after_leader_exit": [],
+      "group_processes_remaining": []
+    },
+    "watchdog_timeouts": []
+  },
+  "integrity": {
+    "counts": {
+      "passed": 94,
+      "failed": 0,
+      "not_run": 0,
+      "not_evaluated": 0
+    },
+    "all_ok": true
+  },
+  "run_status": {
+    "manifest_status": "passed",
+    "protected_paths_post_run_status": "clean",
+    "archived_attempts_unchanged": true,
+    "config_diff_status": "passed"
+  },
+  "provenance": {
+    "git_head": "73edb0d1d6d4330d962495b26470bf996af2576e",
+    "git_branch": "research/mlsys-2027",
+    "vllm_kvquant_tree": "433d38b6b83af09581239bc379a115cac189a9af",
+    "rabit_kv2_sha256": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+    "runner_script_sha256": "dcbee7c0c08266d2be1d514cfaaa21b2158fbecd83b29175b230dc87269c2acb",
+    "modal_app_sha256": "4d669d0910b51270aca2df5d04e2cdb6fa7769c94b8f2325497ce4b34787541b",
+    "worker_sha256": "9e62da4d923151fdb818a320240868c015b32db6c5cfe510f4394153fe077856",
+    "correctness_gate_sha256": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce",
+    "watchdog_sha256": "05e6472e8172a0b7e264ecf7509752bb9a70818f08ba67da476c69db38164d21",
+    "canonical_benchmark_deployment_sha256": "95217571f4c7c16b98f3160bb6e385f35444f2a12cb47dfc6c947d59a1264c60",
+    "vllm_kvquant_snapshot_sha256": "4bdcb6339feb358044bcd48008fee6b480fc794eaf85ee4bdfdd344a4ec0e4ab",
+    "gpu_model": [
+      "NVIDIA H100 80GB HBM3"
+    ],
+    "started_utc": "2026-09-25T23:45:38.502471+00:00",
+    "completed_utc": "2026-09-25T23:56:23.650218+00:00",
+    "note": "GPU UUID, driver, CUDA/torch/vLLM/Triton versions are recorded in modal_session.log (EXP3_ENVIRONMENT); that file is hashed above but is not a derivation input."
+  },
+  "notes": [
+    "Capacity is PHYSICAL real-engine vLLM allocator capacity (num_gpu_blocks x block_size).",
+    "Latency is PHYSICAL real-engine single-request latency (batch 1, 2048-token context, 32 output tokens, eager mode, Triton backend).",
+    "These are NOT logical fake-quant memory figures.",
+    "Measured physical capacity: BF16 393,024 tokens (12,282 x 32), RABIT-KV 2,074,592 tokens (64,831 x 32), ratio 5.2785x; duplicate capacities identical in both ABBA legs of each dtype.",
+    "BF16 A1/A2 TPOT drift is +8.64% (median 20.914 -> 22.721 ms, non-overlapping ranges) and must remain visible.",
+    "RABIT-KV is slower than BF16 in all reported pooled latency metrics: tpot median +6.361 ms (+29.20%), tpot p90 +6.220 ms (+27.17%), ttft median +83.843 ms (+135.55%), wall median +281.590 ms (+38.24%).",
+    "The exact latency percentages are a valid result of this matched run but remain pending independent replication before becoming the final paper headline.",
+    "The frozen canonical RABIT-KV latency (results/performance/latency.json) is historical reference only and is not mixed into, or used to derive, any value of this matched run."
+  ]
+}

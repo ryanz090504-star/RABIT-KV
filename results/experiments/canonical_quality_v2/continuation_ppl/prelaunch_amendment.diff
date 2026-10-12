@@ -1,0 +1,612 @@
+diff --git a/benchmarks/mlsys2027/canonical_ppl_identity.py b/benchmarks/mlsys2027/canonical_ppl_identity.py
+index 2678450..980d2d3 100644
+--- a/benchmarks/mlsys2027/canonical_ppl_identity.py
++++ b/benchmarks/mlsys2027/canonical_ppl_identity.py
+@@ -9,13 +9,14 @@ SHA-256 -- against the manifest below BEFORE the model is loaded):
+                (exp14_model_snapshot.py, unchanged; manifest 9be52dd6...).
+ 
+   llama3_1_8b  LLM-Research/Meta-Llama-3.1-8B-Instruct @ 359efdbb8af05b788a4ad4185215c6b8caa9052c.
+-               PROVENANCE (stated exactly; nothing guessed): the accepted Exp12 evidence did NOT record a revision or a
+-               file manifest. It records only `snapshot_download("LLM-Research/Meta-Llama-3.1-8B-Instruct")` and the log
+-               line "Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master" (2026-09-30). The commit
+-               above is DERIVED: resolved 2026-10-03 by `git ls-remote https://www.modelscope.cn/LLM-Research/
+-               Meta-Llama-3.1-8B-Instruct.git` -> refs/heads/master = 359efdbb...; its ModelScope commit date is
+-               2025-02-26 (unix 1740572854), i.e. before every Exp1-Exp12 run, and the file API lists the same 18 blobs
+-               for Revision=master and Revision=<commit>. The run additionally fingerprints the model + windows by
++               PROVENANCE: recovered by byte-identity audit of the preserved historical Exp12 cache
++               (results/mlsys2027/canonical_quality_v2/llama_identity_audit/, commit 3bde966). Exp12 loaded model bytes
++               byte-identical to ModelScope revision 359efdbb8af05b788a4ad4185215c6b8caa9052c, recovered by content
++               matching of the preserved historical cache: all 18 files (size + SHA-256) equal the git tree d4c78fb7...
++               of that revision and of no other commit in the repository. NOT claimed: the accepted Exp12 evidence did
++               not record a revision or a file manifest (only "Downloading 18 files from LLM-Research/
++               Meta-Llama-3.1-8B-Instruct@master"), and the historical master branch pointer was not directly
++               recovered. The run additionally fingerprints the model + windows by
+                reproducing the Exp12 BF16 per-window PPL with the legacy batched scorer (runner validity gate).
+ 
+ Dataset / windows (the frozen legacy protocol, benchmarks/quality/continuation_ppl.py): WikiText-2 test raw text,
+@@ -69,7 +70,7 @@ LLAMA_MANIFEST_SHA256 = "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d
+ MODELS = {
+     "llama3_1_8b": {"model_id": LLAMA_ID, "revision": LLAMA_REVISION, "files": LLAMA_FILES,
+                     "manifest_sha256": LLAMA_MANIFEST_SHA256, "layers": 32, "kv_heads": 8, "head_dim": 128,
+-                    "revision_provenance": "derived (Exp12 recorded only @master); see module docstring",
++                    "revision_provenance": "recovered by byte-identity audit of the preserved historical Exp12 cache",
+                     # sha256 of the int64-LE token pool (first 32 x 1152 tokens), computed offline
+                     "token_pool_sha256": "88dadfe6521c338ca71b1edfe5e85f08b8e2466e0884f8003b5b34a7ee3c849f"},
+     "qwen2_5_7b": {"model_id": qwen.MODEL_ID, "revision": qwen.MODEL_REVISION, "files": qwen.FROZEN_FILES,
+diff --git a/benchmarks/mlsys2027/canonical_ppl_offline_proofs.py b/benchmarks/mlsys2027/canonical_ppl_offline_proofs.py
+index e93861f..05653b0 100644
+--- a/benchmarks/mlsys2027/canonical_ppl_offline_proofs.py
++++ b/benchmarks/mlsys2027/canonical_ppl_offline_proofs.py
+@@ -47,11 +47,14 @@ sys.path.insert(0, str(HERE))
+ import canonical_ppl_core as core  # noqa: E402
+ import canonical_ppl_identity as ident  # noqa: E402
+ import canonical_rabit_quality as crq  # noqa: E402
++from proof_observer import IdentityObserver  # noqa: E402  (proof bookkeeping only)
+ 
+ LEGACY = ROOT / "benchmarks" / "quality" / "continuation_ppl.py"
+ BOUND_FILES = ["benchmarks/mlsys2027/canonical_ppl_core.py", "benchmarks/mlsys2027/canonical_ppl_identity.py",
+                "benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/exp14_model_snapshot.py",
+-               "benchmarks/mlsys2027/canonical_ppl_offline_proofs.py", "benchmarks/quality/continuation_ppl.py"]
++               "benchmarks/mlsys2027/canonical_ppl_offline_proofs.py", "benchmarks/mlsys2027/proof_observer.py",
++               "benchmarks/quality/continuation_ppl.py"]
++OBSERVER = "IdentityObserver v2 (object identity + retained direct references; no id() keying)"
+ TOKENIZER_FILES = {"llama3_1_8b": ("llama", ["tokenizer.json", "tokenizer_config.json", "special_tokens_map.json"]),
+                    "qwen2_5_7b": ("qwen", ["tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt"])}
+ TINY_CONTEXT, TINY_EVAL = 70, 40  # old region 66 -> 105 tokens: the third 32-token page closes during decode
+@@ -200,19 +203,24 @@ def scoring_proofs(name: str, model) -> dict:
+ def canonical_path_proofs(name: str, model) -> dict:
+     """Spy on CanonicalLayerState inside core.score_stepwise: every decoded() equals canonical_state(all raw so far)."""
+     ctx, cont = _tiny_ids(11)
+-    raw, stats = {}, {"decoded_calls": 0, "mismatches": 0, "append_sizes": set(), "final_n": set(), "closed_tokens": set()}
++    # raw tokens per layer-state OBJECT (identity + retained reference; never id(): see proof_observer.py)
++    raw = IdentityObserver()
++    stats = {"decoded_calls": 0, "mismatches": 0, "stale": 0, "append_sizes": set(), "final_n": set(),
++             "closed_tokens": set()}
+     append0, decoded0 = crq.CanonicalLayerState.append, crq.CanonicalLayerState.decoded
+ 
+     def append(self, k, v):
+-        pk, pv = raw.get(id(self), (None, None))
+-        k16, v16 = k.detach().to(torch.bfloat16), v.detach().to(torch.bfloat16)
+-        raw[id(self)] = (k16 if pk is None else torch.cat([pk, k16]), v16 if pv is None else torch.cat([pv, v16]))
++        raw.record(self, (k.detach().to(torch.bfloat16), v.detach().to(torch.bfloat16)))
+         stats["append_sizes"].add(int(k.shape[0]))
+         return append0(self, k, v)
+ 
+     def decoded(self):
+         dk, dv = decoded0(self)
+-        ref = crq.canonical_state(*raw[id(self)])
++        chunks = raw.items(self)
++        raw_k, raw_v = torch.cat([c[0] for c in chunks]), torch.cat([c[1] for c in chunks])
++        if int(raw_k.shape[0]) != self.n:  # the observer's raw tokens are not those of this object
++            stats["stale"] += 1
++        ref = crq.canonical_state(raw_k, raw_v)
+         stats["decoded_calls"] += 1
+         if not (torch.equal(dk, ref["decoded_k"]) and torch.equal(dv, ref["decoded_v"])):
+             stats["mismatches"] += 1
+@@ -232,8 +240,11 @@ def canonical_path_proofs(name: str, model) -> dict:
+            "expected_decoded_calls": 2 * layers * (1 + steps) - layers * steps,  # score: L*(1+steps); parity: L
+            "state_mismatches": stats["mismatches"], "append_sizes": sorted(stats["append_sizes"]),
+            "max_n": max(stats["final_n"]), "closed_tokens_seen": sorted(stats["closed_tokens"]),
+-           "prefill_state_parity": parity}
++           "observed_layer_states": len(raw), "expected_observed_layer_states": 2 * layers,  # score + parity caches
++           "stale_state_associations": stats["stale"], "prefill_state_parity": parity}
+     out["passed"] = (out["cache_class"] == "CanonicalRabitCache" and out["state_mismatches"] == 0
++                     and out["stale_state_associations"] == 0
++                     and out["observed_layer_states"] == out["expected_observed_layer_states"]
+                      and out["decoded_calls"] == out["expected_decoded_calls"]
+                      and out["append_sizes"] == [1, TINY_CONTEXT] and out["max_n"] == n_end
+                      and out["closed_tokens_seen"] == [64, 96] and parity["passed"])
+@@ -260,6 +271,7 @@ def main(argv=None) -> int:
+                            "transformers": str(transformers.__version__)},
+            "protocol": {"samples": ident.SAMPLES, "context_tokens": ident.CONTEXT_TOKENS,
+                         "eval_tokens": ident.EVAL_TOKENS, "policy": crq.POLICY},
++           "observer": OBSERVER,
+            "bound_file_sha256_lf": {f: sha256_lf(ROOT / f) for f in BOUND_FILES},
+            "W_dataset_windows": w, "S_scoring": s, "C_canonical_path": c}
+     rec["passed"] = w["passed"] and all(x["passed"] for x in s.values()) and all(x["passed"] for x in c.values())
+diff --git a/benchmarks/mlsys2027/canonical_ppl_protocol.json b/benchmarks/mlsys2027/canonical_ppl_protocol.json
+index b3956a6..901dd1b 100644
+--- a/benchmarks/mlsys2027/canonical_ppl_protocol.json
++++ b/benchmarks/mlsys2027/canonical_ppl_protocol.json
+@@ -6,7 +6,7 @@
+       "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+       "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+       "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+-      "revision_provenance": "derived (Exp12 recorded only @master); see module docstring",
++      "revision_provenance": "recovered by byte-identity audit of the preserved historical Exp12 cache",
+       "layers": 32,
+       "kv_heads": 8,
+       "head_dim": 128,
+@@ -23,7 +23,7 @@
+       "token_pool_sha256": "eb424fb71baccb8b64ae53688613a30c462a54a893f82359c9e6ea5385c0f63c"
+     }
+   },
+-  "llama_identity_note": "the accepted Exp12 evidence recorded no revision / manifest (only '@master', 18 files); the pinned commit is the ModelScope master resolved on 2026-10-03, committed 2025-02-26 (before every Exp1-Exp12 run); equality with the Exp12 model is additionally checked by the BF16 control-reproduction gate",
++  "llama_identity_note": "Exp12 loaded model bytes byte-identical to ModelScope revision 359efdbb8af05b788a4ad4185215c6b8caa9052c, recovered by content matching of the preserved historical cache (results/mlsys2027/canonical_quality_v2/llama_identity_audit: 18 / 18 files); the accepted Exp12 evidence itself recorded only '@master' (no revision / manifest) and the historical master branch pointer was not directly recovered; equality with the Exp12 model is additionally checked by the BF16 control-reproduction gate",
+   "dataset": {
+     "name": "WikiText-2 test (raw text)",
+     "url": "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt",
+@@ -79,6 +79,26 @@
+     "stepwise BF16 aggregate PPL within 0.5% (relative) of bf16_batched"
+   ],
+   "quality_threshold": "NONE -- the result is reported, not gated; no acceptance threshold on the RABIT delta",
++  "registered_attempt": "both models form ONE registered validation attempt, run Llama -> Qwen by run_canonical_ppl_two_model.py with no human / model-dependent decision in between; valid only if BOTH runs pass every validity gate; if either fails the whole attempt is invalid and archived; no selective rerun",
++  "interpretation_cases": {
++    "note": "preregistered before GPU execution; descriptive only; no numerical success threshold",
++    "case_1": {
++      "condition": "Llama remains near its BF16 control while Qwen still shows severe degradation.",
++      "interpretation": "the frozen operating point shows model-specific quality sensitivity; mechanism remains undiagnosed."
++    },
++    "case_2": {
++      "condition": "Both Llama and Qwen show substantial degradation relative to their BF16 controls.",
++      "interpretation": "the legacy logical evaluator materially understated canonical-RABIT quality loss, and the paper's quality story must be rebuilt."
++    },
++    "case_3": {
++      "condition": "Both Llama and Qwen remain close to their BF16 controls.",
++      "interpretation": "the severe legacy Qwen degradation was primarily an artifact of the old logical evaluator semantics."
++    },
++    "case_4": {
++      "condition": "Results are mixed or intermediate and do not cleanly fit Cases 1-3.",
++      "interpretation": "report the actual values directly without forcing a categorical narrative."
++    }
++  },
+   "statistics": {
+     "aggregate": "PPL = exp(total loss / total tokens) per arm",
+     "delta": "100 * (exp(mean ln PPL_rabit - mean ln PPL_bf16) - 1) over the 32 windows",
+diff --git a/benchmarks/mlsys2027/proof_observer.py b/benchmarks/mlsys2027/proof_observer.py
+new file mode 100644
+index 0000000..19d131c
+--- /dev/null
++++ b/benchmarks/mlsys2027/proof_observer.py
+@@ -0,0 +1,50 @@
++"""
++PROOF-ONLY bookkeeping (stdlib only; never shipped to the container, never imported by scoring code).
++
++IdentityObserver associates recorded items with OBSERVED OBJECTS by object identity (`is`) and never by id(obj).
++It keeps a DIRECT reference to every observed object for its whole lifetime, so an observed object cannot be freed
++while the observer exists and its memory address cannot be reused by a later object; and because lookup compares with
++`is` (no hash, no __eq__, no address), state recorded for one object can never be returned for another one.
++
++It replaces the id()-keyed dict of the first canonical_ppl_offline_proofs.py, which produced nondeterministic FALSE
++mismatches when a new layer state was allocated at the address of a freed one
++(results/mlsys2027/canonical_quality_v2/ppl_offline_proof_diagnostic/record.json).
++"""
++
++from __future__ import annotations
++
++
++class IdentityObserver:
++    def __init__(self):
++        self._entries = []  # [object (retained direct reference), items]; the index is the monotonic sequence ID
++
++    def _index(self, obj) -> int:
++        for i, entry in enumerate(self._entries):
++            if entry[0] is obj:
++                return i
++        return -1
++
++    def record(self, obj, item) -> int:
++        """Append `item` to the state of `obj` (registering it on first sight); returns its sequence ID."""
++        i = self._index(obj)
++        if i < 0:
++            self._entries.append([obj, []])
++            i = len(self._entries) - 1
++        self._entries[i][1].append(item)
++        return i
++
++    def items(self, obj) -> list:
++        """Everything recorded for exactly this object; KeyError if it was never observed."""
++        i = self._index(obj)
++        if i < 0:
++            raise KeyError("object was never observed")
++        return list(self._entries[i][1])
++
++    def sequence_id(self, obj) -> int:
++        i = self._index(obj)
++        if i < 0:
++            raise KeyError("object was never observed")
++        return i
++
++    def __len__(self) -> int:
++        return len(self._entries)
+diff --git a/benchmarks/mlsys2027/run_canonical_ppl.py b/benchmarks/mlsys2027/run_canonical_ppl.py
+index 752b817..d1fa1e6 100644
+--- a/benchmarks/mlsys2027/run_canonical_ppl.py
++++ b/benchmarks/mlsys2027/run_canonical_ppl.py
+@@ -48,10 +48,12 @@ MODAL_APP = HERE / "canonical_ppl_modal.py"
+ STATIC_TESTS = HERE / "test_canonical_ppl_harness.py"
+ PROTOCOL = HERE / "canonical_ppl_protocol.json"
+ OUT_BASE = ROOT / "results/mlsys2027/canonical_quality_v2/continuation_ppl"
+-PROOF_RECORD = OUT_BASE / "offline_proof_record.json"
++PROOF_RECORD = OUT_BASE / "offline_proof_record_v2.json"  # corrected observer; offline_proof_record.json is SUPERSEDED
++PROOF_OBSERVER = "IdentityObserver v2 (object identity + retained direct references; no id() keying)"
++TWO_MODEL = HERE / "run_canonical_ppl_two_model.py"
+ SHIPPED = ["canonical_rabit_quality.py", "canonical_ppl_core.py", "canonical_ppl_identity.py", "exp14_model_snapshot.py"]
+ HARNESS = [*[HERE / n for n in SHIPPED], MODAL_APP, Path(__file__).resolve(), STATIC_TESTS,
+-           HERE / "canonical_ppl_offline_proofs.py", PROTOCOL, PROOF_RECORD]
++           HERE / "canonical_ppl_offline_proofs.py", HERE / "proof_observer.py", TWO_MODEL, PROTOCOL, PROOF_RECORD]
+ RABIT_KV2 = ROOT / "vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py"
+ RABIT_KV2_SHA256_LF = "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+ PARITY_RESULT_SHA256 = "98d3a5d9a16f83256a31d01556c9ecf26233c418f1c08e0bb971f1cb1d7f7d54"
+@@ -115,10 +117,12 @@ def build_protocol() -> dict:
+         "type": "logical quality (HF transformers); NOT a physical serving benchmark",
+         "models": {k: {x: m[x] for x in ("model_id", "revision", "manifest_sha256", "revision_provenance", "layers",
+                                          "kv_heads", "head_dim", "token_pool_sha256")} for k, m in ident.MODELS.items()},
+-        "llama_identity_note": "the accepted Exp12 evidence recorded no revision / manifest (only '@master', 18 files); "
+-                               "the pinned commit is the ModelScope master resolved on 2026-10-03, committed "
+-                               "2025-02-26 (before every Exp1-Exp12 run); equality with the Exp12 model is additionally "
+-                               "checked by the BF16 control-reproduction gate",
++        "llama_identity_note": "Exp12 loaded model bytes byte-identical to ModelScope revision "
++                               "359efdbb8af05b788a4ad4185215c6b8caa9052c, recovered by content matching of the preserved "
++                               "historical cache (results/mlsys2027/canonical_quality_v2/llama_identity_audit: 18 / 18 "
++                               "files); the accepted Exp12 evidence itself recorded only '@master' (no revision / "
++                               "manifest) and the historical master branch pointer was not directly recovered; equality "
++                               "with the Exp12 model is additionally checked by the BF16 control-reproduction gate",
+         "dataset": {"name": "WikiText-2 test (raw text)", "url": ident.WIKITEXT_URL, "sha256": ident.WIKITEXT_SHA256,
+                     "preprocessing": "non-empty stripped lines joined in blocks of 64; tokenizer(text, "
+                                      "add_special_tokens=False) -- no BOS",
+@@ -154,6 +158,23 @@ def build_protocol() -> dict:
+             "accepted legacy BF16 aggregate of the same model (Llama: Exp12 log; Qwen: Exp14 quality log)",
+             f"stepwise BF16 aggregate PPL within {CONTROL_REL_TOL:.1%} (relative) of bf16_batched"],
+         "quality_threshold": "NONE -- the result is reported, not gated; no acceptance threshold on the RABIT delta",
++        "registered_attempt": "both models form ONE registered validation attempt, run Llama -> Qwen by "
++                              "run_canonical_ppl_two_model.py with no human / model-dependent decision in between; "
++                              "valid only if BOTH runs pass every validity gate; if either fails the whole attempt is "
++                              "invalid and archived; no selective rerun",
++        "interpretation_cases": {
++            "note": "preregistered before GPU execution; descriptive only; no numerical success threshold",
++            "case_1": {"condition": "Llama remains near its BF16 control while Qwen still shows severe degradation.",
++                       "interpretation": "the frozen operating point shows model-specific quality sensitivity; "
++                                         "mechanism remains undiagnosed."},
++            "case_2": {"condition": "Both Llama and Qwen show substantial degradation relative to their BF16 controls.",
++                       "interpretation": "the legacy logical evaluator materially understated canonical-RABIT quality "
++                                         "loss, and the paper's quality story must be rebuilt."},
++            "case_3": {"condition": "Both Llama and Qwen remain close to their BF16 controls.",
++                       "interpretation": "the severe legacy Qwen degradation was primarily an artifact of the old "
++                                         "logical evaluator semantics."},
++            "case_4": {"condition": "Results are mixed or intermediate and do not cleanly fit Cases 1-3.",
++                       "interpretation": "report the actual values directly without forcing a categorical narrative."}},
+         "statistics": {"aggregate": "PPL = exp(total loss / total tokens) per arm",
+                        "delta": "100 * (exp(mean ln PPL_rabit - mean ln PPL_bf16) - 1) over the 32 windows",
+                        "ci": "paired percentile bootstrap over windows (Exp12 procedure and seed)", **BOOTSTRAP,
+@@ -191,7 +212,7 @@ def preflight(model: str, attempt: int, execute: bool) -> dict:
+         "rabit_kv2_is_frozen_source": sha256_lf(RABIT_KV2) == RABIT_KV2_SHA256_LF,
+         "parity_accepted": parity.get("passed") is True and parity.get("result_sha256") == PARITY_RESULT_SHA256,
+         "static_harness_tests_pass": t.returncode == 0 and bool(re.search(r"^(\d+)/\1 passed$", t.stdout, re.M)),
+-        "offline_proofs_passed": proof.get("passed") is True,
++        "offline_proofs_passed": proof.get("passed") is True and proof.get("observer") == PROOF_OBSERVER,
+         "offline_proofs_bound_to_current_files": bool(proof) and all(
+             sha256_lf(ROOT / f) == h for f, h in proof.get("bound_file_sha256_lf", {}).items()),
+         "protocol_matches": PROTOCOL.exists() and load_protocol() is not None,
+diff --git a/benchmarks/mlsys2027/run_canonical_ppl_two_model.py b/benchmarks/mlsys2027/run_canonical_ppl_two_model.py
+new file mode 100644
+index 0000000..225c417
+--- /dev/null
++++ b/benchmarks/mlsys2027/run_canonical_ppl_two_model.py
+@@ -0,0 +1,99 @@
++"""
++Orchestrator: ONE registered two-model canonical continuation-PPL validation attempt (Llama -> Qwen), with no human /
++model-dependent decision between the two runs. It only sequences benchmarks/mlsys2027/run_canonical_ppl.py (unchanged
++protocol, gates and statistics); it contains no scoring, no quantization, no threshold and no retry.
++
++  0. refuses to start if ANY output of this attempt number already exists (a registered two-model attempt is never
++     partially rerun; one model's result is never kept while the other is rerun)
++  1. run_canonical_ppl.py --execute --model llama3_1_8b --attempt N     (output captured, NOT printed)
++  2. the Llama attempt directory is committed and pushed UNINSPECTED (the per-model preflight requires a clean, pushed
++     tree; this is the only way to satisfy it without a human step)
++  3. only if the Llama run passed its VALIDITY gates (runner exit code 0 -- the gates never depend on the RABIT
++     result): run_canonical_ppl.py --execute --model qwen2_5_7b --attempt N
++  4. two_model_attempt_<N>/record.json is written: the attempt is VALID only if BOTH runs are valid
++  5. both runner outputs are printed only now.
++If either model is invalid, the complete two-model attempt is INVALID (archive; no selective rerun).
++
++Usage:  python benchmarks/mlsys2027/run_canonical_ppl_two_model.py --execute --attempt 1     (ONLY when authorized)
++"""
++
++from __future__ import annotations
++
++import argparse
++import datetime as dt
++import json
++import subprocess
++import sys
++from pathlib import Path
++
++HERE = Path(__file__).resolve().parent
++ROOT = HERE.parents[1]
++RUNNER = HERE / "run_canonical_ppl.py"
++OUT_BASE = "results/mlsys2027/canonical_quality_v2/continuation_ppl"
++ORDER = ["llama3_1_8b", "qwen2_5_7b"]
++RULE = ("one registered attempt = both models; valid only if BOTH runs pass every validity gate; if either fails the "
++        "whole attempt is invalid and archived; neither result is accepted evidence on its own; no selective rerun")
++
++
++def command(model: str, attempt: int) -> list:
++    return [sys.executable, str(RUNNER), "--execute", "--model", model, "--attempt", str(attempt)]
++
++
++def run_model(model: str, attempt: int) -> subprocess.CompletedProcess:
++    return subprocess.run(command(model, attempt), cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
++                          errors="replace")
++
++
++def archive_uninspected(model: str, attempt: int) -> None:
++    path = f"{OUT_BASE}/{model}/attempt_{attempt}"
++    msg = (f"Archive canonical PPL two-model attempt {attempt}: {model} raw outputs (UNINSPECTED; committed by the "
++           "orchestrator before the second model runs)\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n")
++    for cmd in (["git", "add", "--", path], ["git", "commit", "-q", "-m", msg], ["git", "push", "-q"]):
++        subprocess.run(cmd, cwd=ROOT, check=True)
++
++
++def orchestrate(attempt: int, run=run_model, archive=archive_uninspected, root: Path = ROOT, out=print) -> int:
++    base = root / OUT_BASE
++    record_dir = base / f"two_model_attempt_{attempt}"
++    existing = [p for p in [*(base / m / f"attempt_{attempt}" for m in ORDER), record_dir] if p.exists()]
++    if existing:
++        raise SystemExit(f"attempt {attempt} already has outputs ({[p.name for p in existing]}); a registered "
++                         "two-model attempt is never partially rerun -- use a new attempt number for BOTH models")
++    started = dt.datetime.now(dt.timezone.utc).isoformat()
++    first = run(ORDER[0], attempt)
++    if (base / ORDER[0] / f"attempt_{attempt}").is_dir():
++        archive(ORDER[0], attempt)
++    second = run(ORDER[1], attempt) if first.returncode == 0 else None
++    codes = {ORDER[0]: first.returncode, ORDER[1]: None if second is None else second.returncode}
++    valid = all(c == 0 for c in codes.values())
++    record_dir.mkdir(parents=True, exist_ok=False)
++    (record_dir / "record.json").write_text(json.dumps({
++        "kind": "canonical-quality-v2 continuation PPL: ONE registered two-model validation attempt",
++        "attempt": attempt, "order": ORDER, "started_utc": started,
++        "completed_utc": dt.datetime.now(dt.timezone.utc).isoformat(), "runner_exit_codes": codes,
++        "models_not_run": [m for m, c in codes.items() if c is None], "rule": RULE, "valid": valid,
++        "status": "valid (awaiting review; not accepted evidence until reviewed)" if valid
++        else "INVALID two-model attempt (archive BOTH models; never pool; no selective rerun)"}, indent=2) + "\n",
++        encoding="utf-8", newline="\n")
++    for model, p in zip(ORDER, (first, second)):
++        out(f"===== {model} =====")
++        if p is None:
++            out("NOT RUN (the first model failed a validity gate; the two-model attempt is INVALID)")
++        else:
++            out(f"runner exit code {p.returncode}\n{p.stdout}\n{p.stderr[-4000:]}")
++    out(f"TWO_MODEL_ATTEMPT_{attempt}_VALID={valid}")
++    return 0 if valid else 1
++
++
++def main(argv=None) -> int:
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--attempt", type=int, default=1)
++    ap.add_argument("--execute", action="store_true", help="launch the GPU jobs (ONLY when explicitly authorized)")
++    a = ap.parse_args(argv)
++    if not a.execute:
++        raise SystemExit("--execute is required; nothing executed")
++    return orchestrate(a.attempt)
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+diff --git a/benchmarks/mlsys2027/test_canonical_ppl_harness.py b/benchmarks/mlsys2027/test_canonical_ppl_harness.py
+index 48a8a21..34d14c0 100644
+--- a/benchmarks/mlsys2027/test_canonical_ppl_harness.py
++++ b/benchmarks/mlsys2027/test_canonical_ppl_harness.py
+@@ -2,7 +2,8 @@
+ Static / offline tests of the canonical-quality-v2 continuation-PPL harness (stdlib + modal client only; no torch, no
+ GPU, no model, no network). Run by run_canonical_ppl.py's preflight. The torch-dependent proofs (legacy window /
+ scorer equivalence, canonical path) are in canonical_ppl_offline_proofs.py and recorded in
+-results/mlsys2027/canonical_quality_v2/continuation_ppl/offline_proof_record.json.
++results/mlsys2027/canonical_quality_v2/continuation_ppl/offline_proof_record_v2.json (the first
++record, offline_proof_record.json, is SUPERSEDED: id()-keyed spy).
+ """
+ 
+ from __future__ import annotations
+@@ -14,7 +15,9 @@ import importlib.util
+ import json
+ import math
+ import sys
++import tempfile
+ from pathlib import Path
++from types import SimpleNamespace
+ 
+ HERE = Path(__file__).resolve().parent
+ ROOT = HERE.parents[1]
+@@ -22,6 +25,7 @@ sys.path.insert(0, str(HERE))
+ import canonical_ppl_identity as ident  # noqa: E402
+ import exp14_hardware_binding as hb  # noqa: E402
+ import run_canonical_ppl as runner  # noqa: E402
++import run_canonical_ppl_two_model as two  # noqa: E402
+ 
+ CORE, MODAL, IDENT, CRQ = (HERE / n for n in ("canonical_ppl_core.py", "canonical_ppl_modal.py",
+                                               "canonical_ppl_identity.py", "canonical_rabit_quality.py"))
+@@ -293,6 +297,194 @@ def test_runner_never_executes_by_default():
+     assert src.count('"modal", "run"') == 1 and "return run(a.model, a.attempt)" in src
+ 
+ 
++# ------------------------------------------------------------------------------------------------ proof observer
++class _Thing:
++    """Stand-in for a layer state. Adversarial on purpose: every instance compares equal and hashes alike."""
++
++    def __eq__(self, other):
++        return True
++
++    def __hash__(self):
++        return 0
++
++
++def test_id_keyed_bookkeeping_aliases_when_an_address_is_reused():
++    """Why raw id()-keying is unsafe (the superseded spy). Deterministic part: two DISTINCT objects that present the
++    same address key (what CPython does after a free) share state. Opportunistic part: real CPython address reuse."""
++    by_address = {}
++
++    def spy_record(address, item):  # the superseded mechanism: state keyed by an address
++        by_address.setdefault(address, []).append(item)
++        return by_address[address]
++
++    dead, new = _Thing(), _Thing()
++    reused_address = 0xDEAD  # the address `dead` had, handed to `new` after `dead` was freed (simulated)
++    spy_record(reused_address, "109 tokens of the dead object")
++    assert dead is not new and spy_record(reused_address, "70 tokens of the new object") == [
++        "109 tokens of the dead object", "70 tokens of the new object"]  # stale state associated with the new object
++
++    # real interpreter: free an object, allocate another, and look for the same id() (usual in CPython; not required)
++    for _ in range(1000):
++        a = object.__new__(_Thing)
++        address, real = id(a), {}
++        real[address] = ["stale"]
++        del a
++        b = object.__new__(_Thing)
++        if id(b) == address:
++            assert real.get(id(b)) == ["stale"]  # a brand-new object inherits the dead object's bookkeeping
++            break
++
++
++def test_identity_observer_cannot_associate_stale_state_with_a_new_object():
++    from proof_observer import IdentityObserver
++
++    obs = IdentityObserver()
++    first = _Thing()
++    assert obs.record(first, "a") == 0 and obs.record(first, "b") == 0 and obs.items(first) == ["a", "b"]
++    retained_address = id(first)
++    del first  # the caller drops it; the observer still holds a direct reference, so it cannot be freed
++    fresh = [_Thing() for _ in range(2000)]
++    assert all(id(x) != retained_address for x in fresh)  # a live object's address is never handed out again
++    for x in fresh[:50]:  # equal-comparing, equal-hashing, never-observed objects get NO state
++        try:
++            obs.items(x)
++        except KeyError:
++            continue
++        raise AssertionError("state returned for an object that was never observed")
++    # new objects start empty and get their own monotonic sequence IDs; earlier state is untouched
++    assert [obs.record(x, i) for i, x in enumerate(fresh[:3])] == [1, 2, 3]
++    assert [obs.items(x) for x in fresh[:3]] == [[0], [1], [2]] and len(obs) == 4
++    assert [obs.sequence_id(x) for x in fresh[:3]] == [1, 2, 3]
++    assert obs._entries[0][1] == ["a", "b"] and all(e[0] is not x for e in obs._entries[:1] for x in fresh)
++
++
++def test_proof_code_never_keys_on_raw_addresses():
++    for name in ("canonical_ppl_offline_proofs.py", "proof_observer.py"):
++        calls = [n for n in ast.walk(tree(HERE / name)) if isinstance(n, ast.Call) and getattr(n.func, "id", "") in
++                 ("id", "hash")]
++        assert not calls, (name, [n.lineno for n in calls])
++    assert imports(HERE / "proof_observer.py") - STDLIB == set()
++    src = (HERE / "canonical_ppl_offline_proofs.py").read_text(encoding="utf-8")
++    assert "raw = IdentityObserver()" in src and "raw.items(self)" in src and "raw.record(self, " in src
++    # scoring code never sees the observer
++    assert all("proof_observer" not in imports(p) for p in (CORE, MODAL, IDENT, CRQ))
++
++
++# ------------------------------------------------------------------------------------------------ preregistration
++def test_interpretation_cases_are_preregistered_verbatim_without_thresholds():
++    cases = runner.load_protocol()["interpretation_cases"]
++    assert [cases[f"case_{i}"] for i in (1, 2, 3, 4)] == [
++        {"condition": "Llama remains near its BF16 control while Qwen still shows severe degradation.",
++         "interpretation": "the frozen operating point shows model-specific quality sensitivity; mechanism remains "
++                           "undiagnosed."},
++        {"condition": "Both Llama and Qwen show substantial degradation relative to their BF16 controls.",
++         "interpretation": "the legacy logical evaluator materially understated canonical-RABIT quality loss, and the "
++                           "paper's quality story must be rebuilt."},
++        {"condition": "Both Llama and Qwen remain close to their BF16 controls.",
++         "interpretation": "the severe legacy Qwen degradation was primarily an artifact of the old logical evaluator "
++                           "semantics."},
++        {"condition": "Results are mixed or intermediate and do not cleanly fit Cases 1-3.",
++         "interpretation": "report the actual values directly without forcing a categorical narrative."}]
++    assert set(cases) == {"note", "case_1", "case_2", "case_3", "case_4"}
++    text = "".join(c["condition"].replace("BF16", "").replace("Cases 1-3", "") + c["interpretation"]
++                   for c in cases.values() if isinstance(c, dict))
++    assert not any(ch.isdigit() or ch in "%<>" for ch in text)  # descriptive only: no numeric threshold
++
++
++# ------------------------------------------------------------------------------------------------ two-model orchestrator
++def _orchestrate(codes: dict, stdout: dict | None = None, pre_existing: str | None = None, archive_fails: bool = False):
++    """Run two.orchestrate against fakes in a temporary root; returns (exit code or exception, log, printed, record)."""
++    root = Path(tempfile.mkdtemp())
++    base = root / two.OUT_BASE
++    if pre_existing:
++        (base / pre_existing).mkdir(parents=True)
++    log, printed = [], []
++
++    def run(model, attempt):
++        log.append(("run", model, attempt, list(printed)))  # what had been printed when this model was launched
++        (base / model / f"attempt_{attempt}").mkdir(parents=True)
++        return SimpleNamespace(returncode=codes[model], stdout=(stdout or {}).get(model, f"STATS-{model}"), stderr="")
++
++    def archive(model, attempt):
++        log.append(("archive", model, attempt, list(printed)))
++        if archive_fails:
++            raise RuntimeError("git push failed")
++
++    try:
++        rc = two.orchestrate(1, run=run, archive=archive, root=root, out=printed.append)
++    except (SystemExit, RuntimeError) as exc:
++        rc = exc
++    rec = base / "two_model_attempt_1" / "record.json"
++    return rc, log, printed, json.loads(rec.read_text(encoding="utf-8")) if rec.is_file() else None
++
++
++def test_orchestrator_runs_llama_then_qwen_once_each_and_hides_the_first_result():
++    rc, log, printed, rec = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 0})
++    assert [e[:3] for e in log] == [("run", "llama3_1_8b", 1), ("archive", "llama3_1_8b", 1), ("run", "qwen2_5_7b", 1)]
++    assert all(e[3] == [] for e in log)  # NOTHING was printed before Qwen was launched
++    assert rc == 0 and rec["valid"] is True and rec["order"] == ["llama3_1_8b", "qwen2_5_7b"]
++    assert rec["runner_exit_codes"] == {"llama3_1_8b": 0, "qwen2_5_7b": 0} and rec["models_not_run"] == []
++    text = "\n".join(printed)
++    assert text.index("STATS-llama3_1_8b") < text.index("STATS-qwen2_5_7b")
++    assert printed[-1] == "TWO_MODEL_ATTEMPT_1_VALID=True"
++
++
++def test_orchestrator_never_branches_on_quality_values():
++    seqs = []
++    for llama_out in ('{"delta_pct": 0.01, "rabit_ppl": 7.5}', '{"delta_pct": 950.0, "rabit_ppl": 80.0}', "garbage"):
++        rc, log, _, rec = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 0}, {"llama3_1_8b": llama_out})
++        seqs.append(([e[:3] for e in log], rc, rec["valid"]))
++    assert seqs[0] == seqs[1] == seqs[2] and seqs[0][0][-1] == ("run", "qwen2_5_7b", 1)
++    src = Path(two.__file__)
++    fn = next(n for n in tree(src).body if isinstance(n, ast.FunctionDef) and n.name == "orchestrate")
++    launch = next(i for i, s in enumerate(fn.body) if isinstance(s, ast.Assign)
++                  and getattr(s.targets[0], "id", "") == "second")
++    used = {n.attr for s in fn.body[:launch + 1] for n in ast.walk(s) if isinstance(n, ast.Attribute)
++            and isinstance(n.value, ast.Name) and n.value.id == "first"}
++    assert used == {"returncode"}  # up to and including the Qwen launch only the VALIDITY exit code of Llama is read
++    assert imports(src) <= STDLIB
++    assert not (identifiers(src) & (QUANT_ARITHMETIC | {"loads", "statistics", "delta_pct", "ppl", "evaluate",
++                                                        "retry", "sleep"}))
++
++
++def test_orchestrator_does_not_change_any_scientific_argument():
++    for m in ("llama3_1_8b", "qwen2_5_7b"):
++        assert two.command(m, 3) == [sys.executable, str(HERE / "run_canonical_ppl.py"), "--execute", "--model", m,
++                                     "--attempt", "3"]
++    assert two.ORDER == ["llama3_1_8b", "qwen2_5_7b"] and set(two.ORDER) == set(ident.MODELS)
++    assert two.OUT_BASE == runner.OUT_BASE.relative_to(ROOT).as_posix()
++    assert Path(two.__file__).resolve() in runner.HARNESS
++    try:
++        two.main([])
++    except SystemExit as e:
++        assert e.code not in (0, None)
++    else:
++        raise AssertionError("ran without --execute")
++
++
++def test_orchestrator_failure_invalidates_the_whole_attempt_without_retry():
++    # Llama fails a validity gate: Qwen is not run, nothing is retried, the attempt is INVALID
++    rc, log, printed, rec = _orchestrate({"llama3_1_8b": 1, "qwen2_5_7b": 0})
++    assert [e[:2] for e in log] == [("run", "llama3_1_8b"), ("archive", "llama3_1_8b")]
++    assert rc == 1 and rec["valid"] is False and rec["models_not_run"] == ["qwen2_5_7b"] and "INVALID" in rec["status"]
++    assert printed[-1] == "TWO_MODEL_ATTEMPT_1_VALID=False"
++    # Qwen fails: each model ran exactly once; the valid Llama result does not make the attempt valid
++    rc, log, printed, rec = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 1})
++    assert [e[1] for e in log if e[0] == "run"] == ["llama3_1_8b", "qwen2_5_7b"]
++    assert rc == 1 and rec["valid"] is False and rec["runner_exit_codes"] == {"llama3_1_8b": 0, "qwen2_5_7b": 1}
++    assert "neither result is accepted evidence on its own" in rec["rule"] and "no selective rerun" in rec["rule"]
++    # a failing archive step (commit / push) propagates and Qwen is never launched
++    rc, log, _, rec = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 0}, archive_fails=True)
++    assert isinstance(rc, RuntimeError) and rec is None
++    assert [e[:2] for e in log] == [("run", "llama3_1_8b"), ("archive", "llama3_1_8b")]
++
++
++def test_orchestrator_refuses_a_partial_rerun():
++    for existing in ("llama3_1_8b/attempt_1", "qwen2_5_7b/attempt_1", "two_model_attempt_1"):
++        rc, log, printed, _ = _orchestrate({"llama3_1_8b": 0, "qwen2_5_7b": 0}, pre_existing=existing)
++        assert isinstance(rc, SystemExit) and "never partially rerun" in str(rc) and log == [] and printed == []
++
++
+ if __name__ == "__main__":
+     tests = [(k, v) for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
+     failed = 0

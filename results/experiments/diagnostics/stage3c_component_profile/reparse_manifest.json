@@ -1,0 +1,40 @@
+{
+  "reparsed_from_existing_raw": true,
+  "h100_rerun": false,
+  "raw_run_dir": "results/mlsys2027/diagnostics/stage3c_component_profile/raw_run_1",
+  "raw_modal_session_sha256": "d9f02ceaaec2465651463b3b619c4a4e63b8b53bb2dd497dc1a4a733a1f44df2",
+  "raw_failed_manifest_sha256": "f2e08e98bc147ac007aca491806510faaaf7099bd6e95fe6b5552ef44ef08187",
+  "original_analysis_status": "failed",
+  "original_failure_stage": "parser_failure",
+  "original_failure_message": "malformed profile line: 'WARNING 09-27 13:26:31 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE'",
+  "measurement_code_commit": "e88cdaa416d794dfa1969cd01330e6c3c86c6d2d",
+  "measurement_run_git_head": "5b577be72d6aa8aab91a4f4514501a0ec267a5ae",
+  "measurement_vllm_kvquant_tree": "b8b9ad19d062ef4104c1c354fdbded804d518fcd",
+  "measurement_snapshot_sha256": "98fa2eabf32723d6ac25b0d1bffdebf1a9b2865f8703dfa93e4463fa81e02dd5",
+  "measurement_modal_app": "ap-mVshZt9jTXIBH0KY2fZC5s",
+  "analysis_parser_commit": "6784639854fce56197931b6dfd33edb031e3ad9c",
+  "analysis_module_sha256": "f189ce21b5333945bb18dff33d6edce95a4152a786920631b38ed865714b9632",
+  "runner_script_sha256": "aefceb7c0a5a799e7b163a6db21192655fa28c0a126ea4f15d83ebc7e5370f0a",
+  "reparsed_utc": "2026-09-27T13:52:05.140178+00:00",
+  "scope": "Stage3C COMPONENT PROFILE diagnostic only; NOT a latency benchmark, NOT paper performance evidence, NOT Experiment 5 evidence. The device is synchronized around every component; profiled TTFT/wall are not latency. One profiled request per implementation per point.",
+  "record_counts": {
+    "profiler_tests": 16,
+    "top_level": 0,
+    "reference_conditioning": 32,
+    "reference_measured": 96,
+    "reference_outside_requests": 0,
+    "tile32_conditioning": 32,
+    "tile32_measured": 96,
+    "tile32_outside_requests": 0
+  },
+  "integrity_counts": {
+    "passed": 34,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "all_integrity_passed": true,
+  "status": "completed",
+  "raw_modal_session_sha256_after": "d9f02ceaaec2465651463b3b619c4a4e63b8b53bb2dd497dc1a4a733a1f44df2",
+  "raw_unchanged": true
+}

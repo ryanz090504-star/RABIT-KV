@@ -49,6 +49,16 @@ from vllm.v1.attention.ops.rabit_kv2 import (
     rabit2_online_decode_attention_triton,
     rabit2_register_attention_impl,
 )
+from vllm.v1.attention.ops.rabit_kv2_stage3c_shared_decode import (
+    rabit2_stage3c_forward_shared_decode,
+    rabit2_stage3c_impl,
+)
+from vllm.v1.attention.ops.rabit_kv2_stage3c_tile32 import (
+    rabit2_stage3c_forward_tile32,
+)
+from vllm.v1.attention.ops.rabit_kv2_stage3c_profile import (
+    rabit2_stage3c_profile_scope,
+)
 from vllm.v1.kv_cache_interface import (
     AttentionSpec,
     KVQuantMode,
@@ -887,36 +897,73 @@ class TritonAttentionImpl(AttentionImpl):
                 )
                 self._rabit2_logged_chunked = True
 
-            # Stage4B4: decode stays on the exact one-token append path. For a
-            # non-initial chunk, precompute exact future sidecar representation
-            # once, then expose only the causally legal state before each
-            # attention call.
-            chunk_plan = (
-                Rabit2CausalChunkPlan(
-                    runtime, k_seq, v_seq, kv_cache, block_table_row
-                )
-                if q_len > 1
-                else None
-            )
-            for local_idx in range(q_len):
-                if chunk_plan is None:
-                    runtime.append(
-                        k_seq[local_idx : local_idx + 1],
-                        v_seq[local_idx : local_idx + 1],
+            # Diagnostic component timing; a no-op unless
+            # VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE=1 and q_len > 1.
+            with rabit2_stage3c_profile_scope(q_len, context_len):
+                # Opt-in tile32 for non-initial chunks (VLLM_RABIT2_STAGE3C_IMPL);
+                # the reference path below stays the default and the oracle.
+                if (
+                    q_len > 1
+                    and rabit2_stage3c_impl() == "tile32"
+                    and rabit2_stage3c_forward_tile32(
+                        runtime,
+                        q_seq,
+                        k_seq,
+                        v_seq,
                         kv_cache,
                         block_table_row,
+                        output[q0:q1],
+                        self.scale,
                     )
-                else:
-                    chunk_plan.apply_step(local_idx)
+                ):
+                    continue
+                # Opt-in shared_decode: one closed-page decode per query block.
+                if (
+                    q_len > 1
+                    and rabit2_stage3c_impl() == "shared_decode"
+                    and rabit2_stage3c_forward_shared_decode(
+                        runtime,
+                        q_seq,
+                        k_seq,
+                        v_seq,
+                        kv_cache,
+                        block_table_row,
+                        output[q0:q1],
+                        self.scale,
+                    )
+                ):
+                    continue
 
-                rabit_out = rabit2_online_decode_attention_triton(
-                    q_seq[local_idx : local_idx + 1],
-                    kv_cache,
-                    block_table_row,
-                    runtime,
-                    softmax_scale=self.scale,
+                # Stage4B4: decode stays on the exact one-token append path. For a
+                # non-initial chunk, precompute exact future sidecar representation
+                # once, then expose only the causally legal state before each
+                # attention call.
+                chunk_plan = (
+                    Rabit2CausalChunkPlan(
+                        runtime, k_seq, v_seq, kv_cache, block_table_row
+                    )
+                    if q_len > 1
+                    else None
                 )
-                output[q0 + local_idx : q0 + local_idx + 1].copy_(rabit_out)
+                for local_idx in range(q_len):
+                    if chunk_plan is None:
+                        runtime.append(
+                            k_seq[local_idx : local_idx + 1],
+                            v_seq[local_idx : local_idx + 1],
+                            kv_cache,
+                            block_table_row,
+                        )
+                    else:
+                        chunk_plan.apply_step(local_idx)
+
+                    rabit_out = rabit2_online_decode_attention_triton(
+                        q_seq[local_idx : local_idx + 1],
+                        kv_cache,
+                        block_table_row,
+                        runtime,
+                        softmax_scale=self.scale,
+                    )
+                    output[q0 + local_idx : q0 + local_idx + 1].copy_(rabit_out)
 
         return output
 

@@ -1,0 +1,1048 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-wzd7WMLwXuWXDprI5lFYQD
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\quality\passage_retrieval.py
+└── 🔨 Created function run_longbench.
+GPU: NVIDIA H100 80GB HBM3
+Model: Qwen/Qwen2.5-7B-Instruct
+Dataset: LongBench passage_retrieval_en
+Samples: 200, starting at index 0
+Maximum input length: 16384 tokens
+Methods: ['bf16', 'rabit2']
+Metric: official LongBench passage retrieval score
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+
+2026-09-30 22:21:21,956 | INFO    | modelscope_hub.download | Downloading 15 files from Qwen/Qwen2.5-7B-Instruct@master
+
+[1ADownloading:   0%|          | 0/15 [00:00<?, ?file/s]
+[1ADownloading:  53%|█████▎    | 8/15 [00:05<00:04,  1.55file/s]
+[1ADownloading: 100%|██████████| 15/15 [00:05<00:00,  3.37file/s]Downloading: 100%|██████████| 15/15 [00:05<00:00,  2.84file/s]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  8.10it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00, 10.55it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 10.91it/s]
+
+[1AGenerating test split: 0 examples [00:00, ? examples/s]Generating test split: 200 examples [00:00, 4581.39 examples/s]
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Sample 1/200 (dataset index 0): 11471 original tokens, 11471 used tokens
+Ground truth: ['Paragraph 15']
+  bf16     score=1.000 KV=627.266 MB answer='Paragraph 15'
+  rabit2   score=0.000 KV=119.149 MB answer='Paragraph 1 answer'
+
+Sample 2/200 (dataset index 1): 11912 original tokens, 11912 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=651.383 MB answer='Paragraph 8'
+  rabit2   score=1.000 KV=123.760 MB answer='Paragraph 8'
+
+Sample 3/200 (dataset index 2): 13335 original tokens, 13335 used tokens
+Ground truth: ['Paragraph 18']
+  bf16     score=1.000 KV=729.203 MB answer='Paragraph 18'
+  rabit2   score=0.000 KV=138.413 MB answer='Paragraph 1 answer \n\n1118 answer " " " "1"11"", "1 " "10".'
+
+Sample 4/200 (dataset index 3): 13050 original tokens, 13050 used tokens
+Ground truth: ['Paragraph 17']
+  bf16     score=1.000 KV=713.617 MB answer='Paragraph 17'
+  rabit2   score=0.000 KV=135.443 MB answer='Paragraph 1 answer'
+
+Sample 5/200 (dataset index 4): 12798 original tokens, 12798 used tokens
+Ground truth: ['Paragraph 14']
+  bf16     score=1.000 KV=699.836 MB answer='Paragraph 14'
+  rabit2   score=0.250 KV=132.808 MB answer='Paragraph 1 answer \n\nParagraph 1 answer answer"Paragraph 1The answerParagraph 14"'
+
+Sample 6/200 (dataset index 5): 12558 original tokens, 12558 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=686.711 MB answer='Paragraph 3'
+  rabit2   score=1.000 KV=130.418 MB answer='Paragraph 3 answer answer'
+
+Sample 7/200 (dataset index 6): 12136 original tokens, 12136 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=663.633 MB answer='Paragraph 24'
+  rabit2   score=1.000 KV=126.081 MB answer='Paragraph 24'
+
+Sample 8/200 (dataset index 7): 12298 original tokens, 12298 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=672.492 MB answer='Paragraph 27'
+  rabit2   score=0.000 KV=127.749 MB answer='Paragraph 2 answer is: Paragraph 2 abstract answer is: Paragraph 2 answer is: 2 answer is: Paragraph 2 answer is: Paragraph'
+
+Sample 9/200 (dataset index 8): 10911 original tokens, 10911 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=596.641 MB answer='Paragraph 30'
+  rabit2   score=0.000 KV=113.251 MB answer='Paragraph 3 answer'
+
+Sample 10/200 (dataset index 9): 14494 original tokens, 14494 used tokens
+Ground truth: ['Paragraph 12']
+  bf16     score=1.000 KV=792.586 MB answer='Paragraph 12'
+  rabit2   score=0.333 KV=150.380 MB answer='Paragraph 1 answer \n\nParagraph 1" Paragraph 11Paragraph 12 answer Paragraph  ".\n\nParagraph 1 Kolkata".\n\nParagraph 12'
+
+Sample 11/200 (dataset index 10): 12959 original tokens, 12959 used tokens
+Ground truth: ['Paragraph 22']
+  bf16     score=1.000 KV=708.641 MB answer='Paragraph 22'
+  rabit2   score=0.200 KV=134.470 MB answer='Paragraph 2 answer \n\nParagraph 22 number",Paragraph 2number222"",Paragraph 222"'
+
+Sample 12/200 (dataset index 11): 13903 original tokens, 13903 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=760.266 MB answer='Paragraph 30'
+  rabit2   score=0.000 KV=144.347 MB answer='Paragraph 3 answer2\nuser\n Paragraph 2Paragraph 3 answer'
+
+Sample 13/200 (dataset index 12): 12423 original tokens, 12423 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=679.328 MB answer='Paragraph 24'
+  rabit2   score=1.000 KV=129.061 MB answer='Paragraph 24'
+
+Sample 14/200 (dataset index 13): 14148 original tokens, 14148 used tokens
+Ground truth: ['Paragraph 19']
+  bf16     score=1.000 KV=773.664 MB answer='Paragraph 19'
+  rabit2   score=0.000 KV=146.757 MB answer='Paragraph 1 answer abstract abstractParagraph 1"", 119abstract is from Paragraph 1"". paragraph.'
+
+Sample 15/200 (dataset index 14): 15573 original tokens, 15573 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=851.594 MB answer='Paragraph 3'
+  rabit2   score=0.800 KV=161.611 MB answer='Paragraph 3 answer3\nParagraph 3 answer answer\nParagraph 3The answerParagraph 33"'
+
+Sample 16/200 (dataset index 15): 13910 original tokens, 13910 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=760.648 MB answer='Paragraph 8'
+  rabit2   score=1.000 KV=144.378 MB answer='Paragraph 8 answer answer'
+
+Sample 17/200 (dataset index 16): 12439 original tokens, 12439 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=680.203 MB answer='Paragraph 3'
+  rabit2   score=1.000 KV=129.130 MB answer='Paragraph 3 answer answern answer3 answeranswer" """3 answerParagraph 3".'
+
+Sample 18/200 (dataset index 17): 12987 original tokens, 12987 used tokens
+Ground truth: ['Paragraph 17']
+  bf16     score=1.000 KV=710.172 MB answer='Paragraph 17'
+  rabit2   score=0.200 KV=134.784 MB answer='Paragraph 1 answer1\n \n17 answer " " " "answer is:Paragraph 11".1'
+
+Sample 19/200 (dataset index 18): 13847 original tokens, 13847 used tokens
+Ground truth: ['Paragraph 4']
+  bf16     score=1.000 KV=757.203 MB answer='Paragraph 4'
+  rabit2   score=1.000 KV=143.718 MB answer='Paragraph 4"'
+
+Sample 20/200 (dataset index 19): 15272 original tokens, 15272 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=835.133 MB answer='Paragraph 3'
+  rabit2   score=1.000 KV=158.572 MB answer='Paragraph 3'
+
+Sample 21/200 (dataset index 20): 13540 original tokens, 13540 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=740.414 MB answer='Paragraph 24'
+  rabit2   score=0.000 KV=140.458 MB answer='Paragraph 2 answer answer \n12 answer"", " "",",number answer""" is the correct"Paragraph 2" " the "abstract"'
+
+Sample 22/200 (dataset index 21): 13494 original tokens, 13494 used tokens
+Ground truth: ['Paragraph 2']
+  bf16     score=1.000 KV=737.898 MB answer='Paragraph 2'
+  rabit2   score=0.600 KV=140.068 MB answer='Paragraph 2 answer2user\n22 answer answer answer 222"Paragraph 2".'
+
+Sample 23/200 (dataset index 22): 12761 original tokens, 12761 used tokens
+Ground truth: ['Paragraph 6']
+  bf16     score=1.000 KV=697.812 MB answer='Paragraph 6'
+  rabit2   score=1.000 KV=132.452 MB answer='Paragraph 6 answer'
+
+Sample 24/200 (dataset index 23): 12729 original tokens, 12729 used tokens
+Ground truth: ['Paragraph 12']
+  bf16     score=1.000 KV=696.062 MB answer='Paragraph 12'
+  rabit2   score=0.000 KV=132.121 MB answer='Paragraph 1 answer \n\n11Paragraph 1 answer2 12222222212222 answer 112'
+
+Sample 25/200 (dataset index 24): 11432 original tokens, 11432 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=625.133 MB answer='Paragraph 24'
+  rabit2   score=0.000 KV=118.787 MB answer='Paragraph 22'
+
+Sample 26/200 (dataset index 25): 11074 original tokens, 11074 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=605.555 MB answer='Paragraph 30'
+  rabit2   score=0.000 KV=114.922 MB answer='Paragraph 3 answer'
+
+Sample 27/200 (dataset index 26): 15280 original tokens, 15280 used tokens
+Ground truth: ['Paragraph 1']
+  bf16     score=1.000 KV=835.570 MB answer='Paragraph 1'
+  rabit2   score=1.000 KV=158.606 MB answer='Paragraph 1 answer1'
+
+Sample 28/200 (dataset index 27): 12958 original tokens, 12958 used tokens
+Ground truth: ['Paragraph 6']
+  bf16     score=1.000 KV=708.586 MB answer='Paragraph 6'
+  rabit2   score=1.000 KV=134.466 MB answer='Paragraph 6 answer answernnumber "6 answer " " "answer is: Paragraph 6".'
+
+Sample 29/200 (dataset index 28): 13379 original tokens, 13379 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=731.609 MB answer='Paragraph 8'
+  rabit2   score=1.000 KV=138.797 MB answer='Paragraph 8 answer \nParagraph 8".Paragraph 8"Paragraph 8 answer"Paragraph 8".Paragraph  the"Paragraph  the"Paragraph'
+
+Sample 30/200 (dataset index 29): 10412 original tokens, 10412 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=569.352 MB answer='Paragraph 3'
+  rabit2   score=0.667 KV=108.195 MB answer='Paragraph 3 answer paragraph number333 answer answer is: Paragraph 3'
+
+Sample 31/200 (dataset index 30): 13895 original tokens, 13895 used tokens
+Ground truth: ['Paragraph 1']
+  bf16     score=1.000 KV=759.828 MB answer='Paragraph 1'
+  rabit2   score=1.000 KV=144.312 MB answer='Paragraph 1'
+
+Sample 32/200 (dataset index 31): 11882 original tokens, 11882 used tokens
+Ground truth: ['Paragraph 25']
+  bf16     score=1.000 KV=649.742 MB answer='Paragraph 25'
+  rabit2   score=0.000 KV=123.439 MB answer='Paragraph 2 answer is: Paragraph 2 paragraph number is 22 paragraph number.'
+
+Sample 33/200 (dataset index 32): 14238 original tokens, 14238 used tokens
+Ground truth: ['Paragraph 19']
+  bf16     score=1.000 KV=778.586 MB answer='Paragraph 19'
+  rabit2   score=0.000 KV=147.728 MB answer='Paragraph 16"'
+
+Sample 34/200 (dataset index 33): 10937 original tokens, 10937 used tokens
+Ground truth: ['Paragraph 22']
+  bf16     score=1.000 KV=598.062 MB answer='Paragraph 22'
+  rabit2   score=0.000 KV=113.555 MB answer='Paragraph 2 answer'
+
+Sample 35/200 (dataset index 34): 13150 original tokens, 13150 used tokens
+Ground truth: ['Paragraph 5']
+  bf16     score=1.000 KV=719.086 MB answer='Paragraph 5'
+  rabit2   score=1.000 KV=136.455 MB answer='Paragraph 5 answer \n\n Paragraph 5 is the correct correct correct abstract correctParagraph 5 the abstract". abstractParagraph 5 the abstract\nParagraph 5'
+
+Sample 36/200 (dataset index 35): 13158 original tokens, 13158 used tokens
+Ground truth: ['Paragraph 15']
+  bf16     score=1.000 KV=719.523 MB answer='Paragraph 15'
+  rabit2   score=1.000 KV=136.683 MB answer='Paragraph 15'
+
+Sample 37/200 (dataset index 36): 13901 original tokens, 13901 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=760.156 MB answer='Paragraph 28'
+  rabit2   score=0.000 KV=144.336 MB answer='Paragraph 2 answer2\nuser\n Paragraph 2 is the correct answer'
+
+Sample 38/200 (dataset index 37): 12498 original tokens, 12498 used tokens
+Ground truth: ['Paragraph 5']
+  bf16     score=1.000 KV=683.430 MB answer='Paragraph 5'
+  rabit2   score=1.000 KV=129.773 MB answer='Paragraph 5 answer'
+
+Sample 39/200 (dataset index 38): 13742 original tokens, 13742 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=751.461 MB answer='Paragraph 30'
+  rabit2   score=0.000 KV=142.685 MB answer='Paragraph 3 answer'
+
+Sample 40/200 (dataset index 39): 10710 original tokens, 10710 used tokens
+Ground truth: ['Paragraph 6']
+  bf16     score=1.000 KV=585.648 MB answer='Paragraph 6'
+  rabit2   score=1.000 KV=111.223 MB answer='Paragraph 6 answer6'
+
+Sample 41/200 (dataset index 40): 12536 original tokens, 12536 used tokens
+Ground truth: ['Paragraph 12']
+  bf16     score=1.000 KV=685.508 MB answer='Paragraph 12'
+  rabit2   score=0.333 KV=130.128 MB answer='Paragraph 1 paragraph number11Paragraph 12"'
+
+Sample 42/200 (dataset index 41): 13995 original tokens, 13995 used tokens
+Ground truth: ['Paragraph 26']
+  bf16     score=1.000 KV=765.297 MB answer='Paragraph 26'
+  rabit2   score=0.000 KV=145.324 MB answer='Paragraph 2 answer is Paragraph 22\nuser\n Paragraph 2 is Paragraph 22\nanswer\n Paragraph 2 is Paragraph'
+
+Sample 43/200 (dataset index 42): 12134 original tokens, 12134 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=663.523 MB answer='Paragraph 30'
+  rabit2   score=1.000 KV=126.074 MB answer='Paragraph 30'
+
+Sample 44/200 (dataset index 43): 13900 original tokens, 13900 used tokens
+Ground truth: ['Paragraph 6']
+  bf16     score=1.000 KV=760.102 MB answer='Paragraph 6'
+  rabit2   score=1.000 KV=144.333 MB answer='Paragraph 6 answer is from Paragraph 6.'
+
+Sample 45/200 (dataset index 44): 12027 original tokens, 12027 used tokens
+Ground truth: ['Paragraph 12']
+  bf16     score=1.000 KV=657.672 MB answer='Paragraph 12'
+  rabit2   score=0.333 KV=124.837 MB answer='Paragraph 1 answer \n Paragraph 1"12"'
+
+Sample 46/200 (dataset index 45): 14520 original tokens, 14520 used tokens
+Ground truth: ['Paragraph 23']
+  bf16     score=1.000 KV=794.008 MB answer='Paragraph 23'
+  rabit2   score=0.000 KV=150.684 MB answer='Paragraph 2 answer \nanswer 22 answer" " 2answer\nParagraph 223"'
+
+Sample 47/200 (dataset index 46): 14777 original tokens, 14777 used tokens
+Ground truth: ['Paragraph 17']
+  bf16     score=1.000 KV=808.062 MB answer='Paragraph 17'
+  rabit2   score=0.000 KV=153.340 MB answer='Paragraph 1 answer'
+
+Sample 48/200 (dataset index 47): 12212 original tokens, 12212 used tokens
+Ground truth: ['Paragraph 1']
+  bf16     score=1.000 KV=667.789 MB answer='Paragraph 1'
+  rabit2   score=1.000 KV=126.796 MB answer='Paragraph 1 answer'
+
+Sample 49/200 (dataset index 48): 14542 original tokens, 14542 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=795.211 MB answer='Paragraph 27'
+  rabit2   score=0.000 KV=150.974 MB answer='Paragraph 2 answer \n", which2answeruser\nThe answer",AssistantThe answer",", is:2 answer"".'
+
+Sample 50/200 (dataset index 49): 12976 original tokens, 12976 used tokens
+Ground truth: ['Paragraph 21']
+  bf16     score=1.000 KV=709.570 MB answer='Paragraph 21'
+  rabit2   score=0.000 KV=134.735 MB answer='Paragraph 2 answer'
+
+Sample 51/200 (dataset index 50): 12122 original tokens, 12122 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=662.867 MB answer='Paragraph 27'
+  rabit2   score=0.000 KV=125.829 MB answer='Paragraph 2 answer'
+
+Sample 52/200 (dataset index 51): 11827 original tokens, 11827 used tokens
+Ground truth: ['Paragraph 29']
+  bf16     score=1.000 KV=646.734 MB answer='Paragraph 29'
+  rabit2   score=0.250 KV=122.814 MB answer='Paragraph 2 answer \n\nParagraph 2 is the correctParagraph 2 the abstract answerParagraph  abstract.Paragraph 29"'
+
+Sample 53/200 (dataset index 52): 13576 original tokens, 13576 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=742.383 MB answer='Paragraph 28'
+  rabit2   score=1.000 KV=141.000 MB answer='Paragraph 28'
+
+Sample 54/200 (dataset index 53): 12437 original tokens, 12437 used tokens
+Ground truth: ['Paragraph 7']
+  bf16     score=1.000 KV=680.094 MB answer='Paragraph 7'
+  rabit2   score=0.800 KV=129.120 MB answer='Paragraph 7 answer answer "77\n\nParagraph 7\n\n"\n7\n\nParagraph 7"'
+
+Sample 55/200 (dataset index 54): 13414 original tokens, 13414 used tokens
+Ground truth: ['Paragraph 15']
+  bf16     score=1.000 KV=733.523 MB answer='Paragraph 15'
+  rabit2   score=1.000 KV=139.335 MB answer='Paragraph 15'
+
+Sample 56/200 (dataset index 55): 14205 original tokens, 14205 used tokens
+Ground truth: ['Paragraph 22']
+  bf16     score=1.000 KV=776.781 MB answer='Paragraph 22'
+  rabit2   score=0.000 KV=147.389 MB answer='Paragraph 222'
+
+Sample 57/200 (dataset index 56): 12440 original tokens, 12440 used tokens
+Ground truth: ['Paragraph 16']
+  bf16     score=1.000 KV=680.258 MB answer='Paragraph 16'
+  rabit2   score=0.000 KV=129.134 MB answer='Paragraph 1 answer \n\n Paragraph 1"1 answer Paragraph 1"116".'
+
+Sample 58/200 (dataset index 57): 11725 original tokens, 11725 used tokens
+Ground truth: ['Paragraph 14']
+  bf16     score=1.000 KV=641.156 MB answer='Paragraph 14'
+  rabit2   score=0.000 KV=121.791 MB answer='Paragraph 1 answer'
+
+Sample 59/200 (dataset index 58): 14408 original tokens, 14408 used tokens
+Ground truth: ['Paragraph 29']
+  bf16     score=1.000 KV=787.883 MB answer='Paragraph 29'
+  rabit2   score=0.333 KV=149.620 MB answer='Paragraph 29\nuser\nHere are a paragraph from a Wikipedia page on a historical figure:\n\nParagraph 1 181, the British East'
+
+Sample 60/200 (dataset index 59): 14666 original tokens, 14666 used tokens
+Ground truth: ['Paragraph 19']
+  bf16     score=1.000 KV=801.992 MB answer='Paragraph 19'
+  rabit2   score=0.333 KV=152.283 MB answer='Paragraph 1 answer is: Paragraph 1 paragraph number is 19.'
+
+Sample 61/200 (dataset index 60): 14232 original tokens, 14232 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=778.258 MB answer='Paragraph 28'
+  rabit2   score=0.000 KV=147.700 MB answer='Paragraph 2 answeranswer\nresponse\n2 answer answeranswer\nresponse\n answerParagraph 228"'
+
+Sample 62/200 (dataset index 61): 14546 original tokens, 14546 used tokens
+Ground truth: ['Paragraph 26']
+  bf16     score=1.000 KV=795.430 MB answer='Paragraph 26'
+  rabit2   score=0.000 KV=150.991 MB answer='Paragraph 2 answer'
+
+Sample 63/200 (dataset index 62): 13502 original tokens, 13502 used tokens
+Ground truth: ['Paragraph 1']
+  bf16     score=1.000 KV=738.336 MB answer='Paragraph 1'
+  rabit2   score=0.857 KV=140.102 MB answer='Paragraph 1 answer answer1 Paragraph 1 answer answer answer 1 1  " 1  "11"'
+
+Sample 64/200 (dataset index 63): 14418 original tokens, 14418 used tokens
+Ground truth: ['Paragraph 10']
+  bf16     score=1.000 KV=788.430 MB answer='Paragraph 10'
+  rabit2   score=0.000 KV=149.665 MB answer='Paragraph 1 answer1'
+
+Sample 65/200 (dataset index 64): 13080 original tokens, 13080 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=715.258 MB answer='Paragraph 8'
+  rabit2   score=0.500 KV=135.764 MB answer='Paragraph 8 answer answer "88"'
+
+Sample 66/200 (dataset index 65): 11174 original tokens, 11174 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=611.023 MB answer='Paragraph 3'
+  rabit2   score=1.000 KV=116.127 MB answer='Paragraph 3'
+
+Sample 67/200 (dataset index 66): 12369 original tokens, 12369 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=676.375 MB answer='Paragraph 27'
+  rabit2   score=0.000 KV=128.439 MB answer='Paragraph 2 answer'
+
+Sample 68/200 (dataset index 67): 12442 original tokens, 12442 used tokens
+Ground truth: ['Paragraph 15']
+  bf16     score=1.000 KV=680.367 MB answer='Paragraph 15'
+  rabit2   score=0.000 KV=129.144 MB answer='Paragraph 1 answer \n\n Paragraph 1"5 answer 155555555555555 answer 155'
+
+Sample 69/200 (dataset index 68): 12624 original tokens, 12624 used tokens
+Ground truth: ['Paragraph 21']
+  bf16     score=1.000 KV=690.320 MB answer='Paragraph 21'
+  rabit2   score=0.167 KV=131.088 MB answer='Paragraph 2 answer "222" answer\nParagraph 2"222"Paragraph 2"21"'
+
+Sample 70/200 (dataset index 69): 15243 original tokens, 15243 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=833.547 MB answer='Paragraph 28'
+  rabit2   score=0.000 KV=158.254 MB answer='Paragraph 2 answer is 22.'
+
+Sample 71/200 (dataset index 70): 14566 original tokens, 14566 used tokens
+Ground truth: ['Paragraph 5']
+  bf16     score=1.000 KV=796.523 MB answer='Paragraph 5'
+  rabit2   score=1.000 KV=151.271 MB answer='Paragraph 5'
+
+Sample 72/200 (dataset index 71): 12485 original tokens, 12485 used tokens
+Ground truth: ['Paragraph 9']
+  bf16     score=1.000 KV=682.719 MB answer='Paragraph 9'
+  rabit2   score=1.000 KV=129.521 MB answer='Paragraph 9'
+
+Sample 73/200 (dataset index 72): 11144 original tokens, 11144 used tokens
+Ground truth: ['Paragraph 20']
+  bf16     score=1.000 KV=609.383 MB answer='Paragraph 20'
+  rabit2   score=0.000 KV=115.803 MB answer='Paragraph 2'
+
+Sample 74/200 (dataset index 73): 13135 original tokens, 13135 used tokens
+Ground truth: ['Paragraph 15']
+  bf16     score=1.000 KV=718.266 MB answer='Paragraph 15'
+  rabit2   score=0.333 KV=136.390 MB answer='Paragraph 1 answer \n\nParagraph 15 answer answerParagraph 1he"",'
+
+Sample 75/200 (dataset index 74): 12982 original tokens, 12982 used tokens
+Ground truth: ['Paragraph 6']
+  bf16     score=1.000 KV=709.898 MB answer='Paragraph 6'
+  rabit2   score=0.667 KV=134.763 MB answer='Paragraph 6 answer \nanswer66"6"'
+
+Sample 76/200 (dataset index 75): 14128 original tokens, 14128 used tokens
+Ground truth: ['Paragraph 23']
+  bf16     score=1.000 KV=772.570 MB answer='Paragraph 23'
+  rabit2   score=0.000 KV=146.671 MB answer='Paragraph 2 answer \nParagraph 2"'
+
+Sample 77/200 (dataset index 76): 11504 original tokens, 11504 used tokens
+Ground truth: ['Paragraph 26']
+  bf16     score=1.000 KV=629.070 MB answer='Paragraph 26'
+  rabit2   score=0.000 KV=119.484 MB answer='Paragraph 2 answer2\nuser\nThe answerispers\nParagraph 2 answer is " Paragraph 2 answer is " Paragraph 2 answer is" Paragraph'
+
+Sample 78/200 (dataset index 77): 12327 original tokens, 12327 used tokens
+Ground truth: ['Paragraph 18']
+  bf16     score=1.000 KV=674.078 MB answer='Paragraph 18'
+  rabit2   score=1.000 KV=128.066 MB answer='Paragraph 18'
+
+Sample 79/200 (dataset index 78): 11659 original tokens, 11659 used tokens
+Ground truth: ['Paragraph 11']
+  bf16     score=1.000 KV=637.547 MB answer='Paragraph 11'
+  rabit2   score=0.000 KV=121.121 MB answer='Paragraph 1 answer for the paragraph that the abstract answer abstract\nuser\nThe answer\nuser\nThe answer answer The answer for the paragraph'
+
+Sample 80/200 (dataset index 79): 11868 original tokens, 11868 used tokens
+Ground truth: ['Paragraph 18']
+  bf16     score=1.000 KV=648.977 MB answer='Paragraph 18'
+  rabit2   score=0.000 KV=123.183 MB answer='Paragraph 1 answer \n\nParagraph 11 answer answernumbernumber1198 answer",Paragraph 122"'
+
+Sample 81/200 (dataset index 80): 11971 original tokens, 11971 used tokens
+Ground truth: ['Paragraph 7']
+  bf16     score=1.000 KV=654.609 MB answer='Paragraph 7'
+  rabit2   score=0.625 KV=124.209 MB answer='Paragraph 7 answer \nParagraph 7 the number"Paragraph 7 number77 answerParagraph 7 777"Paragraph 7 77'
+
+Sample 82/200 (dataset index 81): 15635 original tokens, 15635 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=854.984 MB answer='Paragraph 24'
+  rabit2   score=0.000 KV=162.267 MB answer='Paragraph 2 answer'
+
+Sample 83/200 (dataset index 82): 12905 original tokens, 12905 used tokens
+Ground truth: ['Paragraph 23']
+  bf16     score=1.000 KV=705.688 MB answer='Paragraph 23'
+  rabit2   score=0.333 KV=134.041 MB answer='Paragraph 2 is the answer answer\nuser\n Paragraph 2 is the answer. Paragraph 23'
+
+Sample 84/200 (dataset index 83): 11575 original tokens, 11575 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=632.953 MB answer='Paragraph 27'
+  rabit2   score=0.000 KV=120.179 MB answer='Paragraph 2 answer \n \nParagraph 2 answer"\n "Paragraph 2277"'
+
+Sample 85/200 (dataset index 84): 14541 original tokens, 14541 used tokens
+Ground truth: ['Paragraph 18']
+  bf16     score=1.000 KV=795.156 MB answer='Paragraph 18'
+  rabit2   score=0.000 KV=150.967 MB answer='Paragraph 1 answer'
+
+Sample 86/200 (dataset index 85): 11965 original tokens, 11965 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=654.281 MB answer='Paragraph 28'
+  rabit2   score=0.000 KV=124.181 MB answer='Paragraph 2 answer'
+
+Sample 87/200 (dataset index 86): 11679 original tokens, 11679 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=638.641 MB answer='Paragraph 3'
+  rabit2   score=1.000 KV=121.208 MB answer='Paragraph 3 answer'
+
+Sample 88/200 (dataset index 87): 13099 original tokens, 13099 used tokens
+Ground truth: ['Paragraph 5']
+  bf16     score=1.000 KV=716.297 MB answer='Paragraph 5'
+  rabit2   score=1.000 KV=136.041 MB answer='Paragraph 5 answer answer'
+
+Sample 89/200 (dataset index 88): 14116 original tokens, 14116 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=771.914 MB answer='Paragraph 27'
+  rabit2   score=0.000 KV=146.426 MB answer='Paragraph 2 answer answer answerParagraph 2 number"Paragraph 2"2"numberParagraph 2" the " the " the "Paragraph 2"'
+
+Sample 90/200 (dataset index 89): 11188 original tokens, 11188 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=611.789 MB answer='Paragraph 24'
+  rabit2   score=0.000 KV=116.186 MB answer='Paragraph 2 answer \n\n answer222 answer " "",2"224"'
+
+Sample 91/200 (dataset index 90): 13386 original tokens, 13386 used tokens
+Ground truth: ['Paragraph 29']
+  bf16     score=1.000 KV=731.992 MB answer='Paragraph 29'
+  rabit2   score=0.000 KV=139.021 MB answer='Paragraph 2 answer is: Paragraph 2 answer\nuser\n Paragraph 2 should is 2 answer is: Paragraph 2 answer\nuser'
+
+Sample 92/200 (dataset index 91): 10912 original tokens, 10912 used tokens
+Ground truth: ['Paragraph 23']
+  bf16     score=1.000 KV=596.695 MB answer='Paragraph 23'
+  rabit2   score=0.000 KV=113.254 MB answer='Paragraph 2 answer'
+
+Sample 93/200 (dataset index 92): 10416 original tokens, 10416 used tokens
+Ground truth: ['Paragraph 17']
+  bf16     score=1.000 KV=569.570 MB answer='Paragraph 17'
+  rabit2   score=0.000 KV=108.212 MB answer='Paragraph 1 answer'
+
+Sample 94/200 (dataset index 93): 13296 original tokens, 13296 used tokens
+Ground truth: ['Paragraph 16']
+  bf16     score=1.000 KV=727.070 MB answer='Paragraph 16'
+  rabit2   score=0.000 KV=138.051 MB answer='Paragraph 1 answer1 \nuser\nThe answer answer'
+
+Sample 95/200 (dataset index 94): 12938 original tokens, 12938 used tokens
+Ground truth: ['Paragraph 18']
+  bf16     score=1.000 KV=707.492 MB answer='Paragraph 18'
+  rabit2   score=0.000 KV=134.380 MB answer='Paragraph 8'
+
+Sample 96/200 (dataset index 95): 14404 original tokens, 14404 used tokens
+Ground truth: ['Paragraph 13']
+  bf16     score=1.000 KV=787.664 MB answer='Paragraph 13'
+  rabit2   score=0.000 KV=149.410 MB answer='Paragraph 1 answer answer111 answer paragraph number " 1 1  1  1  1  1  1'
+
+Sample 97/200 (dataset index 96): 14055 original tokens, 14055 used tokens
+Ground truth: ['Paragraph 20']
+  bf16     score=1.000 KV=768.578 MB answer='Paragraph 20'
+  rabit2   score=0.000 KV=145.970 MB answer='Paragraph 2 are the correct paragraph number based on the content of the abstract provided. The abstract describes a military engagement during the Civil War, specifically mentioning the movements'
+
+Sample 98/200 (dataset index 97): 15670 original tokens, 15670 used tokens
+Ground truth: ['Paragraph 18']
+  bf16     score=1.000 KV=856.898 MB answer='Paragraph 18'
+  rabit2   score=0.000 KV=162.613 MB answer='Paragraph 1 answer abstractparagraphParagraph 1 answer"", "The answer"The answer abstract888'
+
+Sample 99/200 (dataset index 98): 13319 original tokens, 13319 used tokens
+Ground truth: ['Paragraph 23']
+  bf16     score=1.000 KV=728.328 MB answer='Paragraph 23'
+  rabit2   score=1.000 KV=138.344 MB answer='Paragraph 23'
+
+Sample 100/200 (dataset index 99): 14381 original tokens, 14381 used tokens
+Ground truth: ['Paragraph 19']
+  bf16     score=1.000 KV=786.406 MB answer='Paragraph 19'
+  rabit2   score=0.000 KV=149.309 MB answer='Paragraph 1 answer'
+
+Sample 101/200 (dataset index 100): 13434 original tokens, 13434 used tokens
+Ground truth: ['Paragraph 19']
+  bf16     score=1.000 KV=734.617 MB answer='Paragraph 19'
+  rabit2   score=0.000 KV=139.422 MB answer='Paragraph 1 answer \n\n Paragraph 1'
+
+Sample 102/200 (dataset index 101): 14555 original tokens, 14555 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=795.922 MB answer='Paragraph 30'
+  rabit2   score=0.000 KV=151.029 MB answer='Paragraph 3 answer answer \nanswer\n\nanswer3 answer","\n"\nanswer is:Paragraph 3300'
+
+Sample 103/200 (dataset index 102): 13254 original tokens, 13254 used tokens
+Ground truth: ['Paragraph 13']
+  bf16     score=1.000 KV=724.773 MB answer='Paragraph 13'
+  rabit2   score=1.000 KV=137.678 MB answer='Paragraph 13'
+
+Sample 104/200 (dataset index 103): 12376 original tokens, 12376 used tokens
+Ground truth: ['Paragraph 9']
+  bf16     score=1.000 KV=676.758 MB answer='Paragraph 9'
+  rabit2   score=0.500 KV=128.471 MB answer='Paragraph 9 answer \n\n answerParagraph 9 answer", "999"Paragraph 99".".'
+
+Sample 105/200 (dataset index 104): 14004 original tokens, 14004 used tokens
+Ground truth: ['Paragraph 22']
+  bf16     score=1.000 KV=765.789 MB answer='Paragraph 22'
+  rabit2   score=0.000 KV=145.362 MB answer='Paragraph 2 answer'
+
+Sample 106/200 (dataset index 105): 13367 original tokens, 13367 used tokens
+Ground truth: ['Paragraph 11']
+  bf16     score=1.000 KV=730.953 MB answer='Paragraph 11'
+  rabit2   score=0.600 KV=138.745 MB answer='Paragraph 1 answer answernparagraph11 answer " " """ "answer answer11"".\\"The answer00".Paragraph 11"'
+
+Sample 107/200 (dataset index 106): 14649 original tokens, 14649 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=801.062 MB answer='Paragraph 3'
+  rabit2   score=0.250 KV=152.014 MB answer='Paragraph 3 answer \n\n answer333 answer answer " "333333333333333 answer333'
+
+Sample 108/200 (dataset index 107): 11425 original tokens, 11425 used tokens
+Ground truth: ['Paragraph 12']
+  bf16     score=1.000 KV=624.750 MB answer='Paragraph 12'
+  rabit2   score=0.000 KV=118.562 MB answer='Paragraph 1 answer \n11Paragraph 1 1DD\n1Paragraph 1122"'
+
+Sample 109/200 (dataset index 108): 13475 original tokens, 13475 used tokens
+Ground truth: ['Paragraph 10']
+  bf16     score=1.000 KV=736.859 MB answer='Paragraph 10'
+  rabit2   score=0.000 KV=139.792 MB answer='Paragraph 1 answer answerParagraph 11 answer answer100000000000000000000'
+
+Sample 110/200 (dataset index 109): 12086 original tokens, 12086 used tokens
+Ground truth: ['Paragraph 3']
+  bf16     score=1.000 KV=660.898 MB answer='Paragraph 3'
+  rabit2   score=1.000 KV=125.480 MB answer='Paragraph 3 answer answer'
+
+Sample 111/200 (dataset index 110): 12830 original tokens, 12830 used tokens
+Ground truth: ['Paragraph 10']
+  bf16     score=1.000 KV=701.586 MB answer='Paragraph 10'
+  rabit2   score=0.000 KV=133.140 MB answer='Paragraph 1 answer'
+
+Sample 112/200 (dataset index 111): 14220 original tokens, 14220 used tokens
+Ground truth: ['Paragraph 2']
+  bf16     score=1.000 KV=777.602 MB answer='Paragraph 2'
+  rabit2   score=1.000 KV=147.648 MB answer='Paragraph 2 answer abstract'
+
+Sample 113/200 (dataset index 112): 12555 original tokens, 12555 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=686.547 MB answer='Paragraph 27'
+  rabit2   score=0.000 KV=130.404 MB answer='Paragraph 2 answer abstract\nuser\nParagraph 2 is the correct answer assistant\n Paragraph 2 answer is " Paragraph 2 answer answer'
+
+Sample 114/200 (dataset index 113): 12721 original tokens, 12721 used tokens
+Ground truth: ['Paragraph 7']
+  bf16     score=1.000 KV=695.625 MB answer='Paragraph 7'
+  rabit2   score=0.667 KV=132.086 MB answer='Paragraph 7 answeranswer \n \nanswer is 7 Paragraph 77'
+
+Sample 115/200 (dataset index 114): 12824 original tokens, 12824 used tokens
+Ground truth: ['Paragraph 20']
+  bf16     score=1.000 KV=701.258 MB answer='Paragraph 20'
+  rabit2   score=0.000 KV=133.112 MB answer='Paragraph 2 paragraph number22'
+
+Sample 116/200 (dataset index 115): 14663 original tokens, 14663 used tokens
+Ground truth: ['Paragraph 25']
+  bf16     score=1.000 KV=801.828 MB answer='Paragraph 25'
+  rabit2   score=0.000 KV=152.269 MB answer='Paragraph 22'
+
+Sample 117/200 (dataset index 116): 11428 original tokens, 11428 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=624.914 MB answer='Paragraph 30'
+  rabit2   score=0.000 KV=118.576 MB answer='Paragraph 3 answer'
+
+Sample 118/200 (dataset index 117): 12620 original tokens, 12620 used tokens
+Ground truth: ['Paragraph 9']
+  bf16     score=1.000 KV=690.102 MB answer='Paragraph 9'
+  rabit2   score=0.667 KV=131.071 MB answer='Paragraph 9 answer is 999 answer:\nParagraph 9'
+
+Sample 119/200 (dataset index 118): 12164 original tokens, 12164 used tokens
+Ground truth: ['Paragraph 14']
+  bf16     score=1.000 KV=665.164 MB answer='Paragraph 14'
+  rabit2   score=0.000 KV=126.202 MB answer='Paragraph 1 answer \n\n Paragraph 1 answer answer'
+
+Sample 120/200 (dataset index 119): 13696 original tokens, 13696 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=748.945 MB answer='Paragraph 8'
+  rabit2   score=0.667 KV=142.098 MB answer='Paragraph 8 answer \n\n188\nParagraph 8" Robert\n answer"",", " "answeris"is the answer " " " "'
+
+Sample 121/200 (dataset index 120): 12496 original tokens, 12496 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=683.320 MB answer='Paragraph 8'
+  rabit2   score=1.000 KV=129.762 MB answer='Paragraph 8 answer8\nuser\nOh, Paragraph 8",'
+
+Sample 122/200 (dataset index 121): 15582 original tokens, 15582 used tokens
+Ground truth: ['Paragraph 19']
+  bf16     score=1.000 KV=852.086 MB answer='Paragraph 19'
+  rabit2   score=0.000 KV=161.653 MB answer='Paragraph 1 answer'
+
+Sample 123/200 (dataset index 122): 13134 original tokens, 13134 used tokens
+Ground truth: ['Paragraph 22']
+  bf16     score=1.000 KV=718.211 MB answer='Paragraph 22'
+  rabit2   score=0.000 KV=136.386 MB answer='Paragraph 2 answer'
+
+Sample 124/200 (dataset index 123): 12843 original tokens, 12843 used tokens
+Ground truth: ['Paragraph 1']
+  bf16     score=1.000 KV=702.297 MB answer='Paragraph 1'
+  rabit2   score=0.500 KV=133.388 MB answer='Paragraph 1 answer abstract\nuser\nThank you. The answer answer玩家朋友\nanswer is: Paragraph 11'
+
+Sample 125/200 (dataset index 124): 11279 original tokens, 11279 used tokens
+Ground truth: ['Paragraph 7']
+  bf16     score=1.000 KV=616.766 MB answer='Paragraph 7'
+  rabit2   score=0.286 KV=117.160 MB answer='Paragraph 7 answer1 \n77\n77\nParagraph 77"7\n"\n7774"'
+
+Sample 126/200 (dataset index 125): 11011 original tokens, 11011 used tokens
+Ground truth: ['Paragraph 7']
+  bf16     score=1.000 KV=602.109 MB answer='Paragraph 7'
+  rabit2   score=0.800 KV=114.263 MB answer='Paragraph 7 answer answerParagraph 7 is 7 answer abstract7\nParagraph 77'
+
+Sample 127/200 (dataset index 126): 12965 original tokens, 12965 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=708.969 MB answer='Paragraph 28'
+  rabit2   score=1.000 KV=134.494 MB answer='Paragraph 28'
+
+Sample 128/200 (dataset index 127): 10577 original tokens, 10577 used tokens
+Ground truth: ['Paragraph 11']
+  bf16     score=1.000 KV=578.375 MB answer='Paragraph 11'
+  rabit2   score=0.000 KV=109.873 MB answer='Paragraph 1 answer'
+
+Sample 129/200 (dataset index 128): 14137 original tokens, 14137 used tokens
+Ground truth: ['Paragraph 18']
+  bf16     score=1.000 KV=773.062 MB answer='Paragraph 18'
+  rabit2   score=0.500 KV=146.709 MB answer='Paragraph 1 answer \n\n \n\n TheThe answer answer abstract " "TheThe"Paragraph 18"".is'
+
+Sample 130/200 (dataset index 129): 12325 original tokens, 12325 used tokens
+Ground truth: ['Paragraph 9']
+  bf16     score=1.000 KV=673.969 MB answer='Paragraph 9'
+  rabit2   score=1.000 KV=127.863 MB answer='Paragraph 9'
+
+Sample 131/200 (dataset index 130): 11347 original tokens, 11347 used tokens
+Ground truth: ['Paragraph 16']
+  bf16     score=1.000 KV=620.484 MB answer='Paragraph 16'
+  rabit2   score=0.000 KV=117.840 MB answer='Paragraph 1 answer'
+
+Sample 132/200 (dataset index 131): 12769 original tokens, 12769 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=698.250 MB answer='Paragraph 8'
+  rabit2   score=0.625 KV=132.487 MB answer='Paragraph 8 answer "number8 Paragraph 8 answer""8 888 answer",1 88888"Paragraph 8".'
+
+Sample 133/200 (dataset index 132): 12769 original tokens, 12769 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=698.250 MB answer='Paragraph 27'
+  rabit2   score=0.000 KV=132.487 MB answer='Paragraph 2 answer "Number\n"\nnumber answer"", answer",",",",",",",",",",numbernumber",",",",", " "'
+
+Sample 134/200 (dataset index 133): 12555 original tokens, 12555 used tokens
+Ground truth: ['Paragraph 7']
+  bf16     score=1.000 KV=686.547 MB answer='Paragraph 7'
+  rabit2   score=1.000 KV=130.404 MB answer='Paragraph 7 answer nameanswer is: Paragraph 7'
+
+Sample 135/200 (dataset index 134): 12822 original tokens, 12822 used tokens
+Ground truth: ['Paragraph 26']
+  bf16     score=1.000 KV=701.148 MB answer='Paragraph 26'
+  rabit2   score=0.000 KV=133.105 MB answer='Paragraph 2 answer'
+
+Sample 136/200 (dataset index 135): 14478 original tokens, 14478 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=791.711 MB answer='Paragraph 24'
+  rabit2   score=0.000 KV=150.311 MB answer='Paragraph 2 answer'
+
+Sample 137/200 (dataset index 136): 13995 original tokens, 13995 used tokens
+Ground truth: ['Paragraph 20']
+  bf16     score=1.000 KV=765.297 MB answer='Paragraph 20'
+  rabit2   score=0.000 KV=145.324 MB answer='Paragraph 2 answer is "Paragraph 2 answer\nuser\nThe answer answer is: Paragraph 2 is correctParagraph 2 answer answer is: Paragraph'
+
+Sample 138/200 (dataset index 137): 12847 original tokens, 12847 used tokens
+Ground truth: ['Paragraph 29']
+  bf16     score=1.000 KV=702.516 MB answer='Paragraph 29'
+  rabit2   score=0.000 KV=133.406 MB answer='Paragraph 2 answer2\nuser\nParagraph 2 The'
+
+Sample 139/200 (dataset index 138): 12626 original tokens, 12626 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=690.430 MB answer='Paragraph 28'
+  rabit2   score=0.000 KV=131.099 MB answer='Paragraph 2 answer \n\nParagraph 22 answer" is the numberParagraph 2".'
+
+Sample 140/200 (dataset index 139): 13749 original tokens, 13749 used tokens
+Ground truth: ['Paragraph 6']
+  bf16     score=1.000 KV=751.844 MB answer='Paragraph 6'
+  rabit2   score=1.000 KV=142.713 MB answer='Paragraph 6 answer'
+
+Sample 141/200 (dataset index 140): 14331 original tokens, 14331 used tokens
+Ground truth: ['Paragraph 1']
+  bf16     score=1.000 KV=783.672 MB answer='Paragraph 1'
+  rabit2   score=0.500 KV=148.709 MB answer='Paragraph 1 answer answer1111 abstract answer " " "abstract"is "is" "isisis " " " " " " " "'
+
+Sample 142/200 (dataset index 141): 11898 original tokens, 11898 used tokens
+Ground truth: ['Paragraph 4']
+  bf16     score=1.000 KV=650.617 MB answer='Paragraph 4'
+  rabit2   score=1.000 KV=123.508 MB answer='Paragraph 4"'
+
+Sample 143/200 (dataset index 142): 13983 original tokens, 13983 used tokens
+Ground truth: ['Paragraph 29']
+  bf16     score=0.000 KV=764.641 MB answer='Paragraph 28'
+  rabit2   score=0.200 KV=145.079 MB answer='Paragraph 2 answer \nParagraph 21 answer answeranswerParagraph 2he number answer"\nParagraph 2 29".".'
+
+Sample 144/200 (dataset index 143): 11889 original tokens, 11889 used tokens
+Ground truth: ['Paragraph 11']
+  bf16     score=1.000 KV=650.125 MB answer='Paragraph 11'
+  rabit2   score=0.000 KV=123.466 MB answer='Paragraph 1 answer'
+
+Sample 145/200 (dataset index 144): 14345 original tokens, 14345 used tokens
+Ground truth: ['Paragraph 7']
+  bf16     score=1.000 KV=784.438 MB answer='Paragraph 7'
+  rabit2   score=1.000 KV=148.960 MB answer='Paragraph 7'
+
+Sample 146/200 (dataset index 145): 12377 original tokens, 12377 used tokens
+Ground truth: ['Paragraph 22']
+  bf16     score=1.000 KV=676.812 MB answer='Paragraph 22'
+  rabit2   score=0.000 KV=128.474 MB answer='Paragraph 2 answer'
+
+Sample 147/200 (dataset index 146): 12238 original tokens, 12238 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=669.211 MB answer='Paragraph 8'
+  rabit2   score=1.000 KV=127.103 MB answer='Paragraph 8 answer'
+
+Sample 148/200 (dataset index 147): 12759 original tokens, 12759 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=697.703 MB answer='Paragraph 28'
+  rabit2   score=0.000 KV=132.446 MB answer='Paragraph 2 answer'
+
+Sample 149/200 (dataset index 148): 13590 original tokens, 13590 used tokens
+Ground truth: ['Paragraph 23']
+  bf16     score=1.000 KV=743.148 MB answer='Paragraph 23'
+  rabit2   score=0.000 KV=141.062 MB answer='Paragraph 2 answeranswer\n2paragraph answer answer answer"\n",12223"'
+
+Sample 150/200 (dataset index 149): 12316 original tokens, 12316 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=673.477 MB answer='Paragraph 8'
+  rabit2   score=1.000 KV=127.825 MB answer='Paragraph 8 answer'
+
+Sample 151/200 (dataset index 150): 11713 original tokens, 11713 used tokens
+Ground truth: ['Paragraph 11']
+  bf16     score=1.000 KV=640.500 MB answer='Paragraph 11'
+  rabit2   score=0.000 KV=121.546 MB answer='Paragraph 1 answer answer answer111 answer answer",1"answer"1 answer "", "11111 1"a "P'
+
+Sample 152/200 (dataset index 151): 13758 original tokens, 13758 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=752.336 MB answer='Paragraph 28'
+  rabit2   score=0.000 KV=142.755 MB answer='Paragraph 2 answer answer2228 answer answer222282 paragraph that that Paragraph 224"'
+
+Sample 153/200 (dataset index 152): 10696 original tokens, 10696 used tokens
+Ground truth: ['Paragraph 16']
+  bf16     score=1.000 KV=584.883 MB answer='Paragraph 16'
+  rabit2   score=1.000 KV=111.161 MB answer='Paragraph 16'
+
+Sample 154/200 (dataset index 153): 13030 original tokens, 13030 used tokens
+Ground truth: ['Paragraph 2']
+  bf16     score=1.000 KV=712.523 MB answer='Paragraph 2'
+  rabit2   score=1.000 KV=135.357 MB answer='Paragraph 2'
+
+Sample 155/200 (dataset index 154): 14367 original tokens, 14367 used tokens
+Ground truth: ['Paragraph 1']
+  bf16     score=1.000 KV=785.641 MB answer='Paragraph 1'
+  rabit2   score=0.500 KV=149.057 MB answer='Paragraph 1 answer answer111 answer abstract answer " " "abstract"is " " " "isis " " " " " " " " "'
+
+Sample 156/200 (dataset index 155): 10744 original tokens, 10744 used tokens
+Ground truth: ['Paragraph 2']
+  bf16     score=1.000 KV=587.508 MB answer='Paragraph 2'
+  rabit2   score=1.000 KV=111.562 MB answer='Paragraph 2 answer'
+
+Sample 157/200 (dataset index 156): 14014 original tokens, 14014 used tokens
+Ground truth: ['Paragraph 28']
+  bf16     score=1.000 KV=766.336 MB answer='Paragraph 28'
+  rabit2   score=0.111 KV=145.407 MB answer='Paragraph 2 answer2\n82\n2 answer2"\n 28\n2Paragraph 2288888882"8'
+
+Sample 158/200 (dataset index 157): 12306 original tokens, 12306 used tokens
+Ground truth: ['Paragraph 7']
+  bf16     score=1.000 KV=672.930 MB answer='Paragraph 7'
+  rabit2   score=1.000 KV=127.783 MB answer='Paragraph 7 answer'
+
+Sample 159/200 (dataset index 158): 15052 original tokens, 15052 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=823.102 MB answer='Paragraph 27'
+  rabit2   score=0.000 KV=156.268 MB answer='Paragraph 2 answer abstract\nuser\nHere answer is:Paragraph 2.\n\n\n\nParagraph 2\nThe answer is:'
+
+Sample 160/200 (dataset index 159): 14525 original tokens, 14525 used tokens
+Ground truth: ['Paragraph 16']
+  bf16     score=1.000 KV=794.281 MB answer='Paragraph 16'
+  rabit2   score=0.000 KV=150.705 MB answer='Paragraph 1 answer \n\nParagraph 1"Paragraph 11\nuser\nThe answerParagraph 6" answer answer'
+
+Sample 161/200 (dataset index 160): 10915 original tokens, 10915 used tokens
+Ground truth: ['Paragraph 1']
+  bf16     score=1.000 KV=596.859 MB answer='Paragraph 1'
+  rabit2   score=1.000 KV=113.268 MB answer='Paragraph 1 answer'
+
+Sample 162/200 (dataset index 161): 12619 original tokens, 12619 used tokens
+Ground truth: ['Paragraph 26']
+  bf16     score=1.000 KV=690.047 MB answer='Paragraph 26'
+  rabit2   score=0.000 KV=131.068 MB answer='Paragraph 2 answer is "Paragraph 2 answer is 226".'
+
+Sample 163/200 (dataset index 162): 11579 original tokens, 11579 used tokens
+Ground truth: ['Paragraph 6']
+  bf16     score=1.000 KV=633.172 MB answer='Paragraph 6'
+  rabit2   score=1.000 KV=120.196 MB answer='Paragraph 6 answer'
+
+Sample 164/200 (dataset index 163): 12675 original tokens, 12675 used tokens
+Ground truth: ['Paragraph 15']
+  bf16     score=1.000 KV=693.109 MB answer='Paragraph 15'
+  rabit2   score=0.200 KV=131.503 MB answer='Paragraph 1 answer1\n \n15 answer answer " """ """1 answer " """ 11"."".'
+
+Sample 165/200 (dataset index 164): 11917 original tokens, 11917 used tokens
+Ground truth: ['Paragraph 14']
+  bf16     score=1.000 KV=651.656 MB answer='Paragraph 14'
+  rabit2   score=0.000 KV=123.780 MB answer='Paragraph 1 answer'
+
+Sample 166/200 (dataset index 165): 12834 original tokens, 12834 used tokens
+Ground truth: ['Paragraph 25']
+  bf16     score=1.000 KV=701.805 MB answer='Paragraph 25'
+  rabit2   score=0.000 KV=133.157 MB answer='Paragraph 2 answer answer answerParagraph 2 answer"Paragraph 2"Eanswer answerParagraph 2"answerParagraph 2" "'
+
+Sample 167/200 (dataset index 166): 12068 original tokens, 12068 used tokens
+Ground truth: ['Paragraph 6']
+  bf16     score=1.000 KV=659.914 MB answer='Paragraph 6'
+  rabit2   score=1.000 KV=125.207 MB answer='Paragraph 6 answer'
+
+Sample 168/200 (dataset index 167): 11376 original tokens, 11376 used tokens
+Ground truth: ['Paragraph 2']
+  bf16     score=1.000 KV=622.070 MB answer='Paragraph 2'
+  rabit2   score=1.000 KV=118.158 MB answer='Paragraph 2 answer2\nuser\nThe answer answer'
+
+Sample 169/200 (dataset index 168): 12473 original tokens, 12473 used tokens
+Ground truth: ['Paragraph 5']
+  bf16     score=1.000 KV=682.062 MB answer='Paragraph 5'
+  rabit2   score=1.000 KV=129.469 MB answer='Paragraph 5 answer'
+
+Sample 170/200 (dataset index 169): 11422 original tokens, 11422 used tokens
+Ground truth: ['Paragraph 12']
+  bf16     score=1.000 KV=624.586 MB answer='Paragraph 12'
+  rabit2   score=0.000 KV=118.552 MB answer='Paragraph 1 answer'
+
+Sample 171/200 (dataset index 170): 11609 original tokens, 11609 used tokens
+Ground truth: ['Paragraph 12']
+  bf16     score=1.000 KV=634.812 MB answer='Paragraph 12'
+  rabit2   score=0.250 KV=120.517 MB answer='Paragraph 1 answer \nParagraph 11 answer answerParagraph 1he"Paragraph 12"'
+
+Sample 172/200 (dataset index 171): 11572 original tokens, 11572 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=632.789 MB answer='Paragraph 8'
+  rabit2   score=0.667 KV=120.165 MB answer='Paragraph 8 answer \n\n answer8answer\nuserParagraph 88".", " "The answer",answer" " " " "isis" "'
+
+Sample 173/200 (dataset index 172): 13072 original tokens, 13072 used tokens
+Ground truth: ['Paragraph 20']
+  bf16     score=1.000 KV=714.820 MB answer='Paragraph 20'
+  rabit2   score=0.000 KV=135.730 MB answer='Paragraph 2 answer answer1paragraphanswer 2200\n\nThe answer",",", answer'
+
+Sample 174/200 (dataset index 173): 11643 original tokens, 11643 used tokens
+Ground truth: ['Paragraph 25']
+  bf16     score=1.000 KV=636.672 MB answer='Paragraph 25'
+  rabit2   score=0.333 KV=120.859 MB answer='Paragraph 2 answer \n\n2The answer answer answeranswer" " "numberanswer25""."'
+
+Sample 175/200 (dataset index 174): 11091 original tokens, 11091 used tokens
+Ground truth: ['Paragraph 23']
+  bf16     score=1.000 KV=606.484 MB answer='Paragraph 23'
+  rabit2   score=0.250 KV=115.188 MB answer='Paragraph 2 answer \n Paragraph 22 answer answer answer 22333"23"."'
+
+Sample 176/200 (dataset index 175): 14474 original tokens, 14474 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=791.492 MB answer='Paragraph 30'
+  rabit2   score=0.000 KV=150.294 MB answer='Paragraph 3 answer is: Paragraph 3 answer is: 300user: The answer is: Paragraph 3'
+
+Sample 177/200 (dataset index 176): 15028 original tokens, 15028 used tokens
+Ground truth: ['Paragraph 7']
+  bf16     score=1.000 KV=821.789 MB answer='Paragraph 7'
+  rabit2   score=1.000 KV=155.971 MB answer='Paragraph 7 answer'
+
+Sample 178/200 (dataset index 177): 11128 original tokens, 11128 used tokens
+Ground truth: ['Paragraph 10']
+  bf16     score=1.000 KV=608.508 MB answer='Paragraph 10'
+  rabit2   score=0.000 KV=115.540 MB answer='Paragraph 1 answer'
+
+Sample 179/200 (dataset index 178): 13159 original tokens, 13159 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=719.578 MB answer='Paragraph 30'
+  rabit2   score=1.000 KV=136.686 MB answer='Paragraph 30'
+
+Sample 180/200 (dataset index 179): 12756 original tokens, 12756 used tokens
+Ground truth: ['Paragraph 9']
+  bf16     score=1.000 KV=697.539 MB answer='Paragraph 9'
+  rabit2   score=1.000 KV=132.432 MB answer='Paragraph 9 answer \n\n Paragraph 9"'
+
+Sample 181/200 (dataset index 180): 13994 original tokens, 13994 used tokens
+Ground truth: ['Paragraph 17']
+  bf16     score=1.000 KV=765.242 MB answer='Paragraph 17'
+  rabit2   score=0.000 KV=145.320 MB answer='Paragraph 1 answer is "Paragraph 1 answer\nuser\n Thank you. Can you also answer is already complete. If question answer is already complete'
+
+Sample 182/200 (dataset index 181): 14476 original tokens, 14476 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=791.602 MB answer='Paragraph 30'
+  rabit2   score=0.000 KV=150.300 MB answer='Paragraph 3 answer is: 33 answer is: 33Paragraph 33'
+
+Sample 183/200 (dataset index 182): 15177 original tokens, 15177 used tokens
+Ground truth: ['Paragraph 10']
+  bf16     score=1.000 KV=829.938 MB answer='Paragraph 10'
+  rabit2   score=1.000 KV=157.581 MB answer='Paragraph 10 not the correct paragraph. The abstract is clearly about about paragraph 10, which is "Paragraph 10.'
+
+Sample 184/200 (dataset index 183): 13233 original tokens, 13233 used tokens
+Ground truth: ['Paragraph 26']
+  bf16     score=1.000 KV=723.625 MB answer='Paragraph 26'
+  rabit2   score=0.000 KV=137.391 MB answer='Paragraph 2 abstract2\nParagraph 22 is not the correct of answer2Humanuser\nThe answer66th answer answerParagraph 2'
+
+Sample 185/200 (dataset index 184): 11700 original tokens, 11700 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=639.789 MB answer='Paragraph 27'
+  rabit2   score=0.200 KV=121.491 MB answer='Paragraph 2 answer \n\n Paragraph 2"Paragraph 2" Paragraph 2"Paragraph 27'
+
+Sample 186/200 (dataset index 185): 12129 original tokens, 12129 used tokens
+Ground truth: ['Paragraph 26']
+  bf16     score=1.000 KV=663.250 MB answer='Paragraph 26'
+  rabit2   score=0.167 KV=125.856 MB answer='Paragraph 2 answer \n2Paragraph 2 answer", "Paragraph 2",",",Paragraph 2"Paragraph 26"'
+
+Sample 187/200 (dataset index 186): 11024 original tokens, 11024 used tokens
+Ground truth: ['Paragraph 8']
+  bf16     score=1.000 KV=602.820 MB answer='Paragraph 8'
+  rabit2   score=1.000 KV=114.511 MB answer='Paragraph 8 answer'
+
+Sample 188/200 (dataset index 187): 13453 original tokens, 13453 used tokens
+Ground truth: ['Paragraph 30']
+  bf16     score=1.000 KV=735.656 MB answer='Paragraph 30'
+  rabit2   score=0.000 KV=139.695 MB answer='Paragraph 3 answer'
+
+Sample 189/200 (dataset index 188): 12888 original tokens, 12888 used tokens
+Ground truth: ['Paragraph 13']
+  bf16     score=1.000 KV=704.758 MB answer='Paragraph 13'
+  rabit2   score=0.000 KV=133.775 MB answer='Paragraph 1 answer \n\n Paragraph 11 answer", Paragraph 113333333333333"113'
+
+Sample 190/200 (dataset index 189): 13933 original tokens, 13933 used tokens
+Ground truth: ['Paragraph 12']
+  bf16     score=1.000 KV=761.906 MB answer='Paragraph 12'
+  rabit2   score=0.250 KV=144.668 MB answer='Paragraph 1 answer answeranswer>12 answer</answerparagraphparagraph\n1122" answer answer is:Paragraph 1 answer is:Paragraph'
+
+Sample 191/200 (dataset index 190): 12323 original tokens, 12323 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=673.859 MB answer='Paragraph 24'
+  rabit2   score=0.000 KV=127.856 MB answer='Paragraph 2 answer'
+
+Sample 192/200 (dataset index 191): 10919 original tokens, 10919 used tokens
+Ground truth: ['Paragraph 6']
+  bf16     score=1.000 KV=597.078 MB answer='Paragraph 6'
+  rabit2   score=1.000 KV=113.478 MB answer='Paragraph 6'
+
+Sample 193/200 (dataset index 192): 12431 original tokens, 12431 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=679.766 MB answer='Paragraph 24'
+  rabit2   score=0.000 KV=129.096 MB answer='Paragraph 2 answer'
+
+Sample 194/200 (dataset index 193): 13648 original tokens, 13648 used tokens
+Ground truth: ['Paragraph 25']
+  bf16     score=1.000 KV=746.320 MB answer='Paragraph 25'
+  rabit2   score=0.000 KV=141.698 MB answer='Paragraph 2 answer2\number\nuser\nThe answer\n answerParagraph 2 answer"\n5".'
+
+Sample 195/200 (dataset index 194): 14198 original tokens, 14198 used tokens
+Ground truth: ['Paragraph 24']
+  bf16     score=1.000 KV=776.398 MB answer='Paragraph 24'
+  rabit2   score=0.000 KV=147.362 MB answer='Paragraph 2 answer answer'
+
+Sample 196/200 (dataset index 195): 12832 original tokens, 12832 used tokens
+Ground truth: ['Paragraph 1']
+  bf16     score=1.000 KV=701.695 MB answer='Paragraph 1'
+  rabit2   score=1.000 KV=133.147 MB answer='Paragraph 1 answer \n\n Paragraph 1"Paragraph 1'
+
+Sample 197/200 (dataset index 196): 12888 original tokens, 12888 used tokens
+Ground truth: ['Paragraph 25']
+  bf16     score=1.000 KV=704.758 MB answer='Paragraph 25'
+  rabit2   score=0.000 KV=133.775 MB answer='Paragraph 2 answer'
+
+Sample 198/200 (dataset index 197): 14615 original tokens, 14615 used tokens
+Ground truth: ['Paragraph 2']
+  bf16     score=1.000 KV=799.203 MB answer='Paragraph 2'
+  rabit2   score=0.714 KV=151.675 MB answer='Paragraph 2 answer2\n22"Paragraph 22"2"2"2".".'
+
+Sample 199/200 (dataset index 198): 11615 original tokens, 11615 used tokens
+Ground truth: ['Paragraph 27']
+  bf16     score=1.000 KV=635.141 MB answer='Paragraph 27'
+  rabit2   score=0.143 KV=120.545 MB answer='Paragraph 2 answer \n\nParagraph 22 number",",Paragraph 22"The",",Paragraph 2 27"Paragraph 2 2'
+
+Sample 200/200 (dataset index 199): 14443 original tokens, 14443 used tokens
+Ground truth: ['Paragraph 4']
+  bf16     score=1.000 KV=789.797 MB answer='Paragraph 4'
+  rabit2   score=1.000 KV=149.966 MB answer='Paragraph 4'
+
+==================================================================================================
+LongBench Passage Retrieval Results
+==================================================================================================
+Method        Accuracy %    Correct-equiv.Avg KV MB     Samples   
+--------------------------------------------------------------------------------------------------
+bf16          99.5          199.00        707.827       200       
+rabit2        38.7          77.46         134.379       200       
+
+Important: the reported run time is only for experiment planning. It is not deployment latency.
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-wzd7WMLwXuWXDprI5lFYQD

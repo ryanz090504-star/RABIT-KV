@@ -1,0 +1,38 @@
+{
+  "kind": "canonical-quality-v2 continuation PPL: FORMAL POST-FAILURE VALIDITY-GATE AMENDMENT (research-integrity record; NOT a quality result)",
+  "date_utc": "2026-10-03",
+  "status": "approved by review; written AFTER the failure of the gate it removes and BEFORE any quality result existed",
+  "what_happened": "Registered two-model Attempt 1 (source 1e5a7ff; archived 5d8d212, 3cba625) exposed a previously unvalidated cross-device exactness assumption: its gate 'GPU canonical state == CPU canonical state, bit-exact' failed in 32 / 32 Llama layers before any scoring. Attempt 1 is permanently INVALID and EXCLUDED; it produced no result.json, no PPL, no NLL. Qwen was never run.",
+  "old_invalid_gate": "GPU canonical state == CPU canonical state, bit-exact, every layer (window 1 prefill), before any scoring",
+  "replacement_validation_model": {
+    "1_cpu_canonical_semantics": "covered by the accepted CPU canonical <-> CPU frozen-oracle parity 8fa9a9c (276 / 276 cases, bit-exact)",
+    "2_cuda_llama_semantics": "covered by the accepted real-model CUDA canonical <-> CUDA frozen-oracle bit-exact diagnostic ec80638 (Llama-3.1-8B @ 359efdbb, 32 / 32 layers, every canonical field)",
+    "3_cuda_qwen_semantics": "covered by the accepted real-model CUDA canonical <-> CUDA frozen-oracle bit-exact diagnostic fd8d275 (Qwen2.5-7B-Instruct @ 16c17498, 28 / 28 layers, every canonical field)",
+    "4_cross_device_cpu_vs_cuda": "descriptive only; NOT required to be bit-exact; no tolerance is defined"
+  },
+  "new_pre_scoring_checks_in_the_ppl_harness": [
+    "canonical implementation hash equals the frozen c360697 (195cb489...)",
+    "the runtime torch / CUDA environment equals the environment of the accepted CUDA conformance diagnostics",
+    "model identity is exact (pinned revision; every file size + SHA-256)",
+    "the model-specific CUDA conformance evidence exists, is pinned by SHA-256, is valid and classified A, and refers to the exact frozen model identity",
+    "no scientific code changed since the conformance validation (canonical_rabit_quality.py, canonical_ppl_core.py, canonical_ppl_identity.py, exp14_model_snapshot.py have the hashes recorded in the conformance results)"
+  ],
+  "diagnostic_evidence": {
+    "cpu_canonical_equals_cpu_independent_oracle": "bit-exact on the same real K / V bytes: Llama 32 / 32 layers, Qwen 28 / 28 layers (and 8fa9a9c)",
+    "cuda_canonical_equals_cuda_independent_oracle": "bit-exact, every canonical field: Llama 32 / 32 layers, Qwen 28 / 28 layers; synthetic Llama and Qwen geometries 60 / 60 full-state and 28 / 28 aging cases in both runs",
+    "cpu_canonical_differs_from_cuda_canonical": "Llama 32 / 32 layers, Qwen 28 / 28 layers; the independent oracle differs across devices in the same way",
+    "mechanism_as_measured": "floating-point device semantics diverge beginning at the scale calculation (max - min) / c: min and max are bit-identical on both devices; every CUDA scale value equals the CPU value of (max - min) * fp32(1 / c), while CPU computes true division. The one-ULP scale differences flip round() at quantization-code boundaries (codes differ by at most 1), and metadata codes and decoded values follow.",
+    "sizes_descriptive_only": {
+      "llama": {"k3_codes_differing": "24699 / 33554432", "v2_codes_differing": "6568 / 33423360", "decoded_k_differing": "104670 / 33554432", "decoded_v_differing": "57564 / 33554432", "max_abs_decoded_k": 2.8807373046875, "max_abs_decoded_v": 3.016845703125},
+      "qwen": {"k3_codes_differing": "14452 / 14680064", "v2_codes_differing": "3031 / 14622720", "decoded_k_differing": "47346 / 14680064", "decoded_v_differing": "23334 / 14680064", "max_abs_decoded_k": 3.74664306640625, "max_abs_decoded_v": 9.4482421875}
+    },
+    "sources": ["results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/attempt_1/summary.json",
+                "results/mlsys2027/canonical_quality_v2/cuda_conformance_diagnostic/qwen2_5_7b/attempt_1/summary.json"]
+  },
+  "conclusion": "cross-device bit-exactness is removed as a validity requirement. The quality run executes the canonical state on CUDA, and the canonical implementation equals the independent oracle on CUDA for both real models.",
+  "basis_of_the_amendment": "independent same-device oracle conformance; NOT PPL / quality outcomes. No quality result existed before the amendment. The gate is not replaced by a tolerance, and the sizes above were not used to set any threshold.",
+  "separation_of_oracle_and_measurement": "the frozen oracle (kvquant_k3.py) and its loader are NOT shipped into the PPL scoring container; canonical_rabit_quality.py remains the only RABIT implementation there; the oracle diagnostics are separate prerequisite evidence.",
+  "unchanged": ["canonical_rabit_quality.py", "canonical_ppl_core.py", "dataset / windows", "scorer", "teacher-forcing schedule", "BF16 arm", "RABIT arm", "K3 / V2 / G32 / R4 / META8g64", "model identities", "interpretation cases", "registered two-model rule", "all other validity gates"],
+  "attempt_numbering": "Attempt 1 remains permanently INVALID; any later PPL run is REGISTERED TWO-MODEL ATTEMPT 2, both models fresh under the amended protocol; Attempt-1 artifacts are never reused or pooled as quality evidence.",
+  "implementation": "the harness / protocol change that implements this amendment is the commit following this record (see prelaunch_amendment_2_record.json)"
+}

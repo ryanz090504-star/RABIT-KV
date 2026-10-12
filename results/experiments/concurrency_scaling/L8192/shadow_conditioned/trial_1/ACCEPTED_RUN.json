@@ -1,0 +1,33 @@
+{
+  "attempt": "L8192 trial 1, attempt 2 (spawned FunctionCall)",
+  "status": "ACCEPTED for scientific interpretation (Trial 1 only; not a three-trial result)",
+  "accepted_for_performance_interpretation": true,
+  "complete_three_trial_result": false,
+  "rerun_allowed": false,
+  "modal_app": "ap-5pvRrz6NUTtnh2gZQMyS1M",
+  "function_call_id": "fc-01M3M67DNZZH5QZYT5DMBVX37K",
+  "run_id": "exp6-L8192-t1-20260928T141726Z-0a1a6b4",
+  "gpu": {"model": "NVIDIA H100 80GB HBM3", "uuid": "GPU-14dcbee8-2eb9-5008-a989-6e79e51c40e3", "driver": "580.95.05"},
+  "measurement_commit": "0a1a6b4d10466f07775a59b5970f812a4d0283c8",
+  "analysis_validation_fix_commit": "852a72f3632d9d8033237e8b3056a27164346e8d",
+  "canonical_raw_evidence": {"file": "remote_session.log", "bytes": 3102296,
+                             "sha256": "5a42a5294dbb612347fd72d7dd43710d4dc3498819f27e61b29c6822fd27ee1c",
+                             "remote_DONE.json_sha256": "c38c35c09dbc5eeba144b9f53294f959015fbe082b1f5eab7c65e1b7531747d2"},
+  "derived_files": {
+    "summary.json / integrity_check.json": "offline reparse with the capacity-bound validation fix (see reparse_provenance.json)",
+    "summary_pre_capacity_validation_fix.json / integrity_check_pre_capacity_validation_fix.json": "measurement-time analysis (137/138)",
+    "launch_session.log": "local launcher stream (secondary)"
+  },
+  "validity": {"points": "12/12", "integrity": "138/138 (reparse; the single change vs measurement-time analysis is the t1_bf16_L8192_c64 shadow-target check failed -> passed)",
+               "measured_phase_jit": "0 at every point", "oom": 0, "request_failures": 0, "watchdog_timeouts": 0,
+               "preemptions": "0 at every point (vllm:num_preemptions counter available)"},
+  "capacity_bound_points": {
+    "t1_bf16_L8192_c64": {
+      "target_concurrency": 64, "observed_max_inflight_concurrency": 47,
+      "allocator_derived_full_length_sequence_ceiling": 47, "capacity_bound": true,
+      "outcome_class": "target_concurrency_not_reached",
+      "statement": "At offered concurrency 64, BF16 reached at most 47 overlapping in-flight requests, matching the allocator-derived full-length KV ceiling of 47.",
+      "not_claimed": ["BF16 sustained C64", "47 as a system-wide maximum concurrency"]}
+  },
+  "excluded_attempts_not_pooled": ["results/mlsys2027/concurrency_scaling/L8192/infrastructure_aborted/trial_1_attempt_1"]
+}

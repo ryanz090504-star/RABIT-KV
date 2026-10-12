@@ -1,0 +1,338 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-R1RwNqMvpdVTZi63HBEawu
+Building image im-a4ZJo1COqUpEuJ4rfPl5QV
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.20s
+
+Built image im-a4ZJo1COqUpEuJ4rfPl5QV in 3.89s
+
+
+Building image im-MXrNpEZ9gtLTqy9N2lsHyB
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_final_fast_decode_append_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 1.35s
+
+Built image im-MXrNpEZ9gtLTqy9N2lsHyB in 5.78s
+
+
+Building image im-N7ZUomsoxMLKtUq6uTIQ47
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 697.15ms
+
+Built image im-N7ZUomsoxMLKtUq6uTIQ47 in 1.86s
+
+
+Building image im-mGISrJMfGLMknyQlns1g8W
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm.log 2>&1 || (tail -n 250 /tmp/vllm.log; exit 1))
+Saving image...
+Image saved, took 5.59s
+
+Built image im-mGISrJMfGLMknyQlns1g8W in 132.13s
+
+
+Building image im-6tDqKNr1aMt7hhtrfD3Q3W
+
+=> Step 0: FROM base
+
+=> Step 1: RUN python -m pip install modelscope pytest
+Looking in indexes: http://pypi-mirror.modal.local:5555/simple
+Collecting modelscope
+  Downloading modelscope-1.40.1-py3-none-any.whl.metadata (43 kB)
+Collecting pytest
+  Downloading pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+Requirement already satisfied: filelock in ./usr/local/lib/python3.11/site-packages (from modelscope) (3.29.0)
+Collecting modelscope-hub>=0.4.2 (from modelscope)
+  Downloading modelscope_hub-0.4.5-py3-none-any.whl.metadata (47 kB)
+Requirement already satisfied: packaging in ./usr/local/lib/python3.11/site-packages (from modelscope) (26.3)
+Requirement already satisfied: requests>=2.25 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.34.2)
+Requirement already satisfied: setuptools in ./usr/local/lib/python3.11/site-packages (from modelscope) (80.10.2)
+Requirement already satisfied: tqdm>=4.64.0 in ./usr/local/lib/python3.11/site-packages (from modelscope) (4.70.1)
+Requirement already satisfied: urllib3>=1.26 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.8.0)
+Collecting iniconfig>=1.0.1 (from pytest)
+  Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting pluggy<2,>=1.5 (from pytest)
+  Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Requirement already satisfied: pygments>=2.7.2 in ./usr/local/lib/python3.11/site-packages (from pytest) (2.21.0)
+Requirement already satisfied: cryptography>=41 in ./usr/local/lib/python3.11/site-packages (from modelscope-hub>=0.4.2->modelscope) (50.0.1)
+Requirement already satisfied: cffi>=2.0.0 in ./usr/local/lib/python3.11/site-packages (from cryptography>=41->modelscope-hub>=0.4.2->modelscope) (2.1.1)
+Requirement already satisfied: pycparser in ./usr/local/lib/python3.11/site-packages (from cffi>=2.0.0->cryptography>=41->modelscope-hub>=0.4.2->modelscope) (3.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.5.2)
+Requirement already satisfied: idna<4,>=2.5 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.20)
+Requirement already satisfied: certifi>=2023.5.7 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (2026.7.22)
+Downloading modelscope-1.40.1-py3-none-any.whl (6.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.1/6.1 MB 59.0 MB/s  0:00:00
+Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Downloading modelscope_hub-0.4.5-py3-none-any.whl (236 kB)
+Installing collected packages: pluggy, iniconfig, pytest, modelscope-hub, modelscope
+
+Successfully installed iniconfig-2.3.0 modelscope-1.40.1 modelscope-hub-0.4.5 pluggy-1.6.0 pytest-9.1.1
+Saving image...
+Image saved, took 2.80s
+
+Built image im-6tDqKNr1aMt7hhtrfD3Q3W in 50.60s
+
+
+Building image im-Gtjs1VGIUMMMP4xSKdIGnm
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 2.83s
+
+Built image im-Gtjs1VGIUMMMP4xSKdIGnm in 5.91s
+
+
+Building image im-LbjangA987o3VjXeQCHrKJ
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 2.82s
+
+Built image im-LbjangA987o3VjXeQCHrKJ in 5.55s
+
+
+Building image im-BAWYbhA7jpT0hNg3KsZAMd
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.67s
+
+Built image im-BAWYbhA7jpT0hNg3KsZAMd in 3.56s
+
+
+Building image im-QhCYBBr6zTxJb1MHzQziaX
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 2.16s
+
+Built image im-QhCYBBr6zTxJb1MHzQziaX in 4.00s
+
+
+Building image im-rYMvZxXTtDSrSUHGOL6qDV
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 4.07s
+
+Built image im-rYMvZxXTtDSrSUHGOL6qDV in 7.05s
+
+
+Building image im-XB3VtN75Iq80NKFb9xHJjh
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.82s
+
+Built image im-XB3VtN75Iq80NKFb9xHJjh in 3.65s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_deployment_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\exp14_vllm_snapshot_5xdbynfy\vllm_kvquant
+│   _snapshot.zip
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_engine_worker.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp3_correctness_gate.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp3_watchdog.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_shape_gate.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_probe_worker.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_model_snapshot.py
+└── 🔨 Created function mirrored.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+EXP14_GPU_BASELINE={"compute_apps": [], "max_wait_s": 60, "memory_used_mib": [4], "t": 1790767790.9544911, "tolerance_mib": 256}
+EXP14_ENVIRONMENT={"gpus": [{"clocks.max.sm": "1980", "driver_version": "580.95.05", "index": "0", "memory.total": "81559", "memory.used": "4", "name": "NVIDIA H100 80GB HBM3", "power.limit": "700.00", "uuid": "GPU-911ed669-2acf-b0dc-6ab5-ea12d6727f24"}], "leg_dtypes": ["bfloat16", "rabit_kv2"], "leg_labels": ["P1", "P2"], "mode": "feasibility_probe_non_evidence", "packages": {"modelscope": "1.40.1", "pytest": "9.1.1", "torch": "2.11.0+cu130", "transformers": "5.17.0", "triton": "3.6.0", "vllm": "0.10.0+kvquant"}, "python": "3.11.5", "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae", "reps_per_leg": 30, "vllm_precompiled_wheel_commit": "f329ce405b12623fb8b1cf1830f12e5a712523be", "warmups": 5}
+EXP14_GATE_START={"cmd": ["/usr/local/bin/python", "/opt/exp14/exp3_correctness_gate.py"], "timeout_s": 600}
+[gate] EXP3_GATE_BEGIN={"pytest_command": ["/usr/local/bin/python", "-m", "pytest", "-q", "--tb=short", "--confcutdir=/root/vllm-kvquant/tests/quantization", "/root/vllm-kvquant/tests/quantization/test_kvquant_k3.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_layout.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_physical.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b1.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b2.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_fixed.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py"], "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"}
+[gate] ====================================================================================================================
+[gate] RABIT-2 FINAL targeted decode-append regression
+[gate] ====================================================================================================================
+[gate] Dispatch preflight: PASSED
+[gate] Stage4D3.4 prep exactness: PASSED (62/62)
+[gate] Stage4D3.4 full attention exactness: PASSED (torch.equal)
+[gate] Stage4D3.4 scratch_bytes_per_stream=57600
+[gate] FINAL fast decode append exactness: PASSED (202 state/byte steps + attention checkpoints)
+[gate] ........................................................................ [ 68%]
+[gate] .................................                                        [100%]
+[gate] =============================== warnings summary ===============================
+[gate] tests/quantization/test_kvquant_k3.py: 14 warnings
+[gate]   /usr/local/lib/python3.11/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+[gate]     warnings.warn(
+[gate] 
+[gate] -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[gate] 105 passed, 14 warnings in 51.33s
+[gate] 
+[gate] pytest exit=0
+[gate] RABIT-2 FINAL TARGETED REGRESSION PASSED
+[gate] EXP3_GATE_RESULT={"passed": true}
+EXP14_PROCESS_EXIT={"cmd": ["/usr/local/bin/python", "/opt/exp14/exp3_correctness_gate.py"], "elapsed_s": 85.378, "grace_s": 10.0, "group_processes_after_leader_exit": [], "group_processes_remaining": [], "label": "gate", "own_session": true, "pgid": 32, "pid": 32, "reader_finished": true, "returncode": 0, "signals_sent": [], "timed_out": false, "timeout_s": 600}
+EXP14_GATE_EXIT={"returncode": 0}
+EXP14_SHAPE_GATE_START={"cmd": ["/usr/local/bin/python", "/opt/exp14/exp14_shape_gate.py"], "timeout_s": 900}
+[shapegate] model_b_qwen2_5_7b: passed=False checks={'page_bytes_expected': True, 'alignment_invariants': True, 'predicates_as_expected': True, 'dispatch_matches_predicates': True, 'main_workload_state_and_attention': True, 'boundary_state_and_attention': False} max_abs=1.192e-02 dispatch={'decode_calls': 64, 'append_calls': 62, 'decode_fallback_calls': 64, 'append_fallback_calls': 62, 'decode_step_quant_fallback_calls_total': 62, 'decode_steps_with_quant_fallback': 62}
+[shapegate] control_llama3_1_8b: passed=False checks={'page_bytes_expected': True, 'alignment_invariants': True, 'predicates_as_expected': True, 'dispatch_matches_predicates': True, 'main_workload_state_and_attention': True, 'boundary_state_and_attention': False} max_abs=9.876e-03 dispatch={'decode_calls': 64, 'append_calls': 62, 'decode_fallback_calls': 0, 'append_fallback_calls': 0, 'decode_step_quant_fallback_calls_total': 0, 'decode_steps_with_quant_fallback': 0}
+[shapegate] EXP14_SHAPE_GATE_SUMMARY={"cuda_available": true, "geometries": {"control_llama3_1_8b": {"boundary_replays": [{"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": ["T=2: attention max_abs runtime_state=0.007586479187011719 reference_state=0.007586479187011719", "T=3: attention max_abs runtime_state=0.006523609161376953 reference_state=0.006523609161376953", "T=4: attention max_abs runtime_state=0.0074920654296875 reference_state=0.0074920654296875", "T=5: attention max_abs runtime_state=0.008002281188964844 reference_state=0.008002281188964844", "T=6: attention max_abs runtime_state=0.008721113204956055 reference_state=0.008721113204956055", "T=7: attention max_abs runtime_state=0.009876489639282227 reference_state=0.009876489639282227", "T=8: attention max_abs runtime_state=0.006184101104736328 reference_state=0.006184101104736328", "T=9: attention max_abs runtime_state=0.00742650032043457 reference_state=0.00742650032043457"], "max_abs_vs_reference_state": 0.009876489639282227, "max_abs_vs_runtime_state": 0.009876489639282227, "prefill": 1, "seed": 140101, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": ["T=4: attention max_abs runtime_state=0.006908893585205078 reference_state=0.006908893585205078", "T=5: attention max_abs runtime_state=0.0072824954986572266 reference_state=0.0072824954986572266", "T=6: attention max_abs runtime_state=0.006222367286682129 reference_state=0.006222367286682129", "T=7: attention max_abs runtime_state=0.006529450416564941 reference_state=0.006529450416564941", "T=8: attention max_abs runtime_state=0.008916139602661133 reference_state=0.008916139602661133", "T=9: attention max_abs runtime_state=0.005428910255432129 reference_state=0.005428910255432129", "T=10: attention max_abs runtime_state=0.008659124374389648 reference_state=0.008659124374389648", "T=11: attention max_abs runtime_state=0.005615115165710449 reference_state=0.005615115165710449", "T=12: attention max_abs runtime_state=0.006441295146942139 reference_state=0.006441295146942139"], "max_abs_vs_reference_state": 0.008916139602661133, "max_abs_vs_runtime_state": 0.008916139602661133, "prefill": 4, "seed": 140104, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": ["T=5: attention max_abs runtime_state=0.006898283958435059 reference_state=0.006898283958435059", "T=6: attention max_abs runtime_state=0.00663304328918457 reference_state=0.00663304328918457", "T=7: attention max_abs runtime_state=0.007318735122680664 reference_state=0.007318735122680664", "T=8: attention max_abs runtime_state=0.006142377853393555 reference_state=0.006142377853393555", "T=9: attention max_abs runtime_state=0.008708000183105469 reference_state=0.008708000183105469", "T=10: attention max_abs runtime_state=0.00811922550201416 reference_state=0.00811922550201416", "T=11: attention max_abs runtime_state=0.006934165954589844 reference_state=0.006934165954589844", "T=12: attention max_abs runtime_state=0.006458163261413574 reference_state=0.006458163261413574", "T=13: attention max_abs runtime_state=0.006595015525817871 reference_state=0.006595015525817871"], "max_abs_vs_reference_state": 0.008708000183105469, "max_abs_vs_runtime_state": 0.008708000183105469, "prefill": 5, "seed": 140105, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": [], "max_abs_vs_reference_state": 0.0037478208541870117, "max_abs_vs_runtime_state": 0.0037478208541870117, "prefill": 35, "seed": 140135, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": [], "max_abs_vs_reference_state": 0.003928542137145996, "max_abs_vs_runtime_state": 0.003928542137145996, "prefill": 36, "seed": 140136, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": [], "max_abs_vs_reference_state": 0.004304349422454834, "max_abs_vs_runtime_state": 0.004304349422454834, "prefill": 37, "seed": 140137, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": ["T=75: attention max_abs runtime_state=0.005567312240600586 reference_state=0.005567312240600586"], "max_abs_vs_reference_state": 0.005567312240600586, "max_abs_vs_runtime_state": 0.005567312240600586, "prefill": 68, "seed": 140168, "steps": 8}], "checks": {"alignment_invariants": true, "boundary_state_and_attention": false, "dispatch_matches_predicates": true, "main_workload_state_and_attention": true, "page_bytes_expected": true, "predicates_as_expected": true}, "geometry": {"head_dim": 128, "kv_heads": 8, "q_heads": 32}, "main_dispatch_counts": {"append_calls": 62, "append_fallback_calls": 0, "decode_calls": 64, "decode_fallback_calls": 0, "decode_step_quant_fallback_calls_total": 0, "decode_steps_with_quant_fallback": 0}, "main_workload_replays": [{"checkpoints": 32, "decode_step_quant_fallback_calls": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "failures": [], "max_abs_vs_reference_state": 0.0004981458187103271, "max_abs_vs_runtime_state": 0.0004981458187103271, "prefill": 2048, "seed": 140001, "steps": 31}, {"checkpoints": 32, "decode_step_quant_fallback_calls": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "failures": [], "max_abs_vs_reference_state": 0.0004906654357910156, "max_abs_vs_runtime_state": 0.0004906654357910156, "prefill": 2048, "seed": 140002, "steps": 31}], "max_abs": 0.009876489639282227, "page_bytes": 24832, "passed": false, "predicates": {"fast_append_engaged": true, "gqa4_engaged": true}}, "model_b_qwen2_5_7b": {"boundary_replays": [{"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": ["T=2: attention max_abs runtime_state=0.0074558258056640625 reference_state=0.0074558258056640625", "T=3: attention max_abs runtime_state=0.007498264312744141 reference_state=0.007498264312744141", "T=4: attention max_abs runtime_state=0.007697582244873047 reference_state=0.007697582244873047", "T=5: attention max_abs runtime_state=0.006611347198486328 reference_state=0.006611347198486328", "T=6: attention max_abs runtime_state=0.00659942626953125 reference_state=0.00659942626953125", "T=7: attention max_abs runtime_state=0.006334185600280762 reference_state=0.006334185600280762", "T=9: attention max_abs runtime_state=0.005359172821044922 reference_state=0.005359172821044922"], "max_abs_vs_reference_state": 0.007697582244873047, "max_abs_vs_runtime_state": 0.007697582244873047, "prefill": 1, "seed": 140101, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": ["T=4: attention max_abs runtime_state=0.00769805908203125 reference_state=0.00769805908203125", "T=5: attention max_abs runtime_state=0.006238222122192383 reference_state=0.006238222122192383", "T=6: attention max_abs runtime_state=0.011920928955078125 reference_state=0.011920928955078125", "T=7: attention max_abs runtime_state=0.008389592170715332 reference_state=0.008389592170715332", "T=8: attention max_abs runtime_state=0.010527610778808594 reference_state=0.010527610778808594", "T=9: attention max_abs runtime_state=0.007600665092468262 reference_state=0.007600665092468262", "T=10: attention max_abs runtime_state=0.009810090065002441 reference_state=0.009810090065002441", "T=11: attention max_abs runtime_state=0.011410951614379883 reference_state=0.011410951614379883", "T=12: attention max_abs runtime_state=0.005953788757324219 reference_state=0.005953788757324219"], "max_abs_vs_reference_state": 0.011920928955078125, "max_abs_vs_runtime_state": 0.011920928955078125, "prefill": 4, "seed": 140104, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": ["T=5: attention max_abs runtime_state=0.00818777084350586 reference_state=0.00818777084350586", "T=6: attention max_abs runtime_state=0.009515047073364258 reference_state=0.009515047073364258", "T=7: attention max_abs runtime_state=0.009585261344909668 reference_state=0.009585261344909668", "T=8: attention max_abs runtime_state=0.0089033842086792 reference_state=0.0089033842086792", "T=9: attention max_abs runtime_state=0.007950663566589355 reference_state=0.007950663566589355", "T=10: attention max_abs runtime_state=0.005915045738220215 reference_state=0.005915045738220215", "T=11: attention max_abs runtime_state=0.007020831108093262 reference_state=0.007020831108093262", "T=12: attention max_abs runtime_state=0.007378816604614258 reference_state=0.007378816604614258", "T=13: attention max_abs runtime_state=0.005988478660583496 reference_state=0.005988478660583496"], "max_abs_vs_reference_state": 0.009585261344909668, "max_abs_vs_runtime_state": 0.009585261344909668, "prefill": 5, "seed": 140105, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": [], "max_abs_vs_reference_state": 0.004381716251373291, "max_abs_vs_runtime_state": 0.004381716251373291, "prefill": 35, "seed": 140135, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": [], "max_abs_vs_reference_state": 0.0038895606994628906, "max_abs_vs_runtime_state": 0.0038895606994628906, "prefill": 36, "seed": 140136, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": ["T=42: attention max_abs runtime_state=0.005245685577392578 reference_state=0.005245685577392578"], "max_abs_vs_reference_state": 0.005245685577392578, "max_abs_vs_runtime_state": 0.005245685577392578, "prefill": 37, "seed": 140137, "steps": 8}, {"checkpoints": 9, "decode_step_quant_fallback_calls": [], "failures": [], "max_abs_vs_reference_state": 0.0038275718688964844, "max_abs_vs_runtime_state": 0.0038275718688964844, "prefill": 68, "seed": 140168, "steps": 8}], "checks": {"alignment_invariants": true, "boundary_state_and_attention": false, "dispatch_matches_predicates": true, "main_workload_state_and_attention": true, "page_bytes_expected": true, "predicates_as_expected": true}, "geometry": {"head_dim": 128, "kv_heads": 4, "q_heads": 28}, "main_dispatch_counts": {"append_calls": 62, "append_fallback_calls": 62, "decode_calls": 64, "decode_fallback_calls": 64, "decode_step_quant_fallback_calls_total": 62, "decode_steps_with_quant_fallback": 62}, "main_workload_replays": [{"checkpoints": 32, "decode_step_quant_fallback_calls": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "failures": [], "max_abs_vs_reference_state": 0.0005859285593032837, "max_abs_vs_runtime_state": 0.0005859285593032837, "prefill": 2048, "seed": 140001, "steps": 31}, {"checkpoints": 32, "decode_step_quant_fallback_calls": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "failures": [], "max_abs_vs_reference_state": 0.0004919618368148804, "max_abs_vs_runtime_state": 0.0004919618368148804, "prefill": 2048, "seed": 140002, "steps": 31}], "max_abs": 0.011920928955078125, "page_bytes": 12416, "passed": false, "predicates": {"fast_append_engaged": false, "gqa4_engaged": false}}}, "passed": false, "tolerance_max_abs": 0.005}
+EXP14_PROCESS_EXIT={"cmd": ["/usr/local/bin/python", "/opt/exp14/exp14_shape_gate.py"], "elapsed_s": 51.698, "grace_s": 10.0, "group_processes_after_leader_exit": [], "group_processes_remaining": [], "label": "shape_gate", "own_session": true, "pgid": 318, "pid": 318, "reader_finished": true, "returncode": 1, "signals_sent": [], "timed_out": false, "timeout_s": 900}
+EXP14_SHAPE_GATE_EXIT={"returncode": 1}
+Traceback (most recent call last):
+  File "/pkg/modal/_runtime/container_io_manager.py", line 945, in handle_input_exception
+    yield
+  File "/pkg/modal/_container_entrypoint.py", line 189, in run_input_sync
+    values = io_context.call_function_sync()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/pkg/modal/_runtime/container_io_manager.py", line 225, in call_function_sync
+    expected_value_or_values = self.finalized_function.callable(*args, **kwargs)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/exp14_deployment_modal.py", line 278, in mirrored
+    raise RuntimeError(f"Model-B shape gate failed with exit code {code}; no measurement run")
+RuntimeError: Model-B shape gate failed with exit code 1; no measurement run
+Stopping app - uncaught exception raised locally: RuntimeError('Model-B shape gate failed with exit code 1; no measurement run').
+┌───────────────────── Traceback (most recent call last) ─────────────────────┐
+│ C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben │
+│ chmarks\mlsys2027\exp14_deployment_modal.py:327 in main                     │
+│                                                                             │
+│   326 def main(legs: str, warmups: int, reps_per_leg: int, probe: bool = Fa │
+│ > 327 │   mirrored.remote(legs=legs, warmups=warmups, reps_per_leg=reps_per │
+│   328                                                                       │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_object.py:46 in wrapped                                                │
+│                                                                             │
+│    45 │   │   await self.hydrate()                                          │
+│ >  46 │   │   return await method(self, *args, **kwargs)                    │
+│    47                                                                       │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_functions.py:1696 in remote                                            │
+│                                                                             │
+│   1695 │   │                                                                │
+│ > 1696 │   │   return await self._call_function(args, kwargs)               │
+│   1697                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_functions.py:1640 in _call_function                                    │
+│                                                                             │
+│   1639 │   │                                                                │
+│ > 1640 │   │   return await invocation.run_function()                       │
+│   1641                                                                      │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_functions.py:493 in run_function                                       │
+│                                                                             │
+│    492 │   │   │   # No more retries left.                                  │
+│ >  493 │   │   │   return await _process_result(                            │
+│    494 │   │   │   │   await_response.output.result, await_response.output. │
+│                                                                             │
+│ C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\mo │
+│ dal\_utils\function_utils.py:548 in _process_result                         │
+│                                                                             │
+│   547 │   │   │                                                             │
+│ > 548 │   │   │   raise exc_with_hints(exc)                                 │
+│   549                                                                       │
+│                                                                             │
+│     ...Remote call to Modal Function (ta-01M3S17ND4ZGJ1EWQZVGZF4TGR)...     │
+│                                                                             │
+│ /root/exp14_deployment_modal.py:278 in mirrored                             │
+│                                                                             │
+│ > 278 raise RuntimeError(f"Model-B shape gate failed with exit code {code}; │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+RuntimeError: Model-B shape gate failed with exit code 1; no measurement run

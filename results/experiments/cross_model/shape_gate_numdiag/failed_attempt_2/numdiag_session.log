@@ -1,0 +1,8 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
++- Error ---------------------------------------------------------------------+
+| 'gbk' codec can't encode character '\u2713' in position 0: illegal          |
+| multibyte sequence                                                          |
++-----------------------------------------------------------------------------+

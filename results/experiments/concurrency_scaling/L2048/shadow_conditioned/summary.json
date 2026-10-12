@@ -1,0 +1,4623 @@
+{
+  "summary_schema": {
+    "version": 2,
+    "point_keys": {
+      "target_concurrency": "int target concurrency C",
+      "inflight_concurrency": "overlapping in-flight concurrency statistics"
+    },
+    "change": "v1 overwrote the point's `concurrency` (C) with the in-flight statistics dict"
+  },
+  "scope": "Experiment 6 concurrency / throughput scaling (closed-loop, fixed concurrency, 256 measured requests per point). Throughput numbers are from this harness only. Highest successfully tested concurrency is reported; no true maximum is claimed unless the sweep brackets the failure boundary.",
+  "amendments": {
+    "execution_path": "vllm bench throughput accepts kv_cache_dtype=rabit_kv2 but samples at temperature 1.0 and exposes no per-request timestamps / token IDs required by the pre-registered metrics and audit; the sweep uses the vLLM multi-request LLM.generate API validated by the accepted concurrency correctness smoke. Benchmark-harness change only.",
+    "max_num_seqs": "max_num_seqs = target concurrency C at every point, identical for BF16 and RABIT.",
+    "compile_conditioning_superseded": "SUPERSEDED by shadow_conditioning after L2048 attempt 2 (jit_contaminated_attempt_2) still showed measured-phase JIT at RABIT C16 / C32. Original text: Point-matched compile-conditioning phase (reviewed amendment, pre-registered before the rerun). Justification: the original two warmup requests contain only 4096 prompt tokens at L2048 and cannot exercise concurrency-induced chunked prefill; at C>=16, C*2048 > max_num_batched_tokens=16384, and the H100 diagnostic run (L2048 jit_contaminated_attempt_1, Modal ap-OwRGAH3ak5JiNMafSwvN6Q) showed the Stage3C marker at every RABIT C>=16 point, none at C<=8, and measured-phase compilation of _rabit2_shared_decode_closed_page_partial_kernel, _rabit2_tile32_reduce_partials_kernel and (C32/C64) _rabit2_tail_partial_kernel. Before the 2 original warmup requests, every point (BF16 and RABIT alike) runs exactly C fixed conditioning prompts of the sweep prompt length, 32 greedy output tokens, concurrently in one llm.generate call under max_num_seqs=C, disjoint from the measured and warmup prompts. Outputs and timings of this phase are discarded from all result tables. This is a pre-measurement kernel-conditioning fix, not a change to the measured workload.",
+    "shadow_conditioning": "Full point-matched shadow-workload conditioning (reviewed; the FINAL warmup amendment, pre-registered before the rerun). Attempt 1: the 2-request warmup did not exercise concurrency-induced Stage3C. Attempt 2 (Modal ap-l630ypsTpdW1bItQYkNG1x): a one-shot C-request conditioning batch also failed to reproduce the measured closed-loop scheduler states (measured-phase JIT of _rabit2_shared_decode_closed_page_partial_kernel and _rabit2_tile32_reduce_partials_kernel at RABIT C16, _rabit2_tail_partial_kernel at C32, all three trials). Observed cause: the measured workload continuously admits new requests while existing requests decode, so prompt chunks share the 16,384-token scheduler budget at different offsets. The final conditioning protocol therefore mirrors the full measured closed-loop workload shape instead of targeting specific RABIT kernels: before the 2 original warmup requests, every point runs ONE queued batch of 256 UNMEASURED shadow requests (same prompt length, 32 greedy output tokens with ignore_eos, max_num_seqs=C, same engine, same closed-loop admission; different prompt token IDs: one fixed set per prompt length, disjoint from the measured and warmup prompts, identical for BF16 and RABIT, all trials and all C). Symmetric across dtypes, independent of RABIT kernel names. It is a benchmark warmup / JIT-conditioning change only and is NOT part of the measured workload; its throughput / latency never enter performance tables."
+  },
+  "prompt_tokens": 2048,
+  "final_rabit_configuration": {
+    "impl": "shared_decode",
+    "query_block": 32,
+    "query_block_source": "results/mlsys2027/diagnostics/stage3c_shared_decode_qb_tiebreak",
+    "accepted_shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f",
+    "accepted_triton_attn_sha256": "0c75dd06d3893c4f6240c4d70bd51d4888855100d220b673c6b77c1a0a4e16cf",
+    "accepted_rabit_kv2_sha256": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+  },
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 401,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "points": [
+    {
+      "label": "t1_bf16_L2048_c1",
+      "trial": 1,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 1,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 166.98734470999995,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 0,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 0,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67411
+        ],
+        "after_measured": [
+          67411
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "1",
+          "--trial",
+          "1",
+          "--label",
+          "t1_bf16_L2048_c1",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 464.559,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_bf16_L2048_c1",
+        "own_session": true,
+        "pgid": 328,
+        "pid": 328,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 175.53894641699998,
+      "requests_per_s": 1.4583658226583034,
+      "output_tokens_per_s": 46.66770632506571,
+      "total_tokens_per_s": 3033.4009111292708,
+      "latency_s": {
+        "median": 91.41381795249998,
+        "p90": 159.14282268699998,
+        "p99": 173.84138188269992,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 90.8097967395,
+        "p90": 158.56507884,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.01942816920967791,
+        "p90": 0.020330341645161856
+      },
+      "target_concurrency": 1,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 175.0997226620002,
+        "all_c_inflight_overlap_longest_s": 2.056380900000022,
+        "measured_span_s": 175.53677502400006,
+        "time_fraction_by_inflight_count": {
+          "0": 0.002489805124539318,
+          "1": 0.9975101948754607
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_bf16_L2048_c4",
+      "trial": 1,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 4,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 50.829149806000146,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 1,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 1,
+        "original_warmup": 1,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67409
+        ],
+        "after_measured": [
+          67409
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "4",
+          "--trial",
+          "1",
+          "--label",
+          "t1_bf16_L2048_c4",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 129.369,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_bf16_L2048_c4",
+        "own_session": true,
+        "pgid": 628,
+        "pid": 628,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 50.77575342099999,
+      "requests_per_s": 5.041776492756536,
+      "output_tokens_per_s": 161.33684776820914,
+      "total_tokens_per_s": 10486.895104933594,
+      "latency_s": {
+        "median": 25.787524600999973,
+        "p90": 46.01994992650008,
+        "p99": 50.69355390839996,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 25.132511556999987,
+        "p90": 45.4639967815001,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.01849266829032287,
+        "p90": 0.02373077648387094
+      },
+      "target_concurrency": 4,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 50.67813258199919,
+        "all_c_inflight_overlap_longest_s": 0.7993529430000308,
+        "measured_span_s": 50.77340783,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0017362302978695119,
+          "3": 0.0001402489867159247,
+          "4": 0.9981235207154145
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_bf16_L2048_c8",
+      "trial": 1,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 8,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 32.99076086699961,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 1,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 1,
+        "original_warmup": 1,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67409
+        ],
+        "after_measured": [
+          67409
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "8",
+          "--trial",
+          "1",
+          "--label",
+          "t1_bf16_L2048_c8",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 92.531,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_bf16_L2048_c8",
+        "own_session": true,
+        "pgid": 730,
+        "pid": 730,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 33.12929959799999,
+      "requests_per_s": 7.72729888969505,
+      "output_tokens_per_s": 247.2735644702416,
+      "total_tokens_per_s": 16072.781690565706,
+      "latency_s": {
+        "median": 17.07202592799996,
+        "p90": 29.984936601500014,
+        "p99": 33.0509246722,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 16.294061110500024,
+        "p90": 29.391345528500043,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.018836901645158832,
+        "p90": 0.031116916290322417
+      },
+      "target_concurrency": 8,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 33.040826725999636,
+        "all_c_inflight_overlap_longest_s": 1.0301124860000073,
+        "measured_span_s": 33.12667179899995,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0024846709775068207,
+          "7": 0.00010674760873659802,
+          "8": 0.9974085814137565
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_bf16_L2048_c16",
+      "trial": 1,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 16,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 24.083914086999584,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 2,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 2,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67411
+        ],
+        "after_measured": [
+          67411
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "16",
+          "--trial",
+          "1",
+          "--label",
+          "t1_bf16_L2048_c16",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 77.458,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_bf16_L2048_c16",
+        "own_session": true,
+        "pgid": 817,
+        "pid": 817,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 27.00089480200006,
+      "requests_per_s": 9.481167267872808,
+      "output_tokens_per_s": 303.39735257192984,
+      "total_tokens_per_s": 19720.82791717544,
+      "latency_s": {
+        "median": 14.442384240500019,
+        "p90": 25.21516057400009,
+        "p99": 26.918830863199997,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 13.09555029850003,
+        "p90": 23.990952267000065,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.03521592845161268,
+        "p90": 0.04722713232258098
+      },
+      "target_concurrency": 16,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 26.840478920000123,
+        "all_c_inflight_overlap_longest_s": 1.4831635159999905,
+        "measured_span_s": 26.99884290099999,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0029647206472326513,
+          "8": 0.000816645219972694,
+          "9": 0.0010431368523195195,
+          "15": 0.0010410812827436285,
+          "16": 0.9941344159977316
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_bf16_L2048_c32",
+      "trial": 1,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 32,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 18.353559988999905,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 2,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 2,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67429
+        ],
+        "after_measured": [
+          67431
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "32",
+          "--trial",
+          "1",
+          "--label",
+          "t1_bf16_L2048_c32",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 67.313,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_bf16_L2048_c32",
+        "own_session": true,
+        "pgid": 909,
+        "pid": 909,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 19.633790826999984,
+      "requests_per_s": 13.038745408653028,
+      "output_tokens_per_s": 417.2398530768969,
+      "total_tokens_per_s": 27120.5904499983,
+      "latency_s": {
+        "median": 11.659458568499986,
+        "p90": 19.490429485999982,
+        "p99": 19.551856710299987,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 9.579090103499993,
+        "p90": 17.51935794299999,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.05091798483870903,
+        "p90": 0.06363118332258329
+      },
+      "target_concurrency": 32,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 18.484632609000187,
+        "all_c_inflight_overlap_longest_s": 1.550495997999974,
+        "measured_span_s": 19.63154935199998,
+        "time_fraction_by_inflight_count": {
+          "1": 0.004040587453273764,
+          "3": 3.702580917238635e-05,
+          "9": 0.0011151191180818435,
+          "10": 0.0009671977824813369,
+          "17": 0.02451364817780037,
+          "24": 0.0010518533015273545,
+          "25": 0.0256694609765291,
+          "29": 6.47103281159659e-05,
+          "30": 1.7079242902312427e-05,
+          "31": 0.0009454383689775894,
+          "32": 0.941577879441138
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_bf16_L2048_c64",
+      "trial": 1,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 64,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 14.423622654000269,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 2,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 2,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67447
+        ],
+        "after_measured": [
+          67447
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "64",
+          "--trial",
+          "1",
+          "--label",
+          "t1_bf16_L2048_c64",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 61.734,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_bf16_L2048_c64",
+        "own_session": true,
+        "pgid": 996,
+        "pid": 996,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 17.68840930099998,
+      "requests_per_s": 14.47275419986621,
+      "output_tokens_per_s": 463.12813439571875,
+      "total_tokens_per_s": 30103.32873572172,
+      "latency_s": {
+        "median": 12.608695402000023,
+        "p90": 17.572306776500056,
+        "p99": 17.611713667899995,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 8.552745386500021,
+        "p90": 15.932190518500022,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.1073841502258046,
+        "p90": 0.12429061387096622
+      },
+      "target_concurrency": 64,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 14.477524793000043,
+        "all_c_inflight_overlap_longest_s": 1.4191838299999517,
+        "measured_span_s": 17.686667048999993,
+        "time_fraction_by_inflight_count": {
+          "1": 0.004215502830088643,
+          "3": 4.438682527783565e-05,
+          "9": 0.001735638880687947,
+          "11": 0.0011427679360947417,
+          "17": 0.02602260503490946,
+          "19": 0.0010694461510223146,
+          "25": 0.028262537119918874,
+          "27": 0.0009752373893965357,
+          "33": 0.027862612816461896,
+          "35": 0.0010076617573395031,
+          "41": 0.028263696524338307,
+          "42": 0.0009976236874418049,
+          "49": 0.02894086741057125,
+          "56": 0.0015645802526460817,
+          "57": 0.028307380447259573,
+          "62": 1.9770711968402635e-05,
+          "63": 0.0010118334873626324,
+          "64": 0.8185558507372142
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_rabit_L2048_c1",
+      "trial": 1,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 1,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 240.0559802209982,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 8,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 8,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          69843
+        ],
+        "after_measured": [
+          69877
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "1",
+          "--trial",
+          "1",
+          "--label",
+          "t1_rabit_L2048_c1",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 521.821,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_rabit_L2048_c1",
+        "own_session": true,
+        "pgid": 1083,
+        "pid": 1083,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 252.8629255310002,
+      "requests_per_s": 1.0124062254773494,
+      "output_tokens_per_s": 32.39699921527518,
+      "total_tokens_per_s": 2105.8049489928867,
+      "latency_s": {
+        "median": 124.30221709450007,
+        "p90": 228.66229273149997,
+        "p99": 250.31525971945007,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 123.51459667400002,
+        "p90": 227.85930073399993,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.026090969387096707,
+        "p90": 0.03202833066128982
+      },
+      "target_concurrency": 1,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 252.4407097770004,
+        "all_c_inflight_overlap_longest_s": 1.2821380220000265,
+        "measured_span_s": 252.86048160000018,
+        "time_fraction_by_inflight_count": {
+          "0": 0.0016600926342607719,
+          "1": 0.9983399073657392
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_rabit_L2048_c4",
+      "trial": 1,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 4,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 147.81158955699902,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 8,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 8,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70135
+        ],
+        "after_measured": [
+          70137
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "4",
+          "--trial",
+          "1",
+          "--label",
+          "t1_rabit_L2048_c4",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 313.954,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_rabit_L2048_c4",
+        "own_session": true,
+        "pgid": 1223,
+        "pid": 1223,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 139.9761278750002,
+      "requests_per_s": 1.82888328093066,
+      "output_tokens_per_s": 58.52426498978112,
+      "total_tokens_per_s": 3804.0772243357733,
+      "latency_s": {
+        "median": 70.59416269250005,
+        "p90": 126.714604473,
+        "p99": 139.82461209230004,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 68.77277332099993,
+        "p90": 124.91091981299996,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.058151543548393095,
+        "p90": 0.05934514941935548
+      },
+      "target_concurrency": 4,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 139.79851151599996,
+        "all_c_inflight_overlap_longest_s": 2.1474673110001277,
+        "measured_span_s": 139.97433099800014,
+        "time_fraction_by_inflight_count": {
+          "1": 0.001139178839886581,
+          "3": 0.00011690490594458169,
+          "4": 0.9987439162541688
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_rabit_L2048_c8",
+      "trial": 1,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 8,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 122.1139225530003,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 8,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 8,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70057
+        ],
+        "after_measured": [
+          70059
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "8",
+          "--trial",
+          "1",
+          "--label",
+          "t1_rabit_L2048_c8",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 282.191,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_rabit_L2048_c8",
+        "own_session": true,
+        "pgid": 1310,
+        "pid": 1310,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 135.0210763749999,
+      "requests_per_s": 1.8960002902732023,
+      "output_tokens_per_s": 60.67200928874247,
+      "total_tokens_per_s": 3943.6806037682604,
+      "latency_s": {
+        "median": 71.00332381000021,
+        "p90": 123.34574067450012,
+        "p99": 134.87013711669982,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 67.623126275,
+        "p90": 120.29315532650025,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.10838188477418953,
+        "p90": 0.11228409472580697
+      },
+      "target_concurrency": 8,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 134.85461420700221,
+        "all_c_inflight_overlap_longest_s": 5.148152866000146,
+        "measured_span_s": 135.01886127499984,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0011607391109593212,
+          "7": 5.573587962063127e-05,
+          "8": 0.99878352500942
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_rabit_L2048_c16",
+      "trial": 1,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 16,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 116.82578890499963,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 10,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 10,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70009
+        ],
+        "after_measured": [
+          70033
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "16",
+          "--trial",
+          "1",
+          "--label",
+          "t1_rabit_L2048_c16",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 275.139,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_rabit_L2048_c16",
+        "own_session": true,
+        "pgid": 1397,
+        "pid": 1397,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 130.84890870300023,
+      "requests_per_s": 1.956454987187296,
+      "output_tokens_per_s": 62.60655958999347,
+      "total_tokens_per_s": 4069.426373349576,
+      "latency_s": {
+        "median": 69.92591753300007,
+        "p90": 122.6829708865,
+        "p99": 130.69461906255015,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 62.73412216499992,
+        "p90": 116.25292784650013,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.22213684141935677,
+        "p90": 0.23791172761290116
+      },
+      "target_concurrency": 16,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 129.7040924639996,
+        "all_c_inflight_overlap_longest_s": 7.844487406999633,
+        "measured_span_s": 130.846722237,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0011626468924794849,
+          "8": 0.00024898065800422244,
+          "9": 0.006447404998587267,
+          "15": 0.0008735497691225689,
+          "16": 0.9912674176818065
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_rabit_L2048_c32",
+      "trial": 1,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 32,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 121.58759161899889,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 11,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 11,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          69751
+        ],
+        "after_measured": [
+          71993
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "32",
+          "--trial",
+          "1",
+          "--label",
+          "t1_rabit_L2048_c32",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 281.376,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_rabit_L2048_c32",
+        "own_session": true,
+        "pgid": 1496,
+        "pid": 1496,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 122.87561990199993,
+      "requests_per_s": 2.083407597082107,
+      "output_tokens_per_s": 66.66904310662743,
+      "total_tokens_per_s": 4333.487801930783,
+      "latency_s": {
+        "median": 70.94804235400011,
+        "p90": 122.3389116809999,
+        "p99": 122.71671773074969,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 57.21398998549989,
+        "p90": 108.88568651299965,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.43165294479032096,
+        "p90": 0.4460083267096795
+      },
+      "target_concurrency": 32,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 119.2928017309996,
+        "all_c_inflight_overlap_longest_s": 12.715426369999932,
+        "measured_span_s": 122.87327308199974,
+        "time_fraction_by_inflight_count": {
+          "1": 0.001258472710309069,
+          "3": 2.8938294805033568e-05,
+          "9": 0.007108966328397071,
+          "10": 0.0004350639619104484,
+          "17": 0.008339923380374776,
+          "24": 0.0016213023223313118,
+          "25": 0.008156993720923947,
+          "29": 7.040302406699344e-06,
+          "30": 1.5380887578661025e-06,
+          "31": 0.00218130654680153,
+          "32": 0.9708604543429823
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t1_rabit_L2048_c64",
+      "trial": 1,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 64,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 133.34275337300096,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 11,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 11,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          69757
+        ],
+        "after_measured": [
+          71999
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "64",
+          "--trial",
+          "1",
+          "--label",
+          "t1_rabit_L2048_c64",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 328.008,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t1_rabit_L2048_c64",
+        "own_session": true,
+        "pgid": 1588,
+        "pid": 1588,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 144.22598974599987,
+      "requests_per_s": 1.774992152599183,
+      "output_tokens_per_s": 56.799748883173855,
+      "total_tokens_per_s": 3691.9836774063006,
+      "latency_s": {
+        "median": 97.05221610099989,
+        "p90": 143.8565299989998,
+        "p99": 144.05632640554987,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 63.54065877399967,
+        "p90": 118.73143362099997,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.9847634556774152,
+        "p90": 1.1051878230322503
+      },
+      "target_concurrency": 64,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 130.54649379900047,
+        "all_c_inflight_overlap_longest_s": 23.646868953000194,
+        "measured_span_s": 144.22342928699982,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0011400796861705184,
+          "3": 3.42843602053921e-05,
+          "9": 0.006306159647543904,
+          "11": 0.00038457413108433,
+          "17": 0.006404212745224488,
+          "19": 0.0009858587380915827,
+          "25": 0.0071078369864584325,
+          "27": 0.001562534132726641,
+          "33": 0.009495312667091296,
+          "35": 0.0022360383510122723,
+          "41": 0.013306017992272308,
+          "42": 0.0027207189909421,
+          "49": 0.018299240373404316,
+          "56": 0.003712864245756421,
+          "57": 0.01686379488425792,
+          "62": 1.3146407681559938e-06,
+          "63": 0.004270736149076048,
+          "64": 0.9051684212779139
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_rabit_L2048_c1",
+      "trial": 2,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 1,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 250.01747459200442,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 8,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 8,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          69843
+        ],
+        "after_measured": [
+          69877
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "1",
+          "--trial",
+          "2",
+          "--label",
+          "t2_rabit_L2048_c1",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 532.79,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_rabit_L2048_c1",
+        "own_session": true,
+        "pgid": 1675,
+        "pid": 1675,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 250.525579568,
+      "requests_per_s": 1.021851742410655,
+      "output_tokens_per_s": 32.69925575714096,
+      "total_tokens_per_s": 2125.451624214162,
+      "latency_s": {
+        "median": 124.0097877584999,
+        "p90": 225.52726640349988,
+        "p99": 247.8343344602,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 123.1680246295,
+        "p90": 224.68649436849978,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.026876419967742725,
+        "p90": 0.028001515999999206
+      },
+      "target_concurrency": 1,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 250.11926699599871,
+        "all_c_inflight_overlap_longest_s": 1.0504603940003108,
+        "measured_span_s": 250.52320970900018,
+        "time_fraction_by_inflight_count": {
+          "0": 0.001612396366271521,
+          "1": 0.9983876036337285
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_rabit_L2048_c4",
+      "trial": 2,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 4,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 163.66484814600335,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 8,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 8,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70135
+        ],
+        "after_measured": [
+          70137
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "4",
+          "--trial",
+          "2",
+          "--label",
+          "t2_rabit_L2048_c4",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 352.784,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_rabit_L2048_c4",
+        "own_session": true,
+        "pgid": 1762,
+        "pid": 1762,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 158.77892127500036,
+      "requests_per_s": 1.6123046934965355,
+      "output_tokens_per_s": 51.593750191889136,
+      "total_tokens_per_s": 3353.593762472794,
+      "latency_s": {
+        "median": 80.73254002049998,
+        "p90": 143.82068812399984,
+        "p99": 158.60612545415006,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 78.69035342450002,
+        "p90": 141.75214401599987,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.06686044316129189,
+        "p90": 0.06806184200000175
+      },
+      "target_concurrency": 4,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 158.58182835699927,
+        "all_c_inflight_overlap_longest_s": 2.4383186209997803,
+        "measured_span_s": 158.77668954199999,
+        "time_fraction_by_inflight_count": {
+          "1": 0.001146961386618127,
+          "3": 8.030431316945496e-05,
+          "4": 0.9987727343002124
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_rabit_L2048_c8",
+      "trial": 2,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 8,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 138.88354223500028,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 8,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 8,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70057
+        ],
+        "after_measured": [
+          70059
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "8",
+          "--trial",
+          "2",
+          "--label",
+          "t2_rabit_L2048_c8",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 307.953,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_rabit_L2048_c8",
+        "own_session": true,
+        "pgid": 1849,
+        "pid": 1849,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 138.7949390120002,
+      "requests_per_s": 1.8444476565378671,
+      "output_tokens_per_s": 59.02232500921175,
+      "total_tokens_per_s": 3836.451125598764,
+      "latency_s": {
+        "median": 70.923376577,
+        "p90": 125.5333354000004,
+        "p99": 138.6212890111001,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 67.51485570600016,
+        "p90": 121.93747264099966,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.11129947445161018,
+        "p90": 0.11437869401612673
+      },
+      "target_concurrency": 8,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 138.60462429199742,
+        "all_c_inflight_overlap_longest_s": 4.394473020999612,
+        "measured_span_s": 138.79259731300044,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0012976775093929852,
+          "7": 5.666720813619981e-05,
+          "8": 0.9986456552824708
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_rabit_L2048_c16",
+      "trial": 2,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 16,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 126.8391240899964,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 10,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 10,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70009
+        ],
+        "after_measured": [
+          70033
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "16",
+          "--trial",
+          "2",
+          "--label",
+          "t2_rabit_L2048_c16",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 287.805,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_rabit_L2048_c16",
+        "own_session": true,
+        "pgid": 1936,
+        "pid": 1936,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 127.04241917800027,
+      "requests_per_s": 2.0150749777624757,
+      "output_tokens_per_s": 64.48239928839922,
+      "total_tokens_per_s": 4191.35595374595,
+      "latency_s": {
+        "median": 68.59911944750002,
+        "p90": 118.98900186449964,
+        "p99": 126.86928944660022,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 61.443695330499395,
+        "p90": 112.66804098750026,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.2190184277096705,
+        "p90": 0.22718131914516268
+      },
+      "target_concurrency": 16,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 125.8106378800012,
+        "all_c_inflight_overlap_longest_s": 7.289621798000553,
+        "measured_span_s": 127.0401337809999,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0013451158851438918,
+          "8": 0.00023426696835766005,
+          "9": 0.0072530109546999275,
+          "15": 0.0008456178909847417,
+          "16": 0.9903219883008137
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_rabit_L2048_c32",
+      "trial": 2,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 32,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 124.19137163500181,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 11,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 11,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          69751
+        ],
+        "after_measured": [
+          71993
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "32",
+          "--trial",
+          "2",
+          "--label",
+          "t2_rabit_L2048_c32",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 289.643,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_rabit_L2048_c32",
+        "own_session": true,
+        "pgid": 2023,
+        "pid": 2023,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 125.50464506400021,
+      "requests_per_s": 2.039765140720127,
+      "output_tokens_per_s": 65.27248450304407,
+      "total_tokens_per_s": 4242.711492697865,
+      "latency_s": {
+        "median": 73.53162295150014,
+        "p90": 124.93919601900052,
+        "p99": 125.32234454770008,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 59.66975864149981,
+        "p90": 111.4944892880003,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.4369699158709585,
+        "p90": 0.46454282233870825
+      },
+      "target_concurrency": 32,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 121.80256122000264,
+        "all_c_inflight_overlap_longest_s": 13.465625387000728,
+        "measured_span_s": 125.50166995499967,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0014121786671305319,
+          "3": 3.093567600578287e-05,
+          "9": 0.007382202231510591,
+          "10": 0.00042425872117151254,
+          "17": 0.008288689300885705,
+          "24": 0.001612388082737567,
+          "25": 0.008174830114757519,
+          "29": 6.527642225436426e-06,
+          "30": 1.7674904194065655e-06,
+          "31": 0.002140799872187558,
+          "32": 0.9705254222009684
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_rabit_L2048_c64",
+      "trial": 2,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 64,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 130.68340680999881,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 11,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 11,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          69757
+        ],
+        "after_measured": [
+          71999
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "64",
+          "--trial",
+          "2",
+          "--label",
+          "t2_rabit_L2048_c64",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 326.367,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_rabit_L2048_c64",
+        "own_session": true,
+        "pgid": 2110,
+        "pid": 2110,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 144.13319549299922,
+      "requests_per_s": 1.7761349085779086,
+      "output_tokens_per_s": 56.836317074493074,
+      "total_tokens_per_s": 3694.36060984205,
+      "latency_s": {
+        "median": 96.92030869200016,
+        "p90": 143.77318475349966,
+        "p99": 143.97094663149997,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 62.74936679099983,
+        "p90": 118.64598412850046,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.9965397561935524,
+        "p90": 1.1195021652258161
+      },
+      "target_concurrency": 64,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 130.73756356500053,
+        "all_c_inflight_overlap_longest_s": 24.011421950000113,
+        "measured_span_s": 144.13135458499983,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0010972803416403904,
+          "3": 2.8897230667497508e-05,
+          "9": 0.006025470228186507,
+          "11": 0.0003798926136357459,
+          "17": 0.00618257993596158,
+          "19": 0.0009796289669710197,
+          "25": 0.006939271353404887,
+          "27": 0.0015396861955448242,
+          "33": 0.009385829203478765,
+          "35": 0.002115164385136718,
+          "41": 0.012844989283077788,
+          "42": 0.002659242224590704,
+          "49": 0.01804792884581334,
+          "56": 0.003707779403981219,
+          "57": 0.016867091272407687,
+          "62": 1.3529117288135626e-06,
+          "63": 0.004125586051082871,
+          "64": 0.9070723295526897
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_bf16_L2048_c1",
+      "trial": 2,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 1,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 174.58555859899843,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 0,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 0,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67411
+        ],
+        "after_measured": [
+          67411
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "1",
+          "--trial",
+          "2",
+          "--label",
+          "t2_bf16_L2048_c1",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 380.504,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_bf16_L2048_c1",
+        "own_session": true,
+        "pgid": 2196,
+        "pid": 2196,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 174.31319574600002,
+      "requests_per_s": 1.468620886126313,
+      "output_tokens_per_s": 46.99586835604202,
+      "total_tokens_per_s": 3054.731443142731,
+      "latency_s": {
+        "median": 87.88173223100011,
+        "p90": 156.98483454450025,
+        "p99": 172.54319119095047,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 87.27237784349973,
+        "p90": 156.35477802649984,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.019602957483878143,
+        "p90": 0.020651179387113514
+      },
+      "target_concurrency": 1,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 173.8855588160004,
+        "all_c_inflight_overlap_longest_s": 1.045708642000136,
+        "measured_span_s": 174.31136786999923,
+        "time_fraction_by_inflight_count": {
+          "0": 0.0024428071399014302,
+          "1": 0.9975571928600986
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_bf16_L2048_c4",
+      "trial": 2,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 4,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 54.168404038992776,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 1,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 1,
+        "original_warmup": 1,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67409
+        ],
+        "after_measured": [
+          67409
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "4",
+          "--trial",
+          "2",
+          "--label",
+          "t2_bf16_L2048_c4",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 141.309,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_bf16_L2048_c4",
+        "own_session": true,
+        "pgid": 2283,
+        "pid": 2283,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 55.746485697000026,
+      "requests_per_s": 4.592217729946993,
+      "output_tokens_per_s": 146.95096735830379,
+      "total_tokens_per_s": 9551.812878289746,
+      "latency_s": {
+        "median": 28.111605000000054,
+        "p90": 50.42125129599981,
+        "p99": 55.665811053949845,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 27.374629967499914,
+        "p90": 49.749273552999966,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.02116161535483233,
+        "p90": 0.026242793854855274
+      },
+      "target_concurrency": 4,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 55.64819639000052,
+        "all_c_inflight_overlap_longest_s": 0.8910984149997603,
+        "measured_span_s": 55.744692344000214,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0015862718813620463,
+          "3": 0.00014476205105642568,
+          "4": 0.9982689660675815
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_bf16_L2048_c8",
+      "trial": 2,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 8,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 35.849155286003224,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 1,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 1,
+        "original_warmup": 1,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67409
+        ],
+        "after_measured": [
+          67409
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "8",
+          "--trial",
+          "2",
+          "--label",
+          "t2_bf16_L2048_c8",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 101.84,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_bf16_L2048_c8",
+        "own_session": true,
+        "pgid": 2370,
+        "pid": 2370,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 35.46717348199945,
+      "requests_per_s": 7.217941969069706,
+      "output_tokens_per_s": 230.9741430102306,
+      "total_tokens_per_s": 15013.31929566499,
+      "latency_s": {
+        "median": 18.33023473350022,
+        "p90": 32.10439108399987,
+        "p99": 35.38658301215041,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 17.49094177300003,
+        "p90": 31.45343305500046,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.02121920932260705,
+        "p90": 0.0333580285161236
+      },
+      "target_concurrency": 8,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 35.37508144600088,
+        "all_c_inflight_overlap_longest_s": 1.1200874419992033,
+        "measured_span_s": 35.46465157300008,
+        "time_fraction_by_inflight_count": {
+          "1": 0.002414451748499764,
+          "7": 0.00011116525396353974,
+          "8": 0.9974743829975367
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_bf16_L2048_c16",
+      "trial": 2,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 16,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 25.634222864996445,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 2,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 2,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67411
+        ],
+        "after_measured": [
+          67411
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "16",
+          "--trial",
+          "2",
+          "--label",
+          "t2_bf16_L2048_c16",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 81.257,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_bf16_L2048_c16",
+        "own_session": true,
+        "pgid": 2456,
+        "pid": 2456,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 25.492974249000326,
+      "requests_per_s": 10.041982449734704,
+      "output_tokens_per_s": 321.3434383915105,
+      "total_tokens_per_s": 20887.32349544818,
+      "latency_s": {
+        "median": 13.737977016500281,
+        "p90": 23.8237092305003,
+        "p99": 25.410120623149943,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 12.422014843500165,
+        "p90": 22.69332454050027,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.03550158009677269,
+        "p90": 0.037129756580666695
+      },
+      "target_concurrency": 16,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 25.330599068001902,
+        "all_c_inflight_overlap_longest_s": 1.5379155290002018,
+        "measured_span_s": 25.49103923599978,
+        "time_fraction_by_inflight_count": {
+          "1": 0.003175652716667662,
+          "8": 0.000867598719493645,
+          "9": 0.0012104991763734127,
+          "15": 0.001040232402928001,
+          "16": 0.9937060169845373
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_bf16_L2048_c32",
+      "trial": 2,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 32,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 19.24881254399952,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 2,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 2,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67429
+        ],
+        "after_measured": [
+          67431
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "32",
+          "--trial",
+          "2",
+          "--label",
+          "t2_bf16_L2048_c32",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 70.219,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_bf16_L2048_c32",
+        "own_session": true,
+        "pgid": 2543,
+        "pid": 2543,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 20.10463521499969,
+      "requests_per_s": 12.733381991880321,
+      "output_tokens_per_s": 407.4682237401703,
+      "total_tokens_per_s": 26485.43454311107,
+      "latency_s": {
+        "median": 11.981883530999767,
+        "p90": 19.938284432499586,
+        "p99": 20.00017073050003,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 9.84863803099961,
+        "p90": 17.95081641349998,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.05271282596772982,
+        "p90": 0.06539576041937366
+      },
+      "target_concurrency": 32,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 18.922410563001904,
+        "all_c_inflight_overlap_longest_s": 1.638687581999875,
+        "measured_span_s": 20.101261503999922,
+        "time_fraction_by_inflight_count": {
+          "1": 0.005012796733184467,
+          "3": 3.331004868871989e-05,
+          "9": 0.001396407036172493,
+          "10": 0.0010098467201169797,
+          "17": 0.02376391764788145,
+          "24": 0.0011414162237971559,
+          "25": 0.025169640467455373,
+          "29": 6.941519563901982e-05,
+          "30": 1.5783089032059436e-05,
+          "31": 0.0010330867043993768,
+          "32": 0.9413543801336329
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t2_bf16_L2048_c64",
+      "trial": 2,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 64,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 14.716345473999354,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 2,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 2,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67447
+        ],
+        "after_measured": [
+          67447
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "64",
+          "--trial",
+          "2",
+          "--label",
+          "t2_bf16_L2048_c64",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 65.939,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t2_bf16_L2048_c64",
+        "own_session": true,
+        "pgid": 2630,
+        "pid": 2630,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 18.00349448199995,
+      "requests_per_s": 14.219461685949414,
+      "output_tokens_per_s": 455.02277395038124,
+      "total_tokens_per_s": 29576.48030677478,
+      "latency_s": {
+        "median": 12.75812683050026,
+        "p90": 17.86756470750015,
+        "p99": 17.910060478150125,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 8.631315362500118,
+        "p90": 16.111065306500223,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.1095888149354998,
+        "p90": 0.12585832683872733
+      },
+      "target_concurrency": 64,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 14.757667679998121,
+        "all_c_inflight_overlap_longest_s": 1.4857314360006058,
+        "measured_span_s": 18.00112966799952,
+        "time_fraction_by_inflight_count": {
+          "1": 0.005029519739538418,
+          "3": 5.6932815808956816e-05,
+          "9": 0.0016719955111426247,
+          "11": 0.0011791830508152592,
+          "17": 0.02564469450050994,
+          "19": 0.0011593284635590209,
+          "25": 0.027703863712862476,
+          "27": 0.00118006343999307,
+          "33": 0.027205988292568175,
+          "35": 0.0011556818034964,
+          "41": 0.027667076965990745,
+          "42": 0.001148859453935622,
+          "49": 0.028791240303182683,
+          "56": 0.0015840286985784485,
+          "57": 0.027748065716599535,
+          "62": 1.8036701371179286e-05,
+          "63": 0.0012364654558118353,
+          "64": 0.8198189753742356
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_bf16_L2048_c1",
+      "trial": 3,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 1,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 181.23219382799653,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 0,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 0,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67411
+        ],
+        "after_measured": [
+          67411
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "1",
+          "--trial",
+          "3",
+          "--label",
+          "t3_bf16_L2048_c1",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 390.276,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_bf16_L2048_c1",
+        "own_session": true,
+        "pgid": 2717,
+        "pid": 2717,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 177.3030581209996,
+      "requests_per_s": 1.4438555246198521,
+      "output_tokens_per_s": 46.20337678783527,
+      "total_tokens_per_s": 3003.2194912092923,
+      "latency_s": {
+        "median": 90.12297776449986,
+        "p90": 159.90078936099962,
+        "p99": 175.4767554167003,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 89.50892010599955,
+        "p90": 159.28081857799998,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.020032479822592934,
+        "p90": 0.021675349548390403
+      },
+      "target_concurrency": 1,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 176.8809832810066,
+        "all_c_inflight_overlap_longest_s": 0.8201205260002098,
+        "measured_span_s": 177.30116929500036,
+        "time_fraction_by_inflight_count": {
+          "0": 0.0023698998470486647,
+          "1": 0.9976301001529513
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_bf16_L2048_c4",
+      "trial": 3,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 4,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 55.66926133800189,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 1,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 1,
+        "original_warmup": 1,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67409
+        ],
+        "after_measured": [
+          67409
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "4",
+          "--trial",
+          "3",
+          "--label",
+          "t3_bf16_L2048_c4",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 147.643,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_bf16_L2048_c4",
+        "own_session": true,
+        "pgid": 2804,
+        "pid": 2804,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 56.980091372999595,
+      "requests_per_s": 4.492797288164886,
+      "output_tokens_per_s": 143.76951322127636,
+      "total_tokens_per_s": 9345.018359382962,
+      "latency_s": {
+        "median": 28.826160966500083,
+        "p90": 51.53613170550034,
+        "p99": 56.88284602259978,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 28.0500804874996,
+        "p90": 50.89841197149963,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.02183694512900876,
+        "p90": 0.026821881693546948
+      },
+      "target_concurrency": 4,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 56.864692361999005,
+        "all_c_inflight_overlap_longest_s": 0.9910190030004742,
+        "measured_span_s": 56.977887670999735,
+        "time_fraction_by_inflight_count": {
+          "1": 0.001839414626990624,
+          "3": 0.00014723868059317955,
+          "4": 0.9980133466924161
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_bf16_L2048_c8",
+      "trial": 3,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 8,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 35.34428373000537,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 1,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 1,
+        "original_warmup": 1,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67409
+        ],
+        "after_measured": [
+          67409
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "8",
+          "--trial",
+          "3",
+          "--label",
+          "t3_bf16_L2048_c8",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 101.721,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_bf16_L2048_c8",
+        "own_session": true,
+        "pgid": 2891,
+        "pid": 2891,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 35.527653207000185,
+      "requests_per_s": 7.205654663099422,
+      "output_tokens_per_s": 230.5809492191815,
+      "total_tokens_per_s": 14987.761699246797,
+      "latency_s": {
+        "median": 18.29503336449943,
+        "p90": 32.133333974999914,
+        "p99": 35.4310585003494,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 17.45894149249989,
+        "p90": 31.504066368000167,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.02134681767743572,
+        "p90": 0.033415129967740924
+      },
+      "target_concurrency": 8,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 35.41879965699718,
+        "all_c_inflight_overlap_longest_s": 1.114898319000531,
+        "measured_span_s": 35.525229223999304,
+        "time_fraction_by_inflight_count": {
+          "1": 0.002871222486909458,
+          "7": 0.00012466436102746115,
+          "8": 0.997004113152063
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_bf16_L2048_c16",
+      "trial": 3,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 16,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 24.736724090999815,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 2,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 2,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67411
+        ],
+        "after_measured": [
+          67411
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "16",
+          "--trial",
+          "3",
+          "--label",
+          "t3_bf16_L2048_c16",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 80.092,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_bf16_L2048_c16",
+        "own_session": true,
+        "pgid": 2978,
+        "pid": 2978,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 25.077177811999718,
+      "requests_per_s": 10.20848525775899,
+      "output_tokens_per_s": 326.6715282482877,
+      "total_tokens_per_s": 21233.649336138704,
+      "latency_s": {
+        "median": 13.420248060999711,
+        "p90": 23.403276005500175,
+        "p99": 24.99553891085002,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 12.138064387499526,
+        "p90": 22.30979739250006,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.034542676145168025,
+        "p90": 0.036352300741929224
+      },
+      "target_concurrency": 16,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 24.914774834004675,
+        "all_c_inflight_overlap_longest_s": 1.509653829999479,
+        "measured_span_s": 25.07521967000048,
+        "time_fraction_by_inflight_count": {
+          "1": 0.003179048241630841,
+          "8": 0.000891139391574218,
+          "9": 0.0012066937557184071,
+          "15": 0.001121660203426265,
+          "16": 0.9936014584076502
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_bf16_L2048_c32",
+      "trial": 3,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 32,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 18.678238698003952,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 2,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 2,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67429
+        ],
+        "after_measured": [
+          67431
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "32",
+          "--trial",
+          "3",
+          "--label",
+          "t3_bf16_L2048_c32",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 69.635,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_bf16_L2048_c32",
+        "own_session": true,
+        "pgid": 3065,
+        "pid": 3065,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 19.827581421000104,
+      "requests_per_s": 12.911307464301279,
+      "output_tokens_per_s": 413.16183885764093,
+      "total_tokens_per_s": 26855.51952574666,
+      "latency_s": {
+        "median": 11.788437248499577,
+        "p90": 19.6821118795001,
+        "p99": 19.742143899099894,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 9.658120002999567,
+        "p90": 17.700777059500524,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.051611057290316356,
+        "p90": 0.06516362716129445
+      },
+      "target_concurrency": 32,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 18.662005843999395,
+        "all_c_inflight_overlap_longest_s": 1.5128634359998614,
+        "measured_span_s": 19.82574074399963,
+        "time_fraction_by_inflight_count": {
+          "1": 0.004197667016556522,
+          "3": 3.7201787811436365e-05,
+          "9": 0.001132047185010228,
+          "10": 0.0010226737684675721,
+          "17": 0.024750620737738437,
+          "24": 0.001063974268255232,
+          "25": 0.025407984120460823,
+          "29": 5.617994377744956e-05,
+          "30": 1.3186796066190862e-05,
+          "31": 0.001016644435153344,
+          "32": 0.9413018199407027
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_bf16_L2048_c64",
+      "trial": 3,
+      "dtype": "bfloat16",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 64,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 14.706300441000167,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 2,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 2,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67447
+        ],
+        "after_measured": [
+          67447
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "bfloat16",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "64",
+          "--trial",
+          "3",
+          "--label",
+          "t3_bf16_L2048_c64",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828"
+        ],
+        "elapsed_s": 66.337,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_bf16_L2048_c64",
+        "own_session": true,
+        "pgid": 3152,
+        "pid": 3152,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 17.826251632000094,
+      "requests_per_s": 14.360842945830052,
+      "output_tokens_per_s": 459.5469742665617,
+      "total_tokens_per_s": 29870.553327326506,
+      "latency_s": {
+        "median": 12.671186090500214,
+        "p90": 17.69905468600018,
+        "p99": 17.742649351350384,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 8.58669653800007,
+        "p90": 16.01137721100031,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.10845885203226287,
+        "p90": 0.125166583612906
+      },
+      "target_concurrency": 64,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 14.619647497001097,
+        "all_c_inflight_overlap_longest_s": 1.4649793689995931,
+        "measured_span_s": 17.82406242700017,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0045512064565825395,
+          "3": 3.361489574051138e-05,
+          "9": 0.0016541558424473402,
+          "11": 0.0011329032358778062,
+          "17": 0.025822545330781904,
+          "19": 0.0013012709136938673,
+          "25": 0.027819319306745173,
+          "27": 0.0010898171547502103,
+          "33": 0.027344937328173283,
+          "35": 0.0011114011791989247,
+          "41": 0.027725860814489175,
+          "42": 0.001090569676776741,
+          "49": 0.028497734682029794,
+          "56": 0.0014900093684100863,
+          "57": 0.027943752275340603,
+          "62": 1.557142211075397e-05,
+          "63": 0.0011556099000378914,
+          "64": 0.8202197202168134
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_rabit_L2048_c1",
+      "trial": 3,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 1,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 245.8186347800047,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 8,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 8,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          69843
+        ],
+        "after_measured": [
+          69877
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "1",
+          "--trial",
+          "3",
+          "--label",
+          "t3_rabit_L2048_c1",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 515.029,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_rabit_L2048_c1",
+        "own_session": true,
+        "pgid": 3239,
+        "pid": 3239,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 237.5241426349994,
+      "requests_per_s": 1.077785176530001,
+      "output_tokens_per_s": 34.489125648960034,
+      "total_tokens_per_s": 2241.793167182402,
+      "latency_s": {
+        "median": 119.31013105600005,
+        "p90": 214.26253047449973,
+        "p99": 235.0937750298503,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 118.51818473850017,
+        "p90": 213.43829265149998,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.025507704903218603,
+        "p90": 0.025837036129022665
+      },
+      "target_concurrency": 1,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 1,
+        "all_c_inflight_overlap_total_s": 237.1012592740026,
+        "all_c_inflight_overlap_longest_s": 1.0027437139997346,
+        "measured_span_s": 237.52231486500023,
+        "time_fraction_by_inflight_count": {
+          "0": 0.0017726990882391542,
+          "1": 0.9982273009117608
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_rabit_L2048_c4",
+      "trial": 3,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 4,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 140.0571904009994,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 8,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 8,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70135
+        ],
+        "after_measured": [
+          70137
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "4",
+          "--trial",
+          "3",
+          "--label",
+          "t3_rabit_L2048_c4",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 333.093,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_rabit_L2048_c4",
+        "own_session": true,
+        "pgid": 3326,
+        "pid": 3326,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 159.74811853700066,
+      "requests_per_s": 1.6025227861491564,
+      "output_tokens_per_s": 51.280729156773006,
+      "total_tokens_per_s": 3333.2473951902452,
+      "latency_s": {
+        "median": 77.62346019200004,
+        "p90": 139.56359080449965,
+        "p99": 159.58419575000008,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 75.51990181100018,
+        "p90": 137.54372397049974,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.06427144391936082,
+        "p90": 0.06937917869354057
+      },
+      "target_concurrency": 4,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 4,
+        "all_c_inflight_overlap_total_s": 159.55547471599584,
+        "all_c_inflight_overlap_longest_s": 3.9451320979997035,
+        "measured_span_s": 159.74423373399986,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0010785756266257567,
+          "3": 0.00010305712212394205,
+          "4": 0.9988183672512503
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_rabit_L2048_c8",
+      "trial": 3,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 8,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 142.6872585689989,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 8,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 8,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70057
+        ],
+        "after_measured": [
+          70059
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "8",
+          "--trial",
+          "3",
+          "--label",
+          "t3_rabit_L2048_c8",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 316.623,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_rabit_L2048_c8",
+        "own_session": true,
+        "pgid": 3413,
+        "pid": 3413,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 140.45984038300048,
+      "requests_per_s": 1.822585012925752,
+      "output_tokens_per_s": 58.32272041362406,
+      "total_tokens_per_s": 3790.976826885564,
+      "latency_s": {
+        "median": 73.85100446449997,
+        "p90": 127.53145681699971,
+        "p99": 140.28469956060013,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 70.25698754349969,
+        "p90": 124.023244643,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.11380170341937863,
+        "p90": 0.11608745241934933
+      },
+      "target_concurrency": 8,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 8,
+        "all_c_inflight_overlap_total_s": 140.26845488399886,
+        "all_c_inflight_overlap_longest_s": 4.400581649000742,
+        "measured_span_s": 140.4575368169999,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0012970068614894504,
+          "7": 4.917887753135147e-05,
+          "8": 0.9986538142609792
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_rabit_L2048_c16",
+      "trial": 3,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 16,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 125.84575618400413,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 10,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 10,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70009
+        ],
+        "after_measured": [
+          70033
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "16",
+          "--trial",
+          "3",
+          "--label",
+          "t3_rabit_L2048_c16",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 283.244,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_rabit_L2048_c16",
+        "own_session": true,
+        "pgid": 3500,
+        "pid": 3500,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 126.76668082799915,
+      "requests_per_s": 2.019458096779772,
+      "output_tokens_per_s": 64.6226590969527,
+      "total_tokens_per_s": 4200.472841301926,
+      "latency_s": {
+        "median": 68.1457224615001,
+        "p90": 118.77362379750002,
+        "p99": 126.60894397255092,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 60.9978576085,
+        "p90": 112.40106801150023,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.2194292654838782,
+        "p90": 0.22386416661292088
+      },
+      "target_concurrency": 16,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 16,
+        "all_c_inflight_overlap_total_s": 125.59936381400348,
+        "all_c_inflight_overlap_longest_s": 7.116047208999589,
+        "measured_span_s": 126.76498771200113,
+        "time_fraction_by_inflight_count": {
+          "1": 0.001231276615232835,
+          "8": 0.0002287208126258469,
+          "9": 0.00689796310305805,
+          "15": 0.0008371959475096494,
+          "16": 0.9908048435215736
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_rabit_L2048_c32",
+      "trial": 3,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 32,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 118.38894562999303,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 11,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 11,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          69751
+        ],
+        "after_measured": [
+          71993
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "32",
+          "--trial",
+          "3",
+          "--label",
+          "t3_rabit_L2048_c32",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 277.29,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_rabit_L2048_c32",
+        "own_session": true,
+        "pgid": 3587,
+        "pid": 3587,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 121.86972340899956,
+      "requests_per_s": 2.100603766374803,
+      "output_tokens_per_s": 67.2193205239937,
+      "total_tokens_per_s": 4369.255834059591,
+      "latency_s": {
+        "median": 70.63987985449967,
+        "p90": 121.32206101249994,
+        "p99": 121.69873023874989,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 57.03063221150023,
+        "p90": 107.90196835649931,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.426961589645162,
+        "p90": 0.4412181190645271
+      },
+      "target_concurrency": 32,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 32,
+        "all_c_inflight_overlap_total_s": 118.18165316900377,
+        "all_c_inflight_overlap_longest_s": 12.55271414499839,
+        "measured_span_s": 121.86747103299967,
+        "time_fraction_by_inflight_count": {
+          "1": 0.0013608955170228913,
+          "3": 4.3603464934382364e-05,
+          "9": 0.007521383460493157,
+          "10": 0.0004281693183373916,
+          "17": 0.008671161295486765,
+          "24": 0.0016351837804744343,
+          "25": 0.00839353900038195,
+          "29": 6.730401413275531e-06,
+          "30": 1.5850168977146208e-06,
+          "31": 0.002182225246395432,
+          "32": 0.9697555234981626
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    },
+    {
+      "label": "t3_rabit_L2048_c64",
+      "trial": 3,
+      "dtype": "rabit_kv2",
+      "prompt_tokens": 2048,
+      "outcome_class": "sustained_target_concurrency",
+      "measured_jit_lines": 0,
+      "interpretable": true,
+      "shadow_conditioning": {
+        "requests": 256,
+        "exact_requests": 256,
+        "expected_requests": 256,
+        "target_concurrency": 64,
+        "completed_all_exact": true,
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 126.44878864799466,
+        "target_inflight_concurrency_reached": true,
+        "failure_in_conditioning": false,
+        "jit_lines": 11,
+        "valid": true
+      },
+      "jit_lines_by_phase": {
+        "setup": 0,
+        "shadow_conditioning": 11,
+        "original_warmup": 0,
+        "measured": 0,
+        "after": 0
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          69757
+        ],
+        "after_measured": [
+          71999
+        ]
+      },
+      "oom_lines": 0,
+      "failure": null,
+      "process": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp6/exp6_worker.py",
+          "--kv-cache-dtype",
+          "rabit_kv2",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--prompt-tokens",
+          "2048",
+          "--concurrency",
+          "64",
+          "--trial",
+          "3",
+          "--label",
+          "t3_rabit_L2048_c64",
+          "--prompt-set-sha256",
+          "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+          "--stage3c-impl",
+          "shared_decode",
+          "--query-block",
+          "32"
+        ],
+        "elapsed_s": 314.765,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "t3_rabit_L2048_c64",
+        "own_session": true,
+        "pgid": 3674,
+        "pid": 3674,
+        "reader_finished": true,
+        "returncode": 0,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "completed_requests": 256,
+      "returned_requests": 256,
+      "failed_requests": 0,
+      "output_token_count_valid": true,
+      "wall_s": 140.80455751699992,
+      "requests_per_s": 1.818122967852742,
+      "output_tokens_per_s": 58.17993497128774,
+      "total_tokens_per_s": 3781.6957731337034,
+      "latency_s": {
+        "median": 94.02546904800056,
+        "p90": 140.44910757400066,
+        "p99": 140.6451145816508,
+        "definition": "last_token_ts - queued_ts (engine core; includes queueing under saturation)"
+      },
+      "ttft_s": {
+        "median": 61.06785310650048,
+        "p90": 115.58039817799909,
+        "definition": "first_token_ts - queued_ts"
+      },
+      "tpot_s": {
+        "median": 0.9612625492580616,
+        "p90": 1.0891928885483784
+      },
+      "target_concurrency": 64,
+      "inflight_concurrency": {
+        "evaluable": true,
+        "kind": "overlapping in-flight concurrency (not GPU residency)",
+        "observed_max_inflight_concurrency": 64,
+        "all_c_inflight_overlap_total_s": 127.55302879300325,
+        "all_c_inflight_overlap_longest_s": 23.069001964999188,
+        "measured_span_s": 140.80228054300096,
+        "time_fraction_by_inflight_count": {
+          "1": 0.001099759843404557,
+          "3": 3.0365488283270714e-05,
+          "9": 0.0061488846037154364,
+          "11": 0.00037527285634867785,
+          "17": 0.006409905127383966,
+          "19": 0.0010035939365123049,
+          "25": 0.007159219439585191,
+          "27": 0.0015385145408563564,
+          "33": 0.009543926247617265,
+          "35": 0.0021097667584162065,
+          "41": 0.012903726750692261,
+          "42": 0.0027094979962676495,
+          "49": 0.018105680349552067,
+          "56": 0.0037913716946931316,
+          "57": 0.01690844201397785,
+          "62": 1.1325739866880491e-06,
+          "63": 0.004259215026112612,
+          "64": 0.9059017247525946
+        }
+      },
+      "preemptions": 0.0,
+      "preemption_source": "vllm:num_preemptions counter delta",
+      "overlap_stats_are_not_residency_evidence": false
+    }
+  ],
+  "outcome_class_counts": {
+    "engine_or_request_failure": 0,
+    "oom_or_allocation_failure": 0,
+    "completed_with_preemption": 0,
+    "target_concurrency_not_reached": 0,
+    "sustained_target_concurrency": 36
+  },
+  "highest_successfully_tested_concurrency": {
+    "bfloat16": {
+      "highest_successfully_tested_concurrency_all_trials": 64,
+      "highest_contiguous_successful_concurrency_all_trials": 64,
+      "non_monotonic": false,
+      "per_trial": {
+        "1": 64,
+        "2": 64,
+        "3": 64
+      },
+      "failure_boundary_bracketed_by_grid": false
+    },
+    "rabit_kv2": {
+      "highest_successfully_tested_concurrency_all_trials": 64,
+      "highest_contiguous_successful_concurrency_all_trials": 64,
+      "non_monotonic": false,
+      "per_trial": {
+        "1": 64,
+        "2": 64,
+        "3": 64
+      },
+      "failure_boundary_bracketed_by_grid": false
+    }
+  },
+  "rabit_only_extension": {
+    "bf16_fails_first_at": [],
+    "rabit_sustains_64_all_trials": true,
+    "eligible_for_pre_registered_rabit_only_extension": false,
+    "extension_grid": [
+      128,
+      256
+    ],
+    "enabled": false,
+    "note": "requires review before any 128 / 256 point"
+  },
+  "excluded_attempts_not_pooled": [
+    "results/mlsys2027/concurrency_scaling/L2048/jit_contaminated_attempt_1",
+    "results/mlsys2027/concurrency_scaling/L2048/jit_contaminated_attempt_2",
+    "results/mlsys2027/concurrency_scaling/L2048/infrastructure_aborted_attempt_3"
+  ],
+  "labels": {
+    "concurrency": "Concurrency derived from request [scheduled_ts, last_token_ts] intervals is OVERLAPPING IN-FLIGHT concurrency (requests that have been scheduled and not yet produced their last token). It is NOT strict GPU-resident or continuously-executing concurrency: a preempted request stays in flight while not resident. If preemption occurs (or its status is unavailable), the point's overlap statistics are reported but must not by themselves be used to claim sustained residency at target C.",
+    "gpu_memory": "device-wide nvidia-smi memory.used; NOT request KV memory",
+    "capacity": "MEASURED allocator capacity (num_gpu_blocks x block_size)"
+  }
+}

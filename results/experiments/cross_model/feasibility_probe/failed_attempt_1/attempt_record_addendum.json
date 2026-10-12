@@ -1,0 +1,24 @@
+{
+  "experiment": 14,
+  "kind": "feasibility_probe_attempt_addendum",
+  "attempt": 1,
+  "addendum_to": "attempt_record.json (unchanged; archived in commit 28d83ba1e82582e07d8b4ce0f6fe0cf22ddb2923)",
+  "status": "invalid_gate_harness_failure",
+  "excluded": true,
+  "permanently_excluded": true,
+  "explicit_facts": {
+    "failure_location": "benchmarks/mlsys2027/exp14_shape_gate.py (the Model-B shape gate; exit code 1)",
+    "failing_criterion": "attention max_abs < 5e-3 on the short-prefix boundary replays",
+    "both_geometries_failed_same_criterion": true,
+    "geometries": {"model_b_qwen2_5_7b": "28 / 4 / 128", "positive_control_llama3_1_8b": "32 / 8 / 128"},
+    "closed_page_byte_identity_vs_independent_reference": "passed at every checkpoint, both geometries",
+    "cache_state_checks": "passed (total_tokens, closed_pages)",
+    "runtime_state_error_equals_reference_state_error": true,
+    "workload_2048_replays_and_dispatch_checks": "passed, both geometries",
+    "qwen_model_download_completed": false,
+    "bf16_engine_started": false,
+    "rabit_engine_started": false,
+    "allocator_capacity_result": "none",
+    "latency_or_timing_result": "none"
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "scope": "Stage3C shared_decode kernel-tuning BENCHMARK evidence only; NOT Experiment 5 evidence; one measured request per point; descriptive only. QUERY_BLOCK comparison is kernel tuning, not an ablation. The 32K (q_len 16352) point is not part of this run. Final benchmark: reference, tile32, shared_decode(QB32 fixed by the tie-break).",
+  "experiment5_evidence": false,
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 43,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "fixed_query_block": 32,
+  "points": [
+    {
+      "prompt_tokens": 16416,
+      "second_chunk_q_len": 32,
+      "reference": {
+        "ttft_ms": 1155.8680534362793,
+        "tpot_ms": 24.246699645162504,
+        "wall_ms": 1907.031140000015,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 1111.5288734436035,
+        "tpot_ms": 24.18031290322585,
+        "wall_ms": 1860.4514849999987,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode": {
+        "ttft_ms": 1001.4886856079102,
+        "tpot_ms": 24.554360000002642,
+        "wall_ms": 1762.4200230000042,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode_ttft_over_reference": 0.8664385892754672,
+      "shared_decode_ttft_over_tile32": 0.9010010531757217,
+      "reference_ttft_over_shared_decode": 1.1541498871099676,
+      "shared_decode_wall_over_reference": 0.9241695041225129,
+      "shared_decode_tpot_delta_ms_vs_reference": 0.307660354840138
+    },
+    {
+      "prompt_tokens": 16896,
+      "second_chunk_q_len": 512,
+      "reference": {
+        "ttft_ms": 7383.360147476196,
+        "tpot_ms": 23.554391387095517,
+        "wall_ms": 8113.210792000018,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 6855.567216873169,
+        "tpot_ms": 23.0324564838721,
+        "wall_ms": 7568.986927000083,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode": {
+        "ttft_ms": 3705.44695854187,
+        "tpot_ms": 22.501146032258504,
+        "wall_ms": 4402.731856000059,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode_ttft_over_reference": 0.5018645825923144,
+      "shared_decode_ttft_over_tile32": 0.5405018784473282,
+      "reference_ttft_over_shared_decode": 1.9925693796414836,
+      "shared_decode_wall_over_reference": 0.5426620814956942,
+      "shared_decode_tpot_delta_ms_vs_reference": -1.0532453548370135
+    },
+    {
+      "prompt_tokens": 18432,
+      "second_chunk_q_len": 2048,
+      "reference": {
+        "ttft_ms": 28243.73173713684,
+        "tpot_ms": 23.122532935483452,
+        "wall_ms": 28960.093048999966,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 26075.098752975464,
+        "tpot_ms": 23.61084067741749,
+        "wall_ms": 26806.53014500001,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode": {
+        "ttft_ms": 13542.190074920654,
+        "tpot_ms": 23.159478387095724,
+        "wall_ms": 14259.604581000076,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode_ttft_over_reference": 0.4794759488922079,
+      "shared_decode_ttft_over_tile32": 0.519353357132553,
+      "reference_ttft_over_shared_decode": 2.085610346692931,
+      "shared_decode_wall_over_reference": 0.49238807889439706,
+      "shared_decode_tpot_delta_ms_vs_reference": 0.03694545161227225
+    },
+    {
+      "prompt_tokens": 20480,
+      "second_chunk_q_len": 4096,
+      "reference": {
+        "ttft_ms": 58192.47364997864,
+        "tpot_ms": 21.878370838710598,
+        "wall_ms": 58870.698526000015,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 53691.410064697266,
+        "tpot_ms": 23.79473309677436,
+        "wall_ms": 54428.41528399992,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode": {
+        "ttft_ms": 26000.443696975708,
+        "tpot_ms": 25.574026870968265,
+        "wall_ms": 26791.897626000035,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode_ttft_over_reference": 0.4468007985597164,
+      "shared_decode_ttft_over_tile32": 0.4842570471821396,
+      "reference_ttft_over_shared_decode": 2.238133869105757,
+      "shared_decode_wall_over_reference": 0.4550973284981067,
+      "shared_decode_tpot_delta_ms_vs_reference": 3.6956560322576664
+    },
+    {
+      "prompt_tokens": 24576,
+      "second_chunk_q_len": 8192,
+      "reference": {
+        "ttft_ms": 125291.88632965088,
+        "tpot_ms": 24.45667370967576,
+        "wall_ms": 126049.803575,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "tile32": {
+        "ttft_ms": 115761.50155067444,
+        "tpot_ms": 24.49812358064528,
+        "wall_ms": 116521.31505699993,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode": {
+        "ttft_ms": 53775.344371795654,
+        "tpot_ms": 24.88876038709379,
+        "wall_ms": 54546.58822599993,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "shared_decode_ttft_over_reference": 0.4292005328286727,
+      "shared_decode_ttft_over_tile32": 0.46453565003435593,
+      "reference_ttft_over_shared_decode": 2.329913230557842,
+      "shared_decode_wall_over_reference": 0.4327383833925973,
+      "shared_decode_tpot_delta_ms_vs_reference": 0.432086677418031
+    }
+  ],
+  "not_claimed": [
+    "Experiment 5 results",
+    "a complexity law",
+    "q_len 16352 latency",
+    "QUERY_BLOCK retuning at 4096 / 8192"
+  ]
+}

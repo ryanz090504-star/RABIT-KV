@@ -1,0 +1,22 @@
+EXP3_GATE_BEGIN={"pytest_command": ["/usr/local/bin/python", "-m", "pytest", "-q", "--tb=short", "--confcutdir=/root/vllm-kvquant/tests/quantization", "/root/vllm-kvquant/tests/quantization/test_kvquant_k3.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_layout.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_physical.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b1.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b2.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_fixed.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py"], "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"}
+====================================================================================================================
+RABIT-2 FINAL targeted decode-append regression
+====================================================================================================================
+Dispatch preflight: PASSED
+Stage4D3.4 prep exactness: PASSED (62/62)
+Stage4D3.4 full attention exactness: PASSED (torch.equal)
+Stage4D3.4 scratch_bytes_per_stream=57600
+FINAL fast decode append exactness: PASSED (202 state/byte steps + attention checkpoints)
+........................................................................ [ 68%]
+.................................                                        [100%]
+=============================== warnings summary ===============================
+tests/quantization/test_kvquant_k3.py: 14 warnings
+  /usr/local/lib/python3.11/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+105 passed, 14 warnings in 42.43s
+
+pytest exit=0
+RABIT-2 FINAL TARGETED REGRESSION PASSED
+EXP3_GATE_RESULT={"passed": true}

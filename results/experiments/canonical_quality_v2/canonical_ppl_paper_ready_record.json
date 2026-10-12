@@ -1,0 +1,296 @@
+{
+  "kind": "PAPER-READY RESULT RECORD: canonical continuation perplexity, two models (logical quality under canonical RABIT semantics; NOT physical serving evidence)",
+  "status": "ACCEPTED (2026-10-03): the authoritative canonical continuation-PPL evidence",
+  "protocol": {
+    "dataset": "WikiText-2 test (raw text), sha256 d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0",
+    "windows": "N = 32 consecutive non-overlapping windows; context 1024 tokens; continuation 128 tokens; no BOS",
+    "scoring": "BF16 prefill; first continuation token scored from the prefill logit; remaining tokens teacher-forced one at a time; canonical cache aging at every decode step; identical paired token inputs in both arms",
+    "arms": "BF16 vs canonical RABIT (canonical_rabit_quality.py, c360697)",
+    "policy": "K3 / V2 / G32 / R4 / META8g64 (frozen; no retuning)",
+    "statistics": "PPL = exp(total NLL / total tokens); delta = 100 * (exp(mean per-window NLL difference) - 1); paired percentile bootstrap over windows, 10000 resamples, seed 20270929",
+    "hardware": "one NVIDIA H100 80GB per model",
+    "registered_attempt": 2,
+    "protocol_file": "benchmarks/mlsys2027/canonical_ppl_protocol.json (sha256_lf cfa990a7...; commit 05eb29e)"
+  },
+  "models": {
+    "llama3_1_8b": {
+      "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+      "files": 18,
+      "geometry": {
+        "layers": 32,
+        "kv_heads": 8,
+        "attention_heads": 32,
+        "head_dim": 128,
+        "architecture": "LlamaForCausalLM"
+      },
+      "hardware": "NVIDIA H100 80GB HBM3",
+      "runtime": {
+        "python_minor": "3.11",
+        "torch": "2.11.0+cu130",
+        "torch_cuda": "13.0",
+        "cuda_device": "NVIDIA H100 80GB HBM3",
+        "transformers": "4.48.2"
+      },
+      "modal_app": "ap-HL07VGNI2BS7tILFTbKcPA",
+      "scored_tokens_per_arm": 4096,
+      "windows": 32,
+      "bf16_ppl": 7.515395843214247,
+      "rabit_ppl": 7.6325218956943175,
+      "relative_delta_pct": 1.558481481528684,
+      "relative_delta_pct_ci95_paired_bootstrap": [
+        1.1169214551782547,
+        2.0482972302842573
+      ],
+      "mean_nll": {
+        "bf16": 2.016953695565462,
+        "rabit": 2.0324183143675327
+      },
+      "rounded": {
+        "bf16_ppl": 7.515,
+        "rabit_ppl": 7.633,
+        "relative_delta_pct": 1.56,
+        "ci95_pct": [
+          1.12,
+          2.05
+        ]
+      },
+      "per_window_paired_nll_delta": {
+        "mean": 0.015464618802070618,
+        "median": 0.013599395751953125,
+        "stdev": 0.013579189514187866,
+        "min": -0.006300210952758789,
+        "max": 0.05903959274291992,
+        "windows_positive": 30,
+        "windows_negative": 2
+      },
+      "largest_positive_windows": [
+        {
+          "window": 32,
+          "delta_nll": 0.05903959274291992,
+          "bf16_ppl": 5.241733226949613,
+          "rabit_ppl": 5.560520977632496
+        },
+        {
+          "window": 6,
+          "delta_nll": 0.03935050964355469,
+          "bf16_ppl": 10.547142689257484,
+          "rabit_ppl": 10.970452230617717
+        },
+        {
+          "window": 10,
+          "delta_nll": 0.03924000263214111,
+          "bf16_ppl": 5.271527961155748,
+          "rabit_ppl": 5.482494833050191
+        }
+      ],
+      "smallest_windows": [
+        {
+          "window": 11,
+          "delta_nll": -0.006300210952758789,
+          "bf16_ppl": 6.925640186783949,
+          "rabit_ppl": 6.882144352960642
+        },
+        {
+          "window": 28,
+          "delta_nll": -0.0003781318664550781,
+          "bf16_ppl": 8.379675517292277,
+          "rabit_ppl": 8.376507493951674
+        },
+        {
+          "window": 21,
+          "delta_nll": 0.0002601146697998047,
+          "bf16_ppl": 10.656747872070914,
+          "rabit_ppl": 10.659520209071928
+        }
+      ],
+      "concentration": {
+        "share_of_summed_window_delta_from_top_1": 0.11930376667087424,
+        "share_from_top_3": 0.27811489160378605,
+        "share_from_top_8_of_32": 0.5446636340072826,
+        "aggregate_delta_pct_without_top_3_windows": 1.239472700414046,
+        "tokens_with_positive_delta_of_4096": 2306
+      },
+      "legacy_logical_evaluator_context_only": {
+        "source": [
+          "results/mlsys2027/variance/continuation_ppl.log:113: bf16        7.5138      0.00        7.6084              128.000       1.000         4096",
+          "results/mlsys2027/variance/continuation_ppl.log:114: rabit2      7.6006      1.16        7.7274              24.710        5.180         4096"
+        ],
+        "bf16_ppl": 7.513773391425638,
+        "legacy_rabit_ppl": 7.6006423020331155,
+        "legacy_relative_delta_pct": 1.156128965861658
+      },
+      "bf16_reproducibility": {
+        "legacy_bf16_ppl": 7.513773391425638,
+        "bf16_batched_control_ppl": 7.513780420171705,
+        "relative_difference": 9.354482362978031e-07,
+        "stepwise_vs_batched_relative_difference": 0.0002149947100137204
+      }
+    },
+    "qwen2_5_7b": {
+      "model_id": "Qwen/Qwen2.5-7B-Instruct",
+      "revision": "16c174980d8a1492910551634b4969e69cdc2444",
+      "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+      "files": 15,
+      "geometry": {
+        "layers": 28,
+        "kv_heads": 4,
+        "attention_heads": 28,
+        "head_dim": 128,
+        "architecture": "Qwen2ForCausalLM"
+      },
+      "hardware": "NVIDIA H100 80GB HBM3",
+      "runtime": {
+        "python_minor": "3.11",
+        "torch": "2.11.0+cu130",
+        "torch_cuda": "13.0",
+        "cuda_device": "NVIDIA H100 80GB HBM3",
+        "transformers": "4.48.2"
+      },
+      "modal_app": "ap-ln4CjmjoYC40x9El0D3PEM",
+      "scored_tokens_per_arm": 4096,
+      "windows": 32,
+      "bf16_ppl": 6.7870010008184805,
+      "rabit_ppl": 112.38555319178539,
+      "relative_delta_pct": 1555.8941597066544,
+      "relative_delta_pct_ci95_paired_bootstrap": [
+        1320.3867153563212,
+        1827.772098941309
+      ],
+      "mean_nll": {
+        "bf16": 1.9150091651827097,
+        "rabit": 4.721935398876667
+      },
+      "rounded": {
+        "bf16_ppl": 6.787,
+        "rabit_ppl": 112.39,
+        "relative_delta_pct": 1555.9,
+        "ci95_pct": [
+          1320.0,
+          1828.0
+        ]
+      },
+      "per_window_paired_nll_delta": {
+        "mean": 2.8069262336939573,
+        "median": 2.7951658964157104,
+        "stdev": 0.45061141156416634,
+        "min": 1.9305983781814575,
+        "max": 3.724118947982788,
+        "windows_positive": 32,
+        "windows_negative": 0
+      },
+      "largest_positive_windows": [
+        {
+          "window": 5,
+          "delta_nll": 3.724118947982788,
+          "bf16_ppl": 5.6535077953621515,
+          "rabit_ppl": 234.2514589398789
+        },
+        {
+          "window": 2,
+          "delta_nll": 3.525831937789917,
+          "bf16_ppl": 5.880621618051746,
+          "rabit_ppl": 199.8354766910256
+        },
+        {
+          "window": 19,
+          "delta_nll": 3.482621431350708,
+          "bf16_ppl": 9.242807858591663,
+          "rabit_ppl": 300.80648518740986
+        }
+      ],
+      "smallest_windows": [
+        {
+          "window": 11,
+          "delta_nll": 1.9305983781814575,
+          "bf16_ppl": 3.349653609258533,
+          "rabit_ppl": 23.091286035314244
+        },
+        {
+          "window": 1,
+          "delta_nll": 2.0813645124435425,
+          "bf16_ppl": 2.3106306135482217,
+          "rabit_ppl": 18.52062530838073
+        },
+        {
+          "window": 23,
+          "delta_nll": 2.1868816614151,
+          "bf16_ppl": 4.749041214388534,
+          "rabit_ppl": 42.30157881066342
+        }
+      ],
+      "concentration": {
+        "share_of_summed_window_delta_from_top_1": 0.0414612666793548,
+        "share_from_top_3": 0.11948760209089092,
+        "share_from_top_8_of_32": 0.3007070804719492,
+        "aggregate_delta_pct_without_top_3_windows": 1429.0155844274796,
+        "tokens_with_positive_delta_of_4096": 3583
+      },
+      "legacy_logical_evaluator_context_only": {
+        "source": [
+          "results/mlsys2027/second_model/quality/continuation_ppl.log:27273: bf16        6.7837      0.00        6.8907              56.000        1.000         4096",
+          "results/mlsys2027/second_model/quality/continuation_ppl.log:27274: rabit2      299.6214    4316.80     324.2389            10.811        5.180         4096"
+        ],
+        "bf16_ppl": 6.7836727695765315,
+        "legacy_rabit_ppl": 299.6214416013361,
+        "legacy_relative_delta_pct": 4316.802693447724
+      },
+      "bf16_reproducibility": {
+        "legacy_bf16_ppl": 6.7836727695765315,
+        "bf16_batched_control_ppl": 6.783683137667368,
+        "relative_difference": 1.528388999399002e-06,
+        "stepwise_vs_batched_relative_difference": 0.0004890946531227952
+      }
+    }
+  },
+  "interpretation": {
+    "case": 1,
+    "condition": "Llama remains near its BF16 control while Qwen still shows severe degradation.",
+    "interpretation": "The frozen operating point shows model-specific quality sensitivity; mechanism remains undiagnosed.",
+    "applied": "descriptively, by review decision; no numerical definition of 'near BF16' is introduced"
+  },
+  "qualification": {
+    "statement": "The old logical evaluator materially distorted the MAGNITUDE of the Qwen degradation (legacy Qwen RABIT PPL 299.62 vs canonical 112.39), but the severe Qwen sensitivity remains under canonical semantics. The Qwen degradation is therefore NOT merely an old-evaluator artifact.",
+    "no_causal_decomposition": "The change from 299.62 to 112.39 is not attributed to the metadata-layout fix or to the aging fix individually; no causal decomposition has been run."
+  },
+  "generalization_claims": {
+    "supported": [
+      "RABIT's physical representation and canonical cache semantics transfer across the tested Llama and Qwen KV geometries.",
+      "The same frozen operating point exhibits strongly model-dependent quality behavior."
+    ],
+    "not_supported": [
+      "RABIT quality generalizes across models.",
+      "The frozen K3/V2/G32/R4/META8g64 operating point is universally suitable.",
+      "Qwen degradation is caused by GQA, projection bias, outliers, fallback attention, or any other specific mechanism."
+    ],
+    "mechanism": "unknown"
+  },
+  "per_window_concentration_summary": {
+    "llama3_1_8b": "small and spread: 30 of 32 windows slightly worse, 2 slightly better",
+    "qwen2_5_7b": "broadly distributed: all 32 windows worse; the top 3 windows contribute about 12 % of the summed window delta"
+  },
+  "limitations": [
+    "Logical quality (HF transformers, quantize-dequantize of the cache); not a physical serving measurement.",
+    "One benchmark (WikiText-2 continuation perplexity), N = 32 windows, 4096 scored tokens per arm, two models.",
+    "One frozen operating point (K3 / V2 / G32 / R4 / META8g64); no retuning, no ablation under canonical semantics.",
+    "The mechanism of the Qwen degradation is undiagnosed; no causal decomposition of the legacy-vs-canonical difference has been run.",
+    "The bootstrap CI reflects sampling over windows conditional on this run; run-to-run GPU variability is not modelled.",
+    "CPU and CUDA canonical states are not bit-identical (device floating-point semantics); validity rests on same-device conformance with the independent oracle, with no cross-device tolerance.",
+    "NIAH, Passage Retrieval, HotpotQA, Qasper and multilingual PPL have NOT been run under canonical semantics.",
+    "The Llama revision was recovered by content matching of the preserved historical cache; the historical master pointer itself was not recovered."
+  ],
+  "evidence": {
+    "canonical_implementation": "c360697 (benchmarks/mlsys2027/canonical_rabit_quality.py, sha256_lf 195cb489...)",
+    "cpu_canonical_vs_cpu_oracle_parity": "8fa9a9c (276 / 276 cases, bit-exact)",
+    "llama_identity_audit": "3bde966",
+    "llama_cuda_conformance": "ec80638 (32 / 32 layers, every canonical field, bit-exact vs the frozen oracle on CUDA)",
+    "qwen_cuda_conformance": "fd8d275 (28 / 28 layers, every canonical field, bit-exact vs the frozen oracle on CUDA)",
+    "post_failure_validity_gate_amendment": "d7ba819",
+    "final_harness_and_protocol": "05eb29e (protocol sha256_lf cfa990a7...)",
+    "attempt_2_llama_run_pushed_uninspected": "01cced9",
+    "attempt_2_evidence": "10b0973",
+    "attempt_1": "INVALID HARNESS / VALIDITY-GATE FAILURE, NO QUALITY RESULT PRODUCED (5d8d212, 3cba625, 2a5aec0); never pooled"
+  },
+  "full_detail": "continuation_ppl/two_model_attempt_2/summary.json (all 32 paired per-window NLL values per model)"
+}

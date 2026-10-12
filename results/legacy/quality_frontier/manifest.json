@@ -1,0 +1,367 @@
+{
+  "experiment": "Experiment 1 -- BF16/8/4/3/2 quality-compression frontier",
+  "plan_reference": "docs/MLSYS_EXPERIMENT_PLAN.md#experiment-1",
+  "policy": "K3/V2/G32/R4/META8g64 (rabit2), unchanged; frontier adds rabit8/rabit4/rabit3",
+  "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+  "methods": [
+    "bf16",
+    "rabit8",
+    "rabit4",
+    "rabit3",
+    "rabit2"
+  ],
+  "gpu": "NVIDIA H100 80GB HBM3 (Modal)",
+  "kv_memory_label": "LOGICAL fake-quant KV storage (HF-side one-shot quantize/dequantize); NOT physical vLLM allocator capacity",
+  "started_utc": "2026-09-25T15:18:47.391594+00:00",
+  "completed_utc": "2026-09-25T15:29:49.555397+00:00",
+  "status": "passed",
+  "provenance": {
+    "git_branch": "research/mlsys-2027",
+    "git_head": "d14f378d2b9445243fec1b06a4fec51633043f59",
+    "rabit_kv2_sha256": "108ba8afaac862bc4e070d2dc812493aaeae4e458837c4bda2ac703e72a57524",
+    "quality_script_sha256": {
+      "continuation_ppl.py": "4f1385a6dfee1e4f75b93c9e61bd90ff8bf86d6c038a4e4b01b568b61ff793d9",
+      "niah.py": "845e58c018859554400c6c2a239b160320e6fae8fe3089d050a3de53cbdd3c9e",
+      "passage_retrieval.py": "d9835832b586a7a6c09118436694ad028f7f32473573ca952523cf6fa013dbee",
+      "hotpotqa.py": "67c9b5754bced90a0dc0cac5cbacc748566ad28005eefb5d2dd2ae95696d7288",
+      "qasper.py": "62667cda5993b02845139d394e5726b5170da012e993f42756cd4c8b9345b424"
+    },
+    "runner_script": "benchmarks/mlsys2027/run_experiment1_quality_frontier.py",
+    "runner_script_sha256": "831481a0131d2c9d77ac8c44429b379b4bedcdf6daf108f2004cb6e1e07c5283",
+    "protected_paths_baseline_status": "clean"
+  },
+  "regression_tolerances": {
+    "ppl_relative": 0.005,
+    "percentage_absolute_points": 1.0,
+    "avg_kv_mb_relative": 0.001
+  },
+  "runs": [
+    {
+      "name": "continuation_ppl",
+      "purpose": "WikiText-2 teacher-forced continuation PPL, bf16/rabit8/rabit4/rabit3/rabit2 frontier",
+      "script": "benchmarks/quality/continuation_ppl.py",
+      "command": [
+        "C:\\Users\\ryanz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "-m",
+        "modal",
+        "run",
+        "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RABIT-KV-upload\\benchmarks\\quality\\continuation_ppl.py",
+        "--context-tokens",
+        "1024",
+        "--eval-tokens",
+        "128",
+        "--samples",
+        "8",
+        "--methods",
+        "bf16,rabit8,rabit4,rabit3,rabit2"
+      ],
+      "log": "results/mlsys2027/quality_frontier/continuation_ppl.log",
+      "started_utc": "2026-09-25T15:18:47.392341+00:00",
+      "completed_utc": "2026-09-25T15:19:52.325410+00:00",
+      "returncode": 0,
+      "status": "passed",
+      "regression_check": {
+        "benchmark": "continuation_ppl",
+        "checks": [
+          {
+            "metric": "bf16.ppl",
+            "canonical": 8.502,
+            "observed": 8.502,
+            "abs_diff": 0.0,
+            "tolerance": 0.042510000000000006,
+            "within_tolerance": true
+          },
+          {
+            "metric": "bf16.avg_kv_mb",
+            "canonical": 128.0,
+            "observed": 128.0,
+            "abs_diff": 0.0,
+            "tolerance": 0.128,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.ppl",
+            "canonical": 8.6317,
+            "observed": 8.6317,
+            "abs_diff": 0.0,
+            "tolerance": 0.0431585,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.avg_kv_mb",
+            "canonical": 24.71,
+            "observed": 24.71,
+            "abs_diff": 0.0,
+            "tolerance": 0.024710000000000003,
+            "within_tolerance": true
+          }
+        ],
+        "all_within_tolerance": true
+      }
+    },
+    {
+      "name": "niah",
+      "purpose": "Needle-in-a-Haystack: 4K/8K/16K x five depths, full frontier",
+      "script": "benchmarks/quality/niah.py",
+      "command": [
+        "C:\\Users\\ryanz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "-m",
+        "modal",
+        "run",
+        "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RABIT-KV-upload\\benchmarks\\quality\\niah.py",
+        "--context-lengths",
+        "4096,8192,16384",
+        "--needle-depths",
+        "0.1,0.25,0.5,0.75,0.9",
+        "--max-new-tokens",
+        "16",
+        "--methods",
+        "bf16,rabit8,rabit4,rabit3,rabit2"
+      ],
+      "log": "results/mlsys2027/quality_frontier/niah.log",
+      "started_utc": "2026-09-25T15:19:52.334386+00:00",
+      "completed_utc": "2026-09-25T15:21:46.434661+00:00",
+      "returncode": 0,
+      "status": "passed",
+      "regression_check": {
+        "benchmark": "niah",
+        "checks": [
+          {
+            "metric": "bf16.accuracy_pct",
+            "canonical": 100.0,
+            "observed": 100.0,
+            "abs_diff": 0.0,
+            "tolerance": 1.0,
+            "within_tolerance": true
+          },
+          {
+            "metric": "bf16.avg_kv_mb",
+            "canonical": 1194.542,
+            "observed": 1194.542,
+            "abs_diff": 0.0,
+            "tolerance": 1.194542,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.accuracy_pct",
+            "canonical": 100.0,
+            "observed": 100.0,
+            "abs_diff": 0.0,
+            "tolerance": 1.0,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.avg_kv_mb",
+            "canonical": 226.786,
+            "observed": 226.786,
+            "abs_diff": 0.0,
+            "tolerance": 0.22678600000000002,
+            "within_tolerance": true
+          }
+        ],
+        "all_within_tolerance": true
+      }
+    },
+    {
+      "name": "passage_retrieval",
+      "purpose": "LongBench passage_retrieval_en, full 10-sample slice, full frontier",
+      "script": "benchmarks/quality/passage_retrieval.py",
+      "command": [
+        "C:\\Users\\ryanz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "-m",
+        "modal",
+        "run",
+        "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RABIT-KV-upload\\benchmarks\\quality\\passage_retrieval.py",
+        "--sample-start",
+        "0",
+        "--samples",
+        "10",
+        "--max-input-tokens",
+        "16384",
+        "--max-new-tokens",
+        "32",
+        "--methods",
+        "bf16,rabit8,rabit4,rabit3,rabit2"
+      ],
+      "log": "results/mlsys2027/quality_frontier/passage_retrieval.log",
+      "started_utc": "2026-09-25T15:21:46.436663+00:00",
+      "completed_utc": "2026-09-25T15:23:25.449509+00:00",
+      "returncode": 0,
+      "status": "passed",
+      "regression_check": {
+        "benchmark": "passage_retrieval",
+        "checks": [
+          {
+            "metric": "bf16.accuracy_pct",
+            "canonical": 100.0,
+            "observed": 100.0,
+            "abs_diff": 0.0,
+            "tolerance": 1.0,
+            "within_tolerance": true
+          },
+          {
+            "metric": "bf16.avg_kv_mb",
+            "canonical": 1517.375,
+            "observed": 1517.375,
+            "abs_diff": 0.0,
+            "tolerance": 1.5173750000000001,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.accuracy_pct",
+            "canonical": 100.0,
+            "observed": 100.0,
+            "abs_diff": 0.0,
+            "tolerance": 1.0,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.avg_kv_mb",
+            "canonical": 288.09,
+            "observed": 288.09,
+            "abs_diff": 0.0,
+            "tolerance": 0.28808999999999996,
+            "within_tolerance": true
+          }
+        ],
+        "all_within_tolerance": true
+      }
+    },
+    {
+      "name": "hotpotqa",
+      "purpose": "LongBench-E HotpotQA 8K+, full 20-sample slice, full frontier",
+      "script": "benchmarks/quality/hotpotqa.py",
+      "command": [
+        "C:\\Users\\ryanz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "-m",
+        "modal",
+        "run",
+        "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RABIT-KV-upload\\benchmarks\\quality\\hotpotqa.py",
+        "--sample-start",
+        "0",
+        "--samples",
+        "20",
+        "--length-bucket",
+        "8k+",
+        "--max-input-tokens",
+        "16384",
+        "--max-new-tokens",
+        "32",
+        "--methods",
+        "bf16,rabit8,rabit4,rabit3,rabit2"
+      ],
+      "log": "results/mlsys2027/quality_frontier/hotpotqa.log",
+      "started_utc": "2026-09-25T15:23:25.451328+00:00",
+      "completed_utc": "2026-09-25T15:26:14.948147+00:00",
+      "returncode": 0,
+      "status": "passed",
+      "regression_check": {
+        "benchmark": "hotpotqa",
+        "checks": [
+          {
+            "metric": "bf16.f1_pct",
+            "canonical": 60.6,
+            "observed": 60.7,
+            "abs_diff": 0.10000000000000142,
+            "tolerance": 1.0,
+            "within_tolerance": true
+          },
+          {
+            "metric": "bf16.avg_kv_mb",
+            "canonical": 1896.106,
+            "observed": 1896.106,
+            "abs_diff": 0.0,
+            "tolerance": 1.896106,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.f1_pct",
+            "canonical": 55.2,
+            "observed": 55.2,
+            "abs_diff": 0.0,
+            "tolerance": 1.0,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.avg_kv_mb",
+            "canonical": 359.85,
+            "observed": 359.85,
+            "abs_diff": 0.0,
+            "tolerance": 0.35985,
+            "within_tolerance": true
+          }
+        ],
+        "all_within_tolerance": true
+      }
+    },
+    {
+      "name": "qasper",
+      "purpose": "LongBench-E Qasper 8K+, full 24-example bucket, full frontier",
+      "script": "benchmarks/quality/qasper.py",
+      "command": [
+        "C:\\Users\\ryanz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "-m",
+        "modal",
+        "run",
+        "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RABIT-KV-upload\\benchmarks\\quality\\qasper.py",
+        "--sample-start",
+        "0",
+        "--samples",
+        "24",
+        "--length-bucket",
+        "8k+",
+        "--max-input-tokens",
+        "16384",
+        "--max-new-tokens",
+        "32",
+        "--methods",
+        "bf16,rabit8,rabit4,rabit3,rabit2"
+      ],
+      "log": "results/mlsys2027/quality_frontier/qasper.log",
+      "started_utc": "2026-09-25T15:26:14.949802+00:00",
+      "completed_utc": "2026-09-25T15:29:49.456815+00:00",
+      "returncode": 0,
+      "status": "passed",
+      "regression_check": {
+        "benchmark": "qasper",
+        "checks": [
+          {
+            "metric": "bf16.f1_pct",
+            "canonical": 35.9,
+            "observed": 35.5,
+            "abs_diff": 0.3999999999999986,
+            "tolerance": 1.0,
+            "within_tolerance": true
+          },
+          {
+            "metric": "bf16.avg_kv_mb",
+            "canonical": 1783.531,
+            "observed": 1783.531,
+            "abs_diff": 0.0,
+            "tolerance": 1.783531,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.f1_pct",
+            "canonical": 35.6,
+            "observed": 34.8,
+            "abs_diff": 0.8000000000000043,
+            "tolerance": 1.0,
+            "within_tolerance": true
+          },
+          {
+            "metric": "rabit2.avg_kv_mb",
+            "canonical": 338.428,
+            "observed": 338.428,
+            "abs_diff": 0.0,
+            "tolerance": 0.338428,
+            "within_tolerance": true
+          }
+        ],
+        "all_within_tolerance": true
+      }
+    }
+  ],
+  "note": "Reproduction/extension run for the frozen RABIT-KV operating point plus the already-supported 8/4/3-bit frontier. Canonical committed results (results/quality/, results/performance/, results/summary.json) remain unchanged.",
+  "protected_paths_post_run_status": "clean"
+}

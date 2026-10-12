@@ -1,0 +1,85 @@
+{
+  "kind": "canonical-quality-v2 CPU parity tests (correctness testing, not a quality experiment)",
+  "source_commit": "ae36913754e691d3d2dc39e166c55b63fdc864bf",
+  "started_utc": "2026-10-01T00:52:35.992969+00:00",
+  "attempt": 2,
+  "preflight": {
+    "clean_tree": true,
+    "attempt1_archive_unchanged": true,
+    "semantic_audit_unchanged": true,
+    "implementation_unchanged_since_c360697": true,
+    "offline_harness_tests_pass": true,
+    "attempt2_archive_unchanged": true,
+    "attempt3_not_already_run": true
+  },
+  "file_sha256": {
+    "benchmarks/mlsys2027/canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+    "benchmarks/mlsys2027/canonical_quality_parity_tests.py": "25068361f21128ff545041e00827b33da5061bffeea3f145ede9d621613f3ed3",
+    "benchmarks/mlsys2027/canonical_quality_parity_modal.py": "0036515816e4b370fd9f2e9a9ab06c2b15f52458ba8cbb90418b1a75d259fa8f",
+    "benchmarks/mlsys2027/run_canonical_quality_parity.py": "f76693ac59ac44fec4e699cb25971441ef1f9014a077a8bc7254b4833ada9a6d",
+    "vllm-kvquant/vllm/v1/attention/ops/kvquant_k3.py": "c2a48e97d9ca71fe55eb400938c3b3e665422b1534c4fb8fbe6ef02f2e60cc0f",
+    "benchmarks/quality/hotpotqa.py": "67c9b5754bced90a0dc0cac5cbacc748566ad28005eefb5d2dd2ae95696d7288"
+  },
+  "wall_clock_s": 1200,
+  "completed_utc": "2026-10-01T00:53:24.510890+00:00",
+  "elapsed_s": 47.2,
+  "modal_returncode": 0,
+  "timed_out": false,
+  "app_ids_new": [
+    "ap-HbcE93fgye1sizoxfRwvuy"
+  ],
+  "cleanup": {
+    "new_app_ids": [
+      "ap-HbcE93fgye1sizoxfRwvuy"
+    ],
+    "first_observed_states": {
+      "ap-HbcE93fgye1sizoxfRwvuy": {
+        "App ID": "ap-HbcE93fgye1sizoxfRwvuy",
+        "Description": "rabit-kv-canonical-quality-v2-parity",
+        "State": "stopped",
+        "Tasks": "1",
+        "Created at": "2026-09-30 20:52:38-04:00",
+        "Stopped at": "2026-09-30 20:53:17-04:00"
+      }
+    },
+    "final_states": {
+      "ap-HbcE93fgye1sizoxfRwvuy": {
+        "App ID": "ap-HbcE93fgye1sizoxfRwvuy",
+        "Description": "rabit-kv-canonical-quality-v2-parity",
+        "State": "stopped",
+        "Tasks": "0",
+        "Created at": "2026-09-30 20:52:38-04:00",
+        "Stopped at": "2026-09-30 20:53:17-04:00"
+      }
+    },
+    "polls": 2,
+    "elapsed_s": 5.5,
+    "stopped_again_after_timeout": [],
+    "verified": true
+  },
+  "cleanup_verified": true,
+  "cases_planned_per_geometry": {
+    "T1_full_state": 52,
+    "T2_sequential_aging": 28,
+    "T3_hf_cache": 6,
+    "T4_old_harness": 52
+  },
+  "cases_executed": {
+    "qwen2_5_7b": {
+      "T1_full_state": 52,
+      "T2_sequential_aging": 28,
+      "T3_hf_cache": 6,
+      "T4_old_harness": 52
+    },
+    "llama3_1_8b": {
+      "T1_full_state": 52,
+      "T2_sequential_aging": 28,
+      "T3_hf_cache": 6,
+      "T4_old_harness": 52
+    }
+  },
+  "all_planned_cases_ran": true,
+  "result_bytes": 11264,
+  "result_sha256": "98d3a5d9a16f83256a31d01556c9ecf26233c418f1c08e0bb971f1cb1d7f7d54",
+  "passed": true
+}

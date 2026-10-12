@@ -1,0 +1,52 @@
+{
+  "measurement_commit": "0a1a6b4d10466f07775a59b5970f812a4d0283c8",
+  "modal_app": "ap-5pvRrz6NUTtnh2gZQMyS1M",
+  "function_call_id": "fc-01M3M67DNZZH5QZYT5DMBVX37K",
+  "run_id": "exp6-L8192-t1-20260928T141726Z-0a1a6b4",
+  "trial": 1,
+  "analysis_validation_fix_commit": "852a72f3632d9d8033237e8b3056a27164346e8d",
+  "reparsed_from_existing_raw": true,
+  "h100_rerun": false,
+  "raw_unchanged": true,
+  "raw": {
+    "file": "remote_session.log",
+    "sha256": "5a42a5294dbb612347fd72d7dd43710d4dc3498819f27e61b29c6822fd27ee1c",
+    "bytes": 3102296,
+    "remote_DONE.json_sha256": "c38c35c09dbc5eeba144b9f53294f959015fbe082b1f5eab7c65e1b7531747d2"
+  },
+  "pre_fix": {
+    "summary": {
+      "file": "summary_pre_capacity_validation_fix.json",
+      "sha256": "6c9331b38b06c32db92a7c38a325fde9d9896981a93bfe68a2e100ba3858054a"
+    },
+    "integrity": {
+      "file": "integrity_check_pre_capacity_validation_fix.json",
+      "sha256": "a9fb47bc2562e96d886d2820d40fefeb28ce2001c21623b7eb9b62432af6479c",
+      "counts": {
+        "passed": 137,
+        "failed": 1,
+        "not_run": 0,
+        "not_evaluated": 0
+      }
+    }
+  },
+  "integrity_counts": {
+    "passed": 138,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "fix_diff": {
+    "capacity_bound_points": [
+      "t1_bf16_L8192_c64"
+    ],
+    "flipped_checks": [
+      "t1_bf16_L8192_c64: shadow conditioning reached target overlapping in-flight concurrency 64"
+    ],
+    "problems": []
+  },
+  "all_metric_values_identical": true,
+  "summary_sha256": "b00d9cfb06534f34479cabb5f511e5bfb97a4b3b1ad2aeb1a453a3890106b104",
+  "integrity_check_sha256": "66e29e1daa28a50d9c0cf3cb53bd3165626f034acc50f17dec10d771e0e7aefb",
+  "reparsed_utc": "2026-09-28T17:25:12.595411+00:00"
+}

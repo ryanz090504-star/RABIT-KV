@@ -1,0 +1,145 @@
+{
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "capacity_label": "OBSERVED PHYSICAL vLLM allocator KV capacity (num_gpu_blocks x block_size) from the live engine",
+  "observed_capacity": {
+    "bf16": {
+      "observed_capacity_tokens": 902656,
+      "num_gpu_blocks": 28208,
+      "reported_kv_cache_gib": 48.21,
+      "implied_bytes_per_token_derived": 57347.53143505388
+    },
+    "rabit": {
+      "observed_capacity_tokens": 4764640,
+      "num_gpu_blocks": 148895,
+      "reported_kv_cache_gib": 48.21,
+      "implied_bytes_per_token_derived": 10864.429072299272
+    }
+  },
+  "capacity_ratio_rabit_over_bf16": 5.27846710153148,
+  "theoretical_bytes_per_token_SEPARATE_FROM_OBSERVED": {
+    "bf16": {
+      "bytes": 57344,
+      "formula": "28 layers x (K,V) x 4 heads x 128 x 2 B (BF16)"
+    },
+    "rabit": {
+      "bytes": 10864,
+      "formula": "28 layers x 388 B (RABIT physical page 12,416 B per 32-token block per layer: K3 payload 6,144 + V2 payload 4,096 + META8g64 K min/scale 2 x 544 + V min/scale 2 x 544)"
+    }
+  },
+  "latency_primary_per_leg": {
+    "bf16": {
+      "A1": {
+        "n": 30,
+        "median_tpot_ms": 27.24633609677455,
+        "p90_tpot_ms": 28.14485400000055,
+        "median_ttft_ms": 59.97192859649658,
+        "median_wall_ms": 903.9324099999817
+      },
+      "A2": {
+        "n": 30,
+        "median_tpot_ms": 26.66586229032426,
+        "p90_tpot_ms": 27.584243225808148,
+        "median_ttft_ms": 56.57696723937988,
+        "median_wall_ms": 882.857857499971
+      }
+    },
+    "rabit": {
+      "B1": {
+        "n": 30,
+        "median_tpot_ms": 48.61746277419346,
+        "p90_tpot_ms": 49.258228645161616,
+        "median_ttft_ms": 161.54348850250244,
+        "median_wall_ms": 1669.391608500007
+      },
+      "B2": {
+        "n": 30,
+        "median_tpot_ms": 48.7838424677402,
+        "p90_tpot_ms": 50.0414069354835,
+        "median_ttft_ms": 161.70215606689453,
+        "median_wall_ms": 1674.016255500021
+      }
+    }
+  },
+  "latency_primary_cross_leg": {
+    "bf16": {
+      "median_of_leg_median_tpot_ms": 26.956099193549406,
+      "median_of_leg_p90_tpot_ms": 27.86454861290435,
+      "median_of_leg_median_ttft_ms": 58.27444791793823,
+      "median_of_leg_median_wall_ms": 893.3951337499764
+    },
+    "rabit": {
+      "median_of_leg_median_tpot_ms": 48.700652620966835,
+      "median_of_leg_p90_tpot_ms": 49.64981779032256,
+      "median_of_leg_median_ttft_ms": 161.6228222846985,
+      "median_of_leg_median_wall_ms": 1671.703932000014
+    }
+  },
+  "latency_secondary_pooled_within_session_descriptive": {
+    "bf16": {
+      "n": 60,
+      "pooled_median_tpot_ms": 27.037375935484242,
+      "pooled_p90_tpot_ms": 27.809698645160463
+    },
+    "rabit": {
+      "n": 60,
+      "pooled_median_tpot_ms": 48.72447869354896,
+      "pooled_p90_tpot_ms": 49.62354370967836
+    }
+  },
+  "leg_to_leg_drift": {
+    "bf16": {
+      "legs": [
+        "A1",
+        "A2"
+      ],
+      "tpot_abs_diff_ms": -0.5804738064502892,
+      "tpot_pct_diff": -2.1304655583361365,
+      "p90_tpot_abs_diff_ms": -0.5606107741924014,
+      "ttft_abs_diff_ms": -3.394961357116699,
+      "wall_abs_diff_ms": -21.074552500010668
+    },
+    "rabit": {
+      "legs": [
+        "B1",
+        "B2"
+      ],
+      "tpot_abs_diff_ms": 0.16637969354673743,
+      "tpot_pct_diff": 0.3422220824634392,
+      "p90_tpot_abs_diff_ms": 0.7831782903218851,
+      "ttft_abs_diff_ms": 0.15866756439208984,
+      "wall_abs_diff_ms": 4.624647000014193
+    }
+  },
+  "rabit_vs_bf16": {
+    "basis": "cross-leg summaries (median of the two leg-level values per condition)",
+    "tpot_abs_diff_ms": 21.74455342741743,
+    "tpot_pct_diff": 80.66654329800396,
+    "p90_tpot_abs_diff_ms": 21.785269177418208,
+    "ttft_abs_diff_ms": 103.34837436676025,
+    "wall_abs_diff_ms": 778.3087982500376,
+    "capacity_ratio": 5.27846710153148,
+    "rabit_serving_path": "exact fallback paths (see claim boundary)"
+  },
+  "jit_warnings_in_measured_samples": {
+    "A1": 0,
+    "B1": 0,
+    "B2": 0,
+    "A2": 0
+  },
+  "statistics_note": "descriptive only: two fresh-engine legs per condition; no significance tests or CIs",
+  "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+  "model_manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+  "claim_boundary": "Generalization of the FROZEN RABIT policy (K3/V2/G32/R4/META8g64, no retuning) to ONE additional model, Qwen2.5-7B-Instruct (GQA 28:4, head_dim 128). Serving: observed physical allocator capacity and single-request latency in one H100 session (default V2 runner, eager, 2048-token prompt, 32 output tokens); no throughput claim. At this geometry the frozen RABIT source serves through its exact FALLBACK paths (GQA ratio 7 is not a multiple of 4; the final fast append and the compiled V2 quantizer require 8 KV heads x head_dim 128), so RABIT latency on Model B measures those untuned paths -- it is NOT a measurement of how the Llama-tuned kernels transfer. Quality: LOGICAL fake-quant evaluation (HF transformers), separate from physical serving; neither validates the other. Cross-model comparisons with Exp12 / Exp13 (Llama-3.1-8B) are descriptive context from different sessions, never pooled. No universality claim beyond these two models.",
+  "gpu": [
+    {
+      "clocks.max.sm": "1980",
+      "driver_version": "580.95.05",
+      "index": "0",
+      "memory.total": "81559",
+      "memory.used": "4",
+      "name": "NVIDIA H100 80GB HBM3",
+      "power.limit": "700.00",
+      "uuid": "GPU-aab95c07-b09a-a62a-b352-ef5a6c586dee"
+    }
+  ]
+}

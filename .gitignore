@@ -17,3 +17,6 @@ dist/
 # Reproduction outputs
 results/reproduced/
 results/performance/*_reproduced.log
+
+# Mapped legacy reproduction outputs; original ignored outputs remain ignored.
+results/legacy/performance/*_reproduced.log

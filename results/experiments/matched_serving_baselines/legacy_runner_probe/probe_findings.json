@@ -1,0 +1,27 @@
+{
+  "label": "NON-EVIDENCE FEASIBILITY PROBE",
+  "probe_record": "probe_record.json",
+  "modal_app_id": "ap-XhXHURi21ylxNI9CxTu4aS",
+  "harness_commit": "426fe3e47ca11acb4a0488ac07ed16d322b9b104",
+  "gpu": "NVIDIA H100 80GB HBM3 (GPU-2cc05cab-c641-5150-705d-7a5dc5f24b0f)",
+  "runner_setting": "VLLM_USE_V2_MODEL_RUNNER=0 for every process; legacy runner confirmed (vllm/v1/worker/gpu_model_runner.py in the log and traceback; no 'Using V2 Model Runner' line)",
+  "phases_run": [{"phase": "turboquant_k3v4_nc", "returncode": 2}],
+  "phases_not_run_by_decision_rule": ["rabit_gate", "rabit_kv2", "bfloat16", "fp8_e4m3"],
+  "turboquant": {
+    "startup": "FAILED during KV-cache tensor initialization (after allocator sizing)",
+    "requested_block_size": 32,
+    "effective_block_size": "not observable (engine failed before the effective config could be read); no block-size bump line in the log",
+    "allocator_planning_from_log": {"available_kv_cache_memory": "47.98 GiB", "gpu_kv_cache_size_tokens": 1203200,
+                                    "implied_bytes_per_token": 42818,
+                                    "derived_packed_footprint_bytes_per_token": 42816,
+                                    "note": "planning figures only; identical to the V2-runner probe; tensors never created"},
+    "backends_selected": ["FLASH_ATTN (FlashAttention version 2, forced) for the BF16 boundary layers",
+                          "TURBOQUANT for the quantized layers"],
+    "exception": "ValueError: Unknown TurboQuant cache dtype: 'auto'. Valid presets: turboquant_k8v4, turboquant_4bit_nc, turboquant_k3v4_nc, turboquant_3bit_nc",
+    "failure_location": "vllm/model_executor/layers/quantization/turboquant/config.py:222 from_cache_dtype <- vllm/v1/attention/backends/turboquant_attn.py:161 get_kv_cache_shape <- vllm/v1/worker/gpu_model_runner.py:7200 _reshape_kv_cache_tensors <- :7355 initialize_kv_cache_tensors <- :7438 initialize_kv_cache",
+    "root_cause": "the legacy runner uses the SAME rule as the V2 runner: layer_cache_dtype_str = 'auto' if kv_cache_spec.kv_quant_mode == KVQuantMode.NONE else cache_dtype (gpu_model_runner.py:7195-7199). get_kv_quant_mode() has no TurboQuant mode, so TQFullAttentionSpec carries KVQuantMode.NONE and the TurboQuant layers themselves receive 'auto'",
+    "physical_turboquant_cache_confirmed": "no -- the cache tensors were never created"
+  },
+  "conclusion": "TurboQuant turboquant_k3v4_nc cannot initialize its KV cache in this vLLM fork snapshot under EITHER model runner (V2: first probe, 55311c0; legacy: this probe). Per the pre-registered decision rule, the matched Exp13 TurboQuant comparison is INFEASIBLE under a fully matched configuration without source modification. RABIT / BF16 / FP8 legacy-runner startup was not probed (the rule stops after the TurboQuant failure).",
+  "no_actions_taken": ["no retry", "no alternate block size", "no model-runner or preset change", "no vLLM / TurboQuant / RABIT modification", "no latency measured"]
+}

@@ -1,0 +1,1266 @@
+{
+  "kind": "canonical-quality-v2 continuation PPL: registered two-model Attempt 2 -- summary (logical quality; NOT physical serving evidence)",
+  "attempt": 2,
+  "two_model_record": {
+    "kind": "canonical-quality-v2 continuation PPL: ONE registered two-model validation attempt",
+    "attempt": 2,
+    "order": [
+      "llama3_1_8b",
+      "qwen2_5_7b"
+    ],
+    "started_utc": "2026-10-03T16:30:06.511976+00:00",
+    "completed_utc": "2026-10-03T16:42:38.719654+00:00",
+    "runner_exit_codes": {
+      "llama3_1_8b": 0,
+      "qwen2_5_7b": 0
+    },
+    "models_not_run": [],
+    "rule": "one registered attempt = both models; valid only if BOTH runs pass every validity gate; if either fails the whole attempt is invalid and archived; neither result is accepted evidence on its own; no selective rerun",
+    "valid": true,
+    "status": "valid (awaiting review; not accepted evidence until reviewed)"
+  },
+  "models": {
+    "llama3_1_8b": {
+      "valid": true,
+      "gates": {
+        "hardware": true,
+        "model_snapshot": true,
+        "dataset": true,
+        "shipped_files": true,
+        "geometry_and_policy": true,
+        "runtime_environment": true,
+        "structure": true,
+        "legacy_unreachable": true,
+        "bf16_control_reproduces_legacy": true,
+        "bf16_stepwise_matches_batched": true
+      },
+      "source_commit": "05eb29e6dcb99dd256ee8a5bb85396bbd01c05f6",
+      "started_utc": "2026-10-03T16:30:09.062394+00:00",
+      "completed_utc": "2026-10-03T16:36:32.159881+00:00",
+      "app_ids": [
+        "ap-HL07VGNI2BS7tILFTbKcPA"
+      ],
+      "app_final_states": {
+        "ap-HL07VGNI2BS7tILFTbKcPA": {
+          "App ID": "ap-HL07VGNI2BS7tILFTbKcPA",
+          "Description": "rabit-kv-canonical-quality-v2-ppl",
+          "State": "stopped",
+          "Tasks": "0",
+          "Created at": "2026-10-03 12:30:11-04:00",
+          "Stopped at": "2026-10-03 12:36:29-04:00"
+        }
+      },
+      "cleanup_verified": true,
+      "modal_returncode": 0,
+      "result_sha256": "e8dbf17c9d8059a6d05087a811d6b1b30189e0fb62756e2bc89beb3914fd9c51",
+      "result_sha256_matches_file": true,
+      "hardware": [
+        {
+          "name": "NVIDIA H100 80GB HBM3",
+          "memory.total": "81559",
+          "memory.used": "4",
+          "driver_version": "580.95.05"
+        }
+      ],
+      "environment": {
+        "python": "3.11.12",
+        "torch": "2.11.0+cu130",
+        "torch_cuda": "13.0",
+        "cuda_device": "NVIDIA H100 80GB HBM3",
+        "packages": {
+          "transformers": "4.48.2",
+          "accelerate": "1.15.0",
+          "modelscope": "1.40.1",
+          "requests": "2.34.2",
+          "sentencepiece": "0.2.2",
+          "tokenizers": "0.21.4",
+          "safetensors": "0.8.0"
+        }
+      },
+      "runtime_environment": {
+        "runtime": {
+          "python_minor": "3.11",
+          "torch": "2.11.0+cu130",
+          "torch_cuda": "13.0",
+          "cuda_device": "NVIDIA H100 80GB HBM3",
+          "transformers": "4.48.2"
+        },
+        "validated": {
+          "python_minor": "3.11",
+          "torch": "2.11.0+cu130",
+          "torch_cuda": "13.0",
+          "cuda_device": "NVIDIA H100 80GB HBM3",
+          "transformers": "4.48.2"
+        },
+        "passed": true
+      },
+      "model": {
+        "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+        "model_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+        "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89",
+        "files_checked": 18,
+        "passed": true,
+        "dir": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c"
+      },
+      "dataset": {
+        "url": "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt",
+        "wikitext_sha256": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0",
+        "token_pool_sha256": "88dadfe6521c338ca71b1edfe5e85f08b8e2466e0884f8003b5b34a7ee3c849f",
+        "pool_tokens": 36864,
+        "samples": 32,
+        "context_tokens": 1024,
+        "eval_tokens": 128,
+        "add_special_tokens": false
+      },
+      "geometry": {
+        "layers": 32,
+        "kv_heads": 8,
+        "attention_heads": 32,
+        "head_dim": 128,
+        "architecture": "LlamaForCausalLM"
+      },
+      "policy": {
+        "k_bits": 3,
+        "v_bits": 2,
+        "group_size": 32,
+        "residual_tokens": 4,
+        "metadata_bits": 8,
+        "metadata_group_size": 64
+      },
+      "canonical_rabit_quality_sha256_lf": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+      "structure": {
+        "windows": {
+          "bf16_batched": 32,
+          "bf16": 32,
+          "rabit": 32
+        },
+        "tokens_per_window": [
+          128
+        ],
+        "token_nll_values_per_arm": {
+          "bf16_batched": 4096,
+          "bf16": 4096,
+          "rabit": 4096
+        },
+        "all_finite": true,
+        "paired_inputs": "both stepwise arms score the same 32 (context, continuation) windows of the pinned token pool (token_pool_sha256 above) with the same loop; first token from the prefill logit",
+        "first_token_nll_identical_in_bf16_and_rabit": true,
+        "rabit_cache_class": [
+          "CanonicalRabitCache"
+        ],
+        "decode_forwards": [
+          127
+        ]
+      },
+      "scored_tokens_per_arm": 4096,
+      "aggregate": {
+        "bf16_batched": {
+          "loss_sum": 8260.561813354492,
+          "tokens": 4096,
+          "mean_nll": 2.016738723963499,
+          "ppl": 7.513780420171705
+        },
+        "bf16": {
+          "loss_sum": 8261.442337036133,
+          "tokens": 4096,
+          "mean_nll": 2.016953695565462,
+          "ppl": 7.515395843214247
+        },
+        "rabit": {
+          "loss_sum": 8324.785415649414,
+          "tokens": 4096,
+          "mean_nll": 2.0324183143675327,
+          "ppl": 7.6325218956943175
+        }
+      },
+      "bf16_ppl": 7.515395843214247,
+      "rabit_ppl": 7.6325218956943175,
+      "delta_pct": 1.558481481528684,
+      "delta_pct_ci95_paired_bootstrap": [
+        1.1169214551782547,
+        2.0482972302842573
+      ],
+      "aggregate_nll_delta": 0.015464618802070618,
+      "per_window": [
+        {
+          "window": 1,
+          "bf16_nll": 1.1877086162567139,
+          "rabit_nll": 1.2137267589569092,
+          "delta_nll": 0.026018142700195312,
+          "bf16_ppl": 3.2795578656648505,
+          "rabit_ppl": 3.3660055982964563
+        },
+        {
+          "window": 2,
+          "bf16_nll": 1.869348406791687,
+          "rabit_nll": 1.905064344406128,
+          "delta_nll": 0.03571593761444092,
+          "bf16_ppl": 6.484070046500333,
+          "rabit_ppl": 6.719839997838433
+        },
+        {
+          "window": 3,
+          "bf16_nll": 2.3599534034729004,
+          "rabit_nll": 2.369804620742798,
+          "delta_nll": 0.009851217269897461,
+          "bf16_ppl": 10.590457962374968,
+          "rabit_ppl": 10.695302439715354
+        },
+        {
+          "window": 4,
+          "bf16_nll": 2.754848003387451,
+          "rabit_nll": 2.7584002017974854,
+          "delta_nll": 0.0035521984100341797,
+          "bf16_ppl": 15.718651539432798,
+          "rabit_ppl": 15.774586595832028
+        },
+        {
+          "window": 5,
+          "bf16_nll": 2.1031880378723145,
+          "rabit_nll": 2.1148219108581543,
+          "delta_nll": 0.011633872985839844,
+          "bf16_ppl": 8.192245514438694,
+          "rabit_ppl": 8.288109612351262
+        },
+        {
+          "window": 6,
+          "bf16_nll": 2.3558549880981445,
+          "rabit_nll": 2.395205497741699,
+          "delta_nll": 0.03935050964355469,
+          "bf16_ppl": 10.547142689257484,
+          "rabit_ppl": 10.970452230617717
+        },
+        {
+          "window": 7,
+          "bf16_nll": 2.1105542182922363,
+          "rabit_nll": 2.1240344047546387,
+          "delta_nll": 0.013480186462402344,
+          "bf16_ppl": 8.252813877815731,
+          "rabit_ppl": 8.364816560203492
+        },
+        {
+          "window": 8,
+          "bf16_nll": 2.3786561489105225,
+          "rabit_nll": 2.3959879875183105,
+          "delta_nll": 0.017331838607788086,
+          "bf16_ppl": 10.790392435557097,
+          "rabit_ppl": 10.979039856759632
+        },
+        {
+          "window": 9,
+          "bf16_nll": 1.890798807144165,
+          "rabit_nll": 1.9029362201690674,
+          "delta_nll": 0.012137413024902344,
+          "bf16_ppl": 6.624658392483724,
+          "rabit_ppl": 6.705554549465785
+        },
+        {
+          "window": 10,
+          "bf16_nll": 1.6623202562332153,
+          "rabit_nll": 1.7015602588653564,
+          "delta_nll": 0.03924000263214111,
+          "bf16_ppl": 5.271527961155748,
+          "rabit_ppl": 5.482494833050191
+        },
+        {
+          "window": 11,
+          "bf16_nll": 1.9352304935455322,
+          "rabit_nll": 1.9289302825927734,
+          "delta_nll": -0.006300210952758789,
+          "bf16_ppl": 6.925640186783949,
+          "rabit_ppl": 6.882144352960642
+        },
+        {
+          "window": 12,
+          "bf16_nll": 1.4398657083511353,
+          "rabit_nll": 1.4504890441894531,
+          "delta_nll": 0.010623335838317871,
+          "bf16_ppl": 4.220129050852764,
+          "rabit_ppl": 4.265199876426775
+        },
+        {
+          "window": 13,
+          "bf16_nll": 1.9006733894348145,
+          "rabit_nll": 1.907555103302002,
+          "delta_nll": 0.0068817138671875,
+          "bf16_ppl": 6.6903981691698515,
+          "rabit_ppl": 6.736598360948992
+        },
+        {
+          "window": 14,
+          "bf16_nll": 1.5663087368011475,
+          "rabit_nll": 1.5845324993133545,
+          "delta_nll": 0.01822376251220703,
+          "bf16_ppl": 4.788938296242907,
+          "rabit_ppl": 4.8770108395612315
+        },
+        {
+          "window": 15,
+          "bf16_nll": 1.7515242099761963,
+          "rabit_nll": 1.755880355834961,
+          "delta_nll": 0.0043561458587646484,
+          "bf16_ppl": 5.763380586803733,
+          "rabit_ppl": 5.788541475742746
+        },
+        {
+          "window": 16,
+          "bf16_nll": 2.5858817100524902,
+          "rabit_nll": 2.593891143798828,
+          "delta_nll": 0.00800943374633789,
+          "bf16_ppl": 13.27498862232745,
+          "rabit_ppl": 13.381740705362159
+        },
+        {
+          "window": 17,
+          "bf16_nll": 1.8663026094436646,
+          "rabit_nll": 1.8778977394104004,
+          "delta_nll": 0.01159512996673584,
+          "bf16_ppl": 6.464350928611121,
+          "rabit_ppl": 6.539742158658924
+        },
+        {
+          "window": 18,
+          "bf16_nll": 1.7642450332641602,
+          "rabit_nll": 1.7793735265731812,
+          "delta_nll": 0.015128493309020996,
+          "bf16_ppl": 5.8371638296262045,
+          "rabit_ppl": 5.9261426845193625
+        },
+        {
+          "window": 19,
+          "bf16_nll": 1.3913909196853638,
+          "rabit_nll": 1.4184542894363403,
+          "delta_nll": 0.027063369750976562,
+          "bf16_ppl": 4.020438272447977,
+          "rabit_ppl": 4.1307305891861406
+        },
+        {
+          "window": 20,
+          "bf16_nll": 1.377164602279663,
+          "rabit_nll": 1.3794212341308594,
+          "delta_nll": 0.002256631851196289,
+          "bf16_ppl": 3.963647163462419,
+          "rabit_ppl": 3.9726017557074087
+        },
+        {
+          "window": 21,
+          "bf16_nll": 2.3661932945251465,
+          "rabit_nll": 2.3664534091949463,
+          "delta_nll": 0.0002601146697998047,
+          "bf16_ppl": 10.656747872070914,
+          "rabit_ppl": 10.659520209071928
+        },
+        {
+          "window": 22,
+          "bf16_nll": 1.675027847290039,
+          "rabit_nll": 1.6758490800857544,
+          "delta_nll": 0.000821232795715332,
+          "bf16_ppl": 5.338943822120212,
+          "rabit_ppl": 5.343330138728426
+        },
+        {
+          "window": 23,
+          "bf16_nll": 2.1887481212615967,
+          "rabit_nll": 2.2044100761413574,
+          "delta_nll": 0.015661954879760742,
+          "bf16_ppl": 8.924034310091212,
+          "rabit_ppl": 9.06490238801218
+        },
+        {
+          "window": 24,
+          "bf16_nll": 2.675783395767212,
+          "rabit_nll": 2.690310478210449,
+          "delta_nll": 0.014527082443237305,
+          "bf16_ppl": 14.523723207369976,
+          "rabit_ppl": 14.736250494935371
+        },
+        {
+          "window": 25,
+          "bf16_nll": 2.100590229034424,
+          "rabit_nll": 2.1143088340759277,
+          "delta_nll": 0.013718605041503906,
+          "bf16_ppl": 8.170991245855564,
+          "rabit_ppl": 8.28385826646731
+        },
+        {
+          "window": 26,
+          "bf16_nll": 2.2789244651794434,
+          "rabit_nll": 2.297912120819092,
+          "delta_nll": 0.018987655639648438,
+          "bf16_ppl": 9.766170902002743,
+          "rabit_ppl": 9.953379291723454
+        },
+        {
+          "window": 27,
+          "bf16_nll": 2.1403582096099854,
+          "rabit_nll": 2.1644794940948486,
+          "delta_nll": 0.02412128448486328,
+          "bf16_ppl": 8.502482754488327,
+          "rabit_ppl": 8.710067095395534
+        },
+        {
+          "window": 28,
+          "bf16_nll": 2.1258091926574707,
+          "rabit_nll": 2.1254310607910156,
+          "delta_nll": -0.0003781318664550781,
+          "bf16_ppl": 8.379675517292277,
+          "rabit_ppl": 8.376507493951674
+        },
+        {
+          "window": 29,
+          "bf16_nll": 2.60371470451355,
+          "rabit_nll": 2.61059832572937,
+          "delta_nll": 0.0068836212158203125,
+          "bf16_ppl": 13.513844851840124,
+          "rabit_ppl": 13.60718994852326
+        },
+        {
+          "window": 30,
+          "bf16_nll": 1.9564156532287598,
+          "rabit_nll": 1.972966194152832,
+          "delta_nll": 0.016550540924072266,
+          "bf16_ppl": 7.07392616512459,
+          "rabit_ppl": 7.191977683140049
+        },
+        {
+          "window": 31,
+          "bf16_nll": 2.5224826335906982,
+          "rabit_nll": 2.5410077571868896,
+          "delta_nll": 0.018525123596191406,
+          "bf16_ppl": 12.45949064849429,
+          "rabit_ppl": 12.692455441121071
+        },
+        {
+          "window": 32,
+          "bf16_nll": 1.6566522121429443,
+          "rabit_nll": 1.7156918048858643,
+          "delta_nll": 0.05903959274291992,
+          "bf16_ppl": 5.241733226949613,
+          "rabit_ppl": 5.560520977632496
+        }
+      ],
+      "paired_window_delta_nll": {
+        "mean": 0.015464618802070618,
+        "median": 0.013599395751953125,
+        "stdev": 0.013579189514187866,
+        "min": -0.006300210952758789,
+        "max": 0.05903959274291992,
+        "windows_positive": 30,
+        "windows_negative": 2,
+        "quartiles": [
+          0.006882190704345703,
+          0.013599395751953125,
+          0.01887202262878418
+        ],
+        "largest_positive": [
+          {
+            "window": 32,
+            "delta_nll": 0.05903959274291992,
+            "bf16_ppl": 5.241733226949613,
+            "rabit_ppl": 5.560520977632496
+          },
+          {
+            "window": 6,
+            "delta_nll": 0.03935050964355469,
+            "bf16_ppl": 10.547142689257484,
+            "rabit_ppl": 10.970452230617717
+          },
+          {
+            "window": 10,
+            "delta_nll": 0.03924000263214111,
+            "bf16_ppl": 5.271527961155748,
+            "rabit_ppl": 5.482494833050191
+          },
+          {
+            "window": 2,
+            "delta_nll": 0.03571593761444092,
+            "bf16_ppl": 6.484070046500333,
+            "rabit_ppl": 6.719839997838433
+          },
+          {
+            "window": 19,
+            "delta_nll": 0.027063369750976562,
+            "bf16_ppl": 4.020438272447977,
+            "rabit_ppl": 4.1307305891861406
+          }
+        ],
+        "largest_negative_or_smallest": [
+          {
+            "window": 11,
+            "delta_nll": -0.006300210952758789,
+            "bf16_ppl": 6.925640186783949,
+            "rabit_ppl": 6.882144352960642
+          },
+          {
+            "window": 28,
+            "delta_nll": -0.0003781318664550781,
+            "bf16_ppl": 8.379675517292277,
+            "rabit_ppl": 8.376507493951674
+          },
+          {
+            "window": 21,
+            "delta_nll": 0.0002601146697998047,
+            "bf16_ppl": 10.656747872070914,
+            "rabit_ppl": 10.659520209071928
+          },
+          {
+            "window": 22,
+            "delta_nll": 0.000821232795715332,
+            "bf16_ppl": 5.338943822120212,
+            "rabit_ppl": 5.343330138728426
+          },
+          {
+            "window": 20,
+            "delta_nll": 0.002256631851196289,
+            "bf16_ppl": 3.963647163462419,
+            "rabit_ppl": 3.9726017557074087
+          }
+        ]
+      },
+      "concentration_descriptive": {
+        "share_of_summed_window_delta_from_top_1": 0.11930376667087424,
+        "share_from_top_3": 0.27811489160378605,
+        "share_from_top_8_of_32": 0.5446636340072826,
+        "aggregate_delta_pct_without_top_3_windows": 1.239472700414046,
+        "token_level": {
+          "tokens": 4096,
+          "tokens_with_positive_delta": 2306,
+          "share_of_total_delta_from_top_1pct_tokens": 0.5592389562353144,
+          "share_from_top_10pct_tokens": 2.539498605934302,
+          "max_token_delta": 2.358272612094879,
+          "min_token_delta": -2.0403146743774414
+        }
+      },
+      "robustness_from_runner": {
+        "unit": "ln PPL (mean token NLL) per window; contribution = d/n to the mean ln-PPL delta",
+        "n": 32,
+        "n_rabit2_better": 30,
+        "n_rabit2_worse": 2,
+        "n_equal": 0,
+        "per_unit_delta_summary": {
+          "min": -0.006300210952758789,
+          "q25": 0.006883144378662109,
+          "median": 0.013599395751953125,
+          "q75": 0.018640756607055664,
+          "max": 0.05903959274291992,
+          "mean": 0.015464618802070618
+        },
+        "aggregate_delta_on_unit_scale": 0.015464618802070618,
+        "largest_abs_contribution": {
+          "key": 32,
+          "delta": 0.05903959274291992,
+          "contribution": 0.0018449872732162476
+        },
+        "top1_by_abs": {
+          "units": [
+            {
+              "key": 32,
+              "delta": 0.05903959274291992,
+              "contribution": 0.0018449872732162476
+            }
+          ],
+          "sum_contribution": 0.0018449872732162476,
+          "share_of_aggregate_delta": 0.11930376667087424,
+          "share_of_total_abs_contribution": 0.11616833548503318
+        },
+        "top3_by_abs": {
+          "units": [
+            {
+              "key": 32,
+              "delta": 0.05903959274291992,
+              "contribution": 0.0018449872732162476
+            },
+            {
+              "key": 6,
+              "delta": 0.03935050964355469,
+              "contribution": 0.001229703426361084
+            },
+            {
+              "key": 10,
+              "delta": 0.03924000263214111,
+              "contribution": 0.0012262500822544098
+            }
+          ],
+          "sum_contribution": 0.004300940781831741,
+          "share_of_aggregate_delta": 0.27811489160378605,
+          "share_of_total_abs_contribution": 0.27080573340438946
+        },
+        "worst1": {
+          "units": [
+            {
+              "key": 11,
+              "delta": -0.006300210952758789,
+              "contribution": -0.00019688159227371216
+            }
+          ],
+          "sum_contribution": -0.00019688159227371216,
+          "share_of_aggregate_delta": -0.012731098955206766,
+          "share_of_total_abs_contribution": 0.012396511994475636
+        },
+        "worst3": {
+          "units": [
+            {
+              "key": 11,
+              "delta": -0.006300210952758789,
+              "contribution": -0.00019688159227371216
+            },
+            {
+              "key": 28,
+              "delta": -0.0003781318664550781,
+              "contribution": -1.1816620826721191e-05
+            },
+            {
+              "key": 21,
+              "delta": 0.0002601146697998047,
+              "contribution": 8.128583431243896e-06
+            }
+          ],
+          "sum_contribution": -0.00020056962966918945,
+          "share_of_aggregate_delta": -0.012969581225134008,
+          "share_of_total_abs_contribution": 0.013652347854805296
+        }
+      },
+      "legacy_accepted_evidence": {
+        "log": "results/mlsys2027/variance/continuation_ppl.log",
+        "bf16_aggregate_ppl": 7.513773391425638,
+        "rabit2_legacy_aggregate_ppl": 7.6006423020331155,
+        "rabit2_legacy_delta_pct": 1.156128965861658,
+        "source": "aggregate of the 32 per-window values printed (4 decimals) in the accepted legacy log",
+        "summary_lines_in_log": [
+          "results/mlsys2027/variance/continuation_ppl.log:113: bf16        7.5138      0.00        7.6084              128.000       1.000         4096",
+          "results/mlsys2027/variance/continuation_ppl.log:114: rabit2      7.6006      1.16        7.7274              24.710        5.180         4096"
+        ],
+        "note": "legacy logical evaluator (different V metadata order; no decode aging); context only, never pooled"
+      },
+      "bf16_reproducibility": {
+        "legacy_bf16_aggregate_ppl": 7.513773391425638,
+        "bf16_batched_aggregate_ppl": 7.513780420171705,
+        "relative_difference": 9.354482362978031e-07,
+        "tolerance": 0.005,
+        "max_per_window_relative_difference_report_only": 8.42601390313874e-06,
+        "stepwise_vs_batched_relative_difference": 0.0002149947100137204
+      }
+    },
+    "qwen2_5_7b": {
+      "valid": true,
+      "gates": {
+        "hardware": true,
+        "model_snapshot": true,
+        "dataset": true,
+        "shipped_files": true,
+        "geometry_and_policy": true,
+        "runtime_environment": true,
+        "structure": true,
+        "legacy_unreachable": true,
+        "bf16_control_reproduces_legacy": true,
+        "bf16_stepwise_matches_batched": true
+      },
+      "source_commit": "01cced91cf9501d5f248d26dfe4a011ad4f64832",
+      "started_utc": "2026-10-03T16:36:37.224843+00:00",
+      "completed_utc": "2026-10-03T16:42:38.688251+00:00",
+      "app_ids": [
+        "ap-ln4CjmjoYC40x9El0D3PEM"
+      ],
+      "app_final_states": {
+        "ap-ln4CjmjoYC40x9El0D3PEM": {
+          "App ID": "ap-ln4CjmjoYC40x9El0D3PEM",
+          "Description": "rabit-kv-canonical-quality-v2-ppl",
+          "State": "stopped",
+          "Tasks": "0",
+          "Created at": "2026-10-03 12:36:39-04:00",
+          "Stopped at": "2026-10-03 12:42:31-04:00"
+        }
+      },
+      "cleanup_verified": true,
+      "modal_returncode": 0,
+      "result_sha256": "15222e1fa724286990abe089ea5df9dc16668afa6f56736f8789dcb56526b8fa",
+      "result_sha256_matches_file": true,
+      "hardware": [
+        {
+          "name": "NVIDIA H100 80GB HBM3",
+          "memory.total": "81559",
+          "memory.used": "4",
+          "driver_version": "580.95.05"
+        }
+      ],
+      "environment": {
+        "python": "3.11.12",
+        "torch": "2.11.0+cu130",
+        "torch_cuda": "13.0",
+        "cuda_device": "NVIDIA H100 80GB HBM3",
+        "packages": {
+          "transformers": "4.48.2",
+          "accelerate": "1.15.0",
+          "modelscope": "1.40.1",
+          "requests": "2.34.2",
+          "sentencepiece": "0.2.2",
+          "tokenizers": "0.21.4",
+          "safetensors": "0.8.0"
+        }
+      },
+      "runtime_environment": {
+        "runtime": {
+          "python_minor": "3.11",
+          "torch": "2.11.0+cu130",
+          "torch_cuda": "13.0",
+          "cuda_device": "NVIDIA H100 80GB HBM3",
+          "transformers": "4.48.2"
+        },
+        "validated": {
+          "python_minor": "3.11",
+          "torch": "2.11.0+cu130",
+          "torch_cuda": "13.0",
+          "cuda_device": "NVIDIA H100 80GB HBM3",
+          "transformers": "4.48.2"
+        },
+        "passed": true
+      },
+      "model": {
+        "model_id": "Qwen/Qwen2.5-7B-Instruct",
+        "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+        "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+        "files_checked": 15,
+        "passed": true,
+        "dir": "/model_cache/models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444"
+      },
+      "dataset": {
+        "url": "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt",
+        "wikitext_sha256": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0",
+        "token_pool_sha256": "eb424fb71baccb8b64ae53688613a30c462a54a893f82359c9e6ea5385c0f63c",
+        "pool_tokens": 36864,
+        "samples": 32,
+        "context_tokens": 1024,
+        "eval_tokens": 128,
+        "add_special_tokens": false
+      },
+      "geometry": {
+        "layers": 28,
+        "kv_heads": 4,
+        "attention_heads": 28,
+        "head_dim": 128,
+        "architecture": "Qwen2ForCausalLM"
+      },
+      "policy": {
+        "k_bits": 3,
+        "v_bits": 2,
+        "group_size": 32,
+        "residual_tokens": 4,
+        "metadata_bits": 8,
+        "metadata_group_size": 64
+      },
+      "canonical_rabit_quality_sha256_lf": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+      "structure": {
+        "windows": {
+          "bf16_batched": 32,
+          "bf16": 32,
+          "rabit": 32
+        },
+        "tokens_per_window": [
+          128
+        ],
+        "token_nll_values_per_arm": {
+          "bf16_batched": 4096,
+          "bf16": 4096,
+          "rabit": 4096
+        },
+        "all_finite": true,
+        "paired_inputs": "both stepwise arms score the same 32 (context, continuation) windows of the pinned token pool (token_pool_sha256 above) with the same loop; first token from the prefill logit",
+        "first_token_nll_identical_in_bf16_and_rabit": true,
+        "rabit_cache_class": [
+          "CanonicalRabitCache"
+        ],
+        "decode_forwards": [
+          127
+        ]
+      },
+      "scored_tokens_per_arm": 4096,
+      "aggregate": {
+        "bf16_batched": {
+          "loss_sum": 7841.874698638916,
+          "tokens": 4096,
+          "mean_nll": 1.9145201900973916,
+          "ppl": 6.783683137667368
+        },
+        "bf16": {
+          "loss_sum": 7843.877540588379,
+          "tokens": 4096,
+          "mean_nll": 1.9150091651827097,
+          "ppl": 6.7870010008184805
+        },
+        "rabit": {
+          "loss_sum": 19341.047393798828,
+          "tokens": 4096,
+          "mean_nll": 4.721935398876667,
+          "ppl": 112.38555319178539
+        }
+      },
+      "bf16_ppl": 6.7870010008184805,
+      "rabit_ppl": 112.38555319178539,
+      "delta_pct": 1555.8941597066544,
+      "delta_pct_ci95_paired_bootstrap": [
+        1320.3867153563212,
+        1827.772098941309
+      ],
+      "aggregate_nll_delta": 2.8069262336939573,
+      "per_window": [
+        {
+          "window": 1,
+          "bf16_nll": 0.8375204801559448,
+          "rabit_nll": 2.9188849925994873,
+          "delta_nll": 2.0813645124435425,
+          "bf16_ppl": 2.3106306135482217,
+          "rabit_ppl": 18.52062530838073
+        },
+        {
+          "window": 2,
+          "bf16_nll": 1.7716624736785889,
+          "rabit_nll": 5.297494411468506,
+          "delta_nll": 3.525831937789917,
+          "bf16_ppl": 5.880621618051746,
+          "rabit_ppl": 199.8354766910256
+        },
+        {
+          "window": 3,
+          "bf16_nll": 1.966455101966858,
+          "rabit_nll": 4.926299095153809,
+          "delta_nll": 2.9598439931869507,
+          "bf16_ppl": 7.145302172619503,
+          "rabit_ppl": 137.86832943523243
+        },
+        {
+          "window": 4,
+          "bf16_nll": 1.7987337112426758,
+          "rabit_nll": 4.866284370422363,
+          "delta_nll": 3.0675506591796875,
+          "bf16_ppl": 6.041991712062542,
+          "rabit_ppl": 129.83759112887472
+        },
+        {
+          "window": 5,
+          "bf16_nll": 1.732276201248169,
+          "rabit_nll": 5.456395149230957,
+          "delta_nll": 3.724118947982788,
+          "bf16_ppl": 5.6535077953621515,
+          "rabit_ppl": 234.2514589398789
+        },
+        {
+          "window": 6,
+          "bf16_nll": 2.2915377616882324,
+          "rabit_nll": 5.207927703857422,
+          "delta_nll": 2.9163899421691895,
+          "bf16_ppl": 9.89013466368701,
+          "rabit_ppl": 182.71502595236353
+        },
+        {
+          "window": 7,
+          "bf16_nll": 2.5522632598876953,
+          "rabit_nll": 5.346778392791748,
+          "delta_nll": 2.7945151329040527,
+          "bf16_ppl": 12.836122412895833,
+          "rabit_ppl": 209.9308924091871
+        },
+        {
+          "window": 8,
+          "bf16_nll": 1.893442153930664,
+          "rabit_nll": 5.173733711242676,
+          "delta_nll": 3.2802915573120117,
+          "bf16_ppl": 6.642192826542275,
+          "rabit_ppl": 176.57288039718526
+        },
+        {
+          "window": 9,
+          "bf16_nll": 1.8697456121444702,
+          "rabit_nll": 5.035170555114746,
+          "delta_nll": 3.165424942970276,
+          "bf16_ppl": 6.486646065401004,
+          "rabit_ppl": 153.72580909911133
+        },
+        {
+          "window": 10,
+          "bf16_nll": 1.614303469657898,
+          "rabit_nll": 4.390431880950928,
+          "delta_nll": 2.77612841129303,
+          "bf16_ppl": 5.024387066341509,
+          "rabit_ppl": 80.67525356296436
+        },
+        {
+          "window": 11,
+          "bf16_nll": 1.2088569402694702,
+          "rabit_nll": 3.1394553184509277,
+          "delta_nll": 1.9305983781814575,
+          "bf16_ppl": 3.349653609258533,
+          "rabit_ppl": 23.091286035314244
+        },
+        {
+          "window": 12,
+          "bf16_nll": 0.3293195366859436,
+          "rabit_nll": 2.6666698455810547,
+          "delta_nll": 2.337350308895111,
+          "bf16_ppl": 1.3900219476385183,
+          "rabit_ppl": 14.391961845891759
+        },
+        {
+          "window": 13,
+          "bf16_nll": 2.1309010982513428,
+          "rabit_nll": 4.991105079650879,
+          "delta_nll": 2.860203981399536,
+          "bf16_ppl": 8.422452850579194,
+          "rabit_ppl": 147.0988896997872
+        },
+        {
+          "window": 14,
+          "bf16_nll": 1.685422420501709,
+          "rabit_nll": 4.157029151916504,
+          "delta_nll": 2.471606731414795,
+          "bf16_ppl": 5.394729295357535,
+          "rabit_ppl": 63.88145830567739
+        },
+        {
+          "window": 15,
+          "bf16_nll": 2.0689408779144287,
+          "rabit_nll": 5.190114974975586,
+          "delta_nll": 3.1211740970611572,
+          "bf16_ppl": 7.916434205886276,
+          "rabit_ppl": 179.48918851058903
+        },
+        {
+          "window": 16,
+          "bf16_nll": 1.8458430767059326,
+          "rabit_nll": 4.321250915527344,
+          "delta_nll": 2.475407838821411,
+          "bf16_ppl": 6.333437113498424,
+          "rabit_ppl": 75.28274176636414
+        },
+        {
+          "window": 17,
+          "bf16_nll": 2.0266165733337402,
+          "rabit_nll": 5.156766414642334,
+          "delta_nll": 3.1301498413085938,
+          "bf16_ppl": 7.588368188260666,
+          "rabit_ppl": 173.6021895292398
+        },
+        {
+          "window": 18,
+          "bf16_nll": 1.774282455444336,
+          "rabit_nll": 4.231792449951172,
+          "delta_nll": 2.457509994506836,
+          "bf16_ppl": 5.896048940288959,
+          "rabit_ppl": 68.84051482928834
+        },
+        {
+          "window": 19,
+          "bf16_nll": 2.2238457202911377,
+          "rabit_nll": 5.706467151641846,
+          "delta_nll": 3.482621431350708,
+          "bf16_ppl": 9.242807858591663,
+          "rabit_ppl": 300.80648518740986
+        },
+        {
+          "window": 20,
+          "bf16_nll": 1.431389570236206,
+          "rabit_nll": 4.159255027770996,
+          "delta_nll": 2.72786545753479,
+          "bf16_ppl": 4.184509824152219,
+          "rabit_ppl": 64.0238088698383
+        },
+        {
+          "window": 21,
+          "bf16_nll": 2.541463613510132,
+          "rabit_nll": 5.463954448699951,
+          "delta_nll": 2.9224908351898193,
+          "bf16_ppl": 12.698242696169562,
+          "rabit_ppl": 236.02894568211062
+        },
+        {
+          "window": 22,
+          "bf16_nll": 1.683856725692749,
+          "rabit_nll": 3.942873477935791,
+          "delta_nll": 2.259016752243042,
+          "bf16_ppl": 5.3862894045747725,
+          "rabit_ppl": 51.56656399881853
+        },
+        {
+          "window": 23,
+          "bf16_nll": 1.5579427480697632,
+          "rabit_nll": 3.7448244094848633,
+          "delta_nll": 2.1868816614151,
+          "bf16_ppl": 4.749041214388534,
+          "rabit_ppl": 42.30157881066342
+        },
+        {
+          "window": 24,
+          "bf16_nll": 2.4340057373046875,
+          "rabit_nll": 5.539742469787598,
+          "delta_nll": 3.10573673248291,
+          "bf16_ppl": 11.40447403141539,
+          "rabit_ppl": 254.61242062388794
+        },
+        {
+          "window": 25,
+          "bf16_nll": 2.749377965927124,
+          "rabit_nll": 6.051424980163574,
+          "delta_nll": 3.30204701423645,
+          "bf16_ppl": 15.632904659812892,
+          "rabit_ppl": 424.7178134995667
+        },
+        {
+          "window": 26,
+          "bf16_nll": 2.2239491939544678,
+          "rabit_nll": 4.822031021118164,
+          "delta_nll": 2.5980818271636963,
+          "bf16_ppl": 9.243764295262396,
+          "rabit_ppl": 124.21712235119799
+        },
+        {
+          "window": 27,
+          "bf16_nll": 2.0150957107543945,
+          "rabit_nll": 4.52126407623291,
+          "delta_nll": 2.5061683654785156,
+          "bf16_ppl": 7.501445315835609,
+          "rabit_ppl": 91.95175857735474
+        },
+        {
+          "window": 28,
+          "bf16_nll": 2.2895522117614746,
+          "rabit_nll": 5.053802967071533,
+          "delta_nll": 2.7642507553100586,
+          "bf16_ppl": 9.870516790108764,
+          "rabit_ppl": 156.61694245485307
+        },
+        {
+          "window": 29,
+          "bf16_nll": 2.7413086891174316,
+          "rabit_nll": 5.017869472503662,
+          "delta_nll": 2.2765607833862305,
+          "bf16_ppl": 15.507266013010272,
+          "rabit_ppl": 151.08906124326282
+        },
+        {
+          "window": 30,
+          "bf16_nll": 1.7386407852172852,
+          "rabit_nll": 4.157763481140137,
+          "delta_nll": 2.4191226959228516,
+          "bf16_ppl": 5.689604769706854,
+          "rabit_ppl": 63.928385555276165
+        },
+        {
+          "window": 31,
+          "bf16_nll": 1.9789106845855713,
+          "rabit_nll": 4.7747273445129395,
+          "delta_nll": 2.795816659927368,
+          "bf16_ppl": 7.234857649173284,
+          "rabit_ppl": 118.47800653785686
+        },
+        {
+          "window": 32,
+          "bf16_nll": 2.2728307247161865,
+          "rabit_nll": 5.6723480224609375,
+          "delta_nll": 3.399517297744751,
+          "bf16_ppl": 9.706839350344428,
+          "rabit_ppl": 290.71634212962965
+        }
+      ],
+      "paired_window_delta_nll": {
+        "mean": 2.8069262336939573,
+        "median": 2.7951658964157104,
+        "stdev": 0.45061141156416634,
+        "min": 1.9305983781814575,
+        "max": 3.724118947982788,
+        "windows_positive": 32,
+        "windows_negative": 0,
+        "quartiles": [
+          2.4610341787338257,
+          2.7951658964157104,
+          3.1279059052467346
+        ],
+        "largest_positive": [
+          {
+            "window": 5,
+            "delta_nll": 3.724118947982788,
+            "bf16_ppl": 5.6535077953621515,
+            "rabit_ppl": 234.2514589398789
+          },
+          {
+            "window": 2,
+            "delta_nll": 3.525831937789917,
+            "bf16_ppl": 5.880621618051746,
+            "rabit_ppl": 199.8354766910256
+          },
+          {
+            "window": 19,
+            "delta_nll": 3.482621431350708,
+            "bf16_ppl": 9.242807858591663,
+            "rabit_ppl": 300.80648518740986
+          },
+          {
+            "window": 32,
+            "delta_nll": 3.399517297744751,
+            "bf16_ppl": 9.706839350344428,
+            "rabit_ppl": 290.71634212962965
+          },
+          {
+            "window": 25,
+            "delta_nll": 3.30204701423645,
+            "bf16_ppl": 15.632904659812892,
+            "rabit_ppl": 424.7178134995667
+          }
+        ],
+        "largest_negative_or_smallest": [
+          {
+            "window": 11,
+            "delta_nll": 1.9305983781814575,
+            "bf16_ppl": 3.349653609258533,
+            "rabit_ppl": 23.091286035314244
+          },
+          {
+            "window": 1,
+            "delta_nll": 2.0813645124435425,
+            "bf16_ppl": 2.3106306135482217,
+            "rabit_ppl": 18.52062530838073
+          },
+          {
+            "window": 23,
+            "delta_nll": 2.1868816614151,
+            "bf16_ppl": 4.749041214388534,
+            "rabit_ppl": 42.30157881066342
+          },
+          {
+            "window": 22,
+            "delta_nll": 2.259016752243042,
+            "bf16_ppl": 5.3862894045747725,
+            "rabit_ppl": 51.56656399881853
+          },
+          {
+            "window": 29,
+            "delta_nll": 2.2765607833862305,
+            "bf16_ppl": 15.507266013010272,
+            "rabit_ppl": 151.08906124326282
+          }
+        ]
+      },
+      "concentration_descriptive": {
+        "share_of_summed_window_delta_from_top_1": 0.0414612666793548,
+        "share_from_top_3": 0.11948760209089092,
+        "share_from_top_8_of_32": 0.3007070804719492,
+        "aggregate_delta_pct_without_top_3_windows": 1429.0155844274796,
+        "token_level": {
+          "tokens": 4096,
+          "tokens_with_positive_delta": 3583,
+          "share_of_total_delta_from_top_1pct_tokens": 0.05676028033818331,
+          "share_from_top_10pct_tokens": 0.3746077737870017,
+          "max_token_delta": 19.778951346466783,
+          "min_token_delta": -8.48071002960205
+        }
+      },
+      "robustness_from_runner": {
+        "unit": "ln PPL (mean token NLL) per window; contribution = d/n to the mean ln-PPL delta",
+        "n": 32,
+        "n_rabit2_better": 32,
+        "n_rabit2_worse": 0,
+        "n_equal": 0,
+        "per_unit_delta_summary": {
+          "min": 1.9305983781814575,
+          "q25": 2.468082547187805,
+          "median": 2.7951658964157104,
+          "q75": 3.1234180331230164,
+          "max": 3.724118947982788,
+          "mean": 2.8069262336939573
+        },
+        "aggregate_delta_on_unit_scale": 2.8069262336939573,
+        "largest_abs_contribution": {
+          "key": 5,
+          "delta": 3.724118947982788,
+          "contribution": 0.11637871712446213
+        },
+        "top1_by_abs": {
+          "units": [
+            {
+              "key": 5,
+              "delta": 3.724118947982788,
+              "contribution": 0.11637871712446213
+            }
+          ],
+          "sum_contribution": 0.11637871712446213,
+          "share_of_aggregate_delta": 0.0414612666793548,
+          "share_of_total_abs_contribution": 0.0414612666793548
+        },
+        "top3_by_abs": {
+          "units": [
+            {
+              "key": 5,
+              "delta": 3.724118947982788,
+              "contribution": 0.11637871712446213
+            },
+            {
+              "key": 2,
+              "delta": 3.525831937789917,
+              "contribution": 0.1101822480559349
+            },
+            {
+              "key": 19,
+              "delta": 3.482621431350708,
+              "contribution": 0.10883191972970963
+            }
+          ],
+          "sum_contribution": 0.33539288491010666,
+          "share_of_aggregate_delta": 0.11948760209089092,
+          "share_of_total_abs_contribution": 0.11948760209089092
+        },
+        "worst1": {
+          "units": [
+            {
+              "key": 11,
+              "delta": 1.9305983781814575,
+              "contribution": 0.06033119931817055
+            }
+          ],
+          "sum_contribution": 0.06033119931817055,
+          "share_of_aggregate_delta": 0.02149368893060427,
+          "share_of_total_abs_contribution": 0.02149368893060427
+        },
+        "worst3": {
+          "units": [
+            {
+              "key": 11,
+              "delta": 1.9305983781814575,
+              "contribution": 0.06033119931817055
+            },
+            {
+              "key": 1,
+              "delta": 2.0813645124435425,
+              "contribution": 0.0650426410138607
+            },
+            {
+              "key": 23,
+              "delta": 2.1868816614151,
+              "contribution": 0.06834005191922188
+            }
+          ],
+          "sum_contribution": 0.19371389225125313,
+          "share_of_aggregate_delta": 0.06901281904951335,
+          "share_of_total_abs_contribution": 0.06901281904951335
+        }
+      },
+      "legacy_accepted_evidence": {
+        "log": "results/mlsys2027/second_model/quality/continuation_ppl.log",
+        "bf16_aggregate_ppl": 6.7836727695765315,
+        "rabit2_legacy_aggregate_ppl": 299.6214416013361,
+        "rabit2_legacy_delta_pct": 4316.802693447724,
+        "source": "aggregate of the 32 per-window values printed (4 decimals) in the accepted legacy log",
+        "summary_lines_in_log": [
+          "results/mlsys2027/second_model/quality/continuation_ppl.log:27273: bf16        6.7837      0.00        6.8907              56.000        1.000         4096",
+          "results/mlsys2027/second_model/quality/continuation_ppl.log:27274: rabit2      299.6214    4316.80     324.2389            10.811        5.180         4096"
+        ],
+        "note": "legacy logical evaluator (different V metadata order; no decode aging); context only, never pooled"
+      },
+      "bf16_reproducibility": {
+        "legacy_bf16_aggregate_ppl": 6.7836727695765315,
+        "bf16_batched_aggregate_ppl": 6.783683137667368,
+        "relative_difference": 1.528388999399002e-06,
+        "tolerance": 0.005,
+        "max_per_window_relative_difference_report_only": 2.061897894970231e-05,
+        "stepwise_vs_batched_relative_difference": 0.0004890946531227952
+      }
+    }
+  }
+}

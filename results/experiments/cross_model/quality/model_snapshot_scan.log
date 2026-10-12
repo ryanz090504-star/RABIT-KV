@@ -1,0 +1,29 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-mhXHnoWBzccWSjezyPJEVc
+Building image im-qFkqJNrjphdE9Bem37Z1zL
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 557.65ms
+
+Built image im-qFkqJNrjphdE9Bem37Z1zL in 1.09s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_model_snapshot_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_model_snapshot.py
+└── 🔨 Created function scan.
+EXP14_MODEL_SCAN={"cache_root": "/model_cache", "passed": true, "results": [{"dir": "/model_cache/models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444", "extra_files": [], "mismatches": [], "passed": true}, {"dir": "/model_cache/models/Qwen--Qwen2.5-7B-Instruct/snapshots/master", "extra_files": [], "mismatches": [], "passed": true}], "snapshot_dirs": ["/model_cache/models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444", "/model_cache/models/Qwen--Qwen2.5-7B-Instruct/snapshots/master"]}
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-mhXHnoWBzccWSjezyPJEVc

@@ -1,0 +1,87 @@
+{
+  "scope": "Stage3C shared_decode kernel-tuning BENCHMARK evidence only; NOT Experiment 5 evidence; one measured request per point; descriptive only. QUERY_BLOCK comparison is kernel tuning, not an ablation. The 32K (q_len 16352) point is not part of this run. QUERY_BLOCK tie-break (QB16 vs QB32, ABBA, q_len 512 and 2048).",
+  "experiment5_evidence": false,
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 53,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "series_order": [
+    "rabit_shared_qb16_A1",
+    "rabit_shared_qb32_B1",
+    "rabit_shared_qb32_B2",
+    "rabit_shared_qb16_A2"
+  ],
+  "per_series": [
+    {
+      "series": "rabit_shared_qb16_A1",
+      "query_block": 16,
+      "ttft_ms_512": 3729.710817337036,
+      "wall_ms_512": 4405.674221000027,
+      "tpot_ms_512": 21.804531677420776,
+      "ttft_ms_2048": 12814.079523086548,
+      "wall_ms_2048": 13497.047301999999,
+      "tpot_ms_2048": 22.030065806450605
+    },
+    {
+      "series": "rabit_shared_qb32_B1",
+      "query_block": 32,
+      "ttft_ms_512": 3662.658929824829,
+      "wall_ms_512": 4314.6120529999625,
+      "tpot_ms_512": 21.042823419355546,
+      "ttft_ms_2048": 12378.190040588379,
+      "wall_ms_2048": 13027.334914999983,
+      "tpot_ms_2048": 20.95261512903151
+    },
+    {
+      "series": "rabit_shared_qb32_B2",
+      "query_block": 32,
+      "ttft_ms_512": 3689.2313957214355,
+      "wall_ms_512": 4356.03444000003,
+      "tpot_ms_512": 21.508497419354683,
+      "ttft_ms_2048": 12557.252407073975,
+      "wall_ms_2048": 13225.67809000003,
+      "tpot_ms_2048": 21.574797387096798
+    },
+    {
+      "series": "rabit_shared_qb16_A2",
+      "query_block": 16,
+      "ttft_ms_512": 3713.9294147491455,
+      "wall_ms_512": 4377.446972999962,
+      "tpot_ms_512": 21.415215290322784,
+      "ttft_ms_2048": 12743.422985076904,
+      "wall_ms_2048": 13414.884607000033,
+      "tpot_ms_2048": 21.67560583870909
+    }
+  ],
+  "selection": {
+    "rule": "per QB16/QB32 and q_len 512/2048: median TTFT over its two ABBA series; score = sqrt(median_512 * median_2048); relative_gap = |score16 - score32| / min(score16, score32); if relative_gap > 0.01 choose the lower score, else choose QB16",
+    "median_ttft_ms": {
+      "16": {
+        "512": 3721.820116043091,
+        "2048": 12778.751254081726
+      },
+      "32": {
+        "512": 3675.9451627731323,
+        "2048": 12467.721223831177
+      }
+    },
+    "score_ms": {
+      "16": 6896.391337167014,
+      "32": 6769.834527043193
+    },
+    "relative_gap": 0.018694225038776036,
+    "gap_exceeds_threshold": true,
+    "stage1_selected_query_block": 32,
+    "final_tiebreak_selected_query_block": 32,
+    "note": null
+  },
+  "stage1_selected_query_block": 32,
+  "not_claimed": [
+    "speedup vs reference or tile32 (not run here)",
+    "Experiment 5 results",
+    "q_len 4096 / 8192 / 16352 behaviour"
+  ]
+}

@@ -1,0 +1,191 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-ZrunNcQJAe2iYTorsBPywp
+Building image im-ulyMXm2yMTMWm1yLQ321bp
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 2.08s
+
+Built image im-ulyMXm2yMTMWm1yLQ321bp in 5.90s
+
+
+Building image im-bNBpR1r4jLfPRd50Q6XoTg
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_final_fast_decode_append_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 1.81s
+
+Built image im-bNBpR1r4jLfPRd50Q6XoTg in 7.65s
+
+
+Building image im-3GhLMy7gWHoAyUX39uFvTp
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 854.20ms
+
+Built image im-3GhLMy7gWHoAyUX39uFvTp in 2.18s
+
+
+Building image im-vStki1QwbssPiy3ufVFX3F
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm.log 2>&1 || (tail -n 250 /tmp/vllm.log; exit 1))
+Saving image...
+Image saved, took 12.66s
+
+Built image im-vStki1QwbssPiy3ufVFX3F in 198.53s
+
+
+Building image im-10wmo7JDBRVt0PeEEomeRA
+
+=> Step 0: FROM base
+
+=> Step 1: RUN python -m pip install modelscope pytest
+Looking in indexes: http://pypi-mirror.modal.local:5555/simple
+Collecting modelscope
+  Downloading modelscope-1.40.1-py3-none-any.whl.metadata (43 kB)
+Collecting pytest
+  Downloading pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+Requirement already satisfied: filelock in ./usr/local/lib/python3.11/site-packages (from modelscope) (3.29.0)
+Collecting modelscope-hub>=0.4.2 (from modelscope)
+  Downloading modelscope_hub-0.4.5-py3-none-any.whl.metadata (47 kB)
+Requirement already satisfied: packaging in ./usr/local/lib/python3.11/site-packages (from modelscope) (26.3)
+Requirement already satisfied: requests>=2.25 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.34.2)
+Requirement already satisfied: setuptools in ./usr/local/lib/python3.11/site-packages (from modelscope) (80.10.2)
+Requirement already satisfied: tqdm>=4.64.0 in ./usr/local/lib/python3.11/site-packages (from modelscope) (4.70.1)
+Requirement already satisfied: urllib3>=1.26 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.8.0)
+Collecting iniconfig>=1.0.1 (from pytest)
+  Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting pluggy<2,>=1.5 (from pytest)
+  Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Requirement already satisfied: pygments>=2.7.2 in ./usr/local/lib/python3.11/site-packages (from pytest) (2.21.0)
+Requirement already satisfied: cryptography>=41 in ./usr/local/lib/python3.11/site-packages (from modelscope-hub>=0.4.2->modelscope) (50.0.2)
+Requirement already satisfied: cffi>=2.0.0 in ./usr/local/lib/python3.11/site-packages (from cryptography>=41->modelscope-hub>=0.4.2->modelscope) (2.1.1)
+Requirement already satisfied: pycparser in ./usr/local/lib/python3.11/site-packages (from cffi>=2.0.0->cryptography>=41->modelscope-hub>=0.4.2->modelscope) (3.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.5.2)
+Requirement already satisfied: idna<4,>=2.5 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.20)
+Requirement already satisfied: certifi>=2023.5.7 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (2026.7.22)
+Downloading modelscope-1.40.1-py3-none-any.whl (6.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.1/6.1 MB 466.0 MB/s  0:00:00
+Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Downloading modelscope_hub-0.4.5-py3-none-any.whl (236 kB)
+Installing collected packages: pluggy, iniconfig, pytest, modelscope-hub, modelscope
+
+Successfully installed iniconfig-2.3.0 modelscope-1.40.1 modelscope-hub-0.4.5 pluggy-1.6.0 pytest-9.1.1
+Saving image...
+Image saved, took 2.25s
+
+Built image im-10wmo7JDBRVt0PeEEomeRA in 10.71s
+
+
+Building image im-P73m4BeHf74w9N2sQU6YDv
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 3.00s
+
+Built image im-P73m4BeHf74w9N2sQU6YDv in 7.24s
+
+
+Building image im-0uAYlojBtbI0jyum5U6b1U
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 7.34s
+
+Built image im-0uAYlojBtbI0jyum5U6b1U in 10.60s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_shape_gate_numdiag_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\exp14_vllm_snapshot_bwny8l7_\vllm_kvquant
+│   _snapshot.zip
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_shape_gate_numdiag.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_shape_gate.py
+└── 🔨 Created function numdiag.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+model_b_qwen2_5_7b: {"R_bf16all.reference_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.0078125, "max_abs_err_vs_fp32_ref": 0.007715463638305664, "max_err_in_bf16_ulp_at_ref": 72380.0, "max_rel_err": 0.21743415296077728, "max_ulp": 29763, "ulp_hist": {"0": 279884, "1": 113597, "2": 24706, "3+": 36981}}, "R_bf16all.runtime_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.0078125, "max_abs_err_vs_fp32_ref": 0.007715463638305664, "max_err_in_bf16_ulp_at_ref": 72380.0, "max_rel_err": 0.21743415296077728, "max_ulp": 29763, "ulp_hist": {"0": 279884, "1": 113597, "2": 24706, "3+": 36981}}, "R_bf16all.states_identical_all": true, "R_fp32.reference_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.015625, "max_abs_err_vs_fp32_ref": 0.011920928955078125, "max_err_in_bf16_ulp_at_ref": 7401.75, "max_rel_err": 0.14242802560329437, "max_ulp": 30000, "ulp_hist": {"0": 389491, "1": 50987, "2": 6133, "3+": 8557}}, "R_fp32.runtime_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.015625, "max_abs_err_vs_fp32_ref": 0.011920928955078125, "max_err_in_bf16_ulp_at_ref": 7401.75, "max_rel_err": 0.14242802560329437, "max_ulp": 30000, "ulp_hist": {"0": 389491, "1": 50987, "2": 6133, "3+": 8557}}, "R_fp32.states_identical_all": true, "R_sem.reference_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.001953125, "max_abs_err_vs_fp32_ref": 0.007715463638305664, "max_err_in_bf16_ulp_at_ref": 9.0, "max_rel_err": 0.0038895129691809416, "max_ulp": 9, "ulp_hist": {"0": 455053, "1": 109, "2": 3, "3+": 3}}, "R_sem.runtime_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.001953125, "max_abs_err_vs_fp32_ref": 0.007715463638305664, "max_err_in_bf16_ulp_at_ref": 9.0, "max_rel_err": 0.0038895129691809416, "max_ulp": 9, "ulp_hist": {"0": 455053, "1": 109, "2": 3, "3+": 3}}, "R_sem.states_identical_all": true, "bytes_identical_all": true, "checkpoints": 127, "gate_attempt1_failures": 26, "max_ref_abs": 3.8125}
+control_llama3_1_8b: {"R_bf16all.reference_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.015625, "max_abs_err_vs_fp32_ref": 0.007887125015258789, "max_err_in_bf16_ulp_at_ref": 69786.0, "max_rel_err": 0.21037082374095917, "max_ulp": 29939, "ulp_hist": {"0": 319655, "1": 130023, "2": 28503, "3+": 42011}}, "R_bf16all.runtime_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.015625, "max_abs_err_vs_fp32_ref": 0.007887125015258789, "max_err_in_bf16_ulp_at_ref": 69786.0, "max_rel_err": 0.21037082374095917, "max_ulp": 29939, "ulp_hist": {"0": 319655, "1": 130023, "2": 28503, "3+": 42011}}, "R_bf16all.states_identical_all": true, "R_fp32.reference_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.015625, "max_abs_err_vs_fp32_ref": 0.009876489639282227, "max_err_in_bf16_ulp_at_ref": 581856.0, "max_rel_err": 0.11866913735866547, "max_ulp": 30116, "ulp_hist": {"0": 445842, "1": 57674, "2": 6915, "3+": 9761}}, "R_fp32.runtime_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.015625, "max_abs_err_vs_fp32_ref": 0.009876489639282227, "max_err_in_bf16_ulp_at_ref": 581856.0, "max_rel_err": 0.11866913735866547, "max_ulp": 30116, "ulp_hist": {"0": 445842, "1": 57674, "2": 6915, "3+": 9761}}, "R_fp32.states_identical_all": true, "R_sem.reference_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.00390625, "max_abs_err_vs_fp32_ref": 0.007714986801147461, "max_err_in_bf16_ulp_at_ref": 232.0, "max_rel_err": 0.003890577470883727, "max_ulp": 148, "ulp_hist": {"0": 520050, "1": 131, "2": 4, "3+": 7}}, "R_sem.runtime_state": {"all_exact": false, "max_abs_err_vs_dtype_rounded_ref": 0.00390625, "max_abs_err_vs_fp32_ref": 0.007714986801147461, "max_err_in_bf16_ulp_at_ref": 232.0, "max_rel_err": 0.003890577470883727, "max_ulp": 148, "ulp_hist": {"0": 520050, "1": 131, "2": 4, "3+": 7}}, "R_sem.states_identical_all": true, "bytes_identical_all": true, "checkpoints": 127, "gate_attempt1_failures": 27, "max_ref_abs": 3.8125}
+EXP14_NUMDIAG_CAPTURE={"bytes": 705659, "completed": true, "remote_returncode": 0, "roundtrip_identical": true, "rows": 254, "sha256": "10ce1ac0aa7073ce70e7fff747bf792bd81188a7cb6c3019080c70bbc0337f95", "summary_returned": true}
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-ZrunNcQJAe2iYTorsBPywp

@@ -1,0 +1,558 @@
+[
+  {
+    "benchmark": "continuation_ppl",
+    "rows": {
+      "bf16": {
+        "ppl": 8.502,
+        "avg_logical_kv_mb": 128.0,
+        "count": 1024
+      },
+      "rabit2_r0": {
+        "ppl": 8.6332,
+        "avg_logical_kv_mb": 24.25,
+        "count": 1024
+      },
+      "rabit2_r2": {
+        "ppl": 8.6238,
+        "avg_logical_kv_mb": 24.48,
+        "count": 1024
+      },
+      "rabit2": {
+        "ppl": 8.6317,
+        "avg_logical_kv_mb": 24.71,
+        "count": 1024
+      },
+      "rabit2_r8": {
+        "ppl": 8.6349,
+        "avg_logical_kv_mb": 25.171,
+        "count": 1024
+      }
+    },
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_r4_control_reproduce_canonical": true
+    },
+    "regression": {
+      "benchmark": "continuation_ppl",
+      "checks": [
+        {
+          "metric": "bf16.ppl",
+          "canonical": 8.502,
+          "observed": 8.502,
+          "abs_diff": 0.0,
+          "tolerance": 0.042510000000000006,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 128.0,
+          "observed": 128.0,
+          "abs_diff": 0.0,
+          "tolerance": 0.128,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.ppl",
+          "canonical": 8.6317,
+          "observed": 8.6317,
+          "abs_diff": 0.0,
+          "tolerance": 0.0431585,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 24.71,
+          "observed": 24.71,
+          "abs_diff": 0.0,
+          "tolerance": 0.024710000000000003,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    "passed": true,
+    "control_rule": "original Exp10 control-reproduction rule"
+  },
+  {
+    "benchmark": "niah",
+    "rows": {
+      "bf16": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 1194.542,
+        "count": 15
+      },
+      "rabit2_r0": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 226.326,
+        "count": 15
+      },
+      "rabit2_r2": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 226.556,
+        "count": 15
+      },
+      "rabit2": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 226.786,
+        "count": 15
+      },
+      "rabit2_r8": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 227.246,
+        "count": 15
+      }
+    },
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_r4_control_reproduce_canonical": true
+    },
+    "regression": {
+      "benchmark": "niah",
+      "checks": [
+        {
+          "metric": "bf16.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1194.542,
+          "observed": 1194.542,
+          "abs_diff": 0.0,
+          "tolerance": 1.194542,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 226.786,
+          "observed": 226.786,
+          "abs_diff": 0.0,
+          "tolerance": 0.22678600000000002,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    "passed": true,
+    "control_rule": "original Exp10 control-reproduction rule"
+  },
+  {
+    "benchmark": "passage_retrieval",
+    "rows": {
+      "bf16": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 1517.375,
+        "count": 10
+      },
+      "rabit2_r0": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 287.674,
+        "count": 10
+      },
+      "rabit2_r2": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 287.904,
+        "count": 10
+      },
+      "rabit2": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 288.09,
+        "count": 10
+      },
+      "rabit2_r8": {
+        "accuracy_pct": 100.0,
+        "avg_logical_kv_mb": 288.506,
+        "count": 10
+      }
+    },
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_r4_control_reproduce_canonical": true
+    },
+    "regression": {
+      "benchmark": "passage_retrieval",
+      "checks": [
+        {
+          "metric": "bf16.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1517.375,
+          "observed": 1517.375,
+          "abs_diff": 0.0,
+          "tolerance": 1.5173750000000001,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 288.09,
+          "observed": 288.09,
+          "abs_diff": 0.0,
+          "tolerance": 0.28808999999999996,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    "passed": true,
+    "control_rule": "original Exp10 control-reproduction rule"
+  },
+  {
+    "benchmark": "hotpotqa",
+    "rows": {
+      "bf16": {
+        "f1_pct": 60.6,
+        "avg_logical_kv_mb": 1896.106,
+        "count": 20
+      },
+      "rabit2_r0": {
+        "f1_pct": 57.7,
+        "avg_logical_kv_mb": 359.39,
+        "count": 20
+      },
+      "rabit2_r2": {
+        "f1_pct": 55.2,
+        "avg_logical_kv_mb": 359.62,
+        "count": 20
+      },
+      "rabit2": {
+        "f1_pct": 57.7,
+        "avg_logical_kv_mb": 359.85,
+        "count": 20
+      },
+      "rabit2_r8": {
+        "f1_pct": 57.7,
+        "avg_logical_kv_mb": 360.244,
+        "count": 20
+      }
+    },
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_r4_logical_kv_mb_reproduce_canonical": true,
+      "qa_control_gate_passed": true
+    },
+    "regression": {
+      "benchmark": "hotpotqa",
+      "checks": [
+        {
+          "metric": "bf16.f1_pct",
+          "canonical": 60.6,
+          "observed": 60.6,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1896.106,
+          "observed": 1896.106,
+          "abs_diff": 0.0,
+          "tolerance": 1.896106,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.f1_pct",
+          "canonical": 55.2,
+          "observed": 57.7,
+          "abs_diff": 2.5,
+          "tolerance": 1.0,
+          "within_tolerance": false
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 359.85,
+          "observed": 359.85,
+          "abs_diff": 0.0,
+          "tolerance": 0.35985,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": false
+    },
+    "passed": true,
+    "qa_control_gate": {
+      "benchmark": "hotpotqa",
+      "checks": {
+        "dataset_header_identical": true,
+        "sample_indices_order_ground_truth_identical": true
+      },
+      "controls": {
+        "bf16": {
+          "rows_complete_and_ordered": true,
+          "score_mismatch_count": 0,
+          "score_mismatch_indices": [],
+          "l1_score_distance": 0.0,
+          "max_allowed_mismatch_count": 1,
+          "max_allowed_l1_score_distance": 0.065,
+          "mismatch_count_within_bound": true,
+          "l1_within_bound": true,
+          "text_only_answer_differences": [
+            7
+          ],
+          "mismatch_details": [],
+          "aggregate_f1": 60.6,
+          "aggregate_f1_envelope_report_only": [
+            60.2,
+            60.7
+          ],
+          "aggregate_inside_envelope_report_only": true,
+          "passed": true
+        },
+        "rabit2": {
+          "rows_complete_and_ordered": true,
+          "score_mismatch_count": 1,
+          "score_mismatch_indices": [
+            1
+          ],
+          "l1_score_distance": 0.5,
+          "max_allowed_mismatch_count": 1,
+          "max_allowed_l1_score_distance": 0.5,
+          "mismatch_count_within_bound": true,
+          "l1_within_bound": true,
+          "text_only_answer_differences": [],
+          "mismatch_details": [
+            {
+              "index": 1,
+              "dataset_index": 201,
+              "reference_score": 0.0,
+              "run_score": 0.5,
+              "reference_answer": "2016-17",
+              "run_answer": "2016–17"
+            }
+          ],
+          "aggregate_f1": 57.7,
+          "aggregate_f1_envelope_report_only": [
+            55.2,
+            57.7
+          ],
+          "aggregate_inside_envelope_report_only": true,
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "superseded_aggregate_f1_control_check_report_only": [
+      {
+        "metric": "bf16.f1_pct",
+        "canonical": 60.6,
+        "observed": 60.6,
+        "abs_diff": 0.0,
+        "tolerance": 1.0,
+        "within_tolerance": true
+      },
+      {
+        "metric": "rabit2.f1_pct",
+        "canonical": 55.2,
+        "observed": 57.7,
+        "abs_diff": 2.5,
+        "tolerance": 1.0,
+        "within_tolerance": false
+      }
+    ],
+    "control_rule": "post-failure empirical per-example reproducibility envelope (qa_control_gate_amendment)"
+  },
+  {
+    "benchmark": "qasper",
+    "rows": {
+      "bf16": {
+        "f1_pct": 35.9,
+        "avg_logical_kv_mb": 1783.531,
+        "count": 24
+      },
+      "rabit2_r0": {
+        "f1_pct": 32.2,
+        "avg_logical_kv_mb": 337.986,
+        "count": 24
+      },
+      "rabit2_r2": {
+        "f1_pct": 35.9,
+        "avg_logical_kv_mb": 338.198,
+        "count": 24
+      },
+      "rabit2": {
+        "f1_pct": 34.9,
+        "avg_logical_kv_mb": 338.428,
+        "count": 24
+      },
+      "rabit2_r8": {
+        "f1_pct": 35.0,
+        "avg_logical_kv_mb": 338.888,
+        "count": 24
+      }
+    },
+    "checks": {
+      "exit_code_zero": true,
+      "no_traceback": true,
+      "all_five_rows_present": true,
+      "counts_exact": true,
+      "kv_mb_matches_expected": true,
+      "kv_mb_ordering_matches_formula": true,
+      "bf16_and_r4_logical_kv_mb_reproduce_canonical": true,
+      "qa_control_gate_passed": true
+    },
+    "regression": {
+      "benchmark": "qasper",
+      "checks": [
+        {
+          "metric": "bf16.f1_pct",
+          "canonical": 35.9,
+          "observed": 35.9,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1783.531,
+          "observed": 1783.531,
+          "abs_diff": 0.0,
+          "tolerance": 1.783531,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.f1_pct",
+          "canonical": 35.6,
+          "observed": 34.9,
+          "abs_diff": 0.7000000000000028,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 338.428,
+          "observed": 338.428,
+          "abs_diff": 0.0,
+          "tolerance": 0.338428,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    "passed": true,
+    "qa_control_gate": {
+      "benchmark": "qasper",
+      "checks": {
+        "dataset_header_identical": true,
+        "sample_indices_order_ground_truth_identical": true
+      },
+      "controls": {
+        "bf16": {
+          "rows_complete_and_ordered": true,
+          "score_mismatch_count": 0,
+          "score_mismatch_indices": [],
+          "l1_score_distance": 0.0,
+          "max_allowed_mismatch_count": 1,
+          "max_allowed_l1_score_distance": 0.096,
+          "mismatch_count_within_bound": true,
+          "l1_within_bound": true,
+          "text_only_answer_differences": [],
+          "mismatch_details": [],
+          "aggregate_f1": 35.9,
+          "aggregate_f1_envelope_report_only": [
+            35.5,
+            35.9
+          ],
+          "aggregate_inside_envelope_report_only": true,
+          "passed": true
+        },
+        "rabit2": {
+          "rows_complete_and_ordered": true,
+          "score_mismatch_count": 1,
+          "score_mismatch_indices": [
+            20
+          ],
+          "l1_score_distance": 0.174,
+          "max_allowed_mismatch_count": 2,
+          "max_allowed_l1_score_distance": 0.185,
+          "mismatch_count_within_bound": true,
+          "l1_within_bound": true,
+          "text_only_answer_differences": [
+            22,
+            23
+          ],
+          "mismatch_details": [
+            {
+              "index": 20,
+              "dataset_index": 220,
+              "reference_score": 0.174,
+              "run_score": 0.0,
+              "reference_answer": "Different registers and domains pose challenges to this task due to their properties, such as document length, readability, and linguistic variability.",
+              "run_answer": "Different registers and domains pose challenges such as varying levels of agreement among annotators, document length, readability, and the presence of narratives and fallacies."
+            }
+          ],
+          "aggregate_f1": 34.9,
+          "aggregate_f1_envelope_report_only": [
+            34.8,
+            36.2
+          ],
+          "aggregate_inside_envelope_report_only": true,
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "superseded_aggregate_f1_control_check_report_only": [
+      {
+        "metric": "bf16.f1_pct",
+        "canonical": 35.9,
+        "observed": 35.9,
+        "abs_diff": 0.0,
+        "tolerance": 1.0,
+        "within_tolerance": true
+      },
+      {
+        "metric": "rabit2.f1_pct",
+        "canonical": 35.6,
+        "observed": 34.9,
+        "abs_diff": 0.7000000000000028,
+        "tolerance": 1.0,
+        "within_tolerance": true
+      }
+    ],
+    "control_rule": "post-failure empirical per-example reproducibility envelope (qa_control_gate_amendment)"
+  }
+]

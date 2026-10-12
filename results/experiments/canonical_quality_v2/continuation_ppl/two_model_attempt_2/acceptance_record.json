@@ -1,0 +1,54 @@
+{
+  "kind": "canonical-quality-v2 continuation PPL: ACCEPTANCE RECORD of registered two-model Attempt 2",
+  "status": "accepted",
+  "accepted_utc_date": "2026-10-03",
+  "attempt": 2,
+  "evidence_commit": "10b0973",
+  "llama_uninspected_run_commit": "01cced9",
+  "source_commit": "05eb29e6dcb99dd256ee8a5bb85396bbd01c05f6",
+  "authoritative": "this is the authoritative canonical continuation-PPL evidence",
+  "results": {
+    "llama3_1_8b": {
+      "bf16_ppl": 7.515395843214247,
+      "rabit_ppl": 7.6325218956943175,
+      "relative_delta_pct": 1.558481481528684,
+      "ci95_pct": [
+        1.1169214551782547,
+        2.0482972302842573
+      ]
+    },
+    "qwen2_5_7b": {
+      "bf16_ppl": 6.7870010008184805,
+      "rabit_ppl": 112.38555319178539,
+      "relative_delta_pct": 1555.8941597066544,
+      "ci95_pct": [
+        1320.3867153563212,
+        1827.772098941309
+      ]
+    }
+  },
+  "interpretation": {
+    "case": 1,
+    "condition": "Llama remains near its BF16 control while Qwen still shows severe degradation.",
+    "interpretation": "The frozen operating point shows model-specific quality sensitivity; mechanism remains undiagnosed.",
+    "applied": "descriptively, by review decision; no numerical definition of 'near BF16' is introduced"
+  },
+  "qualification": {
+    "statement": "The old logical evaluator materially distorted the MAGNITUDE of the Qwen degradation (legacy Qwen RABIT PPL 299.62 vs canonical 112.39), but the severe Qwen sensitivity remains under canonical semantics. The Qwen degradation is therefore NOT merely an old-evaluator artifact.",
+    "no_causal_decomposition": "The change from 299.62 to 112.39 is not attributed to the metadata-layout fix or to the aging fix individually; no causal decomposition has been run."
+  },
+  "generalization_claims": {
+    "supported": [
+      "RABIT's physical representation and canonical cache semantics transfer across the tested Llama and Qwen KV geometries.",
+      "The same frozen operating point exhibits strongly model-dependent quality behavior."
+    ],
+    "not_supported": [
+      "RABIT quality generalizes across models.",
+      "The frozen K3/V2/G32/R4/META8g64 operating point is universally suitable.",
+      "Qwen degradation is caused by GQA, projection bias, outliers, fallback attention, or any other specific mechanism."
+    ],
+    "mechanism": "unknown"
+  },
+  "attempt_1": "permanently INVALID, NO QUALITY RESULT; never pooled or reused",
+  "follow_up_experiments_launched": "none"
+}

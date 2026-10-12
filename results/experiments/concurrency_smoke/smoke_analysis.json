@@ -1,0 +1,215 @@
+{
+  "scope": "Experiment 6 concurrency CORRECTNESS SMOKE test only (4 concurrent 2048-token requests, 32 greedy outputs, max_num_seqs 4); NOT a throughput or latency result; no performance claim.",
+  "performance_claim": false,
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 42,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "final_rabit_configuration": {
+    "impl": "shared_decode",
+    "query_block": 32,
+    "query_block_source": "results/mlsys2027/diagnostics/stage3c_shared_decode_qb_tiebreak",
+    "accepted_shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f",
+    "accepted_triton_attn_sha256": "0c75dd06d3893c4f6240c4d70bd51d4888855100d220b673c6b77c1a0a4e16cf",
+    "accepted_rabit_kv2_sha256": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+  },
+  "upstream_cli_audit": {
+    "vllm_bench_throughput_accepts_rabit_kv2": true,
+    "reason_not_used_for_correctness": "run_vllm() samples with temperature=1.0 / top_p=1.0 and uses outputs only for token counting; no deterministic per-request output token IDs are exposed",
+    "block_size_requirement": "rabit_kv2 requires --block-size to be a multiple of 32"
+  },
+  "per_dtype": {
+    "bfloat16": {
+      "stage3c": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          67409
+        ],
+        "after_smoke": [
+          67409
+        ]
+      },
+      "jit_lines_by_phase": {
+        "warmup": 2
+      },
+      "per_request": [
+        {
+          "i": 0,
+          "prompt_sha256": "6257a7f421a3277282beaf05eb02e2ae6c8f601e853bbf5c313119fd93ba9067",
+          "single_prompt_matches": true,
+          "concurrent_prompt_matches": true,
+          "single_output_sha256": "60ceb9ed0d7be43e328f2b9a8e4bf34f100df5e2ca0115d8a6b5f30ed2cd97ff",
+          "concurrent_output_sha256": "60ceb9ed0d7be43e328f2b9a8e4bf34f100df5e2ca0115d8a6b5f30ed2cd97ff",
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 1,
+          "prompt_sha256": "765622d878082967a274fad8291361a0bc67ced6cfa211f3fb8f829d7fea560d",
+          "single_prompt_matches": true,
+          "concurrent_prompt_matches": true,
+          "single_output_sha256": "1e8823bb792fb4ce1184aa76869cf1e35afed394e7120736d7ae47b3870d755d",
+          "concurrent_output_sha256": "1e8823bb792fb4ce1184aa76869cf1e35afed394e7120736d7ae47b3870d755d",
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 2,
+          "prompt_sha256": "21722659eaf540441594f70cb6bac4b3e3cae725b33c2ab257bc685f83c4e78c",
+          "single_prompt_matches": true,
+          "concurrent_prompt_matches": true,
+          "single_output_sha256": "306b05e6c550f7f539b9661d3de7b07a578bc24fb3954997c1518ca96907bfc5",
+          "concurrent_output_sha256": "306b05e6c550f7f539b9661d3de7b07a578bc24fb3954997c1518ca96907bfc5",
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 3,
+          "prompt_sha256": "b29779cdf1bf2cbde4b6b71cf236abfa8c42a06ac116edb3594f01299df7ff59",
+          "single_prompt_matches": true,
+          "concurrent_prompt_matches": true,
+          "single_output_sha256": "b14b05a48bd4ee9147a235d20bf97cd122d18364b774d7c984a39686e6d10e12",
+          "concurrent_output_sha256": "b14b05a48bd4ee9147a235d20bf97cd122d18364b774d7c984a39686e6d10e12",
+          "equal": true,
+          "first_divergent_position": null
+        }
+      ],
+      "equal_count": 4,
+      "single_outputs_pairwise_distinct": true,
+      "concurrent_overlap": {
+        "evaluable": true,
+        "all_active_simultaneously": true,
+        "all_decoding_simultaneously": true,
+        "common_active_window_s": 0.7409893820000093,
+        "common_decode_window_s": 0.5202764329999923,
+        "serial_in_order": false
+      },
+      "single_overlap": {
+        "evaluable": true,
+        "all_active_simultaneously": false,
+        "all_decoding_simultaneously": false,
+        "common_active_window_s": -1.1703577530000189,
+        "common_decode_window_s": -1.2299582090000172,
+        "serial_in_order": true
+      }
+    },
+    "rabit_kv2": {
+      "stage3c": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      },
+      "capacity": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      },
+      "gpu_memory_mib": {
+        "before_engine_init": [
+          4
+        ],
+        "after_engine_init": [
+          70135
+        ],
+        "after_smoke": [
+          70137
+        ]
+      },
+      "jit_lines_by_phase": {
+        "warmup": 8
+      },
+      "per_request": [
+        {
+          "i": 0,
+          "prompt_sha256": "6257a7f421a3277282beaf05eb02e2ae6c8f601e853bbf5c313119fd93ba9067",
+          "single_prompt_matches": true,
+          "concurrent_prompt_matches": true,
+          "single_output_sha256": "60ceb9ed0d7be43e328f2b9a8e4bf34f100df5e2ca0115d8a6b5f30ed2cd97ff",
+          "concurrent_output_sha256": "60ceb9ed0d7be43e328f2b9a8e4bf34f100df5e2ca0115d8a6b5f30ed2cd97ff",
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 1,
+          "prompt_sha256": "765622d878082967a274fad8291361a0bc67ced6cfa211f3fb8f829d7fea560d",
+          "single_prompt_matches": true,
+          "concurrent_prompt_matches": true,
+          "single_output_sha256": "1e8823bb792fb4ce1184aa76869cf1e35afed394e7120736d7ae47b3870d755d",
+          "concurrent_output_sha256": "1e8823bb792fb4ce1184aa76869cf1e35afed394e7120736d7ae47b3870d755d",
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 2,
+          "prompt_sha256": "21722659eaf540441594f70cb6bac4b3e3cae725b33c2ab257bc685f83c4e78c",
+          "single_prompt_matches": true,
+          "concurrent_prompt_matches": true,
+          "single_output_sha256": "306b05e6c550f7f539b9661d3de7b07a578bc24fb3954997c1518ca96907bfc5",
+          "concurrent_output_sha256": "306b05e6c550f7f539b9661d3de7b07a578bc24fb3954997c1518ca96907bfc5",
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 3,
+          "prompt_sha256": "b29779cdf1bf2cbde4b6b71cf236abfa8c42a06ac116edb3594f01299df7ff59",
+          "single_prompt_matches": true,
+          "concurrent_prompt_matches": true,
+          "single_output_sha256": "b14b05a48bd4ee9147a235d20bf97cd122d18364b774d7c984a39686e6d10e12",
+          "concurrent_output_sha256": "b14b05a48bd4ee9147a235d20bf97cd122d18364b774d7c984a39686e6d10e12",
+          "equal": true,
+          "first_divergent_position": null
+        }
+      ],
+      "equal_count": 4,
+      "single_outputs_pairwise_distinct": true,
+      "concurrent_overlap": {
+        "evaluable": true,
+        "all_active_simultaneously": true,
+        "all_decoding_simultaneously": true,
+        "common_active_window_s": 2.014732312999996,
+        "common_decode_window_s": 1.5894908369999996,
+        "serial_in_order": false
+      },
+      "single_overlap": {
+        "evaluable": true,
+        "all_active_simultaneously": false,
+        "all_decoding_simultaneously": false,
+        "common_active_window_s": -1.5603872730000035,
+        "common_decode_window_s": -1.6787908630000175,
+        "serial_in_order": true
+      }
+    }
+  }
+}

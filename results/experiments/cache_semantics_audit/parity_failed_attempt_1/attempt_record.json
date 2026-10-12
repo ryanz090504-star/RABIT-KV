@@ -1,0 +1,25 @@
+{
+  "kind": "canonical-quality-v2 CPU parity tests",
+  "attempt": 1,
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "source_commit": "c36069781b259e2e9b4d8adf60b7c58ea5df5cac",
+  "modal_app_id": "ap-2Doer4zsR7M4kOk3zO7j62",
+  "hardware": "CPU-only container (cpu=8); no GPU",
+  "wall_clock_s": 2700,
+  "timed_out": true,
+  "elapsed_s": 2704.1,
+  "cleanup": "new app discovered and verified stopped with 0 tasks; no pre-existing app touched",
+  "failure": {
+    "error": "IndexError: 2 at /root/canonical_quality_parity_modal.py line 17: ROOT = Path(__file__).resolve().parents[2]",
+    "classification": "HARNESS DEFECT in canonical_quality_parity_modal.py: module-level local-path computation also executes when Modal imports the wrapper inside the container (/root/<file>, only one parent); every container start failed at import (16 'Runner failed' records) until the local wall clock killed the client",
+    "lesson_not_applied": "the isolated remote-import simulation built for the Exp14 numerical diagnostic was not applied to this new wrapper"
+  },
+  "parity_tests_executed": false,
+  "results": "none",
+  "actions_not_taken": ["no retry", "no fix applied", "no amendment record", "no PPL validation run"],
+  "files_sha256": {
+    "parity_session.log": "4d9ee598330b03f20fdf94fa2698b1491a7d04b7abd2c3358289104b5652bb8c",
+    "record.json": "ef9909fe49f4c5963c2f69e6aaa7ba44baf8958fc797be8a2278197f037f534c"
+  }
+}

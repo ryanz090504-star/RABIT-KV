@@ -1,0 +1,222 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-m4DmeMFX4s0iYWhqdX6bfm
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\quality\hotpotqa.py
+└── 🔨 Created function run_longbench.
+GPU: NVIDIA H200
+Model: LLM-Research/Meta-Llama-3.1-8B-Instruct
+Dataset: LongBench-E hotpotqa_e
+Length bucket: 8k+
+Samples: 20, starting at filtered index 0
+Maximum input length: 16384 tokens
+Methods: ['bf16', 'rabit8', 'rabit4', 'rabit3', 'rabit2']
+Metric: official LongBench QA token-level F1
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+
+2026-09-25 15:23:40,949 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  44%|████▍     | 8/18 [00:01<00:02,  4.31file/s]
+[1ADownloading:  56%|█████▌    | 10/18 [00:08<00:07,  1.01file/s]
+[1ADownloading:  94%|█████████▍| 17/18 [00:08<00:00,  2.26file/s]
+[1ADownloading:  94%|█████████▍| 17/18 [00:20<00:00,  2.26file/s]
+[1ADownloading: 100%|██████████| 18/18 [00:27<00:00,  2.42s/file]
+[1ADownloading: 100%|██████████| 18/18 [00:27<00:00,  1.54s/file]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:03,  1.15s/it]
+[1ALoading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.02s/it]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:03<00:01,  1.16s/it]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:03<00:00,  1.32it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:03<00:00,  1.13it/s]
+
+[1AGenerating test split: 0 examples [00:00, ? examples/s]
+[1AGenerating test split: 300 examples [00:00, 4378.04 examples/s]
+Configurations:
+  bf16: BF16 baseline
+  rabit8: 8b META8g256 G128 R0
+  rabit4: 4b META8g64 SYM G128 R0
+  rabit3: 3b META8g64 SYM G32 R2
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Sample 1/20 (dataset index 200): 16192 original tokens, 16192 used tokens
+Ground truth: ['331 episodes']
+  bf16     score=0.667 KV=2023.875 MB answer='331'
+  rabit8   score=0.667 KV=1019.967 MB answer='331'
+  rabit4   score=0.667 KV=514.369 MB answer='331'
+  rabit3   score=0.667 KV=413.277 MB answer='331'
+  rabit2   score=0.667 KV=383.906 MB answer='331'
+
+Sample 2/20 (dataset index 201): 14845 original tokens, 14845 used tokens
+Ground truth: ['2016–17 NHL season']
+  bf16     score=0.500 KV=1855.500 MB answer='2016–17'
+  rabit8   score=0.500 KV=935.113 MB answer='2016–17'
+  rabit4   score=0.500 KV=471.578 MB answer='2016–17'
+  rabit3   score=0.500 KV=378.909 MB answer='2016–17'
+  rabit2   score=0.000 KV=352.046 MB answer='2016-17'
+
+Sample 3/20 (dataset index 202): 14376 original tokens, 14376 used tokens
+Ground truth: ['Neneh Cherry']
+  bf16     score=0.190 KV=1796.875 MB answer='The Clash, Will Self, Jock Scott, Shane MacGowan, Neneh Cherry, Joe Rush of Mutoid Waste, Keith and Kevin Allen,'
+  rabit8   score=0.190 KV=905.579 MB answer='The Clash, Will Self, Jock Scott, Shane MacGowan, Neneh Cherry, Joe Rush of Mutoid Waste, Keith and Kevin Allen,'
+  rabit4   score=0.190 KV=456.677 MB answer='The Clash, Will Self, Jock Scott, Shane MacGowan, Neneh Cherry, Joe Rush of Mutoid Waste, Keith and Kevin Allen,'
+  rabit3   score=1.000 KV=366.946 MB answer='Neneh Cherry'
+  rabit2   score=0.190 KV=341.231 MB answer='The Clash, Will Self, Jock Scott, Shane MacGowan, Neneh Cherry, Joe Rush of Mutoid Waste, Keith and Kevin Allen,'
+
+Sample 4/20 (dataset index 203): 16148 original tokens, 16148 used tokens
+Ground truth: ['Passion Pit is an American indietronica band']
+  bf16     score=0.100 KV=2018.375 MB answer='Both bands have had a lead guitarist leave the band and then return.'
+  rabit8   score=0.000 KV=1017.201 MB answer='Both bands have had their music featured in various video games, with Sum 41\'s "Underclass Hero" being featured in Madden 08 and Sony\'s NBA'
+  rabit4   score=0.000 KV=512.973 MB answer='They both have a song called "Underclass Hero" and "Manners" respectively, which are also the titles of their albums.'
+  rabit3   score=0.080 KV=412.155 MB answer='They both have a song called "Underclass Hero" and "Manners" is the debut studio album by both bands.'
+  rabit2   score=0.000 KV=383.029 MB answer='Both bands have had their music featured in various video games, with Sum 41\'s "Underclass Hero" being used in the EA Sports video game Madden'
+
+Sample 5/20 (dataset index 204): 15636 original tokens, 15636 used tokens
+Ground truth: ['1924November 22, 1993']
+  bf16     score=0.000 KV=1954.375 MB answer='July 14, 1978'
+  rabit8   score=0.000 KV=984.948 MB answer='July 14, 1978'
+  rabit4   score=0.000 KV=496.708 MB answer='July 14, 1978'
+  rabit3   score=0.000 KV=399.092 MB answer='July 14, 1978'
+  rabit2   score=0.000 KV=370.904 MB answer='July 14, 1978'
+
+Sample 6/20 (dataset index 205): 16044 original tokens, 16044 used tokens
+Ground truth: ['Beauty and the Beast']
+  bf16     score=1.000 KV=2005.375 MB answer='Beauty and the Beast'
+  rabit8   score=1.000 KV=1010.654 MB answer='Beauty and the Beast'
+  rabit4   score=1.000 KV=509.669 MB answer='Beauty and the Beast'
+  rabit3   score=1.000 KV=409.501 MB answer='Beauty and the Beast'
+  rabit2   score=1.000 KV=380.677 MB answer='Beauty and the Beast'
+
+Sample 7/20 (dataset index 206): 14362 original tokens, 14362 used tokens
+Ground truth: ['Ohio River']
+  bf16     score=1.000 KV=1795.125 MB answer='Ohio River'
+  rabit8   score=1.000 KV=904.688 MB answer='Ohio River'
+  rabit4   score=1.000 KV=456.235 MB answer='Ohio River'
+  rabit3   score=1.000 KV=366.589 MB answer='Ohio River'
+  rabit2   score=1.000 KV=340.651 MB answer='Ohio River'
+
+Sample 8/20 (dataset index 207): 16115 original tokens, 16115 used tokens
+Ground truth: ['Vice President']
+  bf16     score=1.000 KV=2014.250 MB answer='Vice President.'
+  rabit8   score=1.000 KV=1015.123 MB answer='Vice President.'
+  rabit4   score=1.000 KV=511.926 MB answer='Vice President'
+  rabit3   score=1.000 KV=411.311 MB answer='Vice President'
+  rabit2   score=0.500 KV=382.260 MB answer='Vice President of the United States.'
+
+Sample 9/20 (dataset index 208): 14950 original tokens, 14950 used tokens
+Ground truth: ['no']
+  bf16     score=1.000 KV=1868.625 MB answer='No'
+  rabit8   score=1.000 KV=941.739 MB answer='No'
+  rabit4   score=1.000 KV=474.913 MB answer='No'
+  rabit3   score=1.000 KV=381.590 MB answer='No'
+  rabit2   score=1.000 KV=354.852 MB answer='No'
+
+Sample 10/20 (dataset index 209): 13686 original tokens, 13686 used tokens
+Ground truth: ['4']
+  bf16     score=1.000 KV=1710.625 MB answer='4'
+  rabit8   score=1.000 KV=862.104 MB answer='4'
+  rabit4   score=1.000 KV=434.758 MB answer='4'
+  rabit3   score=1.000 KV=349.342 MB answer='4'
+  rabit2   score=1.000 KV=324.698 MB answer='4'
+
+Sample 11/20 (dataset index 210): 15471 original tokens, 15471 used tokens
+Ground truth: ['Appointed Deputy Führer']
+  bf16     score=0.800 KV=1933.750 MB answer='Deputy Führer'
+  rabit8   score=0.800 KV=974.556 MB answer='Deputy Führer'
+  rabit4   score=0.800 KV=491.464 MB answer='Deputy Führer'
+  rabit3   score=0.800 KV=394.880 MB answer='Deputy Führer'
+  rabit2   score=0.800 KV=367.064 MB answer='Deputy Führer'
+
+Sample 12/20 (dataset index 211): 16353 original tokens, 16353 used tokens
+Ground truth: ['at age 27']
+  bf16     score=0.000 KV=2044.000 MB answer='1970'
+  rabit8   score=0.000 KV=1030.109 MB answer='1970'
+  rabit4   score=0.000 KV=519.483 MB answer='1970'
+  rabit3   score=0.000 KV=417.383 MB answer='October 4, 1970'
+  rabit2   score=0.000 KV=387.703 MB answer='October 4, 1970'
+
+Sample 13/20 (dataset index 212): 11642 original tokens, 11642 used tokens
+Ground truth: ['New York Giants']
+  bf16     score=1.000 KV=1455.125 MB answer='New York Giants'
+  rabit8   score=1.000 KV=733.339 MB answer='New York Giants'
+  rabit4   score=1.000 KV=369.824 MB answer='New York Giants'
+  rabit3   score=1.000 KV=297.194 MB answer='New York Giants'
+  rabit2   score=1.000 KV=276.237 MB answer='New York Giants'
+
+Sample 14/20 (dataset index 213): 15905 original tokens, 15905 used tokens
+Ground truth: ['Duchess Eleanor of Aquitaine']
+  bf16     score=0.222 KV=1988.000 MB answer='King Richard I of England.'
+  rabit8   score=0.222 KV=1001.887 MB answer='King Richard I of England.'
+  rabit4   score=0.222 KV=505.251 MB answer='King Richard I of England.'
+  rabit3   score=0.250 KV=405.953 MB answer='Richard I of England'
+  rabit2   score=0.222 KV=377.093 MB answer='King Richard I of England.'
+
+Sample 15/20 (dataset index 214): 15982 original tokens, 15982 used tokens
+Ground truth: ['published campaign settings']
+  bf16     score=0.667 KV=1997.625 MB answer='published campaign setting'
+  rabit8   score=0.667 KV=1006.747 MB answer='published campaign setting'
+  rabit4   score=0.500 KV=507.699 MB answer='published'
+  rabit3   score=0.500 KV=407.919 MB answer='Published'
+  rabit2   score=0.667 KV=379.181 MB answer='published campaign setting'
+
+Sample 16/20 (dataset index 215): 15240 original tokens, 15240 used tokens
+Ground truth: ['Two of his novels, "The Prince of Tides" and "The Great Santini", were made into Oscar-nominated films.']
+  bf16     score=0.000 KV=1904.875 MB answer='Pat Conroy'
+  rabit8   score=0.000 KV=960.007 MB answer='Pat Conroy'
+  rabit4   score=0.000 KV=484.125 MB answer='Pat Conroy'
+  rabit3   score=0.000 KV=388.989 MB answer='Pat Conroy'
+  rabit2   score=0.000 KV=361.692 MB answer='Pat Conroy'
+
+Sample 17/20 (dataset index 216): 15948 original tokens, 15948 used tokens
+Ground truth: ['Chris Corbould and Neil Corbould']
+  bf16     score=1.000 KV=1993.375 MB answer='Chris Corbould and Neil Corbould'
+  rabit8   score=1.000 KV=1004.606 MB answer='Chris Corbould and Neil Corbould'
+  rabit4   score=1.000 KV=506.620 MB answer='Chris Corbould and Neil Corbould'
+  rabit3   score=1.000 KV=407.052 MB answer='Chris Corbould and Neil Corbould'
+  rabit2   score=1.000 KV=378.403 MB answer='Chris Corbould and Neil Corbould.'
+
+Sample 18/20 (dataset index 217): 12094 original tokens, 12094 used tokens
+Ground truth: ['yes']
+  bf16     score=1.000 KV=1511.625 MB answer='Yes'
+  rabit8   score=1.000 KV=761.811 MB answer='Yes'
+  rabit4   score=1.000 KV=384.182 MB answer='Yes'
+  rabit3   score=1.000 KV=308.726 MB answer='Yes'
+  rabit2   score=1.000 KV=286.886 MB answer='Yes'
+
+Sample 19/20 (dataset index 218): 16418 original tokens, 16384 used tokens
+Ground truth: ['40 million']
+  bf16     score=0.000 KV=2047.875 MB answer='There is no information in the given passages about Josh Abraham selling albums with the help of Adam Lambert.'
+  rabit8   score=0.000 KV=1032.062 MB answer='There is no information in the given passages about Josh Abraham selling albums with the help of Adam Lambert.'
+  rabit4   score=0.000 KV=520.469 MB answer='There is no information in the given passages about Josh Abraham selling albums with Adam Lambert.'
+  rabit3   score=0.000 KV=418.176 MB answer='There is no information in the given passages about Josh Abraham selling albums with the help of Adam Lambert.'
+  rabit2   score=0.000 KV=388.453 MB answer='There is no information in the given passages about Josh Abraham selling albums with Adam Lambert.'
+
+Sample 20/20 (dataset index 219): 16024 original tokens, 16024 used tokens
+Ground truth: ['Duke Cunningham']
+  bf16     score=1.000 KV=2002.875 MB answer='Duke Cunningham'
+  rabit8   score=1.000 KV=1009.388 MB answer='Duke Cunningham'
+  rabit4   score=1.000 KV=509.032 MB answer='Duke Cunningham'
+  rabit3   score=1.000 KV=408.991 MB answer='Duke Cunningham'
+  rabit2   score=1.000 KV=380.038 MB answer='Duke Cunningham'
+
+==================================================================================================
+LongBench-E HotpotQA Results
+==================================================================================================
+Method        F1 %          F1 total      Avg KV MB     Samples   
+--------------------------------------------------------------------------------------------------
+bf16          60.7          12.15         1896.106      20        
+rabit8        60.2          12.05         955.581       20        
+rabit4        59.4          11.88         481.898       20        
+rabit3        64.0          12.80         387.199       20        
+rabit2        55.2          11.05         359.850       20        
+
+Important: the reported run time is only for experiment planning. It is not deployment latency.
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-m4DmeMFX4s0iYWhqdX6bfm

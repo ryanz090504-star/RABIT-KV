@@ -1,0 +1,10 @@
+{
+  "app_id": "ap-5pvRrz6NUTtnh2gZQMyS1M",
+  "app_name": "rabit-kv-mlsys2027-exp6-concurrency-scaling",
+  "function_call_id": "fc-01M3M67DNZZH5QZYT5DMBVX37K",
+  "git_commit": "0a1a6b4d10466f07775a59b5970f812a4d0283c8",
+  "invocation": "sweep.spawn (modal run --detach); monitored by FunctionCall.from_id; never cancelled",
+  "launch_utc": "2026-09-28T14:20:43Z",
+  "run_id": "exp6-L8192-t1-20260928T141726Z-0a1a6b4",
+  "trial": 1
+}

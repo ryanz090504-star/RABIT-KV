@@ -1,0 +1,188 @@
+{
+  "label": "transparent post-failure methodological amendment",
+  "pre_registered": false,
+  "written_after": "Experiment 10 Attempt 1 failed the HotpotQA R4 control-reproduction gate (results/mlsys2027/ablations/residual_window/failed_attempt_1/, archived at 9889e33)",
+  "motivation": "repeated identical-config generated-QA control instability (HotpotQA rabit2 55.2 / 57.7 from one example's greedy answer; Qasper rabit2 34.8-36.2 from three examples)",
+  "derived_from": {
+    "audit": "results/mlsys2027/control_reproducibility_audit/qa_control_audit.json",
+    "audit_sha256_lf": "a5443863381a80708b6aaa88e45a48bde69542cf2b8e8cbca968d30a5d046e6b",
+    "rows_used": "bf16 and canonical rabit2 control rows only",
+    "treatment_quality_used": false
+  },
+  "status_of_prior_attempts": {
+    "exp10_attempt1": "remains invalid_control_reproduction (excluded)",
+    "exp9_attempt1": "remains invalid_control_reproduction (excluded)",
+    "prior_accepted_experiments": "unchanged; none relabeled"
+  },
+  "unchanged": [
+    "LongBench scorer (qa_f1_score)",
+    "prompts",
+    "generation settings",
+    "datasets",
+    "sample selection and counts",
+    "configs",
+    "logical-storage accounting",
+    "official aggregate F1 metric and its reporting",
+    "continuation_ppl / NIAH / passage-retrieval control-reproduction rules",
+    "original frozen Exp10 protocol file (benchmarks/mlsys2027/exp10_residual_protocol.json, sha256 171cdbcab5c57137edda12ad044e038a52c722f32b740b26cc084ff0539c53d4) -- not modified; this amendment overlays it"
+  ],
+  "changes": "ONLY the QA control-validity rule, prospectively: for hotpotqa and qasper the aggregate +/-1.0-point F1 control-reproduction pass/fail gate (bf16 and canonical control) is superseded by the per-example gate below; the bf16 / control logical KV MB reproduction checks keep their original tolerance",
+  "applies_to": [
+    "Experiment 10 Attempt 2",
+    "Experiment 11"
+  ],
+  "reference": "the frozen canonical run results/quality/<benchmark>.log (per-example scores, dataset indices, ordering and ground truths)",
+  "gate": {
+    "mandatory": [
+      "exact canonical config equality (existing protocol gates)",
+      "exact dataset identity: the Dataset / Length bucket / Samples / Maximum input length / Metric header lines equal the reference's",
+      "exact sample indices, ordering, token counts and ground truths: every 'Sample i/N (dataset index d): ...' and 'Ground truth: ...' line equals the reference's, in order",
+      "exact sample count: one parsed row per sample for bf16 and for the control",
+      "exact logical-storage accounting (existing protocol gates)",
+      "no missing / malformed per-example rows"
+    ],
+    "per_example_bound": "independently for bf16 and for the canonical control: score_mismatch_count <= historical_max_score_mismatch_count AND l1_score_distance <= historical_max_l1_score_distance",
+    "definitions": {
+      "score_mismatch": "an example whose logged official F1 (3 decimals) differs from the reference's",
+      "l1_score_distance": "sum over examples of |run F1 - reference F1| using the logged per-example scores (0-1 scale), computed exactly in integer thousandths",
+      "text_only_differences": "answer-text differences with an identical logged F1 are recorded, not counted"
+    },
+    "numerical_tolerance": "none needed: scores are compared as exact integer thousandths of the printed values",
+    "slack": "none: thresholds equal the historical maxima"
+  },
+  "thresholds": {
+    "hotpotqa": {
+      "bf16": {
+        "historical_max_score_mismatch_count": 1,
+        "historical_max_l1_score_distance": 0.065,
+        "historical_max_l1_score_distance_milli": 65,
+        "per_run": {
+          "exp1": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 35
+          },
+          "exp7": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 65
+          },
+          "exp8": {
+            "score_mismatch_count": 0,
+            "l1_score_distance_milli": 0
+          },
+          "exp9_attempt1": {
+            "score_mismatch_count": 0,
+            "l1_score_distance_milli": 0
+          },
+          "exp9_attempt2": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 35
+          },
+          "exp10_attempt1": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 35
+          }
+        },
+        "n_historical_runs_excluding_reference": 6,
+        "aggregate_f1_envelope_report_only": [
+          60.2,
+          60.7
+        ]
+      },
+      "rabit2": {
+        "historical_max_score_mismatch_count": 1,
+        "historical_max_l1_score_distance": 0.5,
+        "historical_max_l1_score_distance_milli": 500,
+        "per_run": {
+          "exp1": {
+            "score_mismatch_count": 0,
+            "l1_score_distance_milli": 0
+          },
+          "exp7": {
+            "score_mismatch_count": 0,
+            "l1_score_distance_milli": 0
+          },
+          "exp8": {
+            "score_mismatch_count": 0,
+            "l1_score_distance_milli": 0
+          },
+          "exp9_attempt1": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 500
+          },
+          "exp9_attempt2": {
+            "score_mismatch_count": 0,
+            "l1_score_distance_milli": 0
+          },
+          "exp10_attempt1": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 500
+          }
+        },
+        "n_historical_runs_excluding_reference": 6,
+        "aggregate_f1_envelope_report_only": [
+          55.2,
+          57.7
+        ]
+      }
+    },
+    "qasper": {
+      "bf16": {
+        "historical_max_score_mismatch_count": 1,
+        "historical_max_l1_score_distance": 0.096,
+        "historical_max_l1_score_distance_milli": 96,
+        "per_run": {
+          "exp1": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 96
+          },
+          "exp7": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 96
+          },
+          "exp8": {
+            "score_mismatch_count": 0,
+            "l1_score_distance_milli": 0
+          },
+          "exp9_attempt2": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 96
+          }
+        },
+        "n_historical_runs_excluding_reference": 4,
+        "aggregate_f1_envelope_report_only": [
+          35.5,
+          35.9
+        ]
+      },
+      "rabit2": {
+        "historical_max_score_mismatch_count": 2,
+        "historical_max_l1_score_distance": 0.185,
+        "historical_max_l1_score_distance_milli": 185,
+        "per_run": {
+          "exp1": {
+            "score_mismatch_count": 2,
+            "l1_score_distance_milli": 185
+          },
+          "exp7": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 140
+          },
+          "exp8": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 174
+          },
+          "exp9_attempt2": {
+            "score_mismatch_count": 1,
+            "l1_score_distance_milli": 11
+          }
+        },
+        "n_historical_runs_excluding_reference": 4,
+        "aggregate_f1_envelope_report_only": [
+          34.8,
+          36.2
+        ]
+      }
+    }
+  },
+  "aggregate_f1": "reported exactly as before (official LongBench aggregate); whether it lies inside aggregate_f1_envelope_report_only is REPORT-ONLY and never a pass/fail gate"
+}

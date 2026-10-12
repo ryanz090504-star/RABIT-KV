@@ -1,0 +1,172 @@
+{
+  "label": "NON-EVIDENCE FEASIBILITY PROBE",
+  "not_exp13_evidence": true,
+  "latency_measured": false,
+  "retried": false,
+  "vllm_modified": false,
+  "runner_setting": "VLLM_USE_V2_MODEL_RUNNER=0 (legacy model runner) for every process",
+  "purpose": "whether BF16 / native FP8 / RABIT / TurboQuant all run under one common legacy model runner with block_size 32 and the intended Exp13 serving settings, with physical caches",
+  "git_head": "426fe3e47ca11acb4a0488ac07ed16d322b9b104",
+  "vllm_kvquant_snapshot_sha256": "cf61031c45ed6309de8b30edde6c641b27633b3cb2d40f819b312c2f03a870da",
+  "harness_sha256": {
+    "exp13_legacy_probe_modal.py": "bb7c2583b73d2849dc4299d043d6798bee326194e0c69f3a19b428d3a20c843a",
+    "exp13_legacy_probe_worker.py": "00b3e3b0de6fb12d8428fa37251b66a5d7dea19a7d1c7a430fe2d23de29396f4",
+    "run_exp13_legacy_probe.py": "0c003ffb9b94b4a7cd87ede8f909fe5afc246330c4d1b0517f5edc1a7966000f",
+    "exp3_watchdog.py": "05e6472e8172a0b7e264ecf7509752bb9a70818f08ba67da476c69db38164d21",
+    "exp3_correctness_gate.py": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce"
+  },
+  "started_utc": "2026-09-30T02:32:32.387768+00:00",
+  "completed_utc": "2026-09-30T02:40:11.108395+00:00",
+  "modal_returncode": 0,
+  "modal_app_ids": [
+    "ap-XhXHURi21ylxNI9CxTu4aS"
+  ],
+  "log": "results/mlsys2027/external_baseline/legacy_runner_probe/probe.log",
+  "log_sha256": "217ece52324e5f648b6875c3f7971a937a8fc3c46943a7fd6d0cbacf7806160d",
+  "log_sha256_lf_normalized": "c7dcedfd0248fa91b22c386ddfe20e947b8cb56fd58e716c641e871949924a0e",
+  "parsed": {
+    "top": {
+      "ENVIRONMENT": {
+        "VLLM_USE_V2_MODEL_RUNNER": "0",
+        "compute_apps_before": [],
+        "gpus": [
+          {
+            "driver_version": "580.95.05",
+            "index": "0",
+            "memory.total": "81559",
+            "memory.used": "4",
+            "name": "NVIDIA H100 80GB HBM3",
+            "uuid": "GPU-2cc05cab-c641-5150-705d-7a5dc5f24b0f"
+          }
+        ],
+        "packages": {
+          "modelscope": "1.40.1",
+          "pytest": "9.1.1",
+          "torch": "2.11.0+cu130",
+          "transformers": "5.17.0",
+          "triton": "3.6.0",
+          "vllm": "0.10.0+kvquant"
+        },
+        "python": "3.11.5",
+        "vllm_precompiled_wheel_commit": "f329ce405b12623fb8b1cf1830f12e5a712523be"
+      },
+      "MODEL": {
+        "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+        "snapshot_dir": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master"
+      },
+      "PRE_PROCESS_GPU_STATE": {
+        "baseline_mib": [
+          4
+        ],
+        "clean": true,
+        "label": "turboquant_k3v4_nc",
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ]
+          }
+        ]
+      },
+      "PROCESS_START": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp13/exp13_legacy_probe_worker.py",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--kv-cache-dtype",
+          "turboquant_k3v4_nc"
+        ],
+        "label": "turboquant_k3v4_nc",
+        "timeout_s": 1200
+      },
+      "PROCESS_EXIT": {
+        "cmd": [
+          "/usr/local/bin/python",
+          "/opt/exp13/exp13_legacy_probe_worker.py",
+          "--model-dir",
+          "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "--kv-cache-dtype",
+          "turboquant_k3v4_nc"
+        ],
+        "elapsed_s": 138.199,
+        "grace_s": 10.0,
+        "group_processes_after_leader_exit": [],
+        "group_processes_remaining": [],
+        "label": "turboquant_k3v4_nc",
+        "own_session": true,
+        "pgid": 42,
+        "pid": 42,
+        "reader_finished": true,
+        "returncode": 2,
+        "signals_sent": [],
+        "timed_out": false,
+        "timeout_s": 1200
+      },
+      "PHASES": [
+        {
+          "phase": "turboquant_k3v4_nc",
+          "returncode": 2
+        }
+      ]
+    },
+    "phases": {
+      "turboquant_k3v4_nc": {
+        "LABEL": "NON-EVIDENCE FEASIBILITY PROBE -- not Exp13 evidence; no latency measured",
+        "CONDITION": "turboquant_k3v4_nc",
+        "REQUESTED_ENGINE_KWARGS": {
+          "block_size": 32,
+          "disable_log_stats": false,
+          "dtype": "bfloat16",
+          "enable_chunked_prefill": true,
+          "enable_prefix_caching": false,
+          "enforce_eager": true,
+          "gpu_memory_utilization": 0.82,
+          "kv_cache_dtype": "turboquant_k3v4_nc",
+          "max_model_len": 32768,
+          "max_num_batched_tokens": 16384,
+          "max_num_seqs": 32,
+          "model": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+          "trust_remote_code": true
+        },
+        "RUNNER_SETTING": {
+          "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+          "VLLM_USE_V2_MODEL_RUNNER": "0"
+        },
+        "STARTUP": {
+          "exception": "Unknown TurboQuant cache dtype: 'auto'. Valid presets: turboquant_k8v4, turboquant_4bit_nc, turboquant_k3v4_nc, turboquant_3bit_nc",
+          "exception_type": "ValueError",
+          "failure_location": {
+            "file": "/root/vllm-kvquant/vllm/model_executor/layers/quantization/turboquant/config.py",
+            "function": "from_cache_dtype",
+            "line": 222
+          },
+          "success": false
+        },
+        "traceback": "[turboquant_k3v4_nc] Traceback (most recent call last):\n[turboquant_k3v4_nc]   File \"/opt/exp13/exp13_legacy_probe_worker.py\", line 118, in main\n[turboquant_k3v4_nc]     llm = LLM(**kwargs)\n[turboquant_k3v4_nc]           ^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/entrypoints/llm.py\", line 349, in __init__\n[turboquant_k3v4_nc]     self.llm_engine = LLMEngine.from_engine_args(\n[turboquant_k3v4_nc]                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/engine/llm_engine.py\", line 179, in from_engine_args\n[turboquant_k3v4_nc]     return cls(\n[turboquant_k3v4_nc]            ^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/engine/llm_engine.py\", line 105, in __init__\n[turboquant_k3v4_nc]     self.engine_core = EngineCoreClient.make_client(\n[turboquant_k3v4_nc]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/engine/core_client.py\", line 105, in make_client\n[turboquant_k3v4_nc]     return InprocClient(vllm_config, executor_class, log_stats)\n[turboquant_k3v4_nc]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/engine/core_client.py\", line 287, in __init__\n[turboquant_k3v4_nc]     self.engine_core = EngineCore(*args, **kwargs)\n[turboquant_k3v4_nc]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/engine/core.py\", line 133, in __init__\n[turboquant_k3v4_nc]     kv_cache_config = self._initialize_kv_caches(vllm_config)\n[turboquant_k3v4_nc]                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/tracing/otel.py\", line 178, in sync_wrapper\n[turboquant_k3v4_nc]     return func(*args, **kwargs)\n[turboquant_k3v4_nc]            ^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/engine/core.py\", line 321, in _initialize_kv_caches\n[turboquant_k3v4_nc]     self.model_executor.initialize_from_config(kv_cache_configs)\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/executor/abstract.py\", line 123, in initialize_from_config\n[turboquant_k3v4_nc]     self.collective_rpc(\"initialize_from_config\", args=(kv_cache_configs,))\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/executor/uniproc_executor.py\", line 92, in collective_rpc\n[turboquant_k3v4_nc]     result = run_method(self.driver_worker, method, args, kwargs)\n[turboquant_k3v4_nc]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/serial_utils.py\", line 510, in run_method\n[turboquant_k3v4_nc]     return func(*args, **kwargs)\n[turboquant_k3v4_nc]            ^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/worker/worker_base.py\", line 325, in initialize_from_config\n[turboquant_k3v4_nc]     self.worker.initialize_from_config(kv_cache_config)  # type: ignore\n[turboquant_k3v4_nc]     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/tracing/otel.py\", line 178, in sync_wrapper\n[turboquant_k3v4_nc]     return func(*args, **kwargs)\n[turboquant_k3v4_nc]            ^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/worker/gpu_worker.py\", line 710, in initialize_from_config\n[turboquant_k3v4_nc]     self.model_runner.initialize_kv_cache(kv_cache_config)\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/worker/gpu_model_runner.py\", line 7438, in initialize_kv_cache\n[turboquant_k3v4_nc]     kv_caches = self.initialize_kv_cache_tensors(\n[turboquant_k3v4_nc]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/worker/gpu_model_runner.py\", line 7355, in initialize_kv_cache_tensors\n[turboquant_k3v4_nc]     kv_caches = self._reshape_kv_cache_tensors(\n[turboquant_k3v4_nc]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/worker/gpu_model_runner.py\", line 7200, in _reshape_kv_cache_tensors\n[turboquant_k3v4_nc]     kv_cache_shape = attn_backend.get_kv_cache_shape(\n[turboquant_k3v4_nc]                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/v1/attention/backends/turboquant_attn.py\", line 161, in get_kv_cache_shape\n[turboquant_k3v4_nc]     tq_config = TurboQuantConfig.from_cache_dtype(cache_dtype_str, head_size)\n[turboquant_k3v4_nc]                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n[turboquant_k3v4_nc]   File \"/root/vllm-kvquant/vllm/model_executor/layers/quantization/turboquant/config.py\", line 222, in from_cache_dtype\n[turboquant_k3v4_nc]     raise ValueError(\n[turboquant_k3v4_nc] ValueError: Unknown TurboQuant cache dtype: 'auto'. Valid presets: turboquant_k8v4, turboquant_4bit_nc, turboquant_k3v4_nc, turboquant_3bit_nc\n[turboquant_k3v4_nc] ",
+        "warning_lines": [
+          "[turboquant_k3v4_nc] WARNING 09-30 02:38:05 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_PRECOMPILED_WHEEL_VARIANT",
+          "[turboquant_k3v4_nc] WARNING 09-30 02:38:05 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_PRECOMPILED_WHEEL_COMMIT",
+          "[turboquant_k3v4_nc] WARNING 09-30 02:38:05 [envs.py:2035] Unknown vLLM environment variable detected: VLLM_USE_V1",
+          "[turboquant_k3v4_nc] WARNING 09-30 02:38:05 [arg_utils.py:1600] The global random seed is set to 0. Since VLLM_ENABLE_V1_MULTIPROCESSING is set to False, this may affect the random state of the Python process that launched vLLM.",
+          "[turboquant_k3v4_nc] WARNING 09-30 02:38:20 [arg_utils.py:2228] TurboQuant is not yet compatible with FlashAttention >= 3. Overriding flash_attn_version to 2. To silence this warning, pass --attention-config.flash_attn_version=2",
+          "[turboquant_k3v4_nc] WARNING 09-30 02:38:20 [vllm.py:1096] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none",
+          "[turboquant_k3v4_nc] WARNING 09-30 02:38:20 [vllm.py:1144] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.",
+          "[turboquant_k3v4_nc] [rank0]:[W930 02:40:04.361231439 ProcessGroupNCCL.cpp:1575] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())"
+        ],
+        "backend_lines": [
+          "[turboquant_k3v4_nc] INFO 09-30 02:38:30 [cuda.py:476] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+          "[turboquant_k3v4_nc] INFO 09-30 02:38:30 [flash_attn.py:718] Using FlashAttention version 2",
+          "[turboquant_k3v4_nc] INFO 09-30 02:38:30 [cuda.py:476] Using TURBOQUANT attention backend out of potential backends: ['TURBOQUANT']."
+        ],
+        "kv_memory_lines": [
+          "[turboquant_k3v4_nc] INFO 09-30 02:40:03 [gpu_worker.py:538] Available KV cache memory: 47.98 GiB",
+          "[turboquant_k3v4_nc] INFO 09-30 02:40:03 [kv_cache_utils.py:2146] GPU KV cache size: 1,203,200 tokens",
+          "[turboquant_k3v4_nc] INFO 09-30 02:40:03 [kv_cache_utils.py:2147] Maximum concurrency for 32,768 tokens per request: 36.72x"
+        ],
+        "gate_result_lines": []
+      }
+    }
+  }
+}

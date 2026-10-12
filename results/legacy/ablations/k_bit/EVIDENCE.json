@@ -1,0 +1,28 @@
+{
+  "experiment": "Experiment 7 -- single-axis K-bit ablation",
+  "type": "LOGICAL fake-quant / dequant QUALITY ablation; NOT a physical serving benchmark (no allocator capacity, throughput or latency)",
+  "status": "passed (all protocol gates, first and only execution)",
+  "execution_commit": "8173ad9c0f7b9b5989b47da906c4b4126540e880",
+  "protocol": {"file": "benchmarks/mlsys2027/exp7_kbit_protocol.json",
+               "sha256": "5893a293a7354a5e3644b57d8b052c556a90ab6ba988384e08a1179843b59f32"},
+  "utc": {"started": "2026-09-29T01:08:58.789819+00:00", "completed": "2026-09-29T01:19:02.142209+00:00"},
+  "gpu": {"model": "NVIDIA H100 80GB HBM3 (as printed by each script)",
+          "uuid": "not recorded: the canonical quality scripts print the GPU name only (unchanged, as in Experiment 1)"},
+  "modal_apps": {"continuation_ppl": "ap-lCrv4bzlEtFy0V0V9MPtWu", "niah": "ap-Rp82MyqkRwdWxoRLjXxq8U",
+                 "passage_retrieval": "ap-m0ZBnSrmZ7dq2Hf98Xca3V", "hotpotqa": "ap-wYBALDt0k740CSMLnE3QeR",
+                 "qasper": "ap-vv1lH4KuVHnArGBhV2Bn3j"},
+  "file_sha256": {
+    "continuation_ppl.log": "c7ca6cdf07e2b45c3062fb97d56c0396d322ebd6980aa6c13755176b1747f03d",
+    "niah.log": "ddeb92533e24079c7319fd9f944ca7214a502e2b4cf948a618289dc753059c9f",
+    "passage_retrieval.log": "6f82c903e8fb33c98d9fff3803a4771ae4a8d25735fe4ab7642c6e158072b569",
+    "hotpotqa.log": "0e3302edffc1d305cf8718caf7a23820c29d405fa845275a8a12ef73bebd538f",
+    "qasper.log": "81d12bf9b3b0cfc1b49beea9864124b420f061e4783fc6d620eed1e8eb76d531",
+    "manifest.json": "34d42de55f30ef2972118ec166d07b9b4214a1108ce7821c1213294cd30bacca",
+    "regression_check.json": "af7cd4b026fd32e3bd4a54a85ff52a82170a68d791543f9f9a5d53c05b4e4291",
+    "kbit_results.json": "106624c1b7efac45f05284521997fc097fc9888474493f531ebe25a73956059a"
+  },
+  "notes": [
+    "niah.log contains the tokenizer length warning emitted when the full WikiText filler is tokenized before slicing; the identical line is present in the accepted Experiment 1 niah.log.",
+    "Logical KV MB is packed prefix-KV accounting (payload bits + uint8-group metadata + BF16 residual), not physical allocator capacity."
+  ]
+}

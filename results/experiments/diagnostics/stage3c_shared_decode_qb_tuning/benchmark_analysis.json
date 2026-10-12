@@ -1,0 +1,90 @@
+{
+  "scope": "Stage3C shared_decode kernel-tuning BENCHMARK evidence only; NOT Experiment 5 evidence; one measured request per point; descriptive only. QUERY_BLOCK comparison is kernel tuning, not an ablation. The 32K (q_len 16352) point is not part of this run. QUERY_BLOCK tuning subset: shared_decode only, q_len 512 and 2048.",
+  "experiment5_evidence": false,
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 48,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "per_query_block": {
+    "4": {
+      "512": {
+        "ttft_ms": 4453.012228012085,
+        "tpot_ms": 25.554537580644002,
+        "wall_ms": 5244.977801000005,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "2048": {
+        "ttft_ms": 15884.54818725586,
+        "tpot_ms": 25.744287548386712,
+        "wall_ms": 16681.932255999982,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      }
+    },
+    "8": {
+      "512": {
+        "ttft_ms": 4008.6026191711426,
+        "tpot_ms": 25.409803225806346,
+        "wall_ms": 4795.972113999995,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "2048": {
+        "ttft_ms": 14018.003702163696,
+        "tpot_ms": 25.15408087096801,
+        "wall_ms": 14797.220644000048,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      }
+    },
+    "16": {
+      "512": {
+        "ttft_ms": 3902.766466140747,
+        "tpot_ms": 24.612642129031222,
+        "wall_ms": 4665.450018999991,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "2048": {
+        "ttft_ms": 13404.827356338501,
+        "tpot_ms": 24.828840129032415,
+        "wall_ms": 14174.120997999978,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      }
+    },
+    "32": {
+      "512": {
+        "ttft_ms": 3910.9396934509277,
+        "tpot_ms": 24.79304622580648,
+        "wall_ms": 4679.240736999986,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      },
+      "2048": {
+        "ttft_ms": 13357.035875320435,
+        "tpot_ms": 25.098531935485322,
+        "wall_ms": 14135.176773000012,
+        "output_token_ids_sha256": "aef936f8e6b2523e82f1b3144793012fe50cf21526fd24aea3309bea02851d26"
+      }
+    }
+  },
+  "selection": {
+    "rule": "argmin over QUERY_BLOCK of geomean(TTFT_ms at q_len 512 and 2048); exact tie -> smaller QUERY_BLOCK; one measured request per point",
+    "geomean_ttft_ms": {
+      "4": 8410.355956456158,
+      "8": 7496.1727805623705,
+      "16": 7232.973848336787,
+      "32": 7227.6249066784585
+    },
+    "selected_query_block": 32,
+    "geomean_relative_to_selected": {
+      "4": 1.1636403472854318,
+      "8": 1.037155756884363,
+      "16": 1.0007400690721215,
+      "32": 1.0
+    }
+  },
+  "not_claimed": [
+    "speedup vs reference or tile32 (not run here)",
+    "Experiment 5 results",
+    "q_len 4096 / 8192 / 16352 behaviour"
+  ]
+}

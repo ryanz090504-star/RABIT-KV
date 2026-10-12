@@ -1,0 +1,37 @@
+{
+  "kind": "canonical-quality-v2 continuation PPL: registered two-model Attempt 1 -- INVALID (archived; NOT evidence; no PPL was computed)",
+  "attempt": 1,
+  "source_commit": "1e5a7ff8f5c50cb7c85246dd1eb93b6de8418641",
+  "command": "python benchmarks/mlsys2027/run_canonical_ppl_two_model.py --execute --attempt 1",
+  "valid": false,
+  "failed_gate": "GPU canonical state == CPU canonical state, bit-exact, every layer (window 1 prefill), before any scoring",
+  "failure": "llama3_1_8b: CANONICAL_PPL_STATE_PARITY passed = false, mismatched_layers = all 32 (0..31); the container raised RuntimeError('GPU canonical state differs from the CPU canonical state') at canonical_ppl_modal.py:198; modal exit code 1; no result.json",
+  "what_ran": {
+    "llama3_1_8b": {
+      "app_id": "ap-qdO95tNvrfyo6ADWsGxUxd", "app_final_state": "stopped, 0 tasks (cleanup verified)",
+      "started_utc": "2026-10-03T15:47:33.111820+00:00", "completed_utc": "2026-10-03T15:56:40.448296+00:00",
+      "gates_passed_before_the_failure": {
+        "hardware": "exactly 1 x NVIDIA H100 80GB HBM3 (81559 MiB)",
+        "shipped_files": "the four committed files; canonical_rabit_quality.py = 195cb489... (c360697)",
+        "model_snapshot": "revision 359efdbb8af05b788a4ad4185215c6b8caa9052c, 18 / 18 files, manifest 85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89, no extra file",
+        "dataset": "WikiText SHA-256 and token-pool SHA-256 equal the pinned values",
+        "geometry": "32 layers / 8 KV heads / head_dim 128 (the run reached the parity step)"
+      },
+      "environment": {"python": "3.11.12", "torch": "2.11.0+cu130", "transformers": "4.48.2", "modelscope": "1.40.1"},
+      "scoring": "none: no arm was started, no window was scored, no BF16 or RABIT PPL exists"
+    },
+    "qwen2_5_7b": "NOT RUN (the first model failed a validity gate)"
+  },
+  "llama_artifact_status": "results/mlsys2027/canonical_quality_v2/continuation_ppl/llama3_1_8b/attempt_1/ (pushed uninspected by the orchestrator as 5d8d212) is part of this INVALID two-model attempt and is NOT independently accepted evidence",
+  "cause": {
+    "established": "the canonical cache built on the GPU from the prefill K / V is not bit-identical to canonical_state() computed on CPU from the same raw K / V, in every layer",
+    "not_established": "the magnitude and location of the difference: the gate records only pass / fail per layer. Whether this is last-bit CPU-vs-CUDA floating-point divergence in the quantizer arithmetic or a larger discrepancy is UNKNOWN from this attempt",
+    "coverage_gap": "the accepted parity evidence (8fa9a9c) and the offline proofs compare CPU with CPU; this gate is the first CPU-vs-CUDA comparison of the canonical state"
+  },
+  "side_effects": "the Modal volume modelscope-llama31-cache gained snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c (verified against the frozen manifest); the historical snapshots/master directory was not touched",
+  "no_retry": true,
+  "no_parameter_retuning": true,
+  "no_other_quality_benchmark": true,
+  "code_or_protocol_changed_after_launch": false,
+  "next": "STOP; any repair or new attempt requires review (a new attempt number for BOTH models)"
+}

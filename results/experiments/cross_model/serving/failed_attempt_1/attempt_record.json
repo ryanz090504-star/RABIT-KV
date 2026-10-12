@@ -1,0 +1,33 @@
+{
+  "experiment": 14,
+  "part": "serving",
+  "attempt": 1,
+  "status": "invalid_hardware_assignment",
+  "excluded": true,
+  "execution_commit": "0303a5ed5a6b4a39171b3f6b2c12536b33abe116",
+  "protocol_sha256": "7ebb7a44a180b7cfabb9703b95c20f0a8618b90282cd25166a17df7597a2cfb3",
+  "modal_app_id": "ap-dmml6P9O7HnLHcn1SqbI8v",
+  "modal_app_final_state": {"State": "stopped", "Tasks": "0"},
+  "started_utc": "2026-09-30T19:51:27.505812+00:00",
+  "completed_utc": "2026-09-30T20:03:21.661998+00:00",
+  "failure": {
+    "failed_integrity_check": "gpu_is_h100_80gb (1 of 65 checks)",
+    "assigned_gpu": "NVIDIA H200 (memory.total 143771 MiB, uuid GPU-0bfe897d-ede6-003c-7bc2-68e674d5beb3)",
+    "requested": "Modal gpu='H100'; the frozen protocol requires one NVIDIA H100 80GB HBM3",
+    "classification": "HARDWARE-ASSIGNMENT failure: Modal placed the gpu='H100' request on an H200 (larger memory and different memory system), so allocator capacity and latency are not comparable to the protocol's H100 80GB configuration",
+    "other_checks": "all other 64 integrity checks passed, including the RABIT gate and the amended shape gate"
+  },
+  "not_interpreted": "no capacity or latency value from this attempt is reported, interpreted or pooled",
+  "quality_run": false,
+  "actions_not_taken": ["no retry", "no harness change", "no second serving run", "no quality run"],
+  "files_sha256": {
+    "modal_session.log": "25c6ecf4a9cfbea4c70f82c52691a152d7e49e2b3bf1570f95aab6e7110a03ee",
+    "manifest.json": "091c7de7fd10ae9e5a27afeb9fd887d1d6748eacf541fb714ecdf2e5567cb825",
+    "integrity_check.json": "919cc2e3029b6aeed2de4881556412f2c5e8a89ec05c7825f58572de2b8db661"
+  },
+  "files_sha256_lf_normalized": {
+    "modal_session.log": "bb858b71882294c6dfebb05d1e448e22c862768eb92b4f6c31bedfd98660fe41",
+    "manifest.json": "e847de7799299554bfdcc6829ffa5250a6b00a1be330f0bc3e86b0b736b5f226",
+    "integrity_check.json": "651f6dda4820976612d39b2b345afac5c0a02b071678a3c38747b384d793798d"
+  }
+}

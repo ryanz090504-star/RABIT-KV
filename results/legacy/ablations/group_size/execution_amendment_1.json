@@ -1,0 +1,33 @@
+{
+  "experiment": 9,
+  "amendment": 1,
+  "kind": "transparent post-failure execution amendment",
+  "pre_registered": false,
+  "written_after": "Experiment 9 Attempt 1 failed the frozen G32 control-reproduction gate (HotpotQA F1 57.7 vs canonical 55.2, tolerance +/-1.0); see failed_attempt_1/attempt_record.json, archived at 239a4bd70587f7b52d8c1258fe62faf88d64b45b",
+  "statement": "This amendment was written AFTER Attempt 1 failed. It was NOT part of the pre-registered protocol and is not presented as such.",
+  "scientific_protocol": {
+    "modified": false,
+    "protocol": "benchmarks/mlsys2027/exp9_group_protocol.json",
+    "protocol_sha256": "4c9bbdb11e717d21a882e004dcca0e259b6fbb7d942d65606069cf3aa0fc1f0a",
+    "harness_commit": "545b6ad8674ee359edb8a9f3c9bfa3a6e47b8069",
+    "unchanged": ["tolerances", "group-size grid (G16 / G32 / G64)", "model", "datasets", "sample counts", "prompts",
+                  "generation settings", "seed", "TF32 / determinism settings", "logical accounting", "configs",
+                  "benchmark order", "evaluation code", "gates"],
+    "tolerances_widened": false
+  },
+  "authorization": {
+    "re_executions_authorized": 1,
+    "attempt": 2,
+    "scope": "one full, fresh re-execution of the entire frozen Experiment 9 sweep (bf16, G16, G32, G64) on ALL five benchmarks from the beginning, in the frozen order: continuation_ppl, niah, passage_retrieval, hotpotqa, qasper",
+    "selective_rerun_prohibited": "a HotpotQA-only (or any partial / selective) rerun is prohibited",
+    "validity_rule": "the exact original gates, including G32 control reproduction within the ORIGINAL tolerances (PPL +/-0.5% relative; accuracy / F1 +/-1.0 point; logical KV MB +/-0.1% relative), storage matching the frozen expected values, exact counts, no parser / config drift, prior evidence unchanged",
+    "if_attempt_2_passes": "Attempt 2 alone is accepted",
+    "if_attempt_2_fails_any_gate": "archive it and STOP: no third run, no tolerance change, no selective benchmark rerun"
+  },
+  "attempt_1": {
+    "status": "invalid_control_reproduction",
+    "permanently_excluded_from_accepted_results": true
+  },
+  "no_cross_attempt_pooling": "no raw sample, per-example score or benchmark result is pooled, substituted or combined across attempts; Attempt 1 values are never used to rescue or supplement Attempt 2",
+  "reason": "The canonical control failed because one stochastic generated answer changed, while configuration, storage accounting, the bf16 control and 19/20 HotpotQA sample scores reproduced. The frozen evaluation methodology (TF32 enabled, no deterministic algorithms, fresh H100 instances) is known to allow non-bit-exact generation across fresh runs; the observed change is consistent with that, not a proven causal diagnosis."
+}

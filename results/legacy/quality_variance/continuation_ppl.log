@@ -1,0 +1,119 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-efwHixlw6Tr1aZCHUCxH8J
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\quality\continuation_ppl.py
+└── 🔨 Created function run_quality.
+GPU: NVIDIA H100 80GB HBM3
+Model: LLM-Research/Meta-Llama-3.1-8B-Instruct
+Dataset: WikiText-2 test
+Context tokens per sample: 1024
+Continuation tokens per sample: 128
+Independent samples: 32
+Total scored continuation tokens per method: 4096
+Methods: ['bf16', 'rabit2']
+Metric: teacher-forced continuation perplexity
+Mode: quality-only prefix-cache quantization with latest all-bit policies
+Memory: logical packed prefix-KV storage, including metadata and residuals
+
+2026-09-30 00:37:41,865 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@master
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  44%|████▍     | 8/18 [00:01<00:01,  5.28file/s]
+[1ADownloading:  56%|█████▌    | 10/18 [00:06<00:06,  1.32file/s]
+[1ADownloading: 100%|██████████| 18/18 [00:20<00:00,  1.41s/file]
+[1ADownloading: 100%|██████████| 18/18 [00:20<00:00,  1.16s/file]
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  9.42it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00, 11.00it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 11.49it/s]
+Configurations:
+  bf16: BF16 baseline
+  rabit2: 2b META8g64 K3V2 G32 R4
+
+Running bf16...
+  sample 1/32: PPL=3.2852, KV=128.000 MB, quality-run time=2.39s
+  sample 2/32: PPL=6.4981, KV=128.000 MB, quality-run time=0.10s
+  sample 3/32: PPL=10.6066, KV=128.000 MB, quality-run time=0.26s
+  sample 4/32: PPL=15.7193, KV=128.000 MB, quality-run time=0.06s
+  sample 5/32: PPL=8.2092, KV=128.000 MB, quality-run time=0.07s
+  sample 6/32: PPL=10.5001, KV=128.000 MB, quality-run time=0.05s
+  sample 7/32: PPL=8.2317, KV=128.000 MB, quality-run time=0.07s
+  sample 8/32: PPL=10.8100, KV=128.000 MB, quality-run time=0.05s
+  sample 9/32: PPL=6.6138, KV=128.000 MB, quality-run time=0.06s
+  sample 10/32: PPL=5.2774, KV=128.000 MB, quality-run time=0.20s
+  sample 11/32: PPL=6.9533, KV=128.000 MB, quality-run time=0.06s
+  sample 12/32: PPL=4.2320, KV=128.000 MB, quality-run time=0.05s
+  sample 13/32: PPL=6.7224, KV=128.000 MB, quality-run time=0.05s
+  sample 14/32: PPL=4.7637, KV=128.000 MB, quality-run time=0.05s
+  sample 15/32: PPL=5.7587, KV=128.000 MB, quality-run time=0.05s
+  sample 16/32: PPL=13.2142, KV=128.000 MB, quality-run time=0.05s
+  sample 17/32: PPL=6.4419, KV=128.000 MB, quality-run time=0.22s
+  sample 18/32: PPL=5.8299, KV=128.000 MB, quality-run time=0.07s
+  sample 19/32: PPL=4.0155, KV=128.000 MB, quality-run time=0.05s
+  sample 20/32: PPL=3.9438, KV=128.000 MB, quality-run time=0.05s
+  sample 21/32: PPL=10.6101, KV=128.000 MB, quality-run time=0.05s
+  sample 22/32: PPL=5.3429, KV=128.000 MB, quality-run time=0.05s
+  sample 23/32: PPL=8.8941, KV=128.000 MB, quality-run time=0.11s
+  sample 24/32: PPL=14.5321, KV=128.000 MB, quality-run time=0.15s
+  sample 25/32: PPL=8.1215, KV=128.000 MB, quality-run time=0.05s
+  sample 26/32: PPL=9.7476, KV=128.000 MB, quality-run time=0.05s
+  sample 27/32: PPL=8.4824, KV=128.000 MB, quality-run time=0.05s
+  sample 28/32: PPL=8.4272, KV=128.000 MB, quality-run time=0.09s
+  sample 29/32: PPL=13.4899, KV=128.000 MB, quality-run time=0.05s
+  sample 30/32: PPL=7.0953, KV=128.000 MB, quality-run time=0.06s
+  sample 31/32: PPL=12.5548, KV=128.000 MB, quality-run time=0.14s
+  sample 32/32: PPL=5.2610, KV=128.000 MB, quality-run time=0.06s
+
+Running rabit2...
+  sample 1/32: PPL=3.4214, KV=24.710 MB, quality-run time=0.19s
+  sample 2/32: PPL=6.5956, KV=24.710 MB, quality-run time=0.09s
+  sample 3/32: PPL=10.7045, KV=24.710 MB, quality-run time=0.09s
+  sample 4/32: PPL=15.6377, KV=24.710 MB, quality-run time=0.09s
+  sample 5/32: PPL=8.3485, KV=24.710 MB, quality-run time=0.09s
+  sample 6/32: PPL=10.7096, KV=24.710 MB, quality-run time=0.11s
+  sample 7/32: PPL=8.3879, KV=24.710 MB, quality-run time=0.09s
+  sample 8/32: PPL=10.8775, KV=24.710 MB, quality-run time=0.10s
+  sample 9/32: PPL=6.6382, KV=24.710 MB, quality-run time=0.12s
+  sample 10/32: PPL=5.4862, KV=24.710 MB, quality-run time=0.09s
+  sample 11/32: PPL=6.9106, KV=24.710 MB, quality-run time=0.10s
+  sample 12/32: PPL=4.2915, KV=24.710 MB, quality-run time=0.21s
+  sample 13/32: PPL=6.7374, KV=24.710 MB, quality-run time=0.09s
+  sample 14/32: PPL=4.8337, KV=24.710 MB, quality-run time=0.08s
+  sample 15/32: PPL=5.7536, KV=24.710 MB, quality-run time=0.09s
+  sample 16/32: PPL=13.2934, KV=24.710 MB, quality-run time=0.11s
+  sample 17/32: PPL=6.4797, KV=24.710 MB, quality-run time=0.09s
+  sample 18/32: PPL=5.9604, KV=24.710 MB, quality-run time=0.10s
+  sample 19/32: PPL=4.1109, KV=24.710 MB, quality-run time=0.22s
+  sample 20/32: PPL=3.9580, KV=24.710 MB, quality-run time=0.10s
+  sample 21/32: PPL=10.6231, KV=24.710 MB, quality-run time=0.09s
+  sample 22/32: PPL=5.2841, KV=24.710 MB, quality-run time=0.09s
+  sample 23/32: PPL=8.8841, KV=24.710 MB, quality-run time=0.09s
+  sample 24/32: PPL=14.7894, KV=24.710 MB, quality-run time=0.12s
+  sample 25/32: PPL=8.2900, KV=24.710 MB, quality-run time=0.25s
+  sample 26/32: PPL=9.8916, KV=24.710 MB, quality-run time=0.09s
+  sample 27/32: PPL=8.5087, KV=24.710 MB, quality-run time=0.09s
+  sample 28/32: PPL=8.5504, KV=24.710 MB, quality-run time=0.09s
+  sample 29/32: PPL=13.5615, KV=24.710 MB, quality-run time=0.13s
+  sample 30/32: PPL=7.1648, KV=24.710 MB, quality-run time=0.09s
+  sample 31/32: PPL=12.7379, KV=24.710 MB, quality-run time=0.11s
+  sample 32/32: PPL=5.4243, KV=24.710 MB, quality-run time=0.19s
+
+====================================================================================================================
+RABIT-KV LONG-CONTEXT CONTINUATION PERPLEXITY
+====================================================================================================================
+Method      PPL         PPL d%      Median sample PPL   Avg KV MB     Compression   Tokens    
+--------------------------------------------------------------------------------------------------------------------
+bf16        7.5138      0.00        7.6084              128.000       1.000         4096      
+rabit2      7.6006      1.16        7.7274              24.710        5.180         4096      
+
+Important: quality-run time is only for experiment planning. It is not deployment latency.
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-efwHixlw6Tr1aZCHUCxH8J

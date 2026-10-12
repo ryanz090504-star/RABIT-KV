@@ -1,0 +1,521 @@
+{
+  "source": "benchmarks/mlsys2027/exp11_metadata_protocol.json logical_storage_expectations.expected (sha256 47f4560d5ce285c56847502854d5a37c7202ab9ec4e81c1311d6cddd221398a1), with the observed printed avg logical KV MB from metadata_results.json",
+  "components": "k/v payload; k/v primary metadata (uint8 codes incl. padding, or BF16 values); k/v secondary metadata as BF16 group minima and BF16 group scales separately; BF16 residual. Exact integer bytes summed over all samples of each benchmark",
+  "benchmarks": {
+    "continuation_ppl": {
+      "bf16_reference_avg_mb": 128.0,
+      "rabit2_mbf": {
+        "component_bytes_all_samples": {
+          "k_payload": 100663296,
+          "v_payload": 66846720,
+          "k_meta_primary": 33554432,
+          "k_meta_secondary_min": 0,
+          "k_meta_secondary_scale": 0,
+          "v_meta_primary": 33423360,
+          "v_meta_secondary_min": 0,
+          "v_meta_secondary_scale": 0,
+          "residual": 4194304
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 33554432,
+          "v_meta_total": 33423360,
+          "meta_primary_total": 66977792,
+          "meta_secondary_total": 0,
+          "metadata_total": 66977792
+        },
+        "total_logical_bytes_all_samples": 238682112,
+        "expected_avg_logical_kv_mb": 28.453,
+        "observed_avg_logical_kv_mb": 28.453,
+        "compression_vs_bf16": 4.499,
+        "delta_vs_meta8g64_mb": 3.743
+      },
+      "rabit2_m32": {
+        "component_bytes_all_samples": {
+          "k_payload": 100663296,
+          "v_payload": 66846720,
+          "k_meta_primary": 16777216,
+          "k_meta_secondary_min": 1048576,
+          "k_meta_secondary_scale": 1048576,
+          "v_meta_primary": 16711680,
+          "v_meta_secondary_min": 1044480,
+          "v_meta_secondary_scale": 1044480,
+          "residual": 4194304
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 18874368,
+          "v_meta_total": 18800640,
+          "meta_primary_total": 33488896,
+          "meta_secondary_total": 4186112,
+          "metadata_total": 37675008
+        },
+        "total_logical_bytes_all_samples": 209379328,
+        "expected_avg_logical_kv_mb": 24.96,
+        "observed_avg_logical_kv_mb": 24.96,
+        "compression_vs_bf16": 5.128,
+        "delta_vs_meta8g64_mb": 0.25
+      },
+      "rabit2": {
+        "component_bytes_all_samples": {
+          "k_payload": 100663296,
+          "v_payload": 66846720,
+          "k_meta_primary": 16777216,
+          "k_meta_secondary_min": 524288,
+          "k_meta_secondary_scale": 524288,
+          "v_meta_primary": 16711680,
+          "v_meta_secondary_min": 522240,
+          "v_meta_secondary_scale": 522240,
+          "residual": 4194304
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 17825792,
+          "v_meta_total": 17756160,
+          "meta_primary_total": 33488896,
+          "meta_secondary_total": 2093056,
+          "metadata_total": 35581952
+        },
+        "total_logical_bytes_all_samples": 207286272,
+        "expected_avg_logical_kv_mb": 24.71,
+        "observed_avg_logical_kv_mb": 24.71,
+        "compression_vs_bf16": 5.18,
+        "delta_vs_meta8g64_mb": 0.0
+      },
+      "rabit2_m128": {
+        "component_bytes_all_samples": {
+          "k_payload": 100663296,
+          "v_payload": 66846720,
+          "k_meta_primary": 16777216,
+          "k_meta_secondary_min": 262144,
+          "k_meta_secondary_scale": 262144,
+          "v_meta_primary": 16711680,
+          "v_meta_secondary_min": 261120,
+          "v_meta_secondary_scale": 261120,
+          "residual": 4194304
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 17301504,
+          "v_meta_total": 17233920,
+          "meta_primary_total": 33488896,
+          "meta_secondary_total": 1046528,
+          "metadata_total": 34535424
+        },
+        "total_logical_bytes_all_samples": 206239744,
+        "expected_avg_logical_kv_mb": 24.586,
+        "observed_avg_logical_kv_mb": 24.586,
+        "compression_vs_bf16": 5.206,
+        "delta_vs_meta8g64_mb": -0.125
+      }
+    },
+    "niah": {
+      "bf16_reference_avg_mb": 1194.542,
+      "rabit2_mbf": {
+        "component_bytes_all_samples": {
+          "k_payload": 1761607680,
+          "v_payload": 1173790720,
+          "k_meta_primary": 587202560,
+          "k_meta_secondary_min": 0,
+          "k_meta_secondary_scale": 0,
+          "v_meta_primary": 586895360,
+          "v_meta_secondary_min": 0,
+          "v_meta_secondary_scale": 0,
+          "residual": 7864320
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 587202560,
+          "v_meta_total": 586895360,
+          "meta_primary_total": 1174097920,
+          "meta_secondary_total": 0,
+          "metadata_total": 1174097920
+        },
+        "total_logical_bytes_all_samples": 4117360640,
+        "expected_avg_logical_kv_mb": 261.775,
+        "observed_avg_logical_kv_mb": 261.775,
+        "compression_vs_bf16": 4.563,
+        "delta_vs_meta8g64_mb": 34.989
+      },
+      "rabit2_m32": {
+        "component_bytes_all_samples": {
+          "k_payload": 1761607680,
+          "v_payload": 1173790720,
+          "k_meta_primary": 293601280,
+          "k_meta_secondary_min": 18350080,
+          "k_meta_secondary_scale": 18350080,
+          "v_meta_primary": 293447680,
+          "v_meta_secondary_min": 18340480,
+          "v_meta_secondary_scale": 18340480,
+          "residual": 7864320
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 330301440,
+          "v_meta_total": 330128640,
+          "meta_primary_total": 587048960,
+          "meta_secondary_total": 73381120,
+          "metadata_total": 660430080
+        },
+        "total_logical_bytes_all_samples": 3603692800,
+        "expected_avg_logical_kv_mb": 229.117,
+        "observed_avg_logical_kv_mb": 229.117,
+        "compression_vs_bf16": 5.214,
+        "delta_vs_meta8g64_mb": 2.331
+      },
+      "rabit2": {
+        "component_bytes_all_samples": {
+          "k_payload": 1761607680,
+          "v_payload": 1173790720,
+          "k_meta_primary": 293601280,
+          "k_meta_secondary_min": 9175040,
+          "k_meta_secondary_scale": 9175040,
+          "v_meta_primary": 293478400,
+          "v_meta_secondary_min": 9171200,
+          "v_meta_secondary_scale": 9171200,
+          "residual": 7864320
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 311951360,
+          "v_meta_total": 311820800,
+          "meta_primary_total": 587079680,
+          "meta_secondary_total": 36692480,
+          "metadata_total": 623772160
+        },
+        "total_logical_bytes_all_samples": 3567034880,
+        "expected_avg_logical_kv_mb": 226.786,
+        "observed_avg_logical_kv_mb": 226.786,
+        "compression_vs_bf16": 5.267,
+        "delta_vs_meta8g64_mb": 0.0
+      },
+      "rabit2_m128": {
+        "component_bytes_all_samples": {
+          "k_payload": 1761607680,
+          "v_payload": 1173790720,
+          "k_meta_primary": 293601280,
+          "k_meta_secondary_min": 4587520,
+          "k_meta_secondary_scale": 4587520,
+          "v_meta_primary": 293478400,
+          "v_meta_secondary_min": 4585600,
+          "v_meta_secondary_scale": 4585600,
+          "residual": 7864320
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 302776320,
+          "v_meta_total": 302649600,
+          "meta_primary_total": 587079680,
+          "meta_secondary_total": 18346240,
+          "metadata_total": 605425920
+        },
+        "total_logical_bytes_all_samples": 3548688640,
+        "expected_avg_logical_kv_mb": 225.62,
+        "observed_avg_logical_kv_mb": 225.62,
+        "compression_vs_bf16": 5.294,
+        "delta_vs_meta8g64_mb": -1.166
+      }
+    },
+    "passage_retrieval": {
+      "bf16_reference_avg_mb": 1517.375,
+      "rabit2_mbf": {
+        "component_bytes_all_samples": {
+          "k_payload": 1493041152,
+          "v_payload": 994099200,
+          "k_meta_primary": 497680384,
+          "k_meta_secondary_min": 0,
+          "k_meta_secondary_scale": 0,
+          "v_meta_primary": 497049600,
+          "v_meta_secondary_min": 0,
+          "v_meta_secondary_scale": 0,
+          "residual": 5242880
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 497680384,
+          "v_meta_total": 497049600,
+          "meta_primary_total": 994729984,
+          "meta_secondary_total": 0,
+          "metadata_total": 994729984
+        },
+        "total_logical_bytes_all_samples": 3487113216,
+        "expected_avg_logical_kv_mb": 332.557,
+        "observed_avg_logical_kv_mb": 332.557,
+        "compression_vs_bf16": 4.563,
+        "delta_vs_meta8g64_mb": 44.467
+      },
+      "rabit2_m32": {
+        "component_bytes_all_samples": {
+          "k_payload": 1493041152,
+          "v_payload": 994099200,
+          "k_meta_primary": 248840192,
+          "k_meta_secondary_min": 15552512,
+          "k_meta_secondary_scale": 15552512,
+          "v_meta_primary": 248524800,
+          "v_meta_secondary_min": 15532800,
+          "v_meta_secondary_scale": 15532800,
+          "residual": 5242880
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 279945216,
+          "v_meta_total": 279590400,
+          "meta_primary_total": 497364992,
+          "meta_secondary_total": 62170624,
+          "metadata_total": 559535616
+        },
+        "total_logical_bytes_all_samples": 3051918848,
+        "expected_avg_logical_kv_mb": 291.054,
+        "observed_avg_logical_kv_mb": 291.054,
+        "compression_vs_bf16": 5.213,
+        "delta_vs_meta8g64_mb": 2.964
+      },
+      "rabit2": {
+        "component_bytes_all_samples": {
+          "k_payload": 1493041152,
+          "v_payload": 994099200,
+          "k_meta_primary": 248840192,
+          "k_meta_secondary_min": 7776256,
+          "k_meta_secondary_scale": 7776256,
+          "v_meta_primary": 248532992,
+          "v_meta_secondary_min": 7766656,
+          "v_meta_secondary_scale": 7766656,
+          "residual": 5242880
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 264392704,
+          "v_meta_total": 264066304,
+          "meta_primary_total": 497373184,
+          "meta_secondary_total": 31085824,
+          "metadata_total": 528459008
+        },
+        "total_logical_bytes_all_samples": 3020842240,
+        "expected_avg_logical_kv_mb": 288.09,
+        "observed_avg_logical_kv_mb": 288.09,
+        "compression_vs_bf16": 5.267,
+        "delta_vs_meta8g64_mb": 0.0
+      },
+      "rabit2_m128": {
+        "component_bytes_all_samples": {
+          "k_payload": 1493041152,
+          "v_payload": 994099200,
+          "k_meta_primary": 248840192,
+          "k_meta_secondary_min": 3888128,
+          "k_meta_secondary_scale": 3888128,
+          "v_meta_primary": 248553472,
+          "v_meta_secondary_min": 3883648,
+          "v_meta_secondary_scale": 3883648,
+          "residual": 5242880
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 256616448,
+          "v_meta_total": 256320768,
+          "meta_primary_total": 497393664,
+          "meta_secondary_total": 15543552,
+          "metadata_total": 512937216
+        },
+        "total_logical_bytes_all_samples": 3005320448,
+        "expected_avg_logical_kv_mb": 286.61,
+        "observed_avg_logical_kv_mb": 286.61,
+        "compression_vs_bf16": 5.294,
+        "delta_vs_meta8g64_mb": -1.48
+      }
+    },
+    "hotpotqa": {
+      "bf16_reference_avg_mb": 1896.106,
+      "rabit2_mbf": {
+        "component_bytes_all_samples": {
+          "k_payload": 3730833408,
+          "v_payload": 2484609024,
+          "k_meta_primary": 1243611136,
+          "k_meta_secondary_min": 0,
+          "k_meta_secondary_scale": 0,
+          "v_meta_primary": 1242304512,
+          "v_meta_secondary_min": 0,
+          "v_meta_secondary_scale": 0,
+          "residual": 10485760
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 1243611136,
+          "v_meta_total": 1242304512,
+          "meta_primary_total": 2485915648,
+          "meta_secondary_total": 0,
+          "metadata_total": 2485915648
+        },
+        "total_logical_bytes_all_samples": 8711843840,
+        "expected_avg_logical_kv_mb": 415.413,
+        "observed_avg_logical_kv_mb": 415.413,
+        "compression_vs_bf16": 4.564,
+        "delta_vs_meta8g64_mb": 55.563
+      },
+      "rabit2_m32": {
+        "component_bytes_all_samples": {
+          "k_payload": 3730833408,
+          "v_payload": 2484609024,
+          "k_meta_primary": 621805568,
+          "k_meta_secondary_min": 38862848,
+          "k_meta_secondary_scale": 38862848,
+          "v_meta_primary": 621152256,
+          "v_meta_secondary_min": 38822016,
+          "v_meta_secondary_scale": 38822016,
+          "residual": 10485760
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 699531264,
+          "v_meta_total": 698796288,
+          "meta_primary_total": 1242957824,
+          "meta_secondary_total": 155369728,
+          "metadata_total": 1398327552
+        },
+        "total_logical_bytes_all_samples": 7624255744,
+        "expected_avg_logical_kv_mb": 363.553,
+        "observed_avg_logical_kv_mb": 363.553,
+        "compression_vs_bf16": 5.215,
+        "delta_vs_meta8g64_mb": 3.703
+      },
+      "rabit2": {
+        "component_bytes_all_samples": {
+          "k_payload": 3730833408,
+          "v_payload": 2484609024,
+          "k_meta_primary": 621805568,
+          "k_meta_secondary_min": 19431424,
+          "k_meta_secondary_scale": 19431424,
+          "v_meta_primary": 621182976,
+          "v_meta_secondary_min": 19411968,
+          "v_meta_secondary_scale": 19411968,
+          "residual": 10485760
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 660668416,
+          "v_meta_total": 660006912,
+          "meta_primary_total": 1242988544,
+          "meta_secondary_total": 77686784,
+          "metadata_total": 1320675328
+        },
+        "total_logical_bytes_all_samples": 7546603520,
+        "expected_avg_logical_kv_mb": 359.85,
+        "observed_avg_logical_kv_mb": 359.85,
+        "compression_vs_bf16": 5.269,
+        "delta_vs_meta8g64_mb": 0.0
+      },
+      "rabit2_m128": {
+        "component_bytes_all_samples": {
+          "k_payload": 3730833408,
+          "v_payload": 2484609024,
+          "k_meta_primary": 621805568,
+          "k_meta_secondary_min": 9715712,
+          "k_meta_secondary_scale": 9715712,
+          "v_meta_primary": 621215744,
+          "v_meta_secondary_min": 9706496,
+          "v_meta_secondary_scale": 9706496,
+          "residual": 10485760
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 641236992,
+          "v_meta_total": 640628736,
+          "meta_primary_total": 1243021312,
+          "meta_secondary_total": 38844416,
+          "metadata_total": 1281865728
+        },
+        "total_logical_bytes_all_samples": 7507793920,
+        "expected_avg_logical_kv_mb": 358.0,
+        "observed_avg_logical_kv_mb": 358.0,
+        "compression_vs_bf16": 5.296,
+        "delta_vs_meta8g64_mb": -1.851
+      }
+    },
+    "qasper": {
+      "bf16_reference_avg_mb": 1783.531,
+      "rabit2_mbf": {
+        "component_bytes_all_samples": {
+          "k_payload": 4209377280,
+          "v_payload": 2804465664,
+          "k_meta_primary": 1403125760,
+          "k_meta_secondary_min": 0,
+          "k_meta_secondary_scale": 0,
+          "v_meta_primary": 1402232832,
+          "v_meta_secondary_min": 0,
+          "v_meta_secondary_scale": 0,
+          "residual": 12582912
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 1403125760,
+          "v_meta_total": 1402232832,
+          "meta_primary_total": 2805358592,
+          "meta_secondary_total": 0,
+          "metadata_total": 2805358592
+        },
+        "total_logical_bytes_all_samples": 9831784448,
+        "expected_avg_logical_kv_mb": 390.68,
+        "observed_avg_logical_kv_mb": 390.68,
+        "compression_vs_bf16": 4.565,
+        "delta_vs_meta8g64_mb": 52.252
+      },
+      "rabit2_m32": {
+        "component_bytes_all_samples": {
+          "k_payload": 4209377280,
+          "v_payload": 2804465664,
+          "k_meta_primary": 701562880,
+          "k_meta_secondary_min": 43847680,
+          "k_meta_secondary_scale": 43847680,
+          "v_meta_primary": 701116416,
+          "v_meta_secondary_min": 43819776,
+          "v_meta_secondary_scale": 43819776,
+          "residual": 12582912
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 789258240,
+          "v_meta_total": 788755968,
+          "meta_primary_total": 1402679296,
+          "meta_secondary_total": 175334912,
+          "metadata_total": 1578014208
+        },
+        "total_logical_bytes_all_samples": 8604440064,
+        "expected_avg_logical_kv_mb": 341.91,
+        "observed_avg_logical_kv_mb": 341.91,
+        "compression_vs_bf16": 5.216,
+        "delta_vs_meta8g64_mb": 3.482
+      },
+      "rabit2": {
+        "component_bytes_all_samples": {
+          "k_payload": 4209377280,
+          "v_payload": 2804465664,
+          "k_meta_primary": 701562880,
+          "k_meta_secondary_min": 21923840,
+          "k_meta_secondary_scale": 21923840,
+          "v_meta_primary": 701157376,
+          "v_meta_secondary_min": 21911168,
+          "v_meta_secondary_scale": 21911168,
+          "residual": 12582912
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 745410560,
+          "v_meta_total": 744979712,
+          "meta_primary_total": 1402720256,
+          "meta_secondary_total": 87670016,
+          "metadata_total": 1490390272
+        },
+        "total_logical_bytes_all_samples": 8516816128,
+        "expected_avg_logical_kv_mb": 338.428,
+        "observed_avg_logical_kv_mb": 338.428,
+        "compression_vs_bf16": 5.27,
+        "delta_vs_meta8g64_mb": 0.0
+      },
+      "rabit2_m128": {
+        "component_bytes_all_samples": {
+          "k_payload": 4209377280,
+          "v_payload": 2804465664,
+          "k_meta_primary": 701562880,
+          "k_meta_secondary_min": 10961920,
+          "k_meta_secondary_scale": 10961920,
+          "v_meta_primary": 701169664,
+          "v_meta_secondary_min": 10955776,
+          "v_meta_secondary_scale": 10955776,
+          "residual": 12582912
+        },
+        "subtotal_bytes_all_samples": {
+          "k_meta_total": 723486720,
+          "v_meta_total": 723081216,
+          "meta_primary_total": 1402732544,
+          "meta_secondary_total": 43835392,
+          "metadata_total": 1446567936
+        },
+        "total_logical_bytes_all_samples": 8472993792,
+        "expected_avg_logical_kv_mb": 336.687,
+        "observed_avg_logical_kv_mb": 336.687,
+        "compression_vs_bf16": 5.297,
+        "delta_vs_meta8g64_mb": -1.741
+      }
+    }
+  }
+}

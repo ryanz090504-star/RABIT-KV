@@ -1,0 +1,43 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis",
+  "non_evidence": true,
+  "attempt": 2,
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "execution_commit": "d67ffcec7ce128010c723e2c59a9a348555e46ca",
+  "started_utc": "2026-09-30T17:03:42.648649+00:00",
+  "completed_utc": "2026-09-30T17:03:46.280561+00:00",
+  "elapsed_s": 1.4,
+  "wall_clock_limit_s": 2700,
+  "timed_out": false,
+  "modal_app_id": "ap-afhIH3WzeKkno4wrZdHHDY",
+  "modal_app_id_note": "not captured by the runner (the client crashed before printing it); identified afterwards from `modal app list` by name and creation time (2026-09-30 13:03:46-04:00 = 17:03:46 UTC)",
+  "final_app_state": {"State": "stopped", "Tasks": "0", "Stopped at": "2026-09-30 13:04:22-04:00",
+                      "note": "listed as 'ephemeral', 0 tasks, not stopped on first inspection; `modal app stop -y` issued; then 'stopped', 0 tasks"},
+  "what_ran": {
+    "pre_run_validation": "all 15 checks passed on the clean tree at d67ffce",
+    "local_modal_client": "crashed on its first console line",
+    "image_build": "not started",
+    "remote_function": "never invoked (0 tasks)",
+    "gpu": "no container / GPU task",
+    "diagnostic_code": "never executed",
+    "numerical_results": "none",
+    "model_download_engine_capacity_timings": "none"
+  },
+  "failure": {
+    "error": "'gbk' codec can't encode character '\\u2713' in position 0: illegal multibyte sequence",
+    "classification": "HARNESS DEFECT in run_exp14_shape_gate_numdiag.run_with_wall_clock: the Modal client subprocess was started without PYTHONUTF8=1 / PYTHONIOENCODING=utf-8 (which the accepted e1.stream_command sets); on this Windows (GBK) host the client's stdout pipe could not encode its first status line ('\\u2713 Initialized')",
+    "secondary_defect": "the runner only learns the app id from the client's output, so a client that dies before printing it leaves the app id uncaptured and no stop is attempted"
+  },
+  "actions_not_taken": ["no re-run", "no harness fix applied", "no gate change", "no probe attempt 2", "no serving",
+                        "no quality"],
+  "files_sha256": {
+    "numdiag_session.log": "7a53024de1973cb8f92289556f6ace100ddacf06c15eb745dfc51057bd6d2d92",
+    "record.json": "ee2f3214bdd13f974fb5b54d4fda460b488a2e203f8b5c9c5e9d0807a3164183"
+  },
+  "files_sha256_lf_normalized": {
+    "numdiag_session.log": "aff112488fd04481322419e42859d8222dfa31e942690b7adc72b2de086e0118",
+    "record.json": "21278633611963a49df43429f69d1456845859cc649cab47dc0fa413f273e01b"
+  }
+}

@@ -1,0 +1,148 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-HL07VGNI2BS7tILFTbKcPA
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_ppl_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_rabit_quality.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_ppl_core.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\canonical_ppl_identity.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp14_model_snapshot.py
+└── 🔨 Created function run_ppl.
+CANONICAL_PPL_HARDWARE_CHECK={"gpus": [{"driver_version": "580.95.05", "memory.total": "81559", "memory.used": "4", "name": "NVIDIA H100 80GB HBM3"}], "passed": true, "required": "exactly 1 x NVIDIA H100 80GB"}
+CANONICAL_PPL_FILES={"passed": true, "repo_files": ["benchmarks/mlsys2027/canonical_ppl_core.py", "benchmarks/mlsys2027/canonical_ppl_identity.py", "benchmarks/mlsys2027/canonical_rabit_quality.py", "benchmarks/mlsys2027/exp14_model_snapshot.py"], "sha256_lf": {"canonical_ppl_core.py": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44", "canonical_ppl_identity.py": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba", "canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5", "exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9"}}
+CANONICAL_PPL_ENVIRONMENT={"cuda_device": "NVIDIA H100 80GB HBM3", "packages": {"accelerate": "1.15.0", "modelscope": "1.40.1", "requests": "2.34.2", "safetensors": "0.8.0", "sentencepiece": "0.2.2", "tokenizers": "0.21.4", "transformers": "4.48.2"}, "python": "3.11.12", "torch": "2.11.0+cu130", "torch_cuda": "13.0"}
+CANONICAL_PPL_RUNTIME={"passed": true, "runtime": {"cuda_device": "NVIDIA H100 80GB HBM3", "python_minor": "3.11", "torch": "2.11.0+cu130", "torch_cuda": "13.0", "transformers": "4.48.2"}, "validated": {"cuda_device": "NVIDIA H100 80GB HBM3", "python_minor": "3.11", "torch": "2.11.0+cu130", "torch_cuda": "13.0", "transformers": "4.48.2"}}
+2026-10-03 16:30:25,538 | INFO    | modelscope_hub.download | Downloading 18 files from LLM-Research/Meta-Llama-3.1-8B-Instruct@359efdbb8af05b788a4ad4185215c6b8caa9052c
+
+[1ADownloading:   0%|          | 0/18 [00:00<?, ?file/s]
+[1ADownloading:  44%|████▍     | 8/18 [00:01<00:01,  6.38file/s]
+[1ADownloading:  56%|█████▌    | 10/18 [00:05<00:05,  1.56file/s]
+[1ADownloading:  78%|███████▊  | 14/18 [00:05<00:01,  2.63file/s]
+[1ADownloading:  94%|█████████▍| 17/18 [00:05<00:00,  3.62file/s]Downloading: 100%|██████████| 18/18 [00:16<00:00,  1.08file/s]
+CANONICAL_PPL_MODEL={"dir": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c", "extra_files": [], "files_checked": 18, "manifest_sha256": "85d9cffee6980348ad1c334d71f8731f6442553535848542457b68d85d70ce89", "mismatches": [], "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct", "model_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c", "passed": true}
+CANONICAL_PPL_DATASET={"add_special_tokens": false, "context_tokens": 1024, "eval_tokens": 128, "pool_tokens": 36864, "samples": 32, "token_pool_sha256": "88dadfe6521c338ca71b1edfe5e85f08b8e2466e0884f8003b5b34a7ee3c849f", "url": "https://raw.githubusercontent.com/pytorch/examples/main/word_language_model/data/wikitext-2/test.txt", "wikitext_sha256": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0"}
+
+[1ALoading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]
+[1ALoading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  9.68it/s]
+[1ALoading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00, 13.35it/s]
+[1ALoading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00, 14.11it/s]
+Running bf16_batched...
+  sample 1/32: PPL=3.2852
+  sample 2/32: PPL=6.4981
+  sample 3/32: PPL=10.6066
+  sample 4/32: PPL=15.7193
+  sample 5/32: PPL=8.2092
+  sample 6/32: PPL=10.5001
+  sample 7/32: PPL=8.2317
+  sample 8/32: PPL=10.8100
+  sample 9/32: PPL=6.6138
+  sample 10/32: PPL=5.2774
+  sample 11/32: PPL=6.9533
+  sample 12/32: PPL=4.2320
+  sample 13/32: PPL=6.7224
+  sample 14/32: PPL=4.7637
+  sample 15/32: PPL=5.7587
+  sample 16/32: PPL=13.2142
+  sample 17/32: PPL=6.4419
+  sample 18/32: PPL=5.8299
+  sample 19/32: PPL=4.0155
+  sample 20/32: PPL=3.9438
+  sample 21/32: PPL=10.6101
+  sample 22/32: PPL=5.3429
+  sample 23/32: PPL=8.8941
+  sample 24/32: PPL=14.5321
+  sample 25/32: PPL=8.1215
+  sample 26/32: PPL=9.7476
+  sample 27/32: PPL=8.4824
+  sample 28/32: PPL=8.4272
+  sample 29/32: PPL=13.4899
+  sample 30/32: PPL=7.0953
+  sample 31/32: PPL=12.5548
+  sample 32/32: PPL=5.2610
+
+Running bf16...
+  sample 1/32: PPL=3.2796
+  sample 2/32: PPL=6.4841
+  sample 3/32: PPL=10.5905
+  sample 4/32: PPL=15.7187
+  sample 5/32: PPL=8.1922
+  sample 6/32: PPL=10.5471
+  sample 7/32: PPL=8.2528
+  sample 8/32: PPL=10.7904
+  sample 9/32: PPL=6.6247
+  sample 10/32: PPL=5.2715
+  sample 11/32: PPL=6.9256
+  sample 12/32: PPL=4.2201
+  sample 13/32: PPL=6.6904
+  sample 14/32: PPL=4.7889
+  sample 15/32: PPL=5.7634
+  sample 16/32: PPL=13.2750
+  sample 17/32: PPL=6.4644
+  sample 18/32: PPL=5.8372
+  sample 19/32: PPL=4.0204
+  sample 20/32: PPL=3.9636
+  sample 21/32: PPL=10.6567
+  sample 22/32: PPL=5.3389
+  sample 23/32: PPL=8.9240
+  sample 24/32: PPL=14.5237
+  sample 25/32: PPL=8.1710
+  sample 26/32: PPL=9.7662
+  sample 27/32: PPL=8.5025
+  sample 28/32: PPL=8.3797
+  sample 29/32: PPL=13.5138
+  sample 30/32: PPL=7.0739
+  sample 31/32: PPL=12.4595
+  sample 32/32: PPL=5.2417
+
+Running rabit...
+  sample 1/32: PPL=3.3660
+  sample 2/32: PPL=6.7198
+  sample 3/32: PPL=10.6953
+  sample 4/32: PPL=15.7746
+  sample 5/32: PPL=8.2881
+  sample 6/32: PPL=10.9705
+  sample 7/32: PPL=8.3648
+  sample 8/32: PPL=10.9790
+  sample 9/32: PPL=6.7056
+  sample 10/32: PPL=5.4825
+  sample 11/32: PPL=6.8821
+  sample 12/32: PPL=4.2652
+  sample 13/32: PPL=6.7366
+  sample 14/32: PPL=4.8770
+  sample 15/32: PPL=5.7885
+  sample 16/32: PPL=13.3817
+  sample 17/32: PPL=6.5397
+  sample 18/32: PPL=5.9261
+  sample 19/32: PPL=4.1307
+  sample 20/32: PPL=3.9726
+  sample 21/32: PPL=10.6595
+  sample 22/32: PPL=5.3433
+  sample 23/32: PPL=9.0649
+  sample 24/32: PPL=14.7363
+  sample 25/32: PPL=8.2839
+  sample 26/32: PPL=9.9534
+  sample 27/32: PPL=8.7101
+  sample 28/32: PPL=8.3765
+  sample 29/32: PPL=13.6072
+  sample 30/32: PPL=7.1920
+  sample 31/32: PPL=12.6925
+  sample 32/32: PPL=5.5605
+
+CANONICAL_PPL_REMOTE={"completed": true, "model_key": "llama3_1_8b", "ppl": {"bf16": 7.515395843214247, "bf16_batched": 7.513780420171705, "rabit": 7.6325218956943175}}
+CANONICAL_PPL_LOCAL={"payload_type": "str", "bytes": 265545, "sha256": "e8dbf17c9d8059a6d05087a811d6b1b30189e0fb62756e2bc89beb3914fd9c51", "model_key": "llama3_1_8b"}
+Stopping app - local entrypoint completed.
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-HL07VGNI2BS7tILFTbKcPA

@@ -1,0 +1,287 @@
+{
+  "capacity_label": "OBSERVED PHYSICAL vLLM allocator KV capacity (num_gpu_blocks x block_size) from the live engine",
+  "observed_capacity": {
+    "bf16": {
+      "observed_capacity_tokens": 393024,
+      "num_gpu_blocks": 12282,
+      "reported_kv_cache_gib": 47.98,
+      "implied_bytes_per_token_derived": 131081.39125223903
+    },
+    "fp8": {
+      "observed_capacity_tokens": 785568,
+      "num_gpu_blocks": 24549,
+      "reported_kv_cache_gib": 47.95,
+      "implied_bytes_per_token_derived": 65539.7374394069
+    },
+    "rabit": {
+      "observed_capacity_tokens": 2074592,
+      "num_gpu_blocks": 64831,
+      "reported_kv_cache_gib": 47.98,
+      "implied_bytes_per_token_derived": 24832.89857259644
+    },
+    "turboquant": {
+      "observed_capacity_tokens": 1203200,
+      "num_gpu_blocks": 37600,
+      "reported_kv_cache_gib": 47.98,
+      "implied_bytes_per_token_derived": 42817.597004255316
+    }
+  },
+  "capacity_ratios": {
+    "rabit_over_turboquant": 1.7242287234042553,
+    "rabit_over_bf16": 5.278537697443413,
+    "rabit_over_fp8": 2.6408815023015193,
+    "turboquant_over_bf16": 3.0613906529881127,
+    "turboquant_over_fp8": 1.5316306163183837,
+    "fp8_over_bf16": 1.9987787005373718
+  },
+  "theoretical_bytes_per_token_SEPARATE_FROM_OBSERVED": {
+    "bf16": {
+      "bytes": 131072,
+      "formula": "32 layers x (K,V) x 8 heads x 128 x 2 B (BF16)"
+    },
+    "fp8": {
+      "bytes": 65536,
+      "formula": "32 layers x (K,V) x 8 heads x 128 x 1 B (FP8 e4m3, per-tensor scales)"
+    },
+    "rabit": {
+      "bytes": 24832,
+      "formula": "32 layers x 776 B (RABIT physical page 24,832 B per 32-token block per layer)"
+    },
+    "turboquant": {
+      "bytes": 42816,
+      "formula": "28 TurboQuant layers x 8 heads x 118 B slot (48 B 3-bit K codes + 2 B fp16 norm + 64 B 4-bit V codes + 4 B fp16 scale/zero) + 4 BF16 boundary layers x 4,096 B"
+    }
+  },
+  "latency_primary_per_leg": {
+    "bf16": {
+      "A1": {
+        "n": 30,
+        "median_tpot_ms": 24.34409020967755,
+        "p90_tpot_ms": 24.545955225806345,
+        "median_ttft_ms": 60.00041961669922,
+        "median_wall_ms": 814.2628180000031
+      },
+      "A2": {
+        "n": 30,
+        "median_tpot_ms": 24.044735016128662,
+        "p90_tpot_ms": 24.347828870968296,
+        "median_ttft_ms": 59.978485107421875,
+        "median_wall_ms": 805.0954180000076
+      }
+    },
+    "fp8": {
+      "B1": {
+        "n": 30,
+        "median_tpot_ms": 25.615811532256956,
+        "p90_tpot_ms": 26.010176709677022,
+        "median_ttft_ms": 63.38381767272949,
+        "median_wall_ms": 857.1322779999946
+      },
+      "B2": {
+        "n": 30,
+        "median_tpot_ms": 25.876701080643407,
+        "p90_tpot_ms": 26.356486903222823,
+        "median_ttft_ms": 63.47358226776123,
+        "median_wall_ms": 865.2323614999773
+      }
+    },
+    "rabit": {
+      "C1": {
+        "n": 30,
+        "median_tpot_ms": 29.754445338709495,
+        "p90_tpot_ms": 29.925944290321315,
+        "median_ttft_ms": 143.83530616760254,
+        "median_wall_ms": 1066.2877945000275
+      },
+      "C2": {
+        "n": 30,
+        "median_tpot_ms": 30.452987596774047,
+        "p90_tpot_ms": 30.985732032259847,
+        "median_ttft_ms": 145.47228813171387,
+        "median_wall_ms": 1091.2772804999804
+      }
+    },
+    "turboquant": {
+      "D1": {
+        "n": 30,
+        "median_tpot_ms": 28.155415629033,
+        "p90_tpot_ms": 28.42741412902958,
+        "median_ttft_ms": 55.64594268798828,
+        "median_wall_ms": 929.0458720000174
+      },
+      "D2": {
+        "n": 30,
+        "median_tpot_ms": 27.42008319354784,
+        "p90_tpot_ms": 27.74190674193549,
+        "median_ttft_ms": 54.416775703430176,
+        "median_wall_ms": 903.7605820000181
+      }
+    }
+  },
+  "latency_primary_cross_leg": {
+    "bf16": {
+      "median_of_leg_median_tpot_ms": 24.194412612903108,
+      "median_of_leg_p90_tpot_ms": 24.44689204838732,
+      "median_of_leg_median_ttft_ms": 59.98945236206055,
+      "median_of_leg_median_wall_ms": 809.6791180000054
+    },
+    "fp8": {
+      "median_of_leg_median_tpot_ms": 25.74625630645018,
+      "median_of_leg_p90_tpot_ms": 26.18333180644992,
+      "median_of_leg_median_ttft_ms": 63.42869997024536,
+      "median_of_leg_median_wall_ms": 861.1823197499859
+    },
+    "rabit": {
+      "median_of_leg_median_tpot_ms": 30.10371646774177,
+      "median_of_leg_p90_tpot_ms": 30.45583816129058,
+      "median_of_leg_median_ttft_ms": 144.6537971496582,
+      "median_of_leg_median_wall_ms": 1078.7825375000039
+    },
+    "turboquant": {
+      "median_of_leg_median_tpot_ms": 27.78774941129042,
+      "median_of_leg_p90_tpot_ms": 28.084660435482533,
+      "median_of_leg_median_ttft_ms": 55.03135919570923,
+      "median_of_leg_median_wall_ms": 916.4032270000178
+    }
+  },
+  "latency_secondary_pooled_within_session_descriptive": {
+    "bf16": {
+      "n": 60,
+      "pooled_median_tpot_ms": 24.228380548387644,
+      "pooled_p90_tpot_ms": 24.453998612902097
+    },
+    "fp8": {
+      "n": 60,
+      "pooled_median_tpot_ms": 25.82117629032338,
+      "pooled_p90_tpot_ms": 26.105750064516542
+    },
+    "rabit": {
+      "n": 60,
+      "pooled_median_tpot_ms": 30.012962467743186,
+      "pooled_p90_tpot_ms": 30.680883064515882
+    },
+    "turboquant": {
+      "n": 60,
+      "pooled_median_tpot_ms": 27.905286467741107,
+      "pooled_p90_tpot_ms": 28.33598896774176
+    }
+  },
+  "leg_to_leg_drift": {
+    "bf16": {
+      "legs": [
+        "A1",
+        "A2"
+      ],
+      "tpot_abs_diff_ms": -0.2993551935488874,
+      "tpot_pct_diff": -1.2296832248423262,
+      "p90_tpot_abs_diff_ms": -0.19812635483804897,
+      "ttft_abs_diff_ms": -0.02193450927734375,
+      "wall_abs_diff_ms": -9.167399999995496
+    },
+    "fp8": {
+      "legs": [
+        "B1",
+        "B2"
+      ],
+      "tpot_abs_diff_ms": 0.2608895483864515,
+      "tpot_pct_diff": 1.0184707521677439,
+      "p90_tpot_abs_diff_ms": 0.3463101935458006,
+      "ttft_abs_diff_ms": 0.08976459503173828,
+      "wall_abs_diff_ms": 8.100083499982702
+    },
+    "rabit": {
+      "legs": [
+        "C1",
+        "C2"
+      ],
+      "tpot_abs_diff_ms": 0.6985422580645526,
+      "tpot_pct_diff": 2.3476904042831315,
+      "p90_tpot_abs_diff_ms": 1.059787741938532,
+      "ttft_abs_diff_ms": 1.6369819641113281,
+      "wall_abs_diff_ms": 24.989485999952876
+    },
+    "turboquant": {
+      "legs": [
+        "D1",
+        "D2"
+      ],
+      "tpot_abs_diff_ms": -0.7353324354851623,
+      "tpot_pct_diff": -2.611690927151189,
+      "p90_tpot_abs_diff_ms": -0.6855073870940878,
+      "ttft_abs_diff_ms": -1.2291669845581055,
+      "wall_abs_diff_ms": -25.28528999999935
+    }
+  },
+  "rabit_comparisons": {
+    "rabit_vs_bf16": {
+      "basis": "cross-leg summaries (median of the two leg-level values per condition)",
+      "tpot_abs_diff_ms": 5.909303854838662,
+      "tpot_pct_diff": 24.424250133219495,
+      "p90_tpot_abs_diff_ms": 6.00894611290326,
+      "ttft_abs_diff_ms": 84.66434478759766,
+      "wall_abs_diff_ms": 269.1034194999985,
+      "capacity_ratio": 5.278537697443413
+    },
+    "rabit_vs_fp8": {
+      "basis": "cross-leg summaries (median of the two leg-level values per condition)",
+      "tpot_abs_diff_ms": 4.357460161291588,
+      "tpot_pct_diff": 16.924635991446713,
+      "p90_tpot_abs_diff_ms": 4.272506354840658,
+      "ttft_abs_diff_ms": 81.22509717941284,
+      "wall_abs_diff_ms": 217.60021775001792,
+      "capacity_ratio": 2.6408815023015193
+    },
+    "rabit_vs_turboquant": {
+      "basis": "cross-leg summaries (median of the two leg-level values per condition)",
+      "tpot_abs_diff_ms": 2.315967056451349,
+      "tpot_pct_diff": 8.334489498132402,
+      "p90_tpot_abs_diff_ms": 2.371177725808046,
+      "ttft_abs_diff_ms": 89.62243795394897,
+      "wall_abs_diff_ms": 162.3793104999861,
+      "capacity_ratio": 1.7242287234042553,
+      "framing": "METHOD-NATIVE SYSTEM comparison (TurboQuant uses its own backend + FlashAttention v2 on its BF16 boundary layers); not a quantizer-kernel comparison"
+    }
+  },
+  "statistics_note": "descriptive only: two fresh-engine legs per condition; no significance tests or CIs",
+  "fairness": {
+    "MATCHED": [
+      "GPU model / container / session",
+      "model weights and tokenizer",
+      "patched vLLM snapshot",
+      "V2 model runner",
+      "process topology",
+      "prompt 2048 / output 32 / greedy / ignore_eos",
+      "max_model_len 32768",
+      "max_num_seqs 32",
+      "max_num_batched_tokens 16384",
+      "gpu_memory_utilization 0.82",
+      "block_size 32",
+      "enforce_eager",
+      "chunked prefill on",
+      "prefix caching off",
+      "warmup policy",
+      "measurement code (timed region AST-identical to Exp4)",
+      "condition scheduling (mirrored A B C D D C B A)"
+    ],
+    "METHOD_INHERENT": [
+      "KV representation, precision, metadata / per-vector parameters, residual window, and TurboQuant's four BF16 boundary layers"
+    ],
+    "UNAVOIDABLY_DIFFERENT": [
+      "attention backend: TRITON_ATTN (A, B, C) vs TURBOQUANT + FlashAttention v2 on the BF16 boundary layers (D); direction of the latency bias not determined"
+    ]
+  },
+  "claim_boundary": "A matched, method-native system comparison in ONE H100 session (default V2 runner, eager, single request, 2048-token prompt, 32 output tokens). TurboQuant uses its method-required attention backend (TURBOQUANT + FlashAttention v2 on its four BF16 boundary layers) while BF16 / FP8 / RABIT use TRITON_ATTN; latency differences are therefore system-level, not quantizer-kernel-level. No throughput claim (single request), no quality claim, no generalization beyond this configuration. Exp3 / Exp4 absolute TPOT are not comparable as the same experiment (different snapshot / session).",
+  "disclosure": "TurboQuant was evaluated using our vendored vLLM snapshot (upstream base f329ce4) with the official upstream TurboQuant V2 cache-dtype integration fix from fa4321de3d894c50c5ca0766dffa352d3fb07423 (PR #47609; first released in vLLM v0.25.0) backported. The change only restores the intended cache-dtype dispatch for TurboQuant specs in the model runner's KV-cache reshape; TurboQuant's quantizer, packed cache format, boundary-layer policy, and kernels were unchanged. All four methods ran on the same patched snapshot.",
+  "gpu": [
+    {
+      "clocks.max.sm": "1980",
+      "driver_version": "580.95.05",
+      "index": "0",
+      "memory.total": "81559",
+      "memory.used": "4",
+      "name": "NVIDIA H100 80GB HBM3",
+      "power.limit": "700.00",
+      "uuid": "GPU-f85f0d72-1b6d-e018-2b22-f1f50a0a0f21"
+    }
+  ]
+}

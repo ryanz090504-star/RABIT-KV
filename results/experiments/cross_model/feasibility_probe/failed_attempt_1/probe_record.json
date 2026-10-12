@@ -1,0 +1,542 @@
+{
+  "experiment": 14,
+  "kind": "feasibility_probe",
+  "non_evidence": true,
+  "status": "failed",
+  "git_head": "35344e0ac8ea5fc3bf4a81d3bc62dfcec2872fc4",
+  "started_utc": "2026-09-30T11:25:32.492118+00:00",
+  "harness_sha256": {
+    "run_experiment14_second_model.py": "a6cdff9a9ea8c5652e88e261fffaadf740c6ddb3823dab056ddd7f9de489b7c2",
+    "exp14_deployment_modal.py": "33eab0ad7588d58c8782107215a5a433ebb48fbff102dc13bcb892ddab4ec7c6",
+    "exp14_engine_worker.py": "80297e4569846388229fd7a8ab32579a376a7223f15885161f86a120957be7bc",
+    "exp14_probe_worker.py": "b6651c24f4dc1bc8bf28e5fb288e75944a3cdfc4166c5e98361717f8df8475b9",
+    "exp14_shape_gate.py": "12c4e23db61e39c119dc70851efbdebc8e1cf9a1d89a91a02623c6694b8d9442",
+    "exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+    "exp14_model_snapshot_modal.py": "ee691d7e9963f042939cf06d5ea3d5b691b6ad7643219a7575d08f0f51ee7f09",
+    "exp14_second_model_protocol.json": "bea4003ebcb75d54ede04eea2eea4c3ba26f341743d4c6a89e3ae0a069f0b43a",
+    "test_experiment14_second_model.py": "ca7ab1b37433ebd871ecc822601e7cb5d5ad02b2a7dcf0879efa5ce1cfcd0b5a",
+    "exp3_correctness_gate.py": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce",
+    "exp3_watchdog.py": "05e6472e8172a0b7e264ecf7509752bb9a70818f08ba67da476c69db38164d21"
+  },
+  "protocol_sha256": "bea4003ebcb75d54ede04eea2eea4c3ba26f341743d4c6a89e3ae0a069f0b43a",
+  "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+  "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+  "model_manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+  "modal_returncode": 1,
+  "completed_utc": "2026-09-30T11:32:11.395200+00:00",
+  "modal_app_ids": [
+    "ap-R1RwNqMvpdVTZi63HBEawu"
+  ],
+  "session_log_sha256": "af351c4b3fb67ab54967d21ac94c2ea2674213579ab30123b4a9b59c1ed26cf6",
+  "result": {
+    "checks": {
+      "rabit_gate_passed": true,
+      "shape_gate_passed": false,
+      "no_watchdog_timeout": true,
+      "session_complete": false,
+      "gpu_is_h100_80gb": true,
+      "model_is_model_b": false,
+      "model_revision_frozen": false,
+      "model_snapshot_verified": false,
+      "P1_exit_0": false,
+      "P1_gpu_clean_before": false,
+      "P1_v2_runner": false,
+      "P1_block_size_32": false,
+      "P1_engine_cache_dtype": false,
+      "P1_kv_quant_mode": false,
+      "P1_rabit_policy_frozen": false,
+      "P1_geometry": false,
+      "P1_backend_evidence": false,
+      "P1_physical_layout_consistent": false,
+      "P1_workload_generation": false,
+      "P1_sanity_generation_completed": false,
+      "P2_exit_0": false,
+      "P2_gpu_clean_before": false,
+      "P2_v2_runner": false,
+      "P2_block_size_32": false,
+      "P2_engine_cache_dtype": false,
+      "P2_kv_quant_mode": false,
+      "P2_rabit_policy_frozen": false,
+      "P2_geometry": false,
+      "P2_backend_evidence": false,
+      "P2_physical_layout_consistent": false,
+      "P2_workload_generation": false,
+      "P2_sanity_generation_completed": false
+    },
+    "passed": false,
+    "gates": {
+      "rabit_gate_result": {
+        "passed": true
+      },
+      "rabit_gate_passed": true,
+      "shape_gate_summary": {
+        "cuda_available": true,
+        "geometries": {
+          "control_llama3_1_8b": {
+            "boundary_replays": [
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [
+                  "T=2: attention max_abs runtime_state=0.007586479187011719 reference_state=0.007586479187011719",
+                  "T=3: attention max_abs runtime_state=0.006523609161376953 reference_state=0.006523609161376953",
+                  "T=4: attention max_abs runtime_state=0.0074920654296875 reference_state=0.0074920654296875",
+                  "T=5: attention max_abs runtime_state=0.008002281188964844 reference_state=0.008002281188964844",
+                  "T=6: attention max_abs runtime_state=0.008721113204956055 reference_state=0.008721113204956055",
+                  "T=7: attention max_abs runtime_state=0.009876489639282227 reference_state=0.009876489639282227",
+                  "T=8: attention max_abs runtime_state=0.006184101104736328 reference_state=0.006184101104736328",
+                  "T=9: attention max_abs runtime_state=0.00742650032043457 reference_state=0.00742650032043457"
+                ],
+                "max_abs_vs_reference_state": 0.009876489639282227,
+                "max_abs_vs_runtime_state": 0.009876489639282227,
+                "prefill": 1,
+                "seed": 140101,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [
+                  "T=4: attention max_abs runtime_state=0.006908893585205078 reference_state=0.006908893585205078",
+                  "T=5: attention max_abs runtime_state=0.0072824954986572266 reference_state=0.0072824954986572266",
+                  "T=6: attention max_abs runtime_state=0.006222367286682129 reference_state=0.006222367286682129",
+                  "T=7: attention max_abs runtime_state=0.006529450416564941 reference_state=0.006529450416564941",
+                  "T=8: attention max_abs runtime_state=0.008916139602661133 reference_state=0.008916139602661133",
+                  "T=9: attention max_abs runtime_state=0.005428910255432129 reference_state=0.005428910255432129",
+                  "T=10: attention max_abs runtime_state=0.008659124374389648 reference_state=0.008659124374389648",
+                  "T=11: attention max_abs runtime_state=0.005615115165710449 reference_state=0.005615115165710449",
+                  "T=12: attention max_abs runtime_state=0.006441295146942139 reference_state=0.006441295146942139"
+                ],
+                "max_abs_vs_reference_state": 0.008916139602661133,
+                "max_abs_vs_runtime_state": 0.008916139602661133,
+                "prefill": 4,
+                "seed": 140104,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [
+                  "T=5: attention max_abs runtime_state=0.006898283958435059 reference_state=0.006898283958435059",
+                  "T=6: attention max_abs runtime_state=0.00663304328918457 reference_state=0.00663304328918457",
+                  "T=7: attention max_abs runtime_state=0.007318735122680664 reference_state=0.007318735122680664",
+                  "T=8: attention max_abs runtime_state=0.006142377853393555 reference_state=0.006142377853393555",
+                  "T=9: attention max_abs runtime_state=0.008708000183105469 reference_state=0.008708000183105469",
+                  "T=10: attention max_abs runtime_state=0.00811922550201416 reference_state=0.00811922550201416",
+                  "T=11: attention max_abs runtime_state=0.006934165954589844 reference_state=0.006934165954589844",
+                  "T=12: attention max_abs runtime_state=0.006458163261413574 reference_state=0.006458163261413574",
+                  "T=13: attention max_abs runtime_state=0.006595015525817871 reference_state=0.006595015525817871"
+                ],
+                "max_abs_vs_reference_state": 0.008708000183105469,
+                "max_abs_vs_runtime_state": 0.008708000183105469,
+                "prefill": 5,
+                "seed": 140105,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.0037478208541870117,
+                "max_abs_vs_runtime_state": 0.0037478208541870117,
+                "prefill": 35,
+                "seed": 140135,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.003928542137145996,
+                "max_abs_vs_runtime_state": 0.003928542137145996,
+                "prefill": 36,
+                "seed": 140136,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.004304349422454834,
+                "max_abs_vs_runtime_state": 0.004304349422454834,
+                "prefill": 37,
+                "seed": 140137,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [
+                  "T=75: attention max_abs runtime_state=0.005567312240600586 reference_state=0.005567312240600586"
+                ],
+                "max_abs_vs_reference_state": 0.005567312240600586,
+                "max_abs_vs_runtime_state": 0.005567312240600586,
+                "prefill": 68,
+                "seed": 140168,
+                "steps": 8
+              }
+            ],
+            "checks": {
+              "alignment_invariants": true,
+              "boundary_state_and_attention": false,
+              "dispatch_matches_predicates": true,
+              "main_workload_state_and_attention": true,
+              "page_bytes_expected": true,
+              "predicates_as_expected": true
+            },
+            "geometry": {
+              "head_dim": 128,
+              "kv_heads": 8,
+              "q_heads": 32
+            },
+            "main_dispatch_counts": {
+              "append_calls": 62,
+              "append_fallback_calls": 0,
+              "decode_calls": 64,
+              "decode_fallback_calls": 0,
+              "decode_step_quant_fallback_calls_total": 0,
+              "decode_steps_with_quant_fallback": 0
+            },
+            "main_workload_replays": [
+              {
+                "checkpoints": 32,
+                "decode_step_quant_fallback_calls": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.0004981458187103271,
+                "max_abs_vs_runtime_state": 0.0004981458187103271,
+                "prefill": 2048,
+                "seed": 140001,
+                "steps": 31
+              },
+              {
+                "checkpoints": 32,
+                "decode_step_quant_fallback_calls": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.0004906654357910156,
+                "max_abs_vs_runtime_state": 0.0004906654357910156,
+                "prefill": 2048,
+                "seed": 140002,
+                "steps": 31
+              }
+            ],
+            "max_abs": 0.009876489639282227,
+            "page_bytes": 24832,
+            "passed": false,
+            "predicates": {
+              "fast_append_engaged": true,
+              "gqa4_engaged": true
+            }
+          },
+          "model_b_qwen2_5_7b": {
+            "boundary_replays": [
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [
+                  "T=2: attention max_abs runtime_state=0.0074558258056640625 reference_state=0.0074558258056640625",
+                  "T=3: attention max_abs runtime_state=0.007498264312744141 reference_state=0.007498264312744141",
+                  "T=4: attention max_abs runtime_state=0.007697582244873047 reference_state=0.007697582244873047",
+                  "T=5: attention max_abs runtime_state=0.006611347198486328 reference_state=0.006611347198486328",
+                  "T=6: attention max_abs runtime_state=0.00659942626953125 reference_state=0.00659942626953125",
+                  "T=7: attention max_abs runtime_state=0.006334185600280762 reference_state=0.006334185600280762",
+                  "T=9: attention max_abs runtime_state=0.005359172821044922 reference_state=0.005359172821044922"
+                ],
+                "max_abs_vs_reference_state": 0.007697582244873047,
+                "max_abs_vs_runtime_state": 0.007697582244873047,
+                "prefill": 1,
+                "seed": 140101,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [
+                  "T=4: attention max_abs runtime_state=0.00769805908203125 reference_state=0.00769805908203125",
+                  "T=5: attention max_abs runtime_state=0.006238222122192383 reference_state=0.006238222122192383",
+                  "T=6: attention max_abs runtime_state=0.011920928955078125 reference_state=0.011920928955078125",
+                  "T=7: attention max_abs runtime_state=0.008389592170715332 reference_state=0.008389592170715332",
+                  "T=8: attention max_abs runtime_state=0.010527610778808594 reference_state=0.010527610778808594",
+                  "T=9: attention max_abs runtime_state=0.007600665092468262 reference_state=0.007600665092468262",
+                  "T=10: attention max_abs runtime_state=0.009810090065002441 reference_state=0.009810090065002441",
+                  "T=11: attention max_abs runtime_state=0.011410951614379883 reference_state=0.011410951614379883",
+                  "T=12: attention max_abs runtime_state=0.005953788757324219 reference_state=0.005953788757324219"
+                ],
+                "max_abs_vs_reference_state": 0.011920928955078125,
+                "max_abs_vs_runtime_state": 0.011920928955078125,
+                "prefill": 4,
+                "seed": 140104,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [
+                  "T=5: attention max_abs runtime_state=0.00818777084350586 reference_state=0.00818777084350586",
+                  "T=6: attention max_abs runtime_state=0.009515047073364258 reference_state=0.009515047073364258",
+                  "T=7: attention max_abs runtime_state=0.009585261344909668 reference_state=0.009585261344909668",
+                  "T=8: attention max_abs runtime_state=0.0089033842086792 reference_state=0.0089033842086792",
+                  "T=9: attention max_abs runtime_state=0.007950663566589355 reference_state=0.007950663566589355",
+                  "T=10: attention max_abs runtime_state=0.005915045738220215 reference_state=0.005915045738220215",
+                  "T=11: attention max_abs runtime_state=0.007020831108093262 reference_state=0.007020831108093262",
+                  "T=12: attention max_abs runtime_state=0.007378816604614258 reference_state=0.007378816604614258",
+                  "T=13: attention max_abs runtime_state=0.005988478660583496 reference_state=0.005988478660583496"
+                ],
+                "max_abs_vs_reference_state": 0.009585261344909668,
+                "max_abs_vs_runtime_state": 0.009585261344909668,
+                "prefill": 5,
+                "seed": 140105,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.004381716251373291,
+                "max_abs_vs_runtime_state": 0.004381716251373291,
+                "prefill": 35,
+                "seed": 140135,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.0038895606994628906,
+                "max_abs_vs_runtime_state": 0.0038895606994628906,
+                "prefill": 36,
+                "seed": 140136,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [
+                  "T=42: attention max_abs runtime_state=0.005245685577392578 reference_state=0.005245685577392578"
+                ],
+                "max_abs_vs_reference_state": 0.005245685577392578,
+                "max_abs_vs_runtime_state": 0.005245685577392578,
+                "prefill": 37,
+                "seed": 140137,
+                "steps": 8
+              },
+              {
+                "checkpoints": 9,
+                "decode_step_quant_fallback_calls": [],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.0038275718688964844,
+                "max_abs_vs_runtime_state": 0.0038275718688964844,
+                "prefill": 68,
+                "seed": 140168,
+                "steps": 8
+              }
+            ],
+            "checks": {
+              "alignment_invariants": true,
+              "boundary_state_and_attention": false,
+              "dispatch_matches_predicates": true,
+              "main_workload_state_and_attention": true,
+              "page_bytes_expected": true,
+              "predicates_as_expected": true
+            },
+            "geometry": {
+              "head_dim": 128,
+              "kv_heads": 4,
+              "q_heads": 28
+            },
+            "main_dispatch_counts": {
+              "append_calls": 62,
+              "append_fallback_calls": 62,
+              "decode_calls": 64,
+              "decode_fallback_calls": 64,
+              "decode_step_quant_fallback_calls_total": 62,
+              "decode_steps_with_quant_fallback": 62
+            },
+            "main_workload_replays": [
+              {
+                "checkpoints": 32,
+                "decode_step_quant_fallback_calls": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.0005859285593032837,
+                "max_abs_vs_runtime_state": 0.0005859285593032837,
+                "prefill": 2048,
+                "seed": 140001,
+                "steps": 31
+              },
+              {
+                "checkpoints": 32,
+                "decode_step_quant_fallback_calls": [
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "failures": [],
+                "max_abs_vs_reference_state": 0.0004919618368148804,
+                "max_abs_vs_runtime_state": 0.0004919618368148804,
+                "prefill": 2048,
+                "seed": 140002,
+                "steps": 31
+              }
+            ],
+            "max_abs": 0.011920928955078125,
+            "page_bytes": 12416,
+            "passed": false,
+            "predicates": {
+              "fast_append_engaged": false,
+              "gqa4_engaged": false
+            }
+          }
+        },
+        "passed": false,
+        "tolerance_max_abs": 0.005
+      },
+      "shape_gate_passed": false
+    },
+    "facts": {
+      "P1": {
+        "kv_cache_dtype": "bfloat16",
+        "capacity_tokens": null,
+        "kv": {},
+        "reported_kv_cache_gib": null,
+        "implied_bytes_per_token": null,
+        "geometry": null,
+        "workload_generation": {},
+        "sanity_generation": null
+      },
+      "P2": {
+        "kv_cache_dtype": "rabit_kv2",
+        "capacity_tokens": null,
+        "kv": {},
+        "reported_kv_cache_gib": null,
+        "implied_bytes_per_token": null,
+        "geometry": null,
+        "workload_generation": {},
+        "sanity_generation": null
+      }
+    },
+    "model": null
+  }
+}

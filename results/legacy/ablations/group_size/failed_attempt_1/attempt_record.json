@@ -1,0 +1,58 @@
+{
+  "experiment": 9,
+  "attempt": 1,
+  "status": "invalid_control_reproduction",
+  "excluded_from_accepted_results": true,
+  "execution_commit": "545b6ad8674ee359edb8a9f3c9bfa3a6e47b8069",
+  "protocol": "benchmarks/mlsys2027/exp9_group_protocol.json",
+  "protocol_sha256": "4c9bbdb11e717d21a882e004dcca0e259b6fbb7d942d65606069cf3aa0fc1f0a",
+  "started_utc": "2026-09-29T17:03:15.241804+00:00",
+  "completed_utc": "2026-09-29T17:10:03.208329+00:00",
+  "failure": {
+    "benchmark": "hotpotqa",
+    "control": "G32 (rabit2, canonical config)",
+    "metric": "f1_pct",
+    "observed_f1": 57.7,
+    "canonical_target": 55.2,
+    "abs_diff": 2.5,
+    "frozen_tolerance": "+/-1.0 point"
+  },
+  "benchmarks": {
+    "continuation_ppl": {"ran": true, "gates_passed": true, "modal_app_id": "ap-h69UcarugNUC1K9QvR8lhH"},
+    "niah": {"ran": true, "gates_passed": true, "modal_app_id": "ap-ydMwMvGePoefydX5yoEFJt"},
+    "passage_retrieval": {"ran": true, "gates_passed": true, "modal_app_id": "ap-2gK76mepjbOFf85H6w7wxw"},
+    "hotpotqa": {"ran": true, "gates_passed": false, "failed_gate": "bf16_and_g32_control_reproduce_canonical",
+                 "modal_app_id": "ap-YyHcnO0QvQdeWzllW5vV90"},
+    "qasper": {"ran": false,
+               "reason": "never run: the runner stops at the first failed gate (hotpotqa G32 control reproduction)"}
+  },
+  "forensic_note": [
+    "19/20 per-example G32 HotpotQA scores matched the prior accepted controls (Exp1 quality_frontier, Exp7 k_bit, Exp8 v_bit) exactly",
+    "the entire +2.5-point difference came from one example (sample 2 of 20)",
+    "prior accepted runs answered with an ASCII hyphen: \"2016-17\" (F1 0.000)",
+    "this run answered with an en dash: \"2016–17\" (F1 0.500)",
+    "the G32 config and its logical KV storage matched exactly (352.046 MB for that example; 359.850 MB average)",
+    "the bf16 control reproduced exactly (F1 60.6, 1896.106 MB)",
+    "this is CONSISTENT WITH run-to-run generation nondeterminism (the frozen methodology runs with TF32 enabled and without deterministic algorithms on fresh H100 instances); it is NOT a proven causal diagnosis"
+  ],
+  "use_of_values": "no quality or storage value from this attempt is used, salvaged or pooled in any accepted result",
+  "files_sha256_lf_normalized": {
+    "note": "sha256 of each file with CR removed = the committed git blob (core.autocrlf=true stores LF, as for the accepted Exp7 / Exp8 evidence); files_sha256 below are the raw CRLF bytes as written by the runner (= manifest log_sha256)",
+    "continuation_ppl.log": "116172edf93ce2179ec14f2fa03eabe5224ac3d49c2a0121a82c1e7c006e9835",
+    "niah.log": "e047aa025d208de0d29916d82ee6a04d7c4433d94d3bbf1f7fe2ed292a95f33d",
+    "passage_retrieval.log": "d8b49648e8fa7c0351ce7437205adbc9e39fab7a2e3a17db5f6553da59b811da",
+    "hotpotqa.log": "fa4f46cb73928bbe24031040d66e86280f40abaff6c7be9f5956259c90199046",
+    "manifest.json": "c6b4a060fbbcc65f03748b9997b509a2253e69830afba27aba8190ce640901ff",
+    "regression_check.json": "7d6530a8ec64c93198a6275823f06e934971bc169cb9c06ac00472c7cd4506dc",
+    "group_results.json": "640a323394c391ddf736b26c7ab8a93bb1ed4e0f7a41f4428fa68cfb982515f0"
+  },
+  "files_sha256": {
+    "continuation_ppl.log": "5bfc48d3db35c950f5d39f391358d2ad27405625dfd366e201ac6ba401c16cba",
+    "niah.log": "989daff5a91657a55289597cc208b8bb13be90f699185bbe41a3ed28618b4c77",
+    "passage_retrieval.log": "2f14768a1150064742058096c587b67194318df58067db3c7077dffbcf572546",
+    "hotpotqa.log": "14c29b47bed86356448fe928d766e411b18993876c57314e34f0741dff41d40a",
+    "manifest.json": "cb57f34acf26703f388daa66bb6e1e94cf6aade8f5d398aa98cc32dcd89b91b7",
+    "regression_check.json": "91fc6dec3b3a5a7bc4273f955f94658e1b664137c77548f27de83811533dc5a1",
+    "group_results.json": "9914c5bde0f736afdc83075c76e58d34ccddb7831ff9ad298de944578f6633d5"
+  }
+}

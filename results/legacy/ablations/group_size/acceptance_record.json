@@ -1,0 +1,62 @@
+{
+  "experiment": 9,
+  "type": "logical fake-quant / dequant QUALITY ablation (NOT a physical serving benchmark)",
+  "status": "accepted",
+  "accepted_attempt": 2,
+  "failed_attempt_1_excluded": true,
+  "no_cross_attempt_pooling": true,
+  "accepted_files": "the top-level files of results/mlsys2027/ablations/group_size/ listed in files_sha256 (Attempt 2 only); failed_attempt_1/ is excluded evidence",
+  "execution_amendment": "results/mlsys2027/ablations/group_size/execution_amendment_1.json (post-failure, not pre-registered; committed at a934bac84f95231c3cd86f48bf5168670232ec76 before Attempt 2)",
+  "failed_attempt_1": {
+    "path": "results/mlsys2027/ablations/group_size/failed_attempt_1/",
+    "status": "invalid_control_reproduction",
+    "archive_commit": "239a4bd70587f7b52d8c1258fe62faf88d64b45b"
+  },
+  "execution_commit": "a934bac84f95231c3cd86f48bf5168670232ec76",
+  "harness_commit": "545b6ad8674ee359edb8a9f3c9bfa3a6e47b8069",
+  "harness_identical_to_prep_commit": true,
+  "protocol": "benchmarks/mlsys2027/exp9_group_protocol.json",
+  "protocol_sha256": "4c9bbdb11e717d21a882e004dcca0e259b6fbb7d942d65606069cf3aa0fc1f0a",
+  "started_utc": "2026-09-29T17:16:54.227660+00:00",
+  "completed_utc": "2026-09-29T17:28:14.519093+00:00",
+  "group_size_definition": "G is the shared group-size knob: every condition sets k_group = v_group = G together (k_group = seq_affine key SEQUENCE group; v_group = group_affine value HEAD_DIM group); K3 / V2 / R4 / META8g64 / seq_affine / group_affine frozen",
+  "gates": {
+    "all_four_rows_all_five_benchmarks": true,
+    "counts_exact": true,
+    "g32_config_exactly_canonical_rabit2": true,
+    "bf16_and_g32_reproduce_canonical_within_original_tolerances": true,
+    "logical_kv_mb_matches_preregistered_values": true,
+    "storage_ordering_g16_gt_g32_gt_g64": true,
+    "linearity_rule_imposed": false,
+    "prior_evidence_unchanged": true
+  },
+  "modal_app_ids": {
+    "continuation_ppl": "ap-HaSaQmmmn0UKXmMf3fT2C6",
+    "niah": "ap-5zC28GWthlv9oe4hhNZEnR",
+    "passage_retrieval": "ap-Zq8s6GEs0K5jEQbqByT7wX",
+    "hotpotqa": "ap-cXwXTErF8Btsya7gbanL63",
+    "qasper": "ap-LapfKzEvk9obr26x72C7UQ"
+  },
+  "observation": "Attempt 2's 20 per-example G32 HotpotQA scores equal the prior accepted controls (Exp1 / Exp7 / Exp8); the example that changed in Attempt 1 again answered \"2016-17\" (F1 0.000). Reported as an observation only.",
+  "files_sha256": {
+    "continuation_ppl.log": "3df4eb0276dd6583e08e291e3614d3f3143cf2c77723a4f3fb5039097ab66b57",
+    "niah.log": "5672fc032521a1268bb89fbe151de47d2b58e2685964803aa887b2fee8e44d69",
+    "passage_retrieval.log": "b21a8308d77681f24f72feccd81c20ce800322592954b10f15a006c41c1fe14a",
+    "hotpotqa.log": "9a33777acb4a288489fcbb70f5f61781a87aca69c34bf3d1d00fde857a7eeebb",
+    "qasper.log": "b82f1a34f5529b103d0dd3a890a82cc62255bb1757993c24cb66341d6e9019cf",
+    "manifest.json": "e74c1ad50362b1e230769b029cb65cf88a4d9eef98b3ea78f6fed40d0d6a6039",
+    "regression_check.json": "3798ea4bea629bf97d1587123cf6accbc65ec1a16928ff8042e1e5247b783168",
+    "group_results.json": "a69fa79a9bd4b6a824f66232ae100fa62d063ed251faed53e43dc30cf1bf48a8"
+  },
+  "files_sha256_lf_normalized": {
+    "note": "sha256 with CR removed = the committed git blob (core.autocrlf=true); files_sha256 are the raw CRLF bytes written by the runner (= manifest log_sha256 for the logs)",
+    "continuation_ppl.log": "03bf7694d9c07f46738c7e83a623097c7e45bcf48e1fd49d469fb7fd96e647f6",
+    "niah.log": "af9a311791c0f9bd196ce20df6ce3e7271edbb9c94a9ae4c809435c1415d8f20",
+    "passage_retrieval.log": "a2e5e014a93aea3bc4cd0da41b96e2bd6ac90efc1179438b30b17d9db76c9d92",
+    "hotpotqa.log": "7e16e8510e59c08b52b61a1519163079e7d817b3793206b890d9b2aa19f09c83",
+    "qasper.log": "40b29c3cfed9e0f7ca2045405fa33772fa252792e4781eb3b250c6727349feff",
+    "manifest.json": "fc3f20494f35407fd55453c4a8a974ef4e7167979a59593905b98ed4e612b6ad",
+    "regression_check.json": "5e0625ca0083e7cc900d50156cfb74a69aefcd929bb6505f641bb1fd4ceca653",
+    "group_results.json": "31f26251bb339f2f968986d0fb73a0d62fb196cc3a6401d9d70d17e9de0dfc33"
+  }
+}

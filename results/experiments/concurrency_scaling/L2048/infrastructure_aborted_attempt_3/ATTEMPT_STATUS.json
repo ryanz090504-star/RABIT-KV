@@ -1,0 +1,27 @@
+{
+  "attempt": "L2048 infrastructure_aborted_attempt_3",
+  "status": "infrastructure_aborted",
+  "classification": "INFRASTRUCTURE-ABORTED run; not a scientific or performance failure",
+  "accepted_for_performance_interpretation": false,
+  "use_in_paper_dataset": false,
+  "salvage_of_any_point_allowed": false,
+  "decision": "The local Modal client disconnected at 2026-09-28T03:09:12Z and Modal cancelled the function ('Received a cancellation signal while processing input'; 'Stopping app - local client disconnected'; heartbeat: 'App state is APP_STATE_STOPPED'). No harness, worker or GPU fault. The sweep is incomplete; no point (including the 3 completed ones) is interpreted, published or pooled. Relaunch approved with `modal run --detach` plus complete remote-log capture (harness-only; protocol unchanged).",
+  "archival_note": "Every other file in this directory is the byte-exact output of the run (moved unchanged from results/mlsys2027/concurrency_scaling/L2048/shadow_conditioned/; SHA-256 verified before and after the move). Paths recorded inside manifest.json refer to the original location. This file is the only one added after the run.",
+  "modal_app": "ap-oe12rS7ecRPZiIkQ0TDmzt",
+  "code_commit": "5028eb2ce6a9b1dcfa7ca12bed846acf902ae9db",
+  "protocol": "full shadow-workload conditioning (unchanged; exp6_protocol.json sha256 52362fb5019e113596c8e047df607f4bf3ec8268337f17aa3958f4a54ac1a56e)",
+  "vllm_kvquant_snapshot_sha256": "9828b469f9fe2e5a37fd583f42f91aee83e6d3c58410fac76627f737139277c9",
+  "gpu": {"model": "H100", "uuid": "GPU-a030a49a-ca68-3560-4f7c-e4162ea059db"},
+  "utc": {"started": "2026-09-28T02:53:42.971219+00:00", "cancelled": "2026-09-28T03:09:12+00:00", "completed": "2026-09-28T03:22:07.815765+00:00"},
+  "manifest_status": "failed",
+  "modal_returncode": 1,
+  "integrity_counts": {"passed": 47, "failed": 1, "not_run": 225, "not_evaluated": 128},
+  "execution_facts": {
+    "environment_and_gate": "passed",
+    "points_completed": ["t1_bf16_L2048_c1", "t1_bf16_L2048_c4", "t1_bf16_L2048_c8"],
+    "point_in_progress_when_cancelled": "t1_bf16_L2048_c16 (shadow pass 256/256 valid; engine SIGTERM from the cancellation before its measured rows were emitted)",
+    "points_not_started": 32,
+    "protected_paths_post_run": "clean",
+    "prior_evidence_unchanged": true
+  }
+}

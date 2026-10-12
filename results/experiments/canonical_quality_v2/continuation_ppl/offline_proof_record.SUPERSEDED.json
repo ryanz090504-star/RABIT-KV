@@ -1,0 +1,7 @@
+{
+  "marks": "offline_proof_record.json (commit eb3f4b1, sha256_lf 47c5bd48b34b200b9b228ed9097f332a73c09e9a5712e8c35e3b8219f0cef335)",
+  "classification": "SUPERSEDED OFFLINE-PROOF RESULT",
+  "reason": "the canonical-state spy that produced it keyed state by Python id(obj) and passes or fails nondeterministically; the record is kept unmodified but is no longer reliable evidence",
+  "diagnostic": "results/mlsys2027/canonical_quality_v2/ppl_offline_proof_diagnostic/record.json",
+  "superseded_by": "offline_proof_record_v2.json (corrected observer)"
+}

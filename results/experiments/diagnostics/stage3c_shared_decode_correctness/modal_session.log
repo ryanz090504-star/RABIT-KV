@@ -1,0 +1,518 @@
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.WindowsSelectorEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+C:\Users\ryanz\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\modal\_utils\async_utils.py:45: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+✓ Initialized. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-Sfam3n4W8I2pjaFjLNaqi1
+Building image im-zyqMK3W93l6Io0rd8NrUZF
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.49s
+
+Built image im-zyqMK3W93l6Io0rd8NrUZF in 4.37s
+
+
+Building image im-QueQZWT9Atf10IC1FKnAij
+
+=> Step 0: FROM base
+
+=> Step 1: RUN rm -rf /root/vllm-kvquant && mkdir -p /root/vllm-kvquant && python -m zipfile -e /tmp/rabit2_final_fast_decode_append_snapshot.zip /root/vllm-kvquant
+Saving image...
+Image saved, took 1.10s
+
+Built image im-QueQZWT9Atf10IC1FKnAij in 5.00s
+
+
+Building image im-A4hNWKfKUrA5GhaBaXZOV3
+
+=> Step 0: FROM base
+
+=> Step 1: ENV CUDA_HOME=/usr/local/cuda
+
+=> Step 2: ENV VLLM_TARGET_DEVICE=cuda
+
+=> Step 3: ENV VLLM_USE_PRECOMPILED=1
+
+=> Step 4: ENV VLLM_PRECOMPILED_WHEEL_COMMIT=f329ce405b12623fb8b1cf1830f12e5a712523be
+
+=> Step 5: ENV VLLM_PRECOMPILED_WHEEL_VARIANT=cu130
+
+=> Step 6: ENV VLLM_MAIN_CUDA_VERSION=13.0
+
+=> Step 7: ENV VLLM_SKIP_PRECOMPILED_VERSION_SUFFIX=1
+
+=> Step 8: ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.10.0+kvquant
+
+=> Step 9: ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_VLLM=0.10.0+kvquant
+
+=> Step 10: ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+=> Step 11: ENV VLLM_USE_V1=1
+Saving image...
+Image saved, took 839.99ms
+
+Built image im-A4hNWKfKUrA5GhaBaXZOV3 in 2.26s
+
+
+Building image im-divQ6GU3USBhc9siaVaTGw
+
+=> Step 0: FROM base
+
+=> Step 1: RUN cd /root/vllm-kvquant && python use_existing_torch.py --prefix
+>>> removed from requirements/cuda.txt: torch==2.11.0
+>>> removed from requirements/cuda.txt: torchaudio==2.11.0
+>>> removed from requirements/cuda.txt: torchvision==0.26.0 # Required for phi3v processor. See https://github.com/pytorch/vision?tab=readme-ov-file#installation for corresponding version
+>>> removed from requirements/xpu.txt: torch==2.12.0
+>>> removed from requirements/cpu.txt: torch==2.11.0+cpu; platform_machine == "x86_64" or platform_machine == "s390x" or platform_machine == "aarch64"
+>>> removed from requirements/cpu.txt: torch==2.11.0; platform_system == "Darwin" or platform_machine == "ppc64le" or platform_machine == "riscv64"
+>>> removed from requirements/test/cpu.txt: torch==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchaudio==2.11.0+cpu
+>>> removed from requirements/test/cpu.txt: torchvision==0.26.0+cpu
+>>> removed from requirements/test/cuda.txt: torch==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchaudio==2.11.0+cu130
+>>> removed from requirements/test/cuda.txt: torchvision==0.26.0+cu130
+>>> removed from requirements/test/xpu.txt: torch==2.12.0+xpu
+>>> removed from requirements/test/xpu.txt: torchvision==0.27.0+xpu
+>>> removed from requirements/test/cuda.in: torch==2.11.0
+>>> removed from requirements/test/cuda.in: torchaudio==2.11.0
+>>> removed from requirements/test/cuda.in: torchvision==0.26.0
+>>> removed from pyproject.toml: "torch == 2.11.0",
+
+=> Step 2: RUN cd /root/vllm-kvquant && rm -rf build dist *.egg-info /tmp/vllm.log && (python -m pip install -e . --no-build-isolation > /tmp/vllm.log 2>&1 || (tail -n 250 /tmp/vllm.log; exit 1))
+Saving image...
+Image saved, took 6.30s
+
+Built image im-divQ6GU3USBhc9siaVaTGw in 128.30s
+
+
+Building image im-5lR8AgXBgpfPzZxhvoPi43
+
+=> Step 0: FROM base
+
+=> Step 1: RUN python -m pip install modelscope pytest
+Looking in indexes: http://pypi-mirror.modal.local:5555/simple
+Collecting modelscope
+  Downloading modelscope-1.40.1-py3-none-any.whl.metadata (43 kB)
+Collecting pytest
+  Downloading pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+Requirement already satisfied: filelock in ./usr/local/lib/python3.11/site-packages (from modelscope) (3.29.0)
+Collecting modelscope-hub>=0.4.2 (from modelscope)
+  Downloading modelscope_hub-0.4.5-py3-none-any.whl.metadata (47 kB)
+Requirement already satisfied: packaging in ./usr/local/lib/python3.11/site-packages (from modelscope) (26.3)
+Requirement already satisfied: requests>=2.25 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.34.2)
+Requirement already satisfied: setuptools in ./usr/local/lib/python3.11/site-packages (from modelscope) (80.10.2)
+Requirement already satisfied: tqdm>=4.64.0 in ./usr/local/lib/python3.11/site-packages (from modelscope) (4.70.1)
+Requirement already satisfied: urllib3>=1.26 in ./usr/local/lib/python3.11/site-packages (from modelscope) (2.8.0)
+Collecting iniconfig>=1.0.1 (from pytest)
+  Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting pluggy<2,>=1.5 (from pytest)
+  Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Requirement already satisfied: pygments>=2.7.2 in ./usr/local/lib/python3.11/site-packages (from pytest) (2.21.0)
+Requirement already satisfied: cryptography>=41 in ./usr/local/lib/python3.11/site-packages (from modelscope-hub>=0.4.2->modelscope) (50.0.1)
+Requirement already satisfied: cffi>=2.0.0 in ./usr/local/lib/python3.11/site-packages (from cryptography>=41->modelscope-hub>=0.4.2->modelscope) (2.1.1)
+Requirement already satisfied: pycparser in ./usr/local/lib/python3.11/site-packages (from cffi>=2.0.0->cryptography>=41->modelscope-hub>=0.4.2->modelscope) (3.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.5.1)
+Requirement already satisfied: idna<4,>=2.5 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (3.20)
+Requirement already satisfied: certifi>=2023.5.7 in ./usr/local/lib/python3.11/site-packages (from requests>=2.25->modelscope) (2026.7.22)
+Downloading modelscope-1.40.1-py3-none-any.whl (6.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.1/6.1 MB 245.3 MB/s  0:00:00
+Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Downloading modelscope_hub-0.4.5-py3-none-any.whl (236 kB)
+Installing collected packages: pluggy, iniconfig, pytest, modelscope-hub, modelscope
+
+Successfully installed iniconfig-2.3.0 modelscope-1.40.1 modelscope-hub-0.4.5 pluggy-1.6.0 pytest-9.1.1
+Saving image...
+Image saved, took 1.88s
+
+Built image im-5lR8AgXBgpfPzZxhvoPi43 in 10.09s
+
+
+Building image im-4E5YO1KuSErQaKZfhs7qOO
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 2.10s
+
+Built image im-4E5YO1KuSErQaKZfhs7qOO in 5.15s
+
+
+Building image im-9dgTsrJPEvqBVnXUainOZd
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 3.27s
+
+Built image im-9dgTsrJPEvqBVnXUainOZd in 5.88s
+
+
+Building image im-GqYmksYyAc2PvuP5sxOOiX
+
+=> Step 0: FROM base
+
+=> Step 1: COPY . /
+Saving image...
+Image saved, took 1.90s
+
+Built image im-GqYmksYyAc2PvuP5sxOOiX in 4.01s
+
+
+✓ Created objects.
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\stage3c_shared_decode_bench_modal.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\AppData\Local\Temp\s3d_vllm_snapshot_bx186y8d\vllm_kvquant_s
+│   napshot.zip
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\stage3c_shared_decode_bench_worker.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp3_correctness_gate.py
+├── 🔨 Created mount 
+│   C:\Users\ryanz\Documents\GitHub\benchquant\kvquant_full\RABIT-KV-upload\ben
+│   chmarks\mlsys2027\exp3_watchdog.py
+└── 🔨 Created function benchmark.
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 13.0.2
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+S3C_GPU_BASELINE={"compute_apps": [], "max_wait_s": 60, "memory_used_mib": [4], "t": 1790525209.0642579, "tolerance_mib": 256}
+S3C_ENVIRONMENT={"conditioning_prompt_tokens": 16416, "correctness_only": true, "gpus": [{"clocks.max.sm": "1980", "driver_version": "580.95.05", "index": "0", "memory.total": "81559", "memory.used": "4", "name": "NVIDIA H100 80GB HBM3", "power.limit": "700.00", "uuid": "GPU-bda4d59c-776f-0508-2cbf-70b00ff8b5b9"}], "packages": {"modelscope": "1.40.1", "pytest": "9.1.1", "torch": "2.11.0+cu130", "transformers": "5.17.0", "triton": "3.6.0", "vllm": "0.10.0+kvquant"}, "points": [16416, 16896, 18432, 20480, 24576], "python": "3.11.5", "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae", "request_cap_s": 600, "series": ["rabit_reference", "rabit_tile32", "rabit_shared_qb4", "rabit_shared_qb8", "rabit_shared_qb16", "rabit_shared_qb32"], "series_dtypes": ["rabit_kv2", "rabit_kv2", "rabit_kv2", "rabit_kv2", "rabit_kv2", "rabit_kv2"], "series_impls": ["reference", "tile32", "shared_decode", "shared_decode", "shared_decode", "shared_decode"], "series_query_blocks": [8, 8, 4, 8, 16, 32], "series_timeout_s": 4200, "shared_test_timeout_s": 3600, "tile32_test_timeout_s": 1800, "vllm_precompiled_wheel_commit": "f329ce405b12623fb8b1cf1830f12e5a712523be"}
+S3C_GATE_START={"cmd": ["/usr/local/bin/python", "/opt/s3d/exp3_correctness_gate.py"], "timeout_s": 600}
+[gate] EXP3_GATE_BEGIN={"pytest_command": ["/usr/local/bin/python", "-m", "pytest", "-q", "--tb=short", "--confcutdir=/root/vllm-kvquant/tests/quantization", "/root/vllm-kvquant/tests/quantization/test_kvquant_k3.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_layout.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_physical.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b1.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b2.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_fixed.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py", "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py"], "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"}
+[gate] ====================================================================================================================
+[gate] RABIT-2 FINAL targeted decode-append regression
+[gate] ====================================================================================================================
+[gate] Dispatch preflight: PASSED
+[gate] Stage4D3.4 prep exactness: PASSED (62/62)
+[gate] Stage4D3.4 full attention exactness: PASSED (torch.equal)
+[gate] Stage4D3.4 scratch_bytes_per_stream=57600
+[gate] FINAL fast decode append exactness: PASSED (202 state/byte steps + attention checkpoints)
+[gate] ........................................................................ [ 68%]
+[gate] .................................                                        [100%]
+[gate] =============================== warnings summary ===============================
+[gate] tests/quantization/test_kvquant_k3.py: 14 warnings
+[gate]   /usr/local/lib/python3.11/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+[gate]     warnings.warn(
+[gate] 
+[gate] -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[gate] 105 passed, 14 warnings in 28.88s
+[gate] 
+[gate] pytest exit=0
+[gate] RABIT-2 FINAL TARGETED REGRESSION PASSED
+[gate] EXP3_GATE_RESULT={"passed": true}
+S3C_PROCESS_EXIT={"cmd": ["/usr/local/bin/python", "/opt/s3d/exp3_correctness_gate.py"], "elapsed_s": 49.58, "grace_s": 10.0, "group_processes_after_leader_exit": [], "group_processes_remaining": [], "label": "gate", "own_session": true, "pgid": 32, "pid": 32, "reader_finished": true, "returncode": 0, "signals_sent": [], "timed_out": false, "timeout_s": 600}
+S3C_GATE_EXIT={"returncode": 0}
+S3C_TILE_TESTS_START={"cmd": ["/usr/local/bin/python", "-m", "pytest", "-q", "--tb=short", "-rA", "--confcutdir=/root/vllm-kvquant/tests/quantization", "/root/vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py"], "timeout_s": 1800}
+[tile32-tests] ...........................................                              [100%]
+[tile32-tests] ==================================== PASSES ====================================
+[tile32-tests] =========================== short test summary info ============================
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[2-64]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[2-65]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[2-79]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[2-95]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[31-64]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[31-65]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[31-79]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[31-95]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[32-64]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[32-65]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[32-79]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[32-95]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[33-64]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[33-65]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[33-79]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[33-95]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[64-64]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[64-65]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[64-79]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[64-95]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[1024-64]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[1024-65]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[1024-79]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_exactly[1024-95]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[2-4]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[2-5]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[2-31]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[2-32]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[2-36]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[33-4]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[33-5]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[33-31]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[33-32]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[33-36]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[64-4]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[64-5]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[64-31]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[64-32]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_near_residual_and_first_page[64-36]
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_matches_reference_32k_model_limit_chunk
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tile32_falls_back_for_non_gqa4_without_touching_state
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_selector_defaults_to_reference_and_rejects_unknown
+[tile32-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py::test_tiles_cover_steps_with_constant_closed_count
+[tile32-tests] 43 passed in 38.74s
+S3C_PROCESS_EXIT={"cmd": ["/usr/local/bin/python", "-m", "pytest", "-q", "--tb=short", "-rA", "--confcutdir=/root/vllm-kvquant/tests/quantization", "/root/vllm-kvquant/tests/quantization/test_rabit2_stage3c_tile32.py"], "elapsed_s": 39.962, "grace_s": 10.0, "group_processes_after_leader_exit": [], "group_processes_remaining": [], "label": "tile32_tests", "own_session": true, "pgid": 318, "pid": 318, "reader_finished": true, "returncode": 0, "signals_sent": [], "timed_out": false, "timeout_s": 1800}
+S3C_TILE_TESTS_EXIT={"returncode": 0}
+S3C_SHARED_TESTS_START={"cmd": ["/usr/local/bin/python", "-m", "pytest", "-q", "--tb=short", "-rA", "--confcutdir=/root/vllm-kvquant/tests/quantization", "/root/vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py"], "timeout_s": 3600}
+[shared-tests] ........................................................................ [ 37%]
+[shared-tests] ........................................................................ [ 75%]
+[shared-tests] ................................................                         [100%]
+[shared-tests] ==================================== PASSES ====================================
+[shared-tests] ___________ test_shared_decode_decodes_once_per_query_block[79-33-4] ___________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 176, "measured_shared_decode_page_decodes": 176, "per_query_page_decodes_tile32_reference": 632, "prefix": 79, "q_len": 33, "query_block": 4, "reuse_factor": 3.590909090909091, "tiles": 2}
+[shared-tests] ___________ test_shared_decode_decodes_once_per_query_block[79-33-8] ___________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 96, "measured_shared_decode_page_decodes": 96, "per_query_page_decodes_tile32_reference": 632, "prefix": 79, "q_len": 33, "query_block": 8, "reuse_factor": 6.583333333333333, "tiles": 2}
+[shared-tests] __________ test_shared_decode_decodes_once_per_query_block[79-33-16] ___________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 56, "measured_shared_decode_page_decodes": 56, "per_query_page_decodes_tile32_reference": 632, "prefix": 79, "q_len": 33, "query_block": 16, "reuse_factor": 11.285714285714286, "tiles": 2}
+[shared-tests] __________ test_shared_decode_decodes_once_per_query_block[79-33-32] ___________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 40, "measured_shared_decode_page_decodes": 40, "per_query_page_decodes_tile32_reference": 632, "prefix": 79, "q_len": 33, "query_block": 32, "reuse_factor": 15.8, "tiles": 2}
+[shared-tests] __________ test_shared_decode_decodes_once_per_query_block[95-1024-4] __________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 37632, "measured_shared_decode_page_decodes": 37632, "per_query_page_decodes_tile32_reference": 150528, "prefix": 95, "q_len": 1024, "query_block": 4, "reuse_factor": 4.0, "tiles": 33}
+[shared-tests] __________ test_shared_decode_decodes_once_per_query_block[95-1024-8] __________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 18960, "measured_shared_decode_page_decodes": 18960, "per_query_page_decodes_tile32_reference": 150528, "prefix": 95, "q_len": 1024, "query_block": 8, "reuse_factor": 7.939240506329114, "tiles": 33}
+[shared-tests] _________ test_shared_decode_decodes_once_per_query_block[95-1024-16] __________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 9488, "measured_shared_decode_page_decodes": 9488, "per_query_page_decodes_tile32_reference": 150528, "prefix": 95, "q_len": 1024, "query_block": 16, "reuse_factor": 15.865092748735245, "tiles": 33}
+[shared-tests] _________ test_shared_decode_decodes_once_per_query_block[95-1024-32] __________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 4752, "measured_shared_decode_page_decodes": 4752, "per_query_page_decodes_tile32_reference": 150528, "prefix": 95, "q_len": 1024, "query_block": 32, "reuse_factor": 31.67676767676768, "tiles": 33}
+[shared-tests] _________ test_shared_decode_decodes_once_per_query_block[16384-512-4] _________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 536056, "measured_shared_decode_page_decodes": 536056, "per_query_page_decodes_tile32_reference": 2127488, "prefix": 16384, "q_len": 512, "query_block": 4, "reuse_factor": 3.9687793812586745, "tiles": 17}
+[shared-tests] _________ test_shared_decode_decodes_once_per_query_block[16384-512-8] _________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 270072, "measured_shared_decode_page_decodes": 270072, "per_query_page_decodes_tile32_reference": 2127488, "prefix": 16384, "q_len": 512, "query_block": 8, "reuse_factor": 7.877484522645813, "tiles": 17}
+[shared-tests] ________ test_shared_decode_decodes_once_per_query_block[16384-512-16] _________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 137080, "measured_shared_decode_page_decodes": 137080, "per_query_page_decodes_tile32_reference": 2127488, "prefix": 16384, "q_len": 512, "query_block": 16, "reuse_factor": 15.520046688065364, "tiles": 17}
+[shared-tests] ________ test_shared_decode_decodes_once_per_query_block[16384-512-32] _________
+[shared-tests] ----------------------------- Captured stdout call -----------------------------
+[shared-tests] SHARED_DECODE_COUNTS={"expected_shared_decode": 70584, "measured_shared_decode_page_decodes": 70584, "per_query_page_decodes_tile32_reference": 2127488, "prefix": 16384, "q_len": 512, "query_block": 32, "reuse_factor": 30.14122180664173, "tiles": 17}
+[shared-tests] =========================== short test summary info ============================
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-64-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-64-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-64-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-64-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-65-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-65-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-65-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-65-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-79-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-79-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-79-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-79-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-95-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-95-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-95-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[2-95-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-64-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-64-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-64-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-64-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-65-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-65-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-65-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-65-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-79-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-79-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-79-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-79-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-95-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-95-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-95-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[31-95-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-64-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-64-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-64-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-64-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-65-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-65-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-65-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-65-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-79-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-79-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-79-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-79-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-95-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-95-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-95-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[32-95-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-64-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-64-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-64-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-64-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-65-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-65-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-65-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-65-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-79-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-79-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-79-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-79-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-95-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-95-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-95-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[33-95-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-64-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-64-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-64-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-64-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-65-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-65-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-65-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-65-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-79-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-79-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-79-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-79-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-95-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-95-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-95-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[64-95-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-64-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-64-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-64-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-64-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-65-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-65-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-65-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-65-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-79-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-79-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-79-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-79-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-95-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-95-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-95-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[512-95-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-64-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-64-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-64-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-64-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-65-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-65-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-65-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-65-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-79-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-79-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-79-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-79-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-95-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-95-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-95-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_matches_reference_exactly[1024-95-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-4-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-4-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-4-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-4-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-5-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-5-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-5-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-5-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-31-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-31-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-31-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-31-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-32-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-32-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-32-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-32-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-36-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-36-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-36-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[2-36-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-4-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-4-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-4-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-4-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-5-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-5-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-5-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-5-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-31-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-31-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-31-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-31-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-32-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-32-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-32-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-32-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-36-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-36-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-36-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[33-36-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-4-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-4-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-4-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-4-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-5-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-5-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-5-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-5-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-31-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-31-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-31-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-31-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-32-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-32-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-32-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-32-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-36-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-36-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-36-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_near_residual_and_first_page[64-36-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_32k_model_limit_chunk[4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_32k_model_limit_chunk[8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_32k_model_limit_chunk[16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_32k_model_limit_chunk[32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[79-33-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[79-33-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[79-33-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[79-33-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[95-1024-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[95-1024-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[95-1024-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[95-1024-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[16384-512-4]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[16384-512-8]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[16384-512-16]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_decodes_once_per_query_block[16384-512-32]
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_shared_decode_falls_back_for_non_gqa4_without_touching_state
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_selector_three_way_default_reference
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_query_block_selector
+[shared-tests] PASSED vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py::test_decode_and_per_query_body_are_verbatim_reference
+[shared-tests] 192 passed in 62.69s (0:01:02)
+S3C_PROCESS_EXIT={"cmd": ["/usr/local/bin/python", "-m", "pytest", "-q", "--tb=short", "-rA", "--confcutdir=/root/vllm-kvquant/tests/quantization", "/root/vllm-kvquant/tests/quantization/test_rabit2_stage3c_shared_decode.py"], "elapsed_s": 64.06, "grace_s": 10.0, "group_processes_after_leader_exit": [], "group_processes_remaining": [], "label": "shared_decode_tests", "own_session": true, "pgid": 434, "pid": 434, "reader_finished": true, "returncode": 0, "signals_sent": [], "timed_out": false, "timeout_s": 3600}
+Stopping app - local entrypoint completed.
+S3C_SHARED_TESTS_EXIT={"returncode": 0}
+S3C_POST_RUN_GPU_STATE={"compute_apps": [], "memory_used_mib": [4], "t": 1790525362.762537}
+S3C_CORRECTNESS_ONLY_COMPLETE
+✓ App completed. View run at 
+https://modal.com/apps/ryanz090504-star/main/ap-Sfam3n4W8I2pjaFjLNaqi1

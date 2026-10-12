@@ -1,0 +1,45 @@
+{
+  "attempt": "L2048 jit_contaminated_attempt_2",
+  "status": "failed_diagnostic_attempt",
+  "accepted_for_performance_interpretation": false,
+  "use_in_paper_dataset": false,
+  "salvage_of_any_point_allowed": false,
+  "decision": "Diagnostic failure for performance interpretation: measured-phase Triton JIT at RABIT C=16 and C=32 in all three trials. Measured-phase JIT is not accepted; no throughput / latency value of this run is interpreted, published or pooled with any other attempt; uncontaminated points are NOT salvaged.",
+  "archival_note": "Every other file in this directory is the byte-exact output of the run (moved unchanged from results/mlsys2027/concurrency_scaling/L2048/conditioned/; SHA-256 verified before and after the move). Paths recorded inside manifest.json refer to the original location. This file is the only one added after the run.",
+  "modal_app": "ap-l630ypsTpdW1bItQYkNG1x",
+  "code_commit": "1f6d396ff6e4e22754a14872b95552815ac5e955",
+  "protocol": "point-matched C-request compile-conditioning (superseded by full shadow-workload conditioning)",
+  "vllm_kvquant_snapshot_sha256": "d8e4bd4e9d8ed84ae91eea48d16f48432d1f4a438bf4d49f3bdc26014973f5cd",
+  "gpu": {"model": "H100", "uuid": "GPU-0d0f05cd-2bcb-0e4c-c3a8-a042d2c8cebf", "driver": "580.95.05"},
+  "utc": {"started": "2026-09-28T01:24:45.931024+00:00", "completed": "2026-09-28T02:33:45.247561+00:00"},
+  "manifest_status": "failed",
+  "modal_returncode": 0,
+  "failure_category": "jit",
+  "integrity_counts": {"passed": 395, "failed": 6, "not_run": 0, "not_evaluated": 0},
+  "execution_facts": {
+    "points_attempted": 36,
+    "measured_requests_completed_per_point": "256/256 at every point (output length exactly 32)",
+    "prompt_set_sha256": "a29da86e73c9daaded54df025f80b25c11eefe3cce442e5070a44570e912d828",
+    "oom": 0,
+    "request_failures": 0,
+    "watchdog_timeouts": 0,
+    "preemptions": "0 at every point (vllm:num_preemptions counter delta)",
+    "target_overlapping_inflight_concurrency": "reached at all 36 points (observed max == C, non-zero all-C overlap)",
+    "conditioning_valid": "36/36 (C/C exact, target in-flight C reached)",
+    "capacity_selector_qb_gpu_clean": "all exact / passed",
+    "protected_paths_post_run": "clean",
+    "prior_evidence_unchanged": true
+  },
+  "jit_lines_by_phase_failing_points": {
+    "rabit_c16_each_trial": {"setup": 0, "conditioning": 8, "warmup": 0, "measured": 2, "after": 0},
+    "rabit_c32_each_trial": {"setup": 0, "conditioning": 10, "warmup": 0, "measured": 1, "after": 0}
+  },
+  "measured_phase_jit_kernels": {
+    "rabit_c16": ["_rabit2_shared_decode_closed_page_partial_kernel", "_rabit2_tile32_reduce_partials_kernel"],
+    "rabit_c32": ["_rabit2_tail_partial_kernel"]
+  },
+  "same_pattern_in_all_three_trials": true,
+  "measured_phase_jit_all_other_points": 0,
+  "diagnosis": "A one-shot batch of C simultaneous requests did not reproduce the measured closed-loop scheduler states: the measured workload continuously admits new requests while others decode, so prompt chunks share the 16,384-token budget at different offsets. At C=16 the simultaneous batch packed 8 whole 2048-token prompts per step (no split), so the Stage3C kernels never ran during conditioning.",
+  "remedy": "Full point-matched shadow-workload conditioning (256 unmeasured closed-loop requests per point), committed before the rerun."
+}

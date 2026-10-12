@@ -1,0 +1,201 @@
+{
+  "note": "bf16/rabit2 regression check only. rabit8/rabit4/rabit3 have no canonical baseline and are not checked here -- see results/mlsys2027/quality_frontier/*.log for their raw (new) values. All avg_kv_mb figures are LOGICAL fake-quant KV memory, not physical allocator capacity.",
+  "tolerances": {
+    "ppl_relative": 0.005,
+    "percentage_absolute_points": 1.0,
+    "avg_kv_mb_relative": 0.001
+  },
+  "results": [
+    {
+      "benchmark": "continuation_ppl",
+      "checks": [
+        {
+          "metric": "bf16.ppl",
+          "canonical": 8.502,
+          "observed": 8.502,
+          "abs_diff": 0.0,
+          "tolerance": 0.042510000000000006,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 128.0,
+          "observed": 128.0,
+          "abs_diff": 0.0,
+          "tolerance": 0.128,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.ppl",
+          "canonical": 8.6317,
+          "observed": 8.6317,
+          "abs_diff": 0.0,
+          "tolerance": 0.0431585,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 24.71,
+          "observed": 24.71,
+          "abs_diff": 0.0,
+          "tolerance": 0.024710000000000003,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    {
+      "benchmark": "niah",
+      "checks": [
+        {
+          "metric": "bf16.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1194.542,
+          "observed": 1194.542,
+          "abs_diff": 0.0,
+          "tolerance": 1.194542,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 226.786,
+          "observed": 226.786,
+          "abs_diff": 0.0,
+          "tolerance": 0.22678600000000002,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    {
+      "benchmark": "passage_retrieval",
+      "checks": [
+        {
+          "metric": "bf16.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1517.375,
+          "observed": 1517.375,
+          "abs_diff": 0.0,
+          "tolerance": 1.5173750000000001,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.accuracy_pct",
+          "canonical": 100.0,
+          "observed": 100.0,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 288.09,
+          "observed": 288.09,
+          "abs_diff": 0.0,
+          "tolerance": 0.28808999999999996,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    {
+      "benchmark": "hotpotqa",
+      "checks": [
+        {
+          "metric": "bf16.f1_pct",
+          "canonical": 60.6,
+          "observed": 60.7,
+          "abs_diff": 0.10000000000000142,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1896.106,
+          "observed": 1896.106,
+          "abs_diff": 0.0,
+          "tolerance": 1.896106,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.f1_pct",
+          "canonical": 55.2,
+          "observed": 55.2,
+          "abs_diff": 0.0,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 359.85,
+          "observed": 359.85,
+          "abs_diff": 0.0,
+          "tolerance": 0.35985,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    },
+    {
+      "benchmark": "qasper",
+      "checks": [
+        {
+          "metric": "bf16.f1_pct",
+          "canonical": 35.9,
+          "observed": 35.5,
+          "abs_diff": 0.3999999999999986,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "bf16.avg_kv_mb",
+          "canonical": 1783.531,
+          "observed": 1783.531,
+          "abs_diff": 0.0,
+          "tolerance": 1.783531,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.f1_pct",
+          "canonical": 35.6,
+          "observed": 34.8,
+          "abs_diff": 0.8000000000000043,
+          "tolerance": 1.0,
+          "within_tolerance": true
+        },
+        {
+          "metric": "rabit2.avg_kv_mb",
+          "canonical": 338.428,
+          "observed": 338.428,
+          "abs_diff": 0.0,
+          "tolerance": 0.338428,
+          "within_tolerance": true
+        }
+      ],
+      "all_within_tolerance": true
+    }
+  ],
+  "all_benchmarks_within_tolerance": true
+}

@@ -1,0 +1,115 @@
+{
+  "kind": "canonical-quality-v2 long-context suite -- PLUMBING SMOKE TEST (no inference; NOT a quality result)",
+  "smoke_test": true,
+  "attempt": 1,
+  "source_commit": "a4d8ac57d4298c493a39fa6174a8bf24b83ba212",
+  "started_utc": "2026-10-03T18:22:36.908734+00:00",
+  "preflight": {
+    "clean_tree": true,
+    "head_is_pushed": true,
+    "harness_committed": true,
+    "unchanged_canonical_impl_c360697": true,
+    "unchanged_parity_evidence_8fa9a9c": true,
+    "unchanged_legacy_scripts_and_reference": true,
+    "unchanged_exp12_evidence_4f767ab": true,
+    "unchanged_qa_control_gate_amendment_86b03ea": true,
+    "unchanged_model_identity_1e5a7ff": true,
+    "unchanged_accepted_ppl_attempt_2_bae70af": true,
+    "unchanged_llama_cuda_conformance_ec80638": true,
+    "unchanged_llama_16k_cuda_conformance_2637457": true,
+    "legacy_scripts_are_the_exp12_scripts": true,
+    "static_harness_tests_pass": true,
+    "offline_proofs_passed": true,
+    "offline_proofs_bound_to_current_files": true,
+    "protocol_matches": true,
+    "cuda_conformance_accepted_llama_16k_niah": true,
+    "cuda_conformance_accepted_llama_1k_ppl_window": true,
+    "attempt_dir_absent": true
+  },
+  "protocol_sha256_lf": "64513be602c1a0efb6a0035bcd2975471c608d05fb121a74e0a3761eae654675",
+  "harness_sha256_lf": {
+    "benchmarks/mlsys2027/canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+    "benchmarks/mlsys2027/canonical_longctx_core.py": "6fcfecb15d9349e81f5818d84862da0b46d4ea947543893eb813e82ef3cd4d24",
+    "benchmarks/mlsys2027/canonical_longctx_tasks.py": "b7664357eeb1a9b73161df4c89902deb807cc371f949904650dc975978115bfd",
+    "benchmarks/mlsys2027/canonical_longctx_pins.py": "e3685460115cac09cd20585ca1e8d180b328b0e32ab7337d158f51458fd5abed",
+    "benchmarks/mlsys2027/canonical_ppl_identity.py": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba",
+    "benchmarks/mlsys2027/exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+    "benchmarks/mlsys2027/canonical_longctx_modal.py": "f7b36542314d3d305866182221e6ad81e7a36cd557751b02e857ab99668d6efb",
+    "benchmarks/mlsys2027/run_canonical_longctx.py": "aa826188130036bf2dadb0e6e0e028ef32735a7c7b789189a259cb6432dc9c34",
+    "benchmarks/mlsys2027/test_canonical_longctx_harness.py": "a22d73132925d234e9ad8ed80c680e6121074e34befe3a01d5993d1c2aff8476",
+    "benchmarks/mlsys2027/canonical_longctx_offline_proofs.py": "565e419bdbec7865c190d49cca7604e298e00c8575aa9155b0e069c137e0beb3",
+    "benchmarks/mlsys2027/proof_observer.py": "f0d6ceef2bf851a5c8aeebd33f82bf6bbbbf19ddf186e2d8262d2cda1f0bdd46",
+    "benchmarks/mlsys2027/canonical_longctx_protocol.json": "64513be602c1a0efb6a0035bcd2975471c608d05fb121a74e0a3761eae654675",
+    "results/mlsys2027/canonical_quality_v2/long_context/offline_proof_record.json": "e3ea9026eb8fdece7a8ed542797cc3cb57027667389367ff6424d856a1c0545b"
+  },
+  "wall_clock_s": 45000,
+  "completed_utc": "2026-10-03T18:26:01.174014+00:00",
+  "elapsed_s": 203.1,
+  "modal_returncode": 0,
+  "timed_out": false,
+  "app_ids_new": [
+    "ap-ccjcXzOzTFzfOoNib48liV"
+  ],
+  "cleanup": {
+    "new_app_ids": [
+      "ap-ccjcXzOzTFzfOoNib48liV"
+    ],
+    "first_observed_states": {
+      "ap-ccjcXzOzTFzfOoNib48liV": {
+        "App ID": "ap-ccjcXzOzTFzfOoNib48liV",
+        "Description": "rabit-kv-canonical-quality-v2-longctx",
+        "State": "stopped",
+        "Tasks": "1",
+        "Created at": "2026-10-03 14:22:39-04:00",
+        "Stopped at": "2026-10-03 14:25:52-04:00"
+      }
+    },
+    "final_states": {
+      "ap-ccjcXzOzTFzfOoNib48liV": {
+        "App ID": "ap-ccjcXzOzTFzfOoNib48liV",
+        "Description": "rabit-kv-canonical-quality-v2-longctx",
+        "State": "stopped",
+        "Tasks": "0",
+        "Created at": "2026-10-03 14:22:39-04:00",
+        "Stopped at": "2026-10-03 14:25:52-04:00"
+      }
+    },
+    "polls": 2,
+    "elapsed_s": 5.3,
+    "stopped_again_after_timeout": [],
+    "verified": true
+  },
+  "process_ok": true,
+  "incremental_rows_copied": true,
+  "result_sha256": "6f836ea1d7b65047e4ff10464ec29c226016baa85abe79081a15149cded5dab7",
+  "gpu": [
+    {
+      "name": "NVIDIA H100 80GB HBM3",
+      "memory.total": "81559",
+      "memory.used": "4",
+      "driver_version": "580.95.05"
+    }
+  ],
+  "evaluation": {
+    "checks": {
+      "is_smoke_test": true,
+      "hardware": true,
+      "runtime_environment": true,
+      "shipped_files": true,
+      "model_snapshot_verified": true,
+      "datasets": true,
+      "prompt_sets": true,
+      "units_prepared": true,
+      "tokenizer": true,
+      "imports": true,
+      "no_model_load_no_inference": true,
+      "no_benchmark_rows": true,
+      "legacy_unreachable": true,
+      "artifact_volume_written_and_committed": true,
+      "artifact_copied_locally": true
+    },
+    "valid": true
+  },
+  "valid": true,
+  "status": "smoke test passed (plumbing only; NOT evidence)"
+}

@@ -1,0 +1,331 @@
+{
+  "kind": "canonical-quality-v2 continuation PPL (logical quality; NOT physical serving evidence)",
+  "model_key": "llama3_1_8b",
+  "attempt": 2,
+  "source_commit": "05eb29e6dcb99dd256ee8a5bb85396bbd01c05f6",
+  "started_utc": "2026-10-03T16:30:09.062394+00:00",
+  "preflight": {
+    "clean_tree": true,
+    "head_is_pushed": true,
+    "harness_committed": true,
+    "unchanged_canonical_impl_c360697": true,
+    "unchanged_parity_evidence_8fa9a9c": true,
+    "unchanged_harness_amendment_257f0fb": true,
+    "unchanged_legacy_scripts_and_reference": true,
+    "unchanged_exp12_evidence_4f767ab": true,
+    "unchanged_exp14_quality_evidence_4049642": true,
+    "unchanged_exp14_model_identity": true,
+    "unchanged_ppl_scientific_code_1e5a7ff": true,
+    "unchanged_llama_cuda_conformance_ec80638": true,
+    "unchanged_qwen_cuda_conformance_fd8d275": true,
+    "unchanged_invalid_attempt_1_archive": true,
+    "unchanged_gate_amendment_record_d7ba819": true,
+    "rabit_kv2_is_frozen_source": true,
+    "parity_accepted": true,
+    "static_harness_tests_pass": true,
+    "offline_proofs_passed": true,
+    "offline_proofs_bound_to_current_files": true,
+    "protocol_matches": true,
+    "cuda_conformance_accepted_llama3_1_8b": true,
+    "cuda_conformance_accepted_qwen2_5_7b": true,
+    "attempt_dir_absent": true
+  },
+  "protocol_sha256_lf": "cfa990a75c74784cf6121a1231631af3438dddc5a367ce0c3a6e34769113eff4",
+  "harness_sha256_lf": {
+    "benchmarks/mlsys2027/canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+    "benchmarks/mlsys2027/canonical_ppl_core.py": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44",
+    "benchmarks/mlsys2027/canonical_ppl_identity.py": "9a2c8d234fcc86c994423b2cfb39758efec2aea5146dd8babff7ddb8fc0c5aba",
+    "benchmarks/mlsys2027/exp14_model_snapshot.py": "4b4bc6621e70f1d9653db4512adf02bb7de5bcf8ba5730caeffd5cbd27d34fa9",
+    "benchmarks/mlsys2027/canonical_ppl_modal.py": "2fd5cfd956fd6fd8d8f689935f3628c7a815878ababee7ad303baec484782966",
+    "benchmarks/mlsys2027/run_canonical_ppl.py": "a025ebc709965b1a58c26aed9823abc3174b9a1f31160789a7e868ebdf2528e1",
+    "benchmarks/mlsys2027/test_canonical_ppl_harness.py": "0008c00074cebb237dfad3863e0fa02a9cfa58d0d3e43528a74bde768378ffaa",
+    "benchmarks/mlsys2027/canonical_ppl_offline_proofs.py": "a05a7dbebfead642dc266ff97f62cd885ae99cd30edbc3af690d4729b9c2f8ea",
+    "benchmarks/mlsys2027/proof_observer.py": "f0d6ceef2bf851a5c8aeebd33f82bf6bbbbf19ddf186e2d8262d2cda1f0bdd46",
+    "benchmarks/mlsys2027/run_canonical_ppl_two_model.py": "4d09c57ae56b6db541680d04ee196b533978bab996efbca8e5dd482568c1b2df",
+    "benchmarks/mlsys2027/canonical_ppl_protocol.json": "cfa990a75c74784cf6121a1231631af3438dddc5a367ce0c3a6e34769113eff4",
+    "results/mlsys2027/canonical_quality_v2/continuation_ppl/offline_proof_record_v2.json": "905f45a3fbd6f8063d344c8ef6748b8eda1475fa1120da4804d5b2e4dc3a1cdb"
+  },
+  "wall_clock_s": 10800,
+  "completed_utc": "2026-10-03T16:36:32.159881+00:00",
+  "elapsed_s": 381.8,
+  "modal_returncode": 0,
+  "timed_out": false,
+  "app_ids_new": [
+    "ap-HL07VGNI2BS7tILFTbKcPA"
+  ],
+  "cleanup": {
+    "new_app_ids": [
+      "ap-HL07VGNI2BS7tILFTbKcPA"
+    ],
+    "first_observed_states": {
+      "ap-HL07VGNI2BS7tILFTbKcPA": {
+        "App ID": "ap-HL07VGNI2BS7tILFTbKcPA",
+        "Description": "rabit-kv-canonical-quality-v2-ppl",
+        "State": "stopped",
+        "Tasks": "0",
+        "Created at": "2026-10-03 12:30:11-04:00",
+        "Stopped at": "2026-10-03 12:36:29-04:00"
+      }
+    },
+    "final_states": {
+      "ap-HL07VGNI2BS7tILFTbKcPA": {
+        "App ID": "ap-HL07VGNI2BS7tILFTbKcPA",
+        "Description": "rabit-kv-canonical-quality-v2-ppl",
+        "State": "stopped",
+        "Tasks": "0",
+        "Created at": "2026-10-03 12:30:11-04:00",
+        "Stopped at": "2026-10-03 12:36:29-04:00"
+      }
+    },
+    "polls": 1,
+    "elapsed_s": 1.3,
+    "stopped_again_after_timeout": [],
+    "verified": true
+  },
+  "process_ok": true,
+  "result_sha256": "e8dbf17c9d8059a6d05087a811d6b1b30189e0fb62756e2bc89beb3914fd9c51",
+  "gpu": [
+    {
+      "name": "NVIDIA H100 80GB HBM3",
+      "memory.total": "81559",
+      "memory.used": "4",
+      "driver_version": "580.95.05"
+    }
+  ],
+  "evaluation": {
+    "gates": {
+      "hardware": true,
+      "model_snapshot": true,
+      "dataset": true,
+      "shipped_files": true,
+      "geometry_and_policy": true,
+      "runtime_environment": true,
+      "structure": true,
+      "legacy_unreachable": true,
+      "bf16_control_reproduces_legacy": true,
+      "bf16_stepwise_matches_batched": true
+    },
+    "control": {
+      "legacy_bf16_aggregate_ppl": 7.513773391425638,
+      "bf16_batched_aggregate_ppl": 7.513780420171705,
+      "relative_difference": 9.354482362978031e-07,
+      "tolerance": 0.005,
+      "max_per_window_relative_difference_report_only": 8.42601390313874e-06,
+      "stepwise_vs_batched_relative_difference": 0.0002149947100137204
+    },
+    "statistics": {
+      "n_windows": 32,
+      "scored_tokens_per_arm": 4096,
+      "bf16_ppl": 7.515395843214247,
+      "rabit_ppl": 7.6325218956943175,
+      "delta_pct": 1.558481481528684,
+      "ci_low": 1.1169214551782547,
+      "ci_high": 2.0482972302842573,
+      "confidence": 0.95,
+      "resamples": 10000,
+      "seed": 20270929,
+      "replicate_mean": 1.5603589244743863,
+      "robustness": {
+        "unit": "ln PPL (mean token NLL) per window; contribution = d/n to the mean ln-PPL delta",
+        "n": 32,
+        "n_rabit2_better": 30,
+        "n_rabit2_worse": 2,
+        "n_equal": 0,
+        "per_unit_delta_summary": {
+          "min": -0.006300210952758789,
+          "q25": 0.006883144378662109,
+          "median": 0.013599395751953125,
+          "q75": 0.018640756607055664,
+          "max": 0.05903959274291992,
+          "mean": 0.015464618802070618
+        },
+        "aggregate_delta_on_unit_scale": 0.015464618802070618,
+        "largest_abs_contribution": {
+          "key": 32,
+          "delta": 0.05903959274291992,
+          "contribution": 0.0018449872732162476
+        },
+        "top1_by_abs": {
+          "units": [
+            {
+              "key": 32,
+              "delta": 0.05903959274291992,
+              "contribution": 0.0018449872732162476
+            }
+          ],
+          "sum_contribution": 0.0018449872732162476,
+          "share_of_aggregate_delta": 0.11930376667087424,
+          "share_of_total_abs_contribution": 0.11616833548503318
+        },
+        "top3_by_abs": {
+          "units": [
+            {
+              "key": 32,
+              "delta": 0.05903959274291992,
+              "contribution": 0.0018449872732162476
+            },
+            {
+              "key": 6,
+              "delta": 0.03935050964355469,
+              "contribution": 0.001229703426361084
+            },
+            {
+              "key": 10,
+              "delta": 0.03924000263214111,
+              "contribution": 0.0012262500822544098
+            }
+          ],
+          "sum_contribution": 0.004300940781831741,
+          "share_of_aggregate_delta": 0.27811489160378605,
+          "share_of_total_abs_contribution": 0.27080573340438946
+        },
+        "worst1": {
+          "units": [
+            {
+              "key": 11,
+              "delta": -0.006300210952758789,
+              "contribution": -0.00019688159227371216
+            }
+          ],
+          "sum_contribution": -0.00019688159227371216,
+          "share_of_aggregate_delta": -0.012731098955206766,
+          "share_of_total_abs_contribution": 0.012396511994475636
+        },
+        "worst3": {
+          "units": [
+            {
+              "key": 11,
+              "delta": -0.006300210952758789,
+              "contribution": -0.00019688159227371216
+            },
+            {
+              "key": 28,
+              "delta": -0.0003781318664550781,
+              "contribution": -1.1816620826721191e-05
+            },
+            {
+              "key": 21,
+              "delta": 0.0002601146697998047,
+              "contribution": 8.128583431243896e-06
+            }
+          ],
+          "sum_contribution": -0.00020056962966918945,
+          "share_of_aggregate_delta": -0.012969581225134008,
+          "share_of_total_abs_contribution": 0.013652347854805296
+        }
+      },
+      "per_window_ppl": {
+        "bf16_batched": [
+          3.2852276811408747,
+          6.498093568620168,
+          10.606640169251696,
+          15.719311134139064,
+          8.209240188968002,
+          10.500108531194606,
+          8.231669375351563,
+          10.810024003701654,
+          6.613807048853403,
+          5.277424533399353,
+          6.953310833545664,
+          4.231995719801825,
+          6.722373450255067,
+          4.763739697338759,
+          5.75872633937724,
+          13.214195594546142,
+          6.441927379444044,
+          5.8298634267374245,
+          4.015520580546983,
+          3.943807418018174,
+          10.610052096191106,
+          5.342896376639831,
+          8.894052927720663,
+          14.532108885606942,
+          8.121453371179518,
+          9.747561162557359,
+          8.48241539084576,
+          8.427249485264124,
+          13.489852968216898,
+          7.095325438052776,
+          12.554825755054766,
+          5.261019408847318
+        ],
+        "bf16": [
+          3.2795578656648505,
+          6.484070046500333,
+          10.590457962374968,
+          15.718651539432798,
+          8.192245514438694,
+          10.547142689257484,
+          8.252813877815731,
+          10.790392435557097,
+          6.624658392483724,
+          5.271527961155748,
+          6.925640186783949,
+          4.220129050852764,
+          6.6903981691698515,
+          4.788938296242907,
+          5.763380586803733,
+          13.27498862232745,
+          6.464350928611121,
+          5.8371638296262045,
+          4.020438272447977,
+          3.963647163462419,
+          10.656747872070914,
+          5.338943822120212,
+          8.924034310091212,
+          14.523723207369976,
+          8.170991245855564,
+          9.766170902002743,
+          8.502482754488327,
+          8.379675517292277,
+          13.513844851840124,
+          7.07392616512459,
+          12.45949064849429,
+          5.241733226949613
+        ],
+        "rabit": [
+          3.3660055982964563,
+          6.719839997838433,
+          10.695302439715354,
+          15.774586595832028,
+          8.288109612351262,
+          10.970452230617717,
+          8.364816560203492,
+          10.979039856759632,
+          6.705554549465785,
+          5.482494833050191,
+          6.882144352960642,
+          4.265199876426775,
+          6.736598360948992,
+          4.8770108395612315,
+          5.788541475742746,
+          13.381740705362159,
+          6.539742158658924,
+          5.9261426845193625,
+          4.1307305891861406,
+          3.9726017557074087,
+          10.659520209071928,
+          5.343330138728426,
+          9.06490238801218,
+          14.736250494935371,
+          8.28385826646731,
+          9.953379291723454,
+          8.710067095395534,
+          8.376507493951674,
+          13.60718994852326,
+          7.191977683140049,
+          12.692455441121071,
+          5.560520977632496
+        ]
+      },
+      "legacy_evaluator_context_only": {
+        "rabit2_legacy_aggregate_ppl": 7.6006423020331155,
+        "rabit2_legacy_delta_pct": 1.156128965861658,
+        "note": "legacy logical evaluator (different V metadata order; no decode aging); never pooled"
+      }
+    },
+    "valid": true
+  },
+  "valid": true,
+  "status": "valid (awaiting review; not accepted evidence until reviewed)"
+}

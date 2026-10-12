@@ -1,0 +1,548 @@
+[
+ {
+  "path": ".lock",
+  "type": "2",
+  "size": 2202,
+  "mtime_utc": "2026-09-30T22:14:37+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_LICENSE.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T07:30:01+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_README_md.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:55:33+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_USE_POLICY_md.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:55:38+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct__gitattributes.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T07:29:59+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_config_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T07:29:59+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_configuration_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T07:29:59+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_generation_config_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T07:30:00+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_model-00001-of-00004_safetensors.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:47:35+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_model-00002-of-00004_safetensors.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:47:35+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_model-00003-of-00004_safetensors.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:47:35+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_model-00004-of-00004_safetensors.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:55:02+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_model_safetensors_index_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:55:31+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_original___consolidated_00_pth.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:47:35+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_original___params_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:55:32+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_original___tokenizer_model.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:55:36+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_special_tokens_map_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:55:34+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_tokenizer_config_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:55:37+00:00"
+ },
+ {
+  "path": ".lock/model_LLM-Research___Meta-Llama-3.1-8B-Instruct_tokenizer_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-07-10T08:55:35+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_LICENSE.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:56+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_README_md.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:56+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct__gitattributes.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:56+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_config_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:56+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_configuration_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_generation_config_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_merges_txt.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_model-00001-of-00004_safetensors.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_model-00002-of-00004_safetensors.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_model-00003-of-00004_safetensors.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_model-00004-of-00004_safetensors.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:12:58+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_model_safetensors_index_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:14:35+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_tokenizer_config_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:14:37+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_tokenizer_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:14:35+00:00"
+ },
+ {
+  "path": ".lock/model_Qwen___Qwen2.5-7B-Instruct_vocab_json.lock",
+  "type": "1",
+  "size": 0,
+  "mtime_utc": "2026-09-30T22:14:37+00:00"
+ },
+ {
+  "path": "models",
+  "type": "2",
+  "size": 65,
+  "mtime_utc": "2026-09-30T18:59:29+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct",
+  "type": "2",
+  "size": 9,
+  "mtime_utc": "2026-07-10T07:29:59+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots",
+  "type": "2",
+  "size": 6,
+  "mtime_utc": "2026-07-10T07:29:59+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+  "type": "2",
+  "size": 316,
+  "mtime_utc": "2026-07-10T08:56:50+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/.gitattributes",
+  "type": "1",
+  "size": 1519,
+  "mtime_utc": "2026-07-10T07:30:00+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/LICENSE",
+  "type": "1",
+  "size": 7627,
+  "mtime_utc": "2026-07-10T07:30:02+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/README.md",
+  "type": "1",
+  "size": 44044,
+  "mtime_utc": "2026-07-10T08:55:34+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/USE_POLICY.md",
+  "type": "1",
+  "size": 4691,
+  "mtime_utc": "2026-07-10T08:55:39+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/config.json",
+  "type": "1",
+  "size": 855,
+  "mtime_utc": "2026-07-10T07:30:01+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/configuration.json",
+  "type": "1",
+  "size": 48,
+  "mtime_utc": "2026-07-10T07:30:01+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/generation_config.json",
+  "type": "1",
+  "size": 184,
+  "mtime_utc": "2026-07-10T07:30:01+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/model-00001-of-00004.safetensors",
+  "type": "1",
+  "size": 4976698672,
+  "mtime_utc": "2026-07-10T08:54:57+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/model-00002-of-00004.safetensors",
+  "type": "1",
+  "size": 4999802720,
+  "mtime_utc": "2026-07-10T08:56:50+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/model-00003-of-00004.safetensors",
+  "type": "1",
+  "size": 4915916176,
+  "mtime_utc": "2026-07-10T08:56:30+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/model-00004-of-00004.safetensors",
+  "type": "1",
+  "size": 1168138808,
+  "mtime_utc": "2026-07-10T08:55:30+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/model.safetensors.index.json",
+  "type": "1",
+  "size": 23950,
+  "mtime_utc": "2026-07-10T08:55:32+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/original",
+  "type": "2",
+  "size": 45,
+  "mtime_utc": "2026-07-10T09:36:39+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/original/consolidated.00.pth",
+  "type": "1",
+  "size": 16060617592,
+  "mtime_utc": "2026-07-10T09:36:39+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/original/params.json",
+  "type": "1",
+  "size": 199,
+  "mtime_utc": "2026-07-10T08:55:33+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/original/tokenizer.model",
+  "type": "1",
+  "size": 2183982,
+  "mtime_utc": "2026-07-10T08:55:37+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/special_tokens_map.json",
+  "type": "1",
+  "size": 296,
+  "mtime_utc": "2026-07-10T08:55:35+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/tokenizer.json",
+  "type": "1",
+  "size": 9085657,
+  "mtime_utc": "2026-07-10T08:55:36+00:00"
+ },
+ {
+  "path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master/tokenizer_config.json",
+  "type": "1",
+  "size": 55351,
+  "mtime_utc": "2026-07-10T08:55:38+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct",
+  "type": "2",
+  "size": 9,
+  "mtime_utc": "2026-09-30T18:59:29+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots",
+  "type": "2",
+  "size": 46,
+  "mtime_utc": "2026-09-30T22:12:54+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444",
+  "type": "2",
+  "size": 292,
+  "mtime_utc": "2026-09-30T19:00:50+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/.gitattributes",
+  "type": "1",
+  "size": 1519,
+  "mtime_utc": "2026-09-30T18:59:30+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/LICENSE",
+  "type": "1",
+  "size": 11343,
+  "mtime_utc": "2026-09-30T18:59:30+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/README.md",
+  "type": "1",
+  "size": 6240,
+  "mtime_utc": "2026-09-30T18:59:30+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/config.json",
+  "type": "1",
+  "size": 663,
+  "mtime_utc": "2026-09-30T18:59:30+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/configuration.json",
+  "type": "1",
+  "size": 2,
+  "mtime_utc": "2026-09-30T18:59:31+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/generation_config.json",
+  "type": "1",
+  "size": 243,
+  "mtime_utc": "2026-09-30T18:59:31+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/merges.txt",
+  "type": "1",
+  "size": 1671839,
+  "mtime_utc": "2026-09-30T18:59:31+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/model-00001-of-00004.safetensors",
+  "type": "1",
+  "size": 3945441440,
+  "mtime_utc": "2026-09-30T19:00:04+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/model-00002-of-00004.safetensors",
+  "type": "1",
+  "size": 3864726352,
+  "mtime_utc": "2026-09-30T19:00:50+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/model-00003-of-00004.safetensors",
+  "type": "1",
+  "size": 3864726424,
+  "mtime_utc": "2026-09-30T19:00:28+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/model-00004-of-00004.safetensors",
+  "type": "1",
+  "size": 3556377672,
+  "mtime_utc": "2026-09-30T19:00:23+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/model.safetensors.index.json",
+  "type": "1",
+  "size": 27752,
+  "mtime_utc": "2026-09-30T19:00:08+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/tokenizer.json",
+  "type": "1",
+  "size": 7031645,
+  "mtime_utc": "2026-09-30T19:00:10+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/tokenizer_config.json",
+  "type": "1",
+  "size": 7305,
+  "mtime_utc": "2026-09-30T19:00:10+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/16c174980d8a1492910551634b4969e69cdc2444/vocab.json",
+  "type": "1",
+  "size": 2776833,
+  "mtime_utc": "2026-09-30T19:00:11+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master",
+  "type": "2",
+  "size": 292,
+  "mtime_utc": "2026-09-30T22:17:41+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/.gitattributes",
+  "type": "1",
+  "size": 1519,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/LICENSE",
+  "type": "1",
+  "size": 11343,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/README.md",
+  "type": "1",
+  "size": 6240,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/config.json",
+  "type": "1",
+  "size": 663,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/configuration.json",
+  "type": "1",
+  "size": 2,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/generation_config.json",
+  "type": "1",
+  "size": 243,
+  "mtime_utc": "2026-09-30T22:12:57+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/merges.txt",
+  "type": "1",
+  "size": 1671839,
+  "mtime_utc": "2026-09-30T22:12:58+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/model-00001-of-00004.safetensors",
+  "type": "1",
+  "size": 3945441440,
+  "mtime_utc": "2026-09-30T22:17:41+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/model-00002-of-00004.safetensors",
+  "type": "1",
+  "size": 3864726352,
+  "mtime_utc": "2026-09-30T22:17:32+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/model-00003-of-00004.safetensors",
+  "type": "1",
+  "size": 3864726424,
+  "mtime_utc": "2026-09-30T22:17:21+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/model-00004-of-00004.safetensors",
+  "type": "1",
+  "size": 3556377672,
+  "mtime_utc": "2026-09-30T22:14:31+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/model.safetensors.index.json",
+  "type": "1",
+  "size": 27752,
+  "mtime_utc": "2026-09-30T22:14:35+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/tokenizer.json",
+  "type": "1",
+  "size": 7031645,
+  "mtime_utc": "2026-09-30T22:14:37+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/tokenizer_config.json",
+  "type": "1",
+  "size": 7305,
+  "mtime_utc": "2026-09-30T22:14:37+00:00"
+ },
+ {
+  "path": "models/Qwen--Qwen2.5-7B-Instruct/snapshots/master/vocab.json",
+  "type": "1",
+  "size": 2776833,
+  "mtime_utc": "2026-09-30T22:14:38+00:00"
+ }
+]

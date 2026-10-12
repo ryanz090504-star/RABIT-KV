@@ -1,0 +1,20 @@
+{
+  "scope": "Stage3C tile32 before/after BENCHMARK evidence only; NOT Experiment 5 evidence; one measured request per point; descriptive only (no complexity law). The 32K (q_len 16352) point is not part of this run.",
+  "experiment5_evidence": false,
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 5,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "tile32_correctness_tests": {
+    "passed": 43,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "equality_failures": []
+  },
+  "request_guard_note": "600 s per-request SIGALRM guard, with the process-group watchdog and Modal function timeout as hard process-level backstops. Exit 76 on a delivered request-cap signal; no retries; partial evidence preserved; any failure stops the diagnostic; the watchdog kills and reaps the whole process group.",
+  "component_profiling_enabled": false
+}

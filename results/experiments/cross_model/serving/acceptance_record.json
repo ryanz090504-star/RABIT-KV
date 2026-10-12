@@ -1,0 +1,45 @@
+{
+  "experiment": 14,
+  "part": "serving",
+  "status": "accepted",
+  "accepted_attempt": 2,
+  "excluded_attempts": {"serving_attempt_1": "invalid_hardware_assignment (NVIDIA H200; archived 2ccc699; never pooled or interpreted)"},
+  "no_cross_attempt_pooling": true,
+  "execution_commit": "5d7fae28358f918987122a5da9f2be8fff98bb45",
+  "protocol_sha256": "7ebb7a44a180b7cfabb9703b95c20f0a8618b90282cd25166a17df7597a2cfb3",
+  "amendments_in_force": {"correctness_criterion": "c05eb401c086af88a71ed9b7df197dedaeb42cf5",
+                          "scheduler_only_hardware_binding": "5d7fae28358f918987122a5da9f2be8fff98bb45"},
+  "accepted_probe_commit": "0303a5ed5a6b4a39171b3f6b2c12536b33abe116",
+  "model": {"id": "Qwen/Qwen2.5-7B-Instruct", "revision": "16c174980d8a1492910551634b4969e69cdc2444",
+            "manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1"},
+  "hardware": {"gpu": "NVIDIA H100 80GB HBM3", "memory_total_mib": 81559, "count": 1, "selector": "H100!:1",
+               "in_container_guard": "passed"},
+  "modal_app": {"id": "ap-9G9Z3oDvvGWTtwpRwZuJZI", "state": "stopped", "tasks": 0},
+  "started_utc": "2026-09-30T21:48:06.247119+00:00",
+  "completed_utc": "2026-09-30T22:03:17.676780+00:00",
+  "validity": {"integrity_checks": "65 / 65 passed", "rabit_gate": "passed", "shape_gate": "passed (both geometries: exact invariants + C1 / C2)",
+               "legs": "4 / 4 (A1 B1 B2 A2), 30 measured samples each, 60 per condition",
+               "jit_in_measured_samples": {"A1": 0, "B1": 0, "B2": 0, "A2": 0},
+               "qwen_fallback_dispatch_in_shape_gate": {"decode": "64 / 64", "append": "62 / 62", "v2_quantizer": "62 / 62 decode steps"}},
+  "claim_boundary": [
+    "This experiment measures the CURRENT RABIT implementation on Qwen2.5-7B-Instruct's geometry (28 layers, 28 Q / 4 KV heads, head_dim 128, GQA ratio 7).",
+    "RABIT serves this geometry through existing exact FALLBACK paths for decode attention, token append and V2 quantization; the Llama-optimized fast paths are not used, so no claim is made that the optimized kernels generalized.",
+    "Allowed interpretation: the frozen RABIT representation and physical serving system operate on a different GQA geometry, while the current implementation uses untuned fallback kernels for that geometry.",
+    "Within-Qwen BF16 vs RABIT is a valid matched single-request system comparison (same session, H100 80GB, snapshot, engine settings, prompt, order).",
+    "Cross-model Llama-vs-Qwen absolute latency is descriptive only (different model and session).",
+    "No throughput claim; no confidence intervals or significance tests; the 60 timings per condition are not independent replicates.",
+    "Quality has NOT been run for Exp14."
+  ],
+  "files_sha256": {
+    "modal_session.log": "0ceb853965b443508ebc1cc241c20a86d80b40bea7b808c24a573e1be45ce1a0",
+    "manifest.json": "a748568556c02a80f18d4852c526917aeadce5c585d0d88545bc4f998bdfc05e",
+    "integrity_check.json": "611b29d4fa6685bf3f91f2f110473a0cee80b40d26db5478936b613f1cee90ab",
+    "capacity_latency_summary.json": "ba86f495d0be9215d5ee5256232f4e591dcbd5e4d31385ec97e5c412dfc13506"
+  },
+  "files_sha256_lf_normalized": {
+    "modal_session.log": "40925395a40c3ff3d4a6a5fd229e23d0da873069b611228a6abf557fc642f1cc",
+    "manifest.json": "25d592166174473c6ddb21b68971516f7c86a89179bb144205cbc61fabace211",
+    "integrity_check.json": "c641adb91028c4e94a006d86f3042cf2a0a862ddf11bf2be06f29cca24265fab",
+    "capacity_latency_summary.json": "6f7da858ff5d3bbd7f52b453ddbc6d783e11ed1bbf5f65f7a6cf249ffe5a025e"
+  }
+}

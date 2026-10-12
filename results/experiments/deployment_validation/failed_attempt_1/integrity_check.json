@@ -1,0 +1,907 @@
+{
+  "checks": [
+    {
+      "check": "ABBA completed",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "exactly one GPU, H100",
+      "ok": true,
+      "observed": [
+        "NVIDIA H100 80GB HBM3"
+      ]
+    },
+    {
+      "check": "leg order is ABBA",
+      "ok": true,
+      "observed": [
+        "bfloat16",
+        "rabit_kv2",
+        "rabit_kv2",
+        "bfloat16"
+      ]
+    },
+    {
+      "check": "rabit_kv2.py in image is frozen source",
+      "ok": true,
+      "observed": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+    },
+    {
+      "check": "model snapshot hashed",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "idle baseline recorded with no compute process",
+      "ok": true,
+      "observed": [
+        4
+      ]
+    },
+    {
+      "check": "gate: process exit 0",
+      "ok": true,
+      "observed": {
+        "returncode": 0
+      }
+    },
+    {
+      "check": "gate: result passed",
+      "ok": true,
+      "observed": {
+        "passed": true
+      }
+    },
+    {
+      "check": "gate: pytest exit 0",
+      "ok": true,
+      "observed": 0
+    },
+    {
+      "check": "gate: pytest passed count parsed",
+      "ok": true,
+      "observed": 105
+    },
+    {
+      "check": "gate: canonical 'REGRESSION PASSED' line",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "gate: ran against frozen rabit_kv2.py",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "gate completed before first leg",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "config: all non-dtype fields identical across ABBA legs",
+      "ok": false,
+      "observed": [
+        {
+          "field": "effective.attention_backend",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": "AttentionBackendEnum.TRITON_ATTN",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.block_size",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 32,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.compilation_mode",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": "0",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.cudagraph_mode",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": "NONE",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.enable_chunked_prefill",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": true,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.enable_prefix_caching",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": false,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.enforce_eager",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": true,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.gpu_memory_utilization",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 0.82,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.log_stats",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": true,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.max_model_len",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 32768,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.max_num_batched_tokens",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 16384,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.max_num_seqs",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 32,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.model",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.model_dtype",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": "torch.bfloat16",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.quantization",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": null,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.seed",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 0,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.tensor_parallel_size",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 1,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "effective.trust_remote_code",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": true,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "kv_dtype.engine_cache_dtype",
+          "reason": "allowlisted field differs within dtype bfloat16",
+          "values": {
+            "A1": "bfloat16",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "kv_dtype.requested_kv_cache_dtype",
+          "reason": "allowlisted field differs within dtype bfloat16",
+          "values": {
+            "A1": "bfloat16",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "kv_dtype.resolved_kv_torch_dtype",
+          "reason": "allowlisted field differs within dtype bfloat16",
+          "values": {
+            "A1": "torch.bfloat16",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.attention_config.backend",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": "TRITON_ATTN",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.block_size",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 32,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.disable_log_stats",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": false,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.dtype",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": "bfloat16",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.enable_chunked_prefill",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": true,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.enable_prefix_caching",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": false,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.enforce_eager",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": true,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.gpu_memory_utilization",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 0.82,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.kv_cache_dtype",
+          "reason": "allowlisted field differs within dtype bfloat16",
+          "values": {
+            "A1": "bfloat16",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.max_model_len",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 32768,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.max_num_batched_tokens",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 16384,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.max_num_seqs",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": 32,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.model",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        },
+        {
+          "field": "requested.trust_remote_code",
+          "reason": "non-dtype field differs between legs",
+          "values": {
+            "A1": true,
+            "B1": "<missing>",
+            "B2": "<missing>",
+            "A2": "<missing>"
+          }
+        }
+      ]
+    },
+    {
+      "check": "A1: GPU clean before leg (no compute process, within 256 MiB of baseline)",
+      "ok": true,
+      "observed": {
+        "compute_apps": [],
+        "memory_used_mib": [
+          4
+        ],
+        "t": 1790364742.3529143
+      }
+    },
+    {
+      "check": "A1: worker exit 0",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "A1: worker reports leg/dtype",
+      "ok": true,
+      "observed": {
+        "kv_cache_dtype": "bfloat16",
+        "leg": "A1"
+      }
+    },
+    {
+      "check": "A1: RABIT frozen-source markers",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "A1: requested kwargs as planned",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "A1: effective engine config as planned (CUDA graphs/torch.compile off, Triton, ...)",
+      "ok": false,
+      "observed": {
+        "compilation_mode": "0",
+        "cudagraph_mode": "NONE"
+      }
+    },
+    {
+      "check": "A1: workload as planned",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "A1: resolved KV dtype",
+      "ok": true,
+      "observed": {
+        "engine_cache_dtype": "bfloat16",
+        "requested_kv_cache_dtype": "bfloat16",
+        "resolved_kv_torch_dtype": "torch.bfloat16"
+      }
+    },
+    {
+      "check": "A1: capacity = num_gpu_blocks x block_size",
+      "ok": true,
+      "observed": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      }
+    },
+    {
+      "check": "A1: capacity matches engine log 'GPU KV cache size'",
+      "ok": true,
+      "observed": 393024
+    },
+    {
+      "check": "A1: physical bytes/token consistent with 2-byte BF16 KV",
+      "ok": true,
+      "observed": 131081.4
+    },
+    {
+      "check": "A1: warmups == 5",
+      "ok": false,
+      "observed": 0
+    },
+    {
+      "check": "A1: measured reps == 15",
+      "ok": false,
+      "observed": 0
+    },
+    {
+      "check": "A1: every request 2048 prompt / 32 output tokens",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "A1: marker order",
+      "ok": false,
+      "observed": []
+    },
+    {
+      "check": "A1: no Triton JIT compilation during measurement",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "B1: GPU clean before leg (no compute process, within 256 MiB of baseline)",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B1: worker exit 0",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B1: worker reports leg/dtype",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B1: RABIT frozen-source markers",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B1: requested kwargs as planned",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B1: effective engine config as planned (CUDA graphs/torch.compile off, Triton, ...)",
+      "ok": false,
+      "observed": {
+        "model_dtype": "<missing>",
+        "max_model_len": "<missing>",
+        "enforce_eager": "<missing>",
+        "block_size": "<missing>",
+        "gpu_memory_utilization": "<missing>",
+        "enable_prefix_caching": "<missing>",
+        "max_num_batched_tokens": "<missing>",
+        "max_num_seqs": "<missing>",
+        "enable_chunked_prefill": "<missing>",
+        "attention_backend": "<missing>",
+        "compilation_mode": "<missing>",
+        "cudagraph_mode": "<missing>",
+        "tensor_parallel_size": "<missing>",
+        "log_stats": "<missing>",
+        "quantization": "<missing>"
+      }
+    },
+    {
+      "check": "B1: workload as planned",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "B1: resolved KV dtype",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "B1: capacity = num_gpu_blocks x block_size",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "B1: capacity matches engine log 'GPU KV cache size'",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B1: warmups == 5",
+      "ok": false,
+      "observed": 0
+    },
+    {
+      "check": "B1: measured reps == 15",
+      "ok": false,
+      "observed": 0
+    },
+    {
+      "check": "B1: every request 2048 prompt / 32 output tokens",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B1: marker order",
+      "ok": false,
+      "observed": []
+    },
+    {
+      "check": "B1: no Triton JIT compilation during measurement",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "B2: GPU clean before leg (no compute process, within 256 MiB of baseline)",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B2: worker exit 0",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B2: worker reports leg/dtype",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B2: RABIT frozen-source markers",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B2: requested kwargs as planned",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B2: effective engine config as planned (CUDA graphs/torch.compile off, Triton, ...)",
+      "ok": false,
+      "observed": {
+        "model_dtype": "<missing>",
+        "max_model_len": "<missing>",
+        "enforce_eager": "<missing>",
+        "block_size": "<missing>",
+        "gpu_memory_utilization": "<missing>",
+        "enable_prefix_caching": "<missing>",
+        "max_num_batched_tokens": "<missing>",
+        "max_num_seqs": "<missing>",
+        "enable_chunked_prefill": "<missing>",
+        "attention_backend": "<missing>",
+        "compilation_mode": "<missing>",
+        "cudagraph_mode": "<missing>",
+        "tensor_parallel_size": "<missing>",
+        "log_stats": "<missing>",
+        "quantization": "<missing>"
+      }
+    },
+    {
+      "check": "B2: workload as planned",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "B2: resolved KV dtype",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "B2: capacity = num_gpu_blocks x block_size",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "B2: capacity matches engine log 'GPU KV cache size'",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B2: warmups == 5",
+      "ok": false,
+      "observed": 0
+    },
+    {
+      "check": "B2: measured reps == 15",
+      "ok": false,
+      "observed": 0
+    },
+    {
+      "check": "B2: every request 2048 prompt / 32 output tokens",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "B2: marker order",
+      "ok": false,
+      "observed": []
+    },
+    {
+      "check": "B2: no Triton JIT compilation during measurement",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "A2: GPU clean before leg (no compute process, within 256 MiB of baseline)",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "A2: worker exit 0",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "A2: worker reports leg/dtype",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "A2: RABIT frozen-source markers",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "A2: requested kwargs as planned",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "A2: effective engine config as planned (CUDA graphs/torch.compile off, Triton, ...)",
+      "ok": false,
+      "observed": {
+        "model_dtype": "<missing>",
+        "max_model_len": "<missing>",
+        "enforce_eager": "<missing>",
+        "block_size": "<missing>",
+        "gpu_memory_utilization": "<missing>",
+        "enable_prefix_caching": "<missing>",
+        "max_num_batched_tokens": "<missing>",
+        "max_num_seqs": "<missing>",
+        "enable_chunked_prefill": "<missing>",
+        "attention_backend": "<missing>",
+        "compilation_mode": "<missing>",
+        "cudagraph_mode": "<missing>",
+        "tensor_parallel_size": "<missing>",
+        "log_stats": "<missing>",
+        "quantization": "<missing>"
+      }
+    },
+    {
+      "check": "A2: workload as planned",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "A2: resolved KV dtype",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "A2: capacity = num_gpu_blocks x block_size",
+      "ok": false,
+      "observed": {}
+    },
+    {
+      "check": "A2: capacity matches engine log 'GPU KV cache size'",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "A2: warmups == 5",
+      "ok": false,
+      "observed": 0
+    },
+    {
+      "check": "A2: measured reps == 15",
+      "ok": false,
+      "observed": 0
+    },
+    {
+      "check": "A2: every request 2048 prompt / 32 output tokens",
+      "ok": false,
+      "observed": null
+    },
+    {
+      "check": "A2: marker order",
+      "ok": false,
+      "observed": []
+    },
+    {
+      "check": "A2: no Triton JIT compilation during measurement",
+      "ok": true,
+      "observed": null
+    },
+    {
+      "check": "bfloat16: duplicate capacity measurements identical",
+      "ok": false,
+      "observed": {
+        "A1": {
+          "block_size": 32,
+          "capacity_tokens": 393024,
+          "num_gpu_blocks": 12282
+        },
+        "A2": null
+      }
+    },
+    {
+      "check": "bfloat16: pooled measured samples == 30",
+      "ok": false,
+      "observed": 0
+    },
+    {
+      "check": "rabit_kv2: duplicate capacity measurements identical",
+      "ok": false,
+      "observed": {
+        "B1": null,
+        "B2": null
+      }
+    },
+    {
+      "check": "rabit_kv2: pooled measured samples == 30",
+      "ok": false,
+      "observed": 0
+    }
+  ],
+  "all_ok": false,
+  "correctness_gate": {
+    "begin": {
+      "pytest_command": [
+        "/usr/local/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "--tb=short",
+        "--confcutdir=/root/vllm-kvquant/tests/quantization",
+        "/root/vllm-kvquant/tests/quantization/test_kvquant_k3.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_layout.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_physical.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b1.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3b2.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage3c.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b2_fixed.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py",
+        "/root/vllm-kvquant/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py"
+      ],
+      "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae"
+    },
+    "result": {
+      "passed": true
+    },
+    "pytest_passed": 105,
+    "pytest_warnings": 14,
+    "pytest_seconds": 34.08,
+    "pytest_exit": 0,
+    "regression_passed_line": true
+  },
+  "gpu_clean_state": {
+    "baseline": {
+      "compute_apps": [],
+      "max_wait_s": 60,
+      "memory_used_mib": [
+        4
+      ],
+      "t": 1790364636.464493,
+      "tolerance_mib": 256
+    },
+    "tolerance_mib": 256,
+    "max_wait_s": 60,
+    "pre_leg": {
+      "A1": {
+        "baseline_memory_used_mib": [
+          4
+        ],
+        "clean": true,
+        "leg": "A1",
+        "max_wait_s": 60,
+        "readings": [
+          {
+            "compute_apps": [],
+            "memory_used_mib": [
+              4
+            ],
+            "t": 1790364742.3529143
+          }
+        ],
+        "tolerance_mib": 256
+      }
+    }
+  }
+}

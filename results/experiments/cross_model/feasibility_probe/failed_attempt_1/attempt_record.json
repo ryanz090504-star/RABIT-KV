@@ -1,0 +1,58 @@
+{
+  "experiment": 14,
+  "kind": "feasibility_probe",
+  "non_evidence": true,
+  "attempt": 1,
+  "status": "invalid_gate_harness_failure",
+  "excluded": true,
+  "execution_commit": "35344e0ac8ea5fc3bf4a81d3bc62dfcec2872fc4",
+  "protocol_sha256": "bea4003ebcb75d54ede04eea2eea4c3ba26f341743d4c6a89e3ae0a069f0b43a",
+  "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+  "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+  "model_manifest_sha256": "9be52dd6573759d4d2c0878dc0889fd72d4a2fbfe8065afa1180a3a1717469d1",
+  "modal_app_id": "ap-R1RwNqMvpdVTZi63HBEawu",
+  "started_utc": "2026-09-30T11:25:32.492118+00:00",
+  "completed_utc": "2026-09-30T11:32:11.395200+00:00",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "what_ran": {
+    "rabit_correctness_gate": "PASSED (EXP3_GATE_RESULT passed; exit 0)",
+    "exp14_shape_gate": "FAILED (exit 1) -- the Modal function aborted before the model download",
+    "model_download_and_snapshot_verification": "not reached",
+    "bf16_and_rabit_engine_startup": "not reached (no engine started)",
+    "timings": "none collected (the probe worker never ran and emits no timing by design)"
+  },
+  "shape_gate_findings": {
+    "failing_subcheck": "boundary_state_and_attention -- attention max_abs < 5e-3 on the short-prefix boundary replays",
+    "failing_at_both_geometries": true,
+    "positive_control_llama_also_failed_identically": true,
+    "passing_subchecks_both_geometries": ["page_bytes_expected", "alignment_invariants", "predicates_as_expected",
+                                          "dispatch_matches_predicates", "main_workload_state_and_attention"],
+    "state_and_byte_failures": 0,
+    "runtime_state_error_equals_reference_state_error_at_every_checkpoint": true,
+    "attention_max_abs": {
+      "model_b_qwen2_5_7b": {"main_2048_prefill": [5.86e-4, 4.92e-4],
+                             "boundary": {"P1": 7.70e-3, "P4": 1.19e-2, "P5": 9.59e-3, "P35": 4.38e-3, "P36": 3.89e-3,
+                                          "P37": 5.25e-3, "P68": 3.83e-3}},
+      "control_llama3_1_8b": {"main_2048_prefill": [4.98e-4, 4.91e-4],
+                              "boundary": {"P1": 9.88e-3, "P4": 8.92e-3, "P5": 8.71e-3, "P35": 3.75e-3, "P36": 3.93e-3,
+                                           "P37": 4.30e-3, "P68": 5.57e-3}}
+    },
+    "dispatch_observed": {
+      "model_b_qwen2_5_7b": {"decode_calls": 64, "decode_fallback_calls": 64, "append_calls": 62,
+                             "append_fallback_calls": 62, "decode_steps_with_quant_fallback": 62},
+      "control_llama3_1_8b": {"decode_calls": 64, "decode_fallback_calls": 0, "append_calls": 62,
+                              "append_fallback_calls": 0, "decode_step_quant_fallback_calls_total": 0}
+    }
+  },
+  "classification": "HARNESS DEFECT in the Exp14 shape gate: the absolute attention tolerance (5e-3, borrowed from the single 70-token case of test_rabit_kv2_stage3c.py) is not valid at very short contexts, where the fp32-reference vs BF16-output difference is larger; the accepted Llama fast path (positive control) fails it identically. Not a Model-B, RABIT or kernel correctness failure: zero page-byte / state mismatches, and the runtime state matches the independent reference state exactly in attention error. The magnitude attribution to BF16 output rounding is a hypothesis, not yet verified.",
+  "actions_not_taken": ["no retry", "no gate change", "no RABIT patch", "no kernel optimization", "no model switch",
+                        "no serving run", "no quality run"],
+  "files_sha256": {
+    "probe_session.log": "af351c4b3fb67ab54967d21ac94c2ea2674213579ab30123b4a9b59c1ed26cf6",
+    "probe_record.json": "ab1c93e4e88c40908bbd85f2b3ebbb8b224356be7f5b477fe103df87c9f63352"
+  },
+  "files_sha256_lf_normalized": {
+    "probe_session.log": "68fc34f2b857e745df26269793f26042c0d9795558ab543051a2a5d5efbb23e3",
+    "probe_record.json": "cc643825d8121233e5054c886d27eb289bb9f11d4e6986984e69580d29b0b117"
+  }
+}

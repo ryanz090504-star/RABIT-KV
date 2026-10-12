@@ -1,0 +1,291 @@
+{
+  "comparison": "MLSys 2027 Experiment 3 -- independent matched sessions, side by side",
+  "generated_by": "benchmarks/mlsys2027/compare_exp3_sessions.py",
+  "method": "Each session is an independent matched ABBA run with its own pooled statistics. Raw samples are NOT pooled across sessions; no cross-session pooled headline and no statistical confidence is computed from this small number of sessions. Conclusions are descriptive only.",
+  "sessions": [
+    {
+      "label": "run_1",
+      "summary": "results/mlsys2027/deployment/summary.json",
+      "results_dir": "results/mlsys2027/deployment",
+      "summary_sha256_lf": "adab6de664b0a3b9c91147ccd614bffe054d15b97512f33c8805f704d68df228",
+      "git_head": "73edb0d1d6d4330d962495b26470bf996af2576e",
+      "gpu_uuid": [
+        "GPU-d85ba19b-ad3f-0b3f-cfa9-3c19c1c7df38"
+      ],
+      "capacity": {
+        "bf16_tokens": 393024,
+        "rabit_kv2_tokens": 2074592,
+        "ratio": 5.278537697443413
+      },
+      "bf16_pooled": {
+        "tpot": 21.78583543548396,
+        "ttft": 61.85293197631836,
+        "wall": 736.4248484999791,
+        "tpot_p90": 22.891831432258964
+      },
+      "rabit_kv2_pooled": {
+        "tpot": 28.146909887097188,
+        "ttft": 145.69592475891113,
+        "wall": 1018.015336000019,
+        "tpot_p90": 29.112313167741654
+      },
+      "deltas": {
+        "tpot_median": {
+          "ms": 6.361074451613227,
+          "pct": 29.198212161524673
+        },
+        "tpot_p90": {
+          "ms": 6.220481735482689,
+          "pct": 27.173368604824
+        },
+        "ttft_median": {
+          "ms": 83.84299278259277,
+          "pct": 135.55217206953705
+        },
+        "wall_median": {
+          "ms": 281.5904875000399,
+          "pct": 38.23750489593208
+        }
+      },
+      "bf16_drift": {
+        "legs": [
+          "A1",
+          "A2"
+        ],
+        "tpot_ms": {
+          "median_diff_pct": 8.642266238549713,
+          "ranges_overlap": false
+        },
+        "ttft_ms": {
+          "median_diff_pct": 0.860070214553077,
+          "ranges_overlap": true
+        },
+        "wall_ms": {
+          "median_diff_pct": 7.94893239321075,
+          "ranges_overlap": false
+        }
+      },
+      "rabit_kv2_drift": {
+        "legs": [
+          "B1",
+          "B2"
+        ],
+        "tpot_ms": {
+          "median_diff_pct": -2.165231534308476,
+          "ranges_overlap": true
+        },
+        "ttft_ms": {
+          "median_diff_pct": -2.8200879536367407,
+          "ranges_overlap": true
+        },
+        "wall_ms": {
+          "median_diff_pct": -2.072686142296032,
+          "ranges_overlap": true
+        }
+      },
+      "integrity": {
+        "passed": 94,
+        "failed": 0,
+        "not_run": 0,
+        "not_evaluated": 0
+      },
+      "integrity_all_ok": true,
+      "config_status": "passed"
+    },
+    {
+      "label": "independent_replication_1",
+      "summary": "results/mlsys2027/deployment/replication_1/summary.json",
+      "results_dir": "results/mlsys2027/deployment/replication_1",
+      "summary_sha256_lf": "10f51d1d48f30051969aaf6a6e57972ce12779e0fc463e1885651e00bcff5343",
+      "git_head": "73edb0d1d6d4330d962495b26470bf996af2576e",
+      "gpu_uuid": [
+        "GPU-ddee4863-418f-8bf3-bdb2-91a2d3d98de1"
+      ],
+      "capacity": {
+        "bf16_tokens": 393024,
+        "rabit_kv2_tokens": 2074592,
+        "ratio": 5.278537697443413
+      },
+      "bf16_pooled": {
+        "tpot": 13.027540177418931,
+        "ttft": 58.88187885284424,
+        "wall": 462.5450264999955,
+        "tpot_p90": 13.236456764515435
+      },
+      "rabit_kv2_pooled": {
+        "tpot": 17.30100120967714,
+        "ttft": 106.84847831726074,
+        "wall": 642.0056119999913,
+        "tpot_p90": 17.937414570967707
+      },
+      "deltas": {
+        "tpot_median": {
+          "ms": 4.273461032258208,
+          "pct": 32.803284227559246
+        },
+        "tpot_p90": {
+          "ms": 4.700957806452273,
+          "pct": 35.51522805600587
+        },
+        "ttft_median": {
+          "ms": 47.966599464416504,
+          "pct": 81.46241322273893
+        },
+        "wall_median": {
+          "ms": 179.46058549999577,
+          "pct": 38.79851154339404
+        }
+      },
+      "bf16_drift": {
+        "legs": [
+          "A1",
+          "A2"
+        ],
+        "tpot_ms": {
+          "median_diff_pct": 1.0744672700297997,
+          "ranges_overlap": true
+        },
+        "ttft_ms": {
+          "median_diff_pct": -0.2799703846356083,
+          "ranges_overlap": true
+        },
+        "wall_ms": {
+          "median_diff_pct": 0.8486503945944301,
+          "ranges_overlap": true
+        }
+      },
+      "rabit_kv2_drift": {
+        "legs": [
+          "B1",
+          "B2"
+        ],
+        "tpot_ms": {
+          "median_diff_pct": -4.764463344339697,
+          "ranges_overlap": true
+        },
+        "ttft_ms": {
+          "median_diff_pct": -3.713871814291003,
+          "ranges_overlap": true
+        },
+        "wall_ms": {
+          "median_diff_pct": -4.53974332240551,
+          "ranges_overlap": true
+        }
+      },
+      "integrity": {
+        "passed": 94,
+        "failed": 0,
+        "not_run": 0,
+        "not_evaluated": 0
+      },
+      "integrity_all_ok": true,
+      "config_status": "passed"
+    }
+  ],
+  "descriptive_conclusions": {
+    "capacity_matches_exactly_across_sessions": true,
+    "latency_direction_agrees_across_sessions": {
+      "tpot_median": true,
+      "tpot_p90": true,
+      "ttft_median": true,
+      "wall_median": true
+    },
+    "latency_direction_per_session": {
+      "tpot_median": {
+        "run_1": "rabit_kv2 slower",
+        "independent_replication_1": "rabit_kv2 slower"
+      },
+      "tpot_p90": {
+        "run_1": "rabit_kv2 slower",
+        "independent_replication_1": "rabit_kv2 slower"
+      },
+      "ttft_median": {
+        "run_1": "rabit_kv2 slower",
+        "independent_replication_1": "rabit_kv2 slower"
+      },
+      "wall_median": {
+        "run_1": "rabit_kv2 slower",
+        "independent_replication_1": "rabit_kv2 slower"
+      }
+    },
+    "tpot_median_overhead_pct_range": {
+      "min": 29.198212161524673,
+      "max": 32.803284227559246,
+      "spread": 3.605072066034573
+    },
+    "tpot_p90_overhead_pct_range": {
+      "min": 27.173368604824,
+      "max": 35.51522805600587,
+      "spread": 8.341859451181868
+    },
+    "ttft_median_overhead_pct_range": {
+      "min": 81.46241322273893,
+      "max": 135.55217206953705,
+      "spread": 54.08975884679812
+    },
+    "wall_median_overhead_pct_range": {
+      "min": 38.23750489593208,
+      "max": 38.79851154339404,
+      "spread": 0.5610066474619657
+    },
+    "absolute_latency_across_sessions": {
+      "bf16_pooled": {
+        "tpot": {
+          "per_session": {
+            "run_1": 21.78583543548396,
+            "independent_replication_1": 13.027540177418931
+          },
+          "relative_spread": 0.6722907884978988,
+          "materially_different": true
+        },
+        "ttft": {
+          "per_session": {
+            "run_1": 61.85293197631836,
+            "independent_replication_1": 58.88187885284424
+          },
+          "relative_spread": 0.05045785191228841,
+          "materially_different": false
+        },
+        "wall": {
+          "per_session": {
+            "run_1": 736.4248484999791,
+            "independent_replication_1": 462.5450264999955
+          },
+          "relative_spread": 0.5921149429978495,
+          "materially_different": true
+        }
+      },
+      "rabit_kv2_pooled": {
+        "tpot": {
+          "per_session": {
+            "run_1": 28.146909887097188,
+            "independent_replication_1": 17.30100120967714
+          },
+          "relative_spread": 0.6268948568914902,
+          "materially_different": true
+        },
+        "ttft": {
+          "per_session": {
+            "run_1": 145.69592475891113,
+            "independent_replication_1": 106.84847831726074
+          },
+          "relative_spread": 0.3635751023641374,
+          "materially_different": true
+        },
+        "wall": {
+          "per_session": {
+            "run_1": 1018.015336000019,
+            "independent_replication_1": 642.0056119999913
+          },
+          "relative_spread": 0.5856798086681412,
+          "materially_different": true
+        }
+      }
+    },
+    "materiality_threshold_relative": 0.1,
+    "relative_spread_definition": "(max - min) / min across sessions; materially_different if > threshold",
+    "all_sessions_integrity_fully_passed": true,
+    "all_sessions_config_passed": true,
+    "same_gpu_across_sessions": false
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "experiment": "Experiment 2 -- multilingual operating-point quality-compression sweep",
+  "plan_reference": "docs/MLSYS_EXPERIMENT_PLAN.md",
+  "model": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+  "languages": [
+    "zh",
+    "es"
+  ],
+  "methods": [
+    "bf16",
+    "rabit8",
+    "rabit4",
+    "rabit3",
+    "rabit2"
+  ],
+  "presets": {
+    "bf16": "BF16 baseline",
+    "rabit8": "8b META8g256 G128 R0",
+    "rabit4": "4b META8g64 SYM G128 R0",
+    "rabit3": "3b META8g64 SYM G32 R2",
+    "rabit2": "2b META8g64 K3V2 G32 R4"
+  },
+  "settings": {
+    "dataset": "wikimedia/wikipedia 20231101.{zh,es}",
+    "dataset_revision": "cf584d1dc131caa92a5cb910f41a8b7591b12732",
+    "shuffle_seed": 20260804,
+    "shuffle_buffer": 1000,
+    "context_tokens": 1024,
+    "eval_tokens": 128,
+    "samples_per_language": 8
+  },
+  "gpu": "NVIDIA H100 80GB HBM3 (Modal)",
+  "kv_memory_label": "LOGICAL fake-quant KV storage; not physical vLLM allocator capacity",
+  "regression_scope": "bf16/rabit2 only (canonical multilingual run covered bf16, rabit2); rabit8/rabit4/rabit3 are new evidence",
+  "started_utc": "2026-09-25T17:27:28.835740+00:00",
+  "completed_utc": "2026-09-25T17:29:34.003555+00:00",
+  "status": "passed",
+  "provenance": {
+    "git_branch": "research/mlsys-2027",
+    "git_head": "288a583201ed21b194032db6c24c3b403ae96a31",
+    "rabit_kv2_sha256": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+    "rabit_kv2_sha256_crlf_checkout_equivalent": "108ba8afaac862bc4e070d2dc812493aaeae4e458837c4bda2ac703e72a57524",
+    "multilingual_ppl_sha256": "98fa007e88bf6771df8bd8869ab1a00ba2230f8d8835227b02193d346e289b36",
+    "reference_continuation_ppl_sha256": "caaae5c3744e9ba03c4bf385337f563802f58331efdb3a239380741885781374",
+    "runner_script": "benchmarks/mlsys2027/run_experiment2_multilingual_frontier.py",
+    "runner_script_sha256": "d33b0536e6f3548db2b327e981b31f0ab1a638b0ab54071b717c474b73b4e4ff",
+    "canonical_summary_sha256": "a72ccd281dc0fb989d2eec5b8bda2118696b7e78986e64db04721247ea20ca7f",
+    "canonical_multilingual_log_sha256": "c45758ee2cea0cf486567d2b08eef551a8e3f044e1322b2898e97f8aebe08336",
+    "sha256_basis": "LF-normalized bytes (CRLF -> LF); equals committed git content",
+    "protected_paths_baseline_status": "clean",
+    "uncommitted_experiment_files": null
+  },
+  "regression_tolerances": {
+    "ppl_relative": 0.005,
+    "avg_kv_mb_relative": 0.001
+  },
+  "runs": [
+    {
+      "name": "multilingual_ppl",
+      "purpose": "Chinese/Spanish Wikipedia continuation PPL, bf16/rabit8/rabit4/rabit3/rabit2 sweep",
+      "script": "benchmarks/quality/multilingual_ppl.py",
+      "command": [
+        "C:\\Users\\ryanz\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+        "-m",
+        "modal",
+        "run",
+        "C:\\Users\\ryanz\\Documents\\GitHub\\benchquant\\kvquant_full\\RABIT-KV-upload\\benchmarks\\quality\\multilingual_ppl.py",
+        "--model-name",
+        "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+        "--languages",
+        "zh,es",
+        "--context-tokens",
+        "1024",
+        "--eval-tokens",
+        "128",
+        "--samples",
+        "8",
+        "--methods",
+        "bf16,rabit8,rabit4,rabit3,rabit2",
+        "--dataset-revision",
+        "cf584d1dc131caa92a5cb910f41a8b7591b12732",
+        "--shuffle-seed",
+        "20260804",
+        "--shuffle-buffer",
+        "1000"
+      ],
+      "log": "results/mlsys2027/multilingual_frontier/multilingual_ppl.log",
+      "started_utc": "2026-09-25T17:27:28.836598+00:00",
+      "completed_utc": "2026-09-25T17:29:33.934583+00:00",
+      "returncode": 0,
+      "status": "passed",
+      "regression_check": {
+        "benchmark": "multilingual_ppl",
+        "checks": [
+          {
+            "metric": "logged presets == expected presets",
+            "observed": {
+              "bf16": "BF16 baseline",
+              "rabit8": "8b META8g256 G128 R0",
+              "rabit4": "4b META8g64 SYM G128 R0",
+              "rabit3": "3b META8g64 SYM G32 R2",
+              "rabit2": "2b META8g64 K3V2 G32 R4"
+            },
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh: all five method rows present",
+            "observed": [
+              "bf16",
+              "rabit2",
+              "rabit3",
+              "rabit4",
+              "rabit8"
+            ],
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh.bf16.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh.rabit8.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh.rabit4.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh.rabit3.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh.rabit2.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh.bf16.ppl",
+            "canonical": 10.1176,
+            "observed": 10.1176,
+            "abs_diff": 0.0,
+            "tolerance": 0.050588,
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh.bf16.avg_kv_mb",
+            "canonical": 128.0,
+            "observed": 128.0,
+            "abs_diff": 0.0,
+            "tolerance": 0.128,
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh.rabit2.ppl",
+            "canonical": 10.3308,
+            "observed": 10.3308,
+            "abs_diff": 0.0,
+            "tolerance": 0.051654,
+            "within_tolerance": true
+          },
+          {
+            "metric": "zh.rabit2.avg_kv_mb",
+            "canonical": 24.71,
+            "observed": 24.71,
+            "abs_diff": 0.0,
+            "tolerance": 0.024710000000000003,
+            "within_tolerance": true
+          },
+          {
+            "metric": "es: all five method rows present",
+            "observed": [
+              "bf16",
+              "rabit2",
+              "rabit3",
+              "rabit4",
+              "rabit8"
+            ],
+            "within_tolerance": true
+          },
+          {
+            "metric": "es.bf16.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "es.rabit8.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "es.rabit4.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "es.rabit3.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "es.rabit2.tokens == 1024",
+            "observed": 1024,
+            "within_tolerance": true
+          },
+          {
+            "metric": "es.bf16.ppl",
+            "canonical": 5.0035,
+            "observed": 5.0035,
+            "abs_diff": 0.0,
+            "tolerance": 0.025017499999999998,
+            "within_tolerance": true
+          },
+          {
+            "metric": "es.bf16.avg_kv_mb",
+            "canonical": 128.0,
+            "observed": 128.0,
+            "abs_diff": 0.0,
+            "tolerance": 0.128,
+            "within_tolerance": true
+          },
+          {
+            "metric": "es.rabit2.ppl",
+            "canonical": 5.1139,
+            "observed": 5.1139,
+            "abs_diff": 0.0,
+            "tolerance": 0.025569500000000002,
+            "within_tolerance": true
+          },
+          {
+            "metric": "es.rabit2.avg_kv_mb",
+            "canonical": 24.71,
+            "observed": 24.71,
+            "abs_diff": 0.0,
+            "tolerance": 0.024710000000000003,
+            "within_tolerance": true
+          }
+        ],
+        "all_within_tolerance": true
+      }
+    }
+  ],
+  "protected_paths_post_run_status": "clean"
+}

@@ -1,0 +1,18 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis_attempt_addendum",
+  "attempt": 3,
+  "addendum_to": "attempt_record.json (unchanged; archived in commit e1ae27bc44fa04d7ee7591474803a3e1826fbe08)",
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "permanently_excluded": true,
+  "explicit_facts": {
+    "diagnostic_computation_completed_on_h100": true,
+    "model_or_serving_engine_ran": false,
+    "stdout_log_transport_truncated_full_summary": true,
+    "per_prefix_and_per_checkpoint_data_lost": true,
+    "surviving_aggregate_lines": "INDICATIVE ONLY",
+    "aggregates_may_modify_gate": false,
+    "note": "the surviving aggregates must not be used to modify the shape gate before a valid complete capture; Attempt 3 is never pooled with or promoted to valid evidence"
+  }
+}

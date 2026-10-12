@@ -1,0 +1,20 @@
+{
+  "kind": "canonical-quality-v2 CPU parity tests -- attempt addendum",
+  "attempt": 2,
+  "addendum_to": "attempt_record.json (unchanged; archived in commit 8abbde395e61531178cea5586655175efab6cc98)",
+  "status": "invalid_harness_failure",
+  "excluded": true,
+  "permanently_excluded": true,
+  "explicit_facts": {
+    "container": "CPU-only",
+    "gpu_used": false,
+    "model_used": false,
+    "wrapper_import_fix_succeeded": true,
+    "remote_function_returned": true,
+    "local_modal_client_failed_during_deserialization": true,
+    "result_payload": "lost",
+    "parity_result_claimed": false,
+    "note": "the ~30 s remote lifetime is NOT evidence of parity success",
+    "app": {"id": "ap-Yyc9tCQFfBWnrinXKhZnNK", "final_state": "stopped", "tasks": 0, "verified": "by a later query"}
+  }
+}

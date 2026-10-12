@@ -1,0 +1,877 @@
+{
+  "scope": "Stage3C COMPONENT PROFILE diagnostic only; NOT a latency benchmark, NOT paper performance evidence, NOT Experiment 5 evidence. The device is synchronized around every component; profiled TTFT/wall are not latency. One profiled request per implementation per point.",
+  "diagnostic_evidence": true,
+  "latency_evidence": false,
+  "experiment5_evidence": false,
+  "component_profiling_enabled": true,
+  "all_integrity_passed": true,
+  "integrity_counts": {
+    "passed": 34,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "accounting_contract": " (HOST and GPU are separate domains and are NEVER combined):\n\nGPU (CUDA events):\n  total = total_stage3c_gpu_span_ms (scope event pair)\n  mutually exclusive leaves (event pairs, never nested):\n    chunk_plan_encode, closed_page, k_stats_codes, k3_pack, meta8g64,\n    tail_partial (open_recent + recent_only), reduce\n  unattributed_gpu = span - sum(leaves)   (device idle + un-evented work)\n  share = component / span\n\nHOST (perf_counter), exclusive times of a window tree (no double counting):\n  total = total_stage3c_host_wall_ms\n  mutually exclusive components:\n    chunk_plan_host, apply_step_host,\n    launch_host.{closed_page, tail_prep, tail_partial, reduce},\n    wrapper_exclusive_host.{reference_attention_call, tail, tail_prep},\n    profiler_overhead_host\n  unattributed_host = wall - sum(components)   (= root exclusive: loop, output\n                                                copy issue, tensor views, ...)\n  share = component / wall\n\n",
+  "percentages": "HOST shares are of the HOST wall; GPU shares are of the GPU span; never combined",
+  "points": [
+    {
+      "second_chunk_q_len": 32,
+      "prompt_tokens": 16416,
+      "reference": {
+        "impl": "reference",
+        "q_len": 32,
+        "context_len": 16384,
+        "records": 32,
+        "records_expected": 32,
+        "GPU": {
+          "timing": "CUDA events; one synchronize per scope; never combined with HOST",
+          "total_stage3c_gpu_span_ms": 501.927776,
+          "components_ms": {
+            "chunk_plan_encode_gpu": 54.235040000000005,
+            "closed_page_gpu": 320.18688000000003,
+            "k_stats_codes_gpu": 6.890783999999999,
+            "k3_pack_gpu": 5.151071999999999,
+            "meta8g64_gpu": 22.100895999999995,
+            "tail_partial_gpu": 16.093632,
+            "reduce_gpu": 40.517184
+          },
+          "groups_ms_display_only": {
+            "tail_prep_gpu": 34.142751999999994
+          },
+          "unattributed_gpu_ms": 36.752287999999965,
+          "share_of_gpu_span": {
+            "chunk_plan_encode_gpu": 0.10805347421139731,
+            "closed_page_gpu": 0.6379142484435849,
+            "k_stats_codes_gpu": 0.013728636527977282,
+            "k3_pack_gpu": 0.010262576104176389,
+            "meta8g64_gpu": 0.04403202424087404,
+            "tail_partial_gpu": 0.032063640964950305,
+            "reduce_gpu": 0.08072313575250317,
+            "unattributed_gpu": 0.0732222637545366
+          },
+          "sum_components": [
+            "chunk_plan_encode_gpu",
+            "closed_page_gpu",
+            "k_stats_codes_gpu",
+            "k3_pack_gpu",
+            "meta8g64_gpu",
+            "tail_partial_gpu",
+            "reduce_gpu"
+          ]
+        },
+        "HOST": {
+          "timing": "perf_counter; exclusive window times; never combined with GPU",
+          "total_stage3c_host_wall_ms": 491.986574,
+          "components_ms": {
+            "chunk_plan_host": 67.457267,
+            "apply_step_host": 9.021681000000001,
+            "launch_host.closed_page": 26.137144000000003,
+            "launch_host.tail_prep": 84.966751,
+            "launch_host.tail_partial": 30.018903000000005,
+            "launch_host.reduce": 17.396088000000002,
+            "wrapper_exclusive_host.reference_attention_call": 36.388647,
+            "wrapper_exclusive_host.tail": 18.873627000000003,
+            "wrapper_exclusive_host.tail_prep": 25.906277999999997,
+            "profiler_overhead_host": 162.849838
+          },
+          "groups_ms_display_only": {
+            "orchestration_launch_host": 239.68743800000001
+          },
+          "unattributed_host_ms": 12.970349999999996,
+          "share_of_host_wall": {
+            "chunk_plan_host": 0.1371120078573526,
+            "apply_step_host": 0.0183372503982192,
+            "launch_host.closed_page": 0.053125726150405075,
+            "launch_host.tail_prep": 0.17270136115543674,
+            "launch_host.tail_partial": 0.06101569552180504,
+            "launch_host.reduce": 0.03535886733364395,
+            "wrapper_exclusive_host.reference_attention_call": 0.07396268297353983,
+            "wrapper_exclusive_host.tail": 0.03836207733587462,
+            "wrapper_exclusive_host.tail_prep": 0.05265647350775063,
+            "profiler_overhead_host": 0.3310046383501514,
+            "unattributed_host": 0.026363219415820878
+          },
+          "sum_components": [
+            "chunk_plan_host",
+            "apply_step_host",
+            "launch_host.closed_page",
+            "launch_host.tail_prep",
+            "launch_host.tail_partial",
+            "launch_host.reduce",
+            "wrapper_exclusive_host.reference_attention_call",
+            "wrapper_exclusive_host.tail",
+            "wrapper_exclusive_host.tail_prep",
+            "profiler_overhead_host"
+          ]
+        },
+        "call_counts": {
+          "apply_step": 1024,
+          "chunk": 32,
+          "chunk_plan": 32,
+          "closed_page": 1024,
+          "reduce": 1024,
+          "reference_attention_call": 1024,
+          "tail": 1024,
+          "tail_partial.open_recent": 992,
+          "tail_partial.recent_only": 32,
+          "tail_prep": 992,
+          "tail_prep.k3_pack": 992,
+          "tail_prep.k_stats_codes": 992,
+          "tail_prep.meta8g64": 3968
+        },
+        "combined_boundaries": {
+          "chunk_plan_encode_gpu": "one event pair around Rabit2CausalChunkPlan.__init__ (V2 quantization, page encode, cat/stack/index_copy_); its internal split is not measured.",
+          "k_stats_codes_gpu": "K statistics and K codes are one fused kernel; not separable.",
+          "meta8g64_gpu": "four META8g64 launches (k_min, k_scale, v_min, v_scale) summed.",
+          "unattributed_gpu": "device idle inside the span plus un-evented device work (output copy_, contiguous copies in wrappers); not separable.",
+          "gpu_leaf_launch_gap": "if the device is idle when a leaf's start event is reached, the leaf time includes the part of its host launch path after the start event.",
+          "wrapper_exclusive_host": "per-query wrapper code (buffer allocation, contiguous(), layout arithmetic, Stage4D3.4 workspace lookup) timed as window-exclusive time, not per statement.",
+          "unattributed_host": "root exclusive: Stage3C loop overhead, output copy_ issue, tensor views, tile scheduling and per-tile allocations (tile32); not separable without editing the timed code."
+        },
+        "diagnostic_only": true,
+        "classification": {
+          "gpu_rule": "closed_page_gpu",
+          "gpu_action": "closed-page work still dominates: revisit closed-page batching",
+          "gpu_largest": "closed_page_gpu",
+          "gpu_largest_share": 0.6379142484435849,
+          "host_rule": "none",
+          "host_action": "no pre-registered rule fires; review the full breakdown",
+          "host_largest": "per_query_launch_host",
+          "host_largest_share": 0.3222016501612908,
+          "several_per_query_large": false,
+          "per_query_components_ge_large_share": [
+            "per_query_launch_host",
+            "python_state_exposure_host"
+          ],
+          "several_per_query_action": null,
+          "thresholds": {
+            "dominant_share": 0.5,
+            "large_share": 0.15
+          },
+          "note": "per-domain shares only (HOST share of host wall; GPU share of GPU span); pre-registered rule output; requires review before any optimization"
+        },
+        "profiled_request_ttft_ms_NOT_LATENCY": 1276.0272026062012,
+        "external_unprofiled_ttft_ms": 1169.3089008331299,
+        "external_unprofiled_bf16_control_ttft_ms": 1317.9290294647217
+      },
+      "tile32": {
+        "impl": "tile32",
+        "q_len": 32,
+        "context_len": 16384,
+        "records": 32,
+        "records_expected": 32,
+        "GPU": {
+          "timing": "CUDA events; one synchronize per scope; never combined with HOST",
+          "total_stage3c_gpu_span_ms": 449.535456,
+          "components_ms": {
+            "chunk_plan_encode_gpu": 52.117408000000005,
+            "closed_page_gpu": 303.061855,
+            "k_stats_codes_gpu": 7.075743999999999,
+            "k3_pack_gpu": 5.231552000000001,
+            "meta8g64_gpu": 22.177856,
+            "tail_partial_gpu": 15.083904,
+            "reduce_gpu": 19.33264
+          },
+          "groups_ms_display_only": {
+            "tail_prep_gpu": 34.485152
+          },
+          "unattributed_gpu_ms": 25.454497000000003,
+          "share_of_gpu_span": {
+            "chunk_plan_encode_gpu": 0.1159361454238662,
+            "closed_page_gpu": 0.6741667447027804,
+            "k_stats_codes_gpu": 0.015740124400776965,
+            "k3_pack_gpu": 0.011637684926013935,
+            "meta8g64_gpu": 0.04933505400739736,
+            "tail_partial_gpu": 0.0335544255712724,
+            "reduce_gpu": 0.04300581798824785,
+            "unattributed_gpu": 0.056624002979644844
+          },
+          "sum_components": [
+            "chunk_plan_encode_gpu",
+            "closed_page_gpu",
+            "k_stats_codes_gpu",
+            "k3_pack_gpu",
+            "meta8g64_gpu",
+            "tail_partial_gpu",
+            "reduce_gpu"
+          ]
+        },
+        "HOST": {
+          "timing": "perf_counter; exclusive window times; never combined with GPU",
+          "total_stage3c_host_wall_ms": 379.313829,
+          "components_ms": {
+            "chunk_plan_host": 66.146699,
+            "apply_step_host": 9.370158,
+            "launch_host.closed_page": 3.1278,
+            "launch_host.tail_prep": 86.96271399999998,
+            "launch_host.tail_partial": 30.618689,
+            "launch_host.reduce": 1.5513620000000004,
+            "wrapper_exclusive_host.reference_attention_call": 0.0,
+            "wrapper_exclusive_host.tail": 18.498475999999997,
+            "wrapper_exclusive_host.tail_prep": 26.778496,
+            "profiler_overhead_host": 123.454386
+          },
+          "groups_ms_display_only": {
+            "orchestration_launch_host": 167.537537
+          },
+          "unattributed_host_ms": 12.805049000000054,
+          "share_of_host_wall": {
+            "chunk_plan_host": 0.17438515008636818,
+            "apply_step_host": 0.024702916908415695,
+            "launch_host.closed_page": 0.008245942438339099,
+            "launch_host.tail_prep": 0.22926323100126142,
+            "launch_host.tail_partial": 0.08072125680395376,
+            "launch_host.reduce": 0.004089916795519734,
+            "wrapper_exclusive_host.reference_attention_call": 0.0,
+            "wrapper_exclusive_host.tail": 0.048768261491462774,
+            "wrapper_exclusive_host.tail_prep": 0.07059720461707712,
+            "profiler_overhead_host": 0.32546766440197467,
+            "unattributed_host": 0.033758455455627626
+          },
+          "sum_components": [
+            "chunk_plan_host",
+            "apply_step_host",
+            "launch_host.closed_page",
+            "launch_host.tail_prep",
+            "launch_host.tail_partial",
+            "launch_host.reduce",
+            "wrapper_exclusive_host.reference_attention_call",
+            "wrapper_exclusive_host.tail",
+            "wrapper_exclusive_host.tail_prep",
+            "profiler_overhead_host"
+          ]
+        },
+        "call_counts": {
+          "apply_step": 1024,
+          "chunk": 32,
+          "chunk_plan": 32,
+          "closed_page": 64,
+          "reduce": 64,
+          "tail": 1024,
+          "tail_partial.open_recent": 992,
+          "tail_partial.recent_only": 32,
+          "tail_prep": 992,
+          "tail_prep.k3_pack": 992,
+          "tail_prep.k_stats_codes": 992,
+          "tail_prep.meta8g64": 3968
+        },
+        "combined_boundaries": {
+          "chunk_plan_encode_gpu": "one event pair around Rabit2CausalChunkPlan.__init__ (V2 quantization, page encode, cat/stack/index_copy_); its internal split is not measured.",
+          "k_stats_codes_gpu": "K statistics and K codes are one fused kernel; not separable.",
+          "meta8g64_gpu": "four META8g64 launches (k_min, k_scale, v_min, v_scale) summed.",
+          "unattributed_gpu": "device idle inside the span plus un-evented device work (output copy_, contiguous copies in wrappers); not separable.",
+          "gpu_leaf_launch_gap": "if the device is idle when a leaf's start event is reached, the leaf time includes the part of its host launch path after the start event.",
+          "wrapper_exclusive_host": "per-query wrapper code (buffer allocation, contiguous(), layout arithmetic, Stage4D3.4 workspace lookup) timed as window-exclusive time, not per statement.",
+          "unattributed_host": "root exclusive: Stage3C loop overhead, output copy_ issue, tensor views, tile scheduling and per-tile allocations (tile32); not separable without editing the timed code."
+        },
+        "diagnostic_only": true,
+        "classification": {
+          "gpu_rule": "closed_page_gpu",
+          "gpu_action": "closed-page work still dominates: revisit closed-page batching",
+          "gpu_largest": "closed_page_gpu",
+          "gpu_largest_share": 0.6741667447027804,
+          "host_rule": "none",
+          "host_action": "no pre-registered rule fires; review the full breakdown",
+          "host_largest": "per_query_launch_host",
+          "host_largest_share": 0.32232034703907403,
+          "several_per_query_large": false,
+          "per_query_components_ge_large_share": [
+            "per_query_launch_host"
+          ],
+          "several_per_query_action": null,
+          "thresholds": {
+            "dominant_share": 0.5,
+            "large_share": 0.15
+          },
+          "note": "per-domain shares only (HOST share of host wall; GPU share of GPU span); pre-registered rule output; requires review before any optimization"
+        },
+        "profiled_request_ttft_ms_NOT_LATENCY": 1211.6835117340088,
+        "external_unprofiled_ttft_ms": 1121.4540004730225,
+        "external_unprofiled_bf16_control_ttft_ms": 1317.9290294647217
+      }
+    },
+    {
+      "second_chunk_q_len": 512,
+      "prompt_tokens": 16896,
+      "reference": {
+        "impl": "reference",
+        "q_len": 512,
+        "context_len": 16384,
+        "records": 32,
+        "records_expected": 32,
+        "GPU": {
+          "timing": "CUDA events; one synchronize per scope; never combined with HOST",
+          "total_stage3c_gpu_span_ms": 7469.450502,
+          "components_ms": {
+            "chunk_plan_encode_gpu": 472.06972899999994,
+            "closed_page_gpu": 5057.178626000001,
+            "k_stats_codes_gpu": 110.956672,
+            "k3_pack_gpu": 81.998496,
+            "meta8g64_gpu": 350.3997120000001,
+            "tail_partial_gpu": 242.566784,
+            "reduce_gpu": 683.367072
+          },
+          "groups_ms_display_only": {
+            "tail_prep_gpu": 543.3548800000001
+          },
+          "unattributed_gpu_ms": 470.91341099999863,
+          "share_of_gpu_span": {
+            "chunk_plan_encode_gpu": 0.06320006121917533,
+            "closed_page_gpu": 0.6770482814828085,
+            "k_stats_codes_gpu": 0.014854730206765617,
+            "k3_pack_gpu": 0.010977848501445227,
+            "meta8g64_gpu": 0.04691104277432162,
+            "tail_partial_gpu": 0.032474515218361914,
+            "reduce_gpu": 0.09148826567858286,
+            "unattributed_gpu": 0.06304525491853893
+          },
+          "sum_components": [
+            "chunk_plan_encode_gpu",
+            "closed_page_gpu",
+            "k_stats_codes_gpu",
+            "k3_pack_gpu",
+            "meta8g64_gpu",
+            "tail_partial_gpu",
+            "reduce_gpu"
+          ]
+        },
+        "HOST": {
+          "timing": "perf_counter; exclusive window times; never combined with GPU",
+          "total_stage3c_host_wall_ms": 7021.342574,
+          "components_ms": {
+            "chunk_plan_host": 470.98987100000005,
+            "apply_step_host": 132.18862500000003,
+            "launch_host.closed_page": 377.2095770000001,
+            "launch_host.tail_prep": 1325.799779,
+            "launch_host.tail_partial": 478.57014,
+            "launch_host.reduce": 273.03068299999995,
+            "wrapper_exclusive_host.reference_attention_call": 565.4300970000002,
+            "wrapper_exclusive_host.tail": 294.587162,
+            "wrapper_exclusive_host.tail_prep": 410.557389,
+            "profiler_overhead_host": 2492.48253
+          },
+          "groups_ms_display_only": {
+            "orchestration_launch_host": 3725.184827
+          },
+          "unattributed_host_ms": 200.49672099999952,
+          "share_of_host_wall": {
+            "chunk_plan_host": 0.06707974522480549,
+            "apply_step_host": 0.01882668786016707,
+            "launch_host.closed_page": 0.0537232834069093,
+            "launch_host.tail_prep": 0.1888242547670912,
+            "launch_host.tail_partial": 0.06815934914956906,
+            "launch_host.reduce": 0.03888582277854257,
+            "wrapper_exclusive_host.reference_attention_call": 0.08053019647464364,
+            "wrapper_exclusive_host.tail": 0.04195595911967818,
+            "wrapper_exclusive_host.tail_prep": 0.058472775636997425,
+            "profiler_overhead_host": 0.3549866003162489,
+            "unattributed_host": 0.028555325265347112
+          },
+          "sum_components": [
+            "chunk_plan_host",
+            "apply_step_host",
+            "launch_host.closed_page",
+            "launch_host.tail_prep",
+            "launch_host.tail_partial",
+            "launch_host.reduce",
+            "wrapper_exclusive_host.reference_attention_call",
+            "wrapper_exclusive_host.tail",
+            "wrapper_exclusive_host.tail_prep",
+            "profiler_overhead_host"
+          ]
+        },
+        "call_counts": {
+          "apply_step": 16384,
+          "chunk": 32,
+          "chunk_plan": 32,
+          "closed_page": 16384,
+          "reduce": 16384,
+          "reference_attention_call": 16384,
+          "tail": 16384,
+          "tail_partial.open_recent": 15872,
+          "tail_partial.recent_only": 512,
+          "tail_prep": 15872,
+          "tail_prep.k3_pack": 15872,
+          "tail_prep.k_stats_codes": 15872,
+          "tail_prep.meta8g64": 63488
+        },
+        "combined_boundaries": {
+          "chunk_plan_encode_gpu": "one event pair around Rabit2CausalChunkPlan.__init__ (V2 quantization, page encode, cat/stack/index_copy_); its internal split is not measured.",
+          "k_stats_codes_gpu": "K statistics and K codes are one fused kernel; not separable.",
+          "meta8g64_gpu": "four META8g64 launches (k_min, k_scale, v_min, v_scale) summed.",
+          "unattributed_gpu": "device idle inside the span plus un-evented device work (output copy_, contiguous copies in wrappers); not separable.",
+          "gpu_leaf_launch_gap": "if the device is idle when a leaf's start event is reached, the leaf time includes the part of its host launch path after the start event.",
+          "wrapper_exclusive_host": "per-query wrapper code (buffer allocation, contiguous(), layout arithmetic, Stage4D3.4 workspace lookup) timed as window-exclusive time, not per statement.",
+          "unattributed_host": "root exclusive: Stage3C loop overhead, output copy_ issue, tensor views, tile scheduling and per-tile allocations (tile32); not separable without editing the timed code."
+        },
+        "diagnostic_only": true,
+        "classification": {
+          "gpu_rule": "closed_page_gpu",
+          "gpu_action": "closed-page work still dominates: revisit closed-page batching",
+          "gpu_largest": "closed_page_gpu",
+          "gpu_largest_share": 0.6770482814828085,
+          "host_rule": "none",
+          "host_action": "no pre-registered rule fires; review the full breakdown",
+          "host_largest": "per_query_launch_host",
+          "host_largest_share": 0.3495927101021121,
+          "several_per_query_large": false,
+          "per_query_components_ge_large_share": [
+            "per_query_launch_host",
+            "python_state_exposure_host"
+          ],
+          "several_per_query_action": null,
+          "thresholds": {
+            "dominant_share": 0.5,
+            "large_share": 0.15
+          },
+          "note": "per-domain shares only (HOST share of host wall; GPU share of GPU span); pre-registered rule output; requires review before any optimization"
+        },
+        "profiled_request_ttft_ms_NOT_LATENCY": 8847.263097763062,
+        "external_unprofiled_ttft_ms": 7595.336675643921,
+        "external_unprofiled_bf16_control_ttft_ms": 1370.5899715423584
+      },
+      "tile32": {
+        "impl": "tile32",
+        "q_len": 512,
+        "context_len": 16384,
+        "records": 32,
+        "records_expected": 32,
+        "GPU": {
+          "timing": "CUDA events; one synchronize per scope; never combined with HOST",
+          "total_stage3c_gpu_span_ms": 6813.517107,
+          "components_ms": {
+            "chunk_plan_encode_gpu": 474.8916149999999,
+            "closed_page_gpu": 4866.693215,
+            "k_stats_codes_gpu": 113.30873599999998,
+            "k3_pack_gpu": 84.05699200000001,
+            "meta8g64_gpu": 356.2153600000001,
+            "tail_partial_gpu": 240.756384,
+            "reduce_gpu": 326.06995199999983
+          },
+          "groups_ms_display_only": {
+            "tail_prep_gpu": 553.5810880000001
+          },
+          "unattributed_gpu_ms": 351.5248529999999,
+          "share_of_gpu_span": {
+            "chunk_plan_encode_gpu": 0.06969845493043685,
+            "closed_page_gpu": 0.7142703450469227,
+            "k_stats_codes_gpu": 0.016629992149515563,
+            "k3_pack_gpu": 0.01233679914205285,
+            "meta8g64_gpu": 0.05228068769858012,
+            "tail_partial_gpu": 0.035335111106223574,
+            "reduce_gpu": 0.047856334236690404,
+            "unattributed_gpu": 0.051592275689578
+          },
+          "sum_components": [
+            "chunk_plan_encode_gpu",
+            "closed_page_gpu",
+            "k_stats_codes_gpu",
+            "k3_pack_gpu",
+            "meta8g64_gpu",
+            "tail_partial_gpu",
+            "reduce_gpu"
+          ]
+        },
+        "HOST": {
+          "timing": "perf_counter; exclusive window times; never combined with GPU",
+          "total_stage3c_host_wall_ms": 6482.13368,
+          "components_ms": {
+            "chunk_plan_host": 473.854232,
+            "apply_step_host": 140.929911,
+            "launch_host.closed_page": 19.431344,
+            "launch_host.tail_prep": 1375.5921759999999,
+            "launch_host.tail_partial": 1601.324586,
+            "launch_host.reduce": 23.666759999999996,
+            "wrapper_exclusive_host.reference_attention_call": 0.0,
+            "wrapper_exclusive_host.tail": 306.01840599999997,
+            "wrapper_exclusive_host.tail_prep": 421.52983399999994,
+            "profiler_overhead_host": 1955.414543
+          },
+          "groups_ms_display_only": {
+            "orchestration_launch_host": 3747.5631059999996
+          },
+          "unattributed_host_ms": 164.37188799999967,
+          "share_of_host_wall": {
+            "chunk_plan_host": 0.07310158281092408,
+            "apply_step_host": 0.021741284267991216,
+            "launch_host.closed_page": 0.0029976771475653985,
+            "launch_host.tail_prep": 0.2122128675383936,
+            "launch_host.tail_partial": 0.24703664951260307,
+            "launch_host.reduce": 0.003651075582261055,
+            "wrapper_exclusive_host.reference_attention_call": 0.0,
+            "wrapper_exclusive_host.tail": 0.047209517900593495,
+            "wrapper_exclusive_host.tail_prep": 0.06502948794477807,
+            "profiler_overhead_host": 0.30166217476095003,
+            "unattributed_host": 0.025357682533939916
+          },
+          "sum_components": [
+            "chunk_plan_host",
+            "apply_step_host",
+            "launch_host.closed_page",
+            "launch_host.tail_prep",
+            "launch_host.tail_partial",
+            "launch_host.reduce",
+            "wrapper_exclusive_host.reference_attention_call",
+            "wrapper_exclusive_host.tail",
+            "wrapper_exclusive_host.tail_prep",
+            "profiler_overhead_host"
+          ]
+        },
+        "call_counts": {
+          "apply_step": 16384,
+          "chunk": 32,
+          "chunk_plan": 32,
+          "closed_page": 544,
+          "reduce": 544,
+          "tail": 16384,
+          "tail_partial.open_recent": 15872,
+          "tail_partial.recent_only": 512,
+          "tail_prep": 15872,
+          "tail_prep.k3_pack": 15872,
+          "tail_prep.k_stats_codes": 15872,
+          "tail_prep.meta8g64": 63488
+        },
+        "combined_boundaries": {
+          "chunk_plan_encode_gpu": "one event pair around Rabit2CausalChunkPlan.__init__ (V2 quantization, page encode, cat/stack/index_copy_); its internal split is not measured.",
+          "k_stats_codes_gpu": "K statistics and K codes are one fused kernel; not separable.",
+          "meta8g64_gpu": "four META8g64 launches (k_min, k_scale, v_min, v_scale) summed.",
+          "unattributed_gpu": "device idle inside the span plus un-evented device work (output copy_, contiguous copies in wrappers); not separable.",
+          "gpu_leaf_launch_gap": "if the device is idle when a leaf's start event is reached, the leaf time includes the part of its host launch path after the start event.",
+          "wrapper_exclusive_host": "per-query wrapper code (buffer allocation, contiguous(), layout arithmetic, Stage4D3.4 workspace lookup) timed as window-exclusive time, not per statement.",
+          "unattributed_host": "root exclusive: Stage3C loop overhead, output copy_ issue, tensor views, tile scheduling and per-tile allocations (tile32); not separable without editing the timed code."
+        },
+        "diagnostic_only": true,
+        "classification": {
+          "gpu_rule": "closed_page_gpu",
+          "gpu_action": "closed-page work still dominates: revisit closed-page batching",
+          "gpu_largest": "closed_page_gpu",
+          "gpu_largest_share": 0.7142703450469227,
+          "host_rule": "none",
+          "host_action": "no pre-registered rule fires; review the full breakdown",
+          "host_largest": "per_query_launch_host",
+          "host_largest_share": 0.4658982697808231,
+          "several_per_query_large": false,
+          "per_query_components_ge_large_share": [
+            "per_query_launch_host"
+          ],
+          "several_per_query_action": null,
+          "thresholds": {
+            "dominant_share": 0.5,
+            "large_share": 0.15
+          },
+          "note": "per-domain shares only (HOST share of host wall; GPU share of GPU span); pre-registered rule output; requires review before any optimization"
+        },
+        "profiled_request_ttft_ms_NOT_LATENCY": 8021.751403808594,
+        "external_unprofiled_ttft_ms": 7073.352575302124,
+        "external_unprofiled_bf16_control_ttft_ms": 1370.5899715423584
+      }
+    },
+    {
+      "second_chunk_q_len": 2048,
+      "prompt_tokens": 18432,
+      "reference": {
+        "impl": "reference",
+        "q_len": 2048,
+        "context_len": 16384,
+        "records": 32,
+        "records_expected": 32,
+        "GPU": {
+          "timing": "CUDA events; one synchronize per scope; never combined with HOST",
+          "total_stage3c_gpu_span_ms": 30653.188967,
+          "components_ms": {
+            "chunk_plan_encode_gpu": 1744.096741,
+            "closed_page_gpu": 21109.450961,
+            "k_stats_codes_gpu": 444.579008,
+            "k3_pack_gpu": 328.62979199999995,
+            "meta8g64_gpu": 1403.348064,
+            "tail_partial_gpu": 968.3435520000002,
+            "reduce_gpu": 2791.949920000001
+          },
+          "groups_ms_display_only": {
+            "tail_prep_gpu": 2176.556864
+          },
+          "unattributed_gpu_ms": 1862.7909289999989,
+          "share_of_gpu_span": {
+            "chunk_plan_encode_gpu": 0.05689772580848358,
+            "closed_page_gpu": 0.6886543186004429,
+            "k_stats_codes_gpu": 0.014503515718335734,
+            "k3_pack_gpu": 0.010720900600384178,
+            "meta8g64_gpu": 0.04578147042093365,
+            "tail_partial_gpu": 0.03159030380305554,
+            "reduce_gpu": 0.0910818748093617,
+            "unattributed_gpu": 0.060769890239002713
+          },
+          "sum_components": [
+            "chunk_plan_encode_gpu",
+            "closed_page_gpu",
+            "k_stats_codes_gpu",
+            "k3_pack_gpu",
+            "meta8g64_gpu",
+            "tail_partial_gpu",
+            "reduce_gpu"
+          ]
+        },
+        "HOST": {
+          "timing": "perf_counter; exclusive window times; never combined with GPU",
+          "total_stage3c_host_wall_ms": 30141.195143,
+          "components_ms": {
+            "chunk_plan_host": 1763.4238039999998,
+            "apply_step_host": 525.9705640000001,
+            "launch_host.closed_page": 1502.887408,
+            "launch_host.tail_prep": 5228.607809000001,
+            "launch_host.tail_partial": 1994.4211170000003,
+            "launch_host.reduce": 1087.703235,
+            "wrapper_exclusive_host.reference_attention_call": 2281.775857,
+            "wrapper_exclusive_host.tail": 1168.5675579999997,
+            "wrapper_exclusive_host.tail_prep": 1657.8835039999997,
+            "profiler_overhead_host": 12116.342823
+          },
+          "groups_ms_display_only": {
+            "orchestration_launch_host": 14921.846488000001
+          },
+          "unattributed_host_ms": 813.6114639999978,
+          "share_of_host_wall": {
+            "chunk_plan_host": 0.058505437346917474,
+            "apply_step_host": 0.017450222577592503,
+            "launch_host.closed_page": 0.0498615732013875,
+            "launch_host.tail_prep": 0.17347048729135395,
+            "launch_host.tail_partial": 0.06616927787825909,
+            "launch_host.reduce": 0.03608693118635704,
+            "wrapper_exclusive_host.reference_attention_call": 0.07570289917750393,
+            "wrapper_exclusive_host.tail": 0.03876978177062724,
+            "wrapper_exclusive_host.tail_prep": 0.055003907314704704,
+            "profiler_overhead_host": 0.40198614439526975,
+            "unattributed_host": 0.0269933378600268
+          },
+          "sum_components": [
+            "chunk_plan_host",
+            "apply_step_host",
+            "launch_host.closed_page",
+            "launch_host.tail_prep",
+            "launch_host.tail_partial",
+            "launch_host.reduce",
+            "wrapper_exclusive_host.reference_attention_call",
+            "wrapper_exclusive_host.tail",
+            "wrapper_exclusive_host.tail_prep",
+            "profiler_overhead_host"
+          ]
+        },
+        "call_counts": {
+          "apply_step": 65536,
+          "chunk": 32,
+          "chunk_plan": 32,
+          "closed_page": 65536,
+          "reduce": 65536,
+          "reference_attention_call": 65536,
+          "tail": 65536,
+          "tail_partial.open_recent": 63488,
+          "tail_partial.recent_only": 2048,
+          "tail_prep": 63488,
+          "tail_prep.k3_pack": 63488,
+          "tail_prep.k_stats_codes": 63488,
+          "tail_prep.meta8g64": 253952
+        },
+        "combined_boundaries": {
+          "chunk_plan_encode_gpu": "one event pair around Rabit2CausalChunkPlan.__init__ (V2 quantization, page encode, cat/stack/index_copy_); its internal split is not measured.",
+          "k_stats_codes_gpu": "K statistics and K codes are one fused kernel; not separable.",
+          "meta8g64_gpu": "four META8g64 launches (k_min, k_scale, v_min, v_scale) summed.",
+          "unattributed_gpu": "device idle inside the span plus un-evented device work (output copy_, contiguous copies in wrappers); not separable.",
+          "gpu_leaf_launch_gap": "if the device is idle when a leaf's start event is reached, the leaf time includes the part of its host launch path after the start event.",
+          "wrapper_exclusive_host": "per-query wrapper code (buffer allocation, contiguous(), layout arithmetic, Stage4D3.4 workspace lookup) timed as window-exclusive time, not per statement.",
+          "unattributed_host": "root exclusive: Stage3C loop overhead, output copy_ issue, tensor views, tile scheduling and per-tile allocations (tile32); not separable without editing the timed code."
+        },
+        "diagnostic_only": true,
+        "classification": {
+          "gpu_rule": "closed_page_gpu",
+          "gpu_action": "closed-page work still dominates: revisit closed-page batching",
+          "gpu_largest": "closed_page_gpu",
+          "gpu_largest_share": 0.6886543186004429,
+          "host_rule": "none",
+          "host_action": "no pre-registered rule fires; review the full breakdown",
+          "host_largest": "per_query_launch_host",
+          "host_largest_share": 0.3255882695573576,
+          "several_per_query_large": false,
+          "per_query_components_ge_large_share": [
+            "per_query_launch_host",
+            "python_state_exposure_host"
+          ],
+          "several_per_query_action": null,
+          "thresholds": {
+            "dominant_share": 0.5,
+            "large_share": 0.15
+          },
+          "note": "per-domain shares only (HOST share of host wall; GPU share of GPU span); pre-registered rule output; requires review before any optimization"
+        },
+        "profiled_request_ttft_ms_NOT_LATENCY": 33630.33080101013,
+        "external_unprofiled_ttft_ms": 29217.851877212524,
+        "external_unprofiled_bf16_control_ttft_ms": 1583.0762386322021
+      },
+      "tile32": {
+        "impl": "tile32",
+        "q_len": 2048,
+        "context_len": 16384,
+        "records": 32,
+        "records_expected": 32,
+        "GPU": {
+          "timing": "CUDA events; one synchronize per scope; never combined with HOST",
+          "total_stage3c_gpu_span_ms": 28028.167357,
+          "components_ms": {
+            "chunk_plan_encode_gpu": 1787.198914,
+            "closed_page_gpu": 20354.607731,
+            "k_stats_codes_gpu": 454.395296,
+            "k3_pack_gpu": 336.392864,
+            "meta8g64_gpu": 1425.29792,
+            "tail_partial_gpu": 962.682528,
+            "reduce_gpu": 1315.4985920000001
+          },
+          "groups_ms_display_only": {
+            "tail_prep_gpu": 2216.08608
+          },
+          "unattributed_gpu_ms": 1392.0935119999995,
+          "share_of_gpu_span": {
+            "chunk_plan_encode_gpu": 0.06376438713370425,
+            "closed_page_gpu": 0.7262197157502153,
+            "k_stats_codes_gpu": 0.016212094433870124,
+            "k3_pack_gpu": 0.012001957163852394,
+            "meta8g64_gpu": 0.05085234085574395,
+            "tail_partial_gpu": 0.03434696659749933,
+            "reduce_gpu": 0.0469348771628287,
+            "unattributed_gpu": 0.04966766090228607
+          },
+          "sum_components": [
+            "chunk_plan_encode_gpu",
+            "closed_page_gpu",
+            "k_stats_codes_gpu",
+            "k3_pack_gpu",
+            "meta8g64_gpu",
+            "tail_partial_gpu",
+            "reduce_gpu"
+          ]
+        },
+        "HOST": {
+          "timing": "perf_counter; exclusive window times; never combined with GPU",
+          "total_stage3c_host_wall_ms": 27684.222702,
+          "components_ms": {
+            "chunk_plan_host": 1805.973052,
+            "apply_step_host": 564.794893,
+            "launch_host.closed_page": 73.68952200000001,
+            "launch_host.tail_prep": 5540.929058,
+            "launch_host.tail_partial": 8359.475642,
+            "launch_host.reduce": 53.279870999999986,
+            "wrapper_exclusive_host.reference_attention_call": 0.0,
+            "wrapper_exclusive_host.tail": 1208.3232350000003,
+            "wrapper_exclusive_host.tail_prep": 1688.767742,
+            "profiler_overhead_host": 7741.960236999999
+          },
+          "groups_ms_display_only": {
+            "orchestration_launch_host": 16924.46507
+          },
+          "unattributed_host_ms": 647.0294500000018,
+          "share_of_host_wall": {
+            "chunk_plan_host": 0.06523473934738759,
+            "apply_step_host": 0.020401327466535564,
+            "launch_host.closed_page": 0.002661787646820094,
+            "launch_host.tail_prep": 0.20014753954423667,
+            "launch_host.tail_partial": 0.3019581128205591,
+            "launch_host.reduce": 0.0019245572315147888,
+            "wrapper_exclusive_host.reference_attention_call": 0.0,
+            "wrapper_exclusive_host.tail": 0.043646637581509815,
+            "wrapper_exclusive_host.tail_prep": 0.061001089327243345,
+            "profiler_overhead_host": 0.2796524330965122,
+            "unattributed_host": 0.02337177593768086
+          },
+          "sum_components": [
+            "chunk_plan_host",
+            "apply_step_host",
+            "launch_host.closed_page",
+            "launch_host.tail_prep",
+            "launch_host.tail_partial",
+            "launch_host.reduce",
+            "wrapper_exclusive_host.reference_attention_call",
+            "wrapper_exclusive_host.tail",
+            "wrapper_exclusive_host.tail_prep",
+            "profiler_overhead_host"
+          ]
+        },
+        "call_counts": {
+          "apply_step": 65536,
+          "chunk": 32,
+          "chunk_plan": 32,
+          "closed_page": 2080,
+          "reduce": 2080,
+          "tail": 65536,
+          "tail_partial.open_recent": 63488,
+          "tail_partial.recent_only": 2048,
+          "tail_prep": 63488,
+          "tail_prep.k3_pack": 63488,
+          "tail_prep.k_stats_codes": 63488,
+          "tail_prep.meta8g64": 253952
+        },
+        "combined_boundaries": {
+          "chunk_plan_encode_gpu": "one event pair around Rabit2CausalChunkPlan.__init__ (V2 quantization, page encode, cat/stack/index_copy_); its internal split is not measured.",
+          "k_stats_codes_gpu": "K statistics and K codes are one fused kernel; not separable.",
+          "meta8g64_gpu": "four META8g64 launches (k_min, k_scale, v_min, v_scale) summed.",
+          "unattributed_gpu": "device idle inside the span plus un-evented device work (output copy_, contiguous copies in wrappers); not separable.",
+          "gpu_leaf_launch_gap": "if the device is idle when a leaf's start event is reached, the leaf time includes the part of its host launch path after the start event.",
+          "wrapper_exclusive_host": "per-query wrapper code (buffer allocation, contiguous(), layout arithmetic, Stage4D3.4 workspace lookup) timed as window-exclusive time, not per statement.",
+          "unattributed_host": "root exclusive: Stage3C loop overhead, output copy_ issue, tensor views, tile scheduling and per-tile allocations (tile32); not separable without editing the timed code."
+        },
+        "diagnostic_only": true,
+        "classification": {
+          "gpu_rule": "closed_page_gpu",
+          "gpu_action": "closed-page work still dominates: revisit closed-page batching",
+          "gpu_largest": "closed_page_gpu",
+          "gpu_largest_share": 0.7262197157502153,
+          "host_rule": "per_query_launch_host",
+          "host_action": "proceed to a fuller batched chunk-attention path",
+          "host_largest": "per_query_launch_host",
+          "host_largest_share": 0.5066919972431306,
+          "several_per_query_large": false,
+          "per_query_components_ge_large_share": [
+            "per_query_launch_host"
+          ],
+          "several_per_query_action": null,
+          "thresholds": {
+            "dominant_share": 0.5,
+            "large_share": 0.15
+          },
+          "note": "per-domain shares only (HOST share of host wall; GPU share of GPU span); pre-registered rule output; requires review before any optimization"
+        },
+        "profiled_request_ttft_ms_NOT_LATENCY": 30564.594745635986,
+        "external_unprofiled_ttft_ms": 26876.755237579346,
+        "external_unprofiled_bf16_control_ttft_ms": 1583.0762386322021
+      }
+    }
+  ],
+  "external_reference": {
+    "source": "results/mlsys2027/diagnostics/stage3c_tile32_benchmark/summary.json",
+    "note": "unprofiled tile32-benchmark TTFTs for the same prompts; context only, never pooled with profiled numbers"
+  },
+  "decision": "pre-registered rule outputs are per implementation / q_len under 'classification'; the next optimization is chosen only after review",
+  "not_claimed": [
+    "latency",
+    "Experiment 5 results",
+    "a complexity law",
+    "splits of the boundaries listed in combined_boundaries"
+  ],
+  "provenance": {
+    "reparsed_from_existing_raw": true,
+    "h100_rerun": false,
+    "raw_modal_session_sha256": "d9f02ceaaec2465651463b3b619c4a4e63b8b53bb2dd497dc1a4a733a1f44df2",
+    "measurement_code_commit": "e88cdaa416d794dfa1969cd01330e6c3c86c6d2d",
+    "analysis_parser_commit": "6784639854fce56197931b6dfd33edb031e3ad9c",
+    "original_analysis_status": "failed",
+    "original_failure_stage": "parser_failure",
+    "measurement_modal_app": "ap-mVshZt9jTXIBH0KY2fZC5s"
+  },
+  "record_counts": {
+    "profiler_tests": 16,
+    "top_level": 0,
+    "reference_conditioning": 32,
+    "reference_measured": 96,
+    "reference_outside_requests": 0,
+    "tile32_conditioning": 32,
+    "tile32_measured": 96,
+    "tile32_outside_requests": 0
+  }
+}

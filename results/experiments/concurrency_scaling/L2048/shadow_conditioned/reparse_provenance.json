@@ -1,0 +1,37 @@
+{
+  "measurement_commit": "2ccaa10a35d9ead414a5a52d26e6161a9042ec2b",
+  "modal_app": "ap-PFckXF9Fc2yMiljv4ZRErl",
+  "run_id": "exp6-L2048-20260928T033048Z-2ccaa10",
+  "analysis_schema_fix_commit": "8a5f6950421d58d8e8c242a3d3a2f8db28ecfc07",
+  "summary_schema": {
+    "version": 2,
+    "point_keys": {
+      "target_concurrency": "int target concurrency C",
+      "inflight_concurrency": "overlapping in-flight concurrency statistics"
+    },
+    "change": "v1 overwrote the point's `concurrency` (C) with the in-flight statistics dict"
+  },
+  "reparsed_from_existing_raw": true,
+  "h100_rerun": false,
+  "raw_unchanged": true,
+  "raw": {
+    "file": "remote_session.log",
+    "sha256": "19a6c7d951bc617c3b6230bff2cf2ac5f5ac8632c385d3be02b171a77b004a17",
+    "bytes": 8984334
+  },
+  "integrity_counts": {
+    "passed": 401,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "integrity_identical_to_measurement_time_analysis": true,
+  "all_metric_values_identical_to_pre_keyfix_summary": true,
+  "pre_keyfix_summary": {
+    "file": "summary_pre_concurrency_keyfix.json",
+    "sha256": "b57effa457c8b1e9ee62ae8813537568cd72ef233c01733624537a40da9f54bf",
+    "note": "historical derived analysis produced at measurement time (schema v1)"
+  },
+  "summary_sha256": "3a235f7c9b7c06785a436ab72e9b76ea6be036f481c7305b0151e7159b192e5b",
+  "reparsed_utc": "2026-09-28T12:18:17.837348+00:00"
+}

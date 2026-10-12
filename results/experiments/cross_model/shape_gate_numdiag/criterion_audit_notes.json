@@ -1,0 +1,22 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_attention_criterion_audit_notes",
+  "basis": "valid Attempt-4 capture, commit 4947050 (sha256 10ce1ac0aa7073ce70e7fff747bf792bd81188a7cb6c3019080c70bbc0337f95)",
+  "status": "documentation only; exp14_shape_gate.py NOT modified",
+  "analytic_bound_audit": {
+    "decision": "NOT ADOPTED (reviewer decision)",
+    "useful_finding": "the proposed 2*T*2^-24*max|V| weighted-sum term was incomplete: runtime and reference also differ in score dot-product rounding, two-level (per-segment + reduce) online softmax vs single-level torch.softmax, Triton tl.exp lowering (typically ex2.approx.f32) vs accurate exp, normalization placement, and dequantization arithmetic (Triton fused multiply-add vs two-step PyTorch, which can flip a rare open-group BF16 value); gamma_n (n = D and the kernel's segmented L+S sums, not T) replaces n*u",
+    "reasons_not_adopted": ["tl.exp accuracy not formally verified", "different softmax/reduction structures",
+                            "FMA vs unfused dequantization not fully modeled",
+                            "Attempt-4 capture cannot fully validate the bound (no per-element values, V_max, sum|q.k|)",
+                            "PTX-specific checks would make the gate brittle"]
+  },
+  "fixed_bf16_criterion_evaluation": {
+    "criterion": {"C1": "max|rt - ref_bf16| <= 2^-8 * max|ref_bf16|",
+                  "C2": "|rt - ref_bf16| / |ref_bf16| <= 2^-8 where |ref_bf16| >= 0.01 * max|ref_bf16|"},
+    "result": "FAILS (C1 passes 254/254; C2 fails at 60 checkpoints with a 1-ULP flip provably above the floor)",
+    "details": "results/mlsys2027/second_model/shape_gate_numdiag/fixed_bf16_criterion_evaluation.json",
+    "structural_reason": "runtime and ref_bf16 are both BF16 values, so any disagreement is >= 1 ULP; a 1-ULP gap relative to its reference is in (2^-8, 2^-7], so C2 with tolerance exactly 2^-8 requires exact BF16 equality for every away-from-zero element (except when the reference is exactly a power of two and the runtime value is the next lower BF16 number). Legitimate FP32-ordering rounding flips (unrounded relative error <= 2^-8 at every above-floor element) therefore fail C2.",
+    "criterion_not_changed": true
+  }
+}

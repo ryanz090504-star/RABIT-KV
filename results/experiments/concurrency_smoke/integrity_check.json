@@ -1,0 +1,465 @@
+{
+  "checks": [
+    {
+      "check": "exactly one H100",
+      "category": "environment",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2.py in image is frozen",
+      "category": "environment",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "gate passed",
+      "category": "gate",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "smoke completed (both engines), no watchdog / stop",
+      "category": "completion",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "GPU clean before smoke_bfloat16",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "GPU clean before smoke_rabit_kv2",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "GPU clean after the run",
+      "category": "gpu_clean",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bfloat16: process exit 0, not timed out, group reaped, all markers",
+      "category": "completion",
+      "state": "passed",
+      "observed": {
+        "markers": [
+          "EXP6S_WARMUP_BEGIN",
+          "EXP6S_WARMUP_END",
+          "EXP6S_SINGLE_BEGIN",
+          "EXP6S_SINGLE_END",
+          "EXP6S_CONCURRENT_BEGIN",
+          "EXP6S_CONCURRENT_END",
+          "EXP6S_WORKER_COMPLETE"
+        ],
+        "malformed": []
+      }
+    },
+    {
+      "check": "bfloat16: Stage3C selection (rabit: shared_decode / QB requested == effective, accepted SHA; bf16: none)",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": false,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": null,
+          "VLLM_RABIT2_STAGE3C_IMPL": null
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        }
+      }
+    },
+    {
+      "check": "bfloat16: profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bfloat16: requested engine kwargs = frozen Exp5 kwargs with max_num_seqs 4",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bfloat16: effective max_num_seqs 4, block 32, eager, Triton, no prefix cache",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "attention_backend": "AttentionBackendEnum.TRITON_ATTN",
+        "block_size": 32,
+        "enable_chunked_prefill": true,
+        "enable_prefix_caching": false,
+        "enforce_eager": true,
+        "gpu_memory_utilization": 0.82,
+        "log_stats": true,
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 16384,
+        "max_num_seqs": 4,
+        "model": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+        "model_dtype": "torch.bfloat16"
+      }
+    },
+    {
+      "check": "bfloat16: resolved KV dtype",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": {
+        "engine_cache_dtype": "bfloat16",
+        "kv_quant_mode": "NONE",
+        "requested_kv_cache_dtype": "bfloat16",
+        "resolved_kv_torch_dtype": "torch.bfloat16"
+      }
+    },
+    {
+      "check": "bfloat16: allocator capacity recorded (num_gpu_blocks x block_size)",
+      "category": "capacity",
+      "state": "passed",
+      "observed": {
+        "block_size": 32,
+        "capacity_tokens": 393024,
+        "num_gpu_blocks": 12282
+      }
+    },
+    {
+      "check": "bfloat16: workload: 2048-token prompts, 32 greedy outputs, 4 distinct test prompts",
+      "category": "workload",
+      "state": "passed",
+      "observed": {
+        "concurrency": 4,
+        "ignore_eos": true,
+        "output_tokens": 32,
+        "prompt_tokens": 2048,
+        "temperature": 0.0,
+        "test_prompt_sha256": [
+          "6257a7f421a3277282beaf05eb02e2ae6c8f601e853bbf5c313119fd93ba9067",
+          "765622d878082967a274fad8291361a0bc67ced6cfa211f3fb8f829d7fea560d",
+          "21722659eaf540441594f70cb6bac4b3e3cae725b33c2ab257bc685f83c4e78c",
+          "b29779cdf1bf2cbde4b6b71cf236abfa8c42a06ac116edb3594f01299df7ff59"
+        ],
+        "warmup_prompt_sha256": [
+          "1286164a11259064cbc02722045a0a6bd5a3594bec6c8339a2183b814b5535b2",
+          "5b7764a049ffdb6323c6e55b570464815dd4aeeecb0ca7b21593873ca362fa55",
+          "eb1878b7d534c0beec06a5112897327c0826f7ad90ca7b84ad92229112b1050c",
+          "a3c794f088d0ee4cc751265206ff9ecdb01eea1cb14040521a64440c9c798224"
+        ]
+      }
+    },
+    {
+      "check": "bfloat16: single phase: requests 0..3 in order; concurrent phase: requests 0..3",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bfloat16: every request: exactly 2048 prompt / 32 output tokens",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bfloat16: request i uses test prompt i (single and concurrent)",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bfloat16: the 4 single-stream outputs are pairwise distinct (a request swap would be detectable)",
+      "category": "design",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "bfloat16: TRUE concurrency: all 4 requests active AND decoding simultaneously (engine-core clock)",
+      "category": "concurrency",
+      "state": "passed",
+      "observed": {
+        "evaluable": true,
+        "all_active_simultaneously": true,
+        "all_decoding_simultaneously": true,
+        "common_active_window_s": 0.7409893820000093,
+        "common_decode_window_s": 0.5202764329999923,
+        "serial_in_order": false
+      }
+    },
+    {
+      "check": "bfloat16: single phase was serial (control for the overlap metric)",
+      "category": "concurrency",
+      "state": "passed",
+      "observed": {
+        "evaluable": true,
+        "all_active_simultaneously": false,
+        "all_decoding_simultaneously": false,
+        "common_active_window_s": -1.1703577530000189,
+        "common_decode_window_s": -1.2299582090000172,
+        "serial_in_order": true
+      }
+    },
+    {
+      "check": "bfloat16: per-request output equality concurrent vs single-stream: 4/4",
+      "category": "equality",
+      "state": "passed",
+      "observed": [
+        {
+          "i": 0,
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 1,
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 2,
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 3,
+          "equal": true,
+          "first_divergent_position": null
+        }
+      ]
+    },
+    {
+      "check": "bfloat16: no Triton JIT in the single / concurrent phases",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "warmup": 2
+      }
+    },
+    {
+      "check": "bfloat16: no OOM",
+      "category": "request",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2: process exit 0, not timed out, group reaped, all markers",
+      "category": "completion",
+      "state": "passed",
+      "observed": {
+        "markers": [
+          "EXP6S_WARMUP_BEGIN",
+          "EXP6S_WARMUP_END",
+          "EXP6S_SINGLE_BEGIN",
+          "EXP6S_SINGLE_END",
+          "EXP6S_CONCURRENT_BEGIN",
+          "EXP6S_CONCURRENT_END",
+          "EXP6S_WORKER_COMPLETE"
+        ],
+        "malformed": []
+      }
+    },
+    {
+      "check": "rabit_kv2: Stage3C selection (rabit: shared_decode / QB requested == effective, accepted SHA; bf16: none)",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": {
+        "applicable": true,
+        "effective_impl": "shared_decode",
+        "effective_query_block": 32,
+        "env": {
+          "VLLM_RABIT2_SHARED_DECODE_QUERY_BLOCK": "32",
+          "VLLM_RABIT2_STAGE3C_IMPL": "shared_decode"
+        },
+        "profiling_env": {
+          "VLLM_RABIT2_STAGE3C_COMPONENT_PROFILE": null,
+          "VLLM_RABIT2_STAGE3C_PROFILE": null
+        },
+        "requested_impl": "shared_decode",
+        "requested_query_block": 32,
+        "shared_decode_module_sha256": "ace859940728721d6198a84f0111e793c8d85a2eee609b4c5df1981586aade1f"
+      }
+    },
+    {
+      "check": "rabit_kv2: profiling off",
+      "category": "stage3c",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2: requested engine kwargs = frozen Exp5 kwargs with max_num_seqs 4",
+      "category": "config",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2: effective max_num_seqs 4, block 32, eager, Triton, no prefix cache",
+      "category": "config",
+      "state": "passed",
+      "observed": {
+        "attention_backend": "AttentionBackendEnum.TRITON_ATTN",
+        "block_size": 32,
+        "enable_chunked_prefill": true,
+        "enable_prefix_caching": false,
+        "enforce_eager": true,
+        "gpu_memory_utilization": 0.82,
+        "log_stats": true,
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 16384,
+        "max_num_seqs": 4,
+        "model": "/model_cache/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/master",
+        "model_dtype": "torch.bfloat16"
+      }
+    },
+    {
+      "check": "rabit_kv2: resolved KV dtype",
+      "category": "kv_dtype",
+      "state": "passed",
+      "observed": {
+        "engine_cache_dtype": "rabit_kv2",
+        "kv_quant_mode": "RABIT_KV2",
+        "requested_kv_cache_dtype": "rabit_kv2",
+        "resolved_kv_torch_dtype": "torch.uint8"
+      }
+    },
+    {
+      "check": "rabit_kv2: allocator capacity recorded (num_gpu_blocks x block_size)",
+      "category": "capacity",
+      "state": "passed",
+      "observed": {
+        "block_size": 32,
+        "capacity_tokens": 2074592,
+        "num_gpu_blocks": 64831
+      }
+    },
+    {
+      "check": "rabit_kv2: workload: 2048-token prompts, 32 greedy outputs, 4 distinct test prompts",
+      "category": "workload",
+      "state": "passed",
+      "observed": {
+        "concurrency": 4,
+        "ignore_eos": true,
+        "output_tokens": 32,
+        "prompt_tokens": 2048,
+        "temperature": 0.0,
+        "test_prompt_sha256": [
+          "6257a7f421a3277282beaf05eb02e2ae6c8f601e853bbf5c313119fd93ba9067",
+          "765622d878082967a274fad8291361a0bc67ced6cfa211f3fb8f829d7fea560d",
+          "21722659eaf540441594f70cb6bac4b3e3cae725b33c2ab257bc685f83c4e78c",
+          "b29779cdf1bf2cbde4b6b71cf236abfa8c42a06ac116edb3594f01299df7ff59"
+        ],
+        "warmup_prompt_sha256": [
+          "1286164a11259064cbc02722045a0a6bd5a3594bec6c8339a2183b814b5535b2",
+          "5b7764a049ffdb6323c6e55b570464815dd4aeeecb0ca7b21593873ca362fa55",
+          "eb1878b7d534c0beec06a5112897327c0826f7ad90ca7b84ad92229112b1050c",
+          "a3c794f088d0ee4cc751265206ff9ecdb01eea1cb14040521a64440c9c798224"
+        ]
+      }
+    },
+    {
+      "check": "rabit_kv2: single phase: requests 0..3 in order; concurrent phase: requests 0..3",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2: every request: exactly 2048 prompt / 32 output tokens",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2: request i uses test prompt i (single and concurrent)",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2: the 4 single-stream outputs are pairwise distinct (a request swap would be detectable)",
+      "category": "design",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "rabit_kv2: TRUE concurrency: all 4 requests active AND decoding simultaneously (engine-core clock)",
+      "category": "concurrency",
+      "state": "passed",
+      "observed": {
+        "evaluable": true,
+        "all_active_simultaneously": true,
+        "all_decoding_simultaneously": true,
+        "common_active_window_s": 2.014732312999996,
+        "common_decode_window_s": 1.5894908369999996,
+        "serial_in_order": false
+      }
+    },
+    {
+      "check": "rabit_kv2: single phase was serial (control for the overlap metric)",
+      "category": "concurrency",
+      "state": "passed",
+      "observed": {
+        "evaluable": true,
+        "all_active_simultaneously": false,
+        "all_decoding_simultaneously": false,
+        "common_active_window_s": -1.5603872730000035,
+        "common_decode_window_s": -1.6787908630000175,
+        "serial_in_order": true
+      }
+    },
+    {
+      "check": "rabit_kv2: per-request output equality concurrent vs single-stream: 4/4",
+      "category": "equality",
+      "state": "passed",
+      "observed": [
+        {
+          "i": 0,
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 1,
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 2,
+          "equal": true,
+          "first_divergent_position": null
+        },
+        {
+          "i": 3,
+          "equal": true,
+          "first_divergent_position": null
+        }
+      ]
+    },
+    {
+      "check": "rabit_kv2: no Triton JIT in the single / concurrent phases",
+      "category": "jit",
+      "state": "passed",
+      "observed": {
+        "warmup": 8
+      }
+    },
+    {
+      "check": "rabit_kv2: no OOM",
+      "category": "request",
+      "state": "passed",
+      "observed": null
+    },
+    {
+      "check": "identical test prompts and order for both dtypes",
+      "category": "workload",
+      "state": "passed",
+      "observed": null
+    }
+  ],
+  "counts": {
+    "passed": 42,
+    "failed": 0,
+    "not_run": 0,
+    "not_evaluated": 0
+  },
+  "all_ok": true,
+  "failed_categories": []
+}

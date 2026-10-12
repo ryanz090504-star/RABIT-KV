@@ -1,0 +1,72 @@
+{
+  "experiment": 11,
+  "type": "logical fake-quant / dequant QUALITY + logical storage metadata-policy ablation (NOT a physical serving benchmark)",
+  "status": "accepted",
+  "attempt": 1,
+  "contrasts": {"representation": "BF16 metadata (rabit2_mbf) vs grouped UINT8 metadata (META8g64 control)",
+                "uint8_group_size": "META8g32 / META8g64 (control) / META8g128"},
+  "execution_commit": "cd227e3abd22fb1558183fdae9b62b04129b6572",
+  "prep_commit": "6a94c934bb661bf5d8792567e6be18871f10ec0b",
+  "protocol": "benchmarks/mlsys2027/exp11_metadata_protocol.json",
+  "protocol_sha256": "47f4560d5ce285c56847502854d5a37c7202ab9ec4e81c1311d6cddd221398a1",
+  "qa_control_gate": {"rule": "frozen post-failure per-example reproducibility envelope (transparent post-failure methodological amendment; not pre-registered; unchanged)",
+                      "amendment": "results/mlsys2027/control_reproducibility_audit/qa_control_gate_amendment.json",
+                      "amendment_sha256_lf": "eaf28d66f38eedc13f447eb9776cd6affd2abb06dc2c64dec8d7e7d2a1a2e10c",
+                      "amendment_commit": "86b03eabaecfed0a838cabd7a7d1cce2f0a2fa38",
+                      "new_thresholds_derived": false},
+  "started_utc": "2026-09-29T22:10:12.620403+00:00",
+  "completed_utc": "2026-09-29T22:22:15.897206+00:00",
+  "gates": {
+    "all_five_rows_all_five_benchmarks": true,
+    "counts_exact": true,
+    "meta8g64_control_exactly_canonical_rabit2": true,
+    "ppl_niah_passage_retrieval_controls_original_rules": true,
+    "hotpotqa_qasper_controls_frozen_per_example_gate": true,
+    "logical_storage_accounting_integrity_gate": true,
+    "storage_order_meta8g128_lt_meta8g64_lt_meta8g32_lt_metabf16": true,
+    "prior_evidence_unchanged": true
+  },
+  "qa_control_gate_outcome": {
+    "hotpotqa": {"bf16": {"score_mismatches": 1, "indices": [3], "l1": 0.035, "bound": [1, 0.065], "aggregate_f1": 60.7},
+                 "meta8g64_control": {"score_mismatches": 1, "indices": [1], "l1": 0.5, "bound": [1, 0.5],
+                                      "note": "known index-1 variant ('2016-17' vs '2016–17'); exactly at the frozen bounds",
+                                      "aggregate_f1": 57.7}},
+    "qasper": {"bf16": {"score_mismatches": 1, "indices": [7], "l1": 0.096, "bound": [1, 0.096],
+                        "note": "known index-7 variant; exactly at the frozen L1 bound", "aggregate_f1": 35.5},
+               "meta8g64_control": {"score_mismatches": 2, "indices": [18, 20], "l1": 0.185, "bound": [2, 0.185],
+                                    "note": "the same two-example pattern as the Exp1 control; exactly at the frozen bounds",
+                                    "aggregate_f1": 34.8}},
+    "aggregate_envelope_report_only": "all four control aggregates inside their historical envelopes"
+  },
+  "modal_app_ids": {
+    "continuation_ppl": "ap-Wo2NuFjipZvrOBf2as8wmP",
+    "niah": "ap-HsUOhSwbpL2elOEpcRI8lt",
+    "passage_retrieval": "ap-fGUUtkzw2Jy2sulA2E49IJ",
+    "hotpotqa": "ap-uSw4NRf1MjrqeKSAU3A5r5",
+    "qasper": "ap-mTNyJ085amUjRZ8NQHZytu"
+  },
+  "component_accounting": "component_accounting.json (exact integer K / V payload, K / V primary metadata, K / V BF16 secondary minima and scales, residual; expected vs observed MB)",
+  "files_sha256": {
+    "continuation_ppl.log": "691f0836b670f8894627eae5bb82ff1c5be92dec0fa149256fcbc09aaf3c111c",
+    "niah.log": "e37b778da1e422cfe916fb88e5436356957975fcd3c54078664fd180aa47c049",
+    "passage_retrieval.log": "2c0878a8c31edde52e71cef0e458a0a0a6a4f9f4c9a1a3b42b91ff398e11f00c",
+    "hotpotqa.log": "db25a801631df310b6be7f88b219eaaae4aabed14fb63c1a18739db858241bce",
+    "qasper.log": "7feac51e5e1c1509f9bcebc6bc3b3bb1e9c8923b33f84e2d2d4955a522e2acc3",
+    "manifest.json": "a1761610da0d1abe898a40223af82b3a205b621e06e60934bc5a6fc8e2b3b4f2",
+    "regression_check.json": "db36c8ad834b757779f71b6741a77419cecb522c0cd5e392ed8a6ce8df2cc6fa",
+    "metadata_results.json": "9f8ac6ed05ce5407b4d952617719aa17a82dbe28e7c63be0dd2579933525c5a6",
+    "component_accounting.json": "f814563e33fb4965ebb80a977fb0b91fb26e774515da57cbf996bffbb2117fff"
+  },
+  "files_sha256_lf_normalized": {
+    "note": "sha256 with CR removed = the committed git blob (core.autocrlf=true); files_sha256 are the raw CRLF bytes as written (= manifest log_sha256 for the logs)",
+    "continuation_ppl.log": "0c1bf030169a59be244c8e33e82393a2ee485aaffab6938ea3b5e96d248e3d24",
+    "niah.log": "a2e990c58b22a774ddb4176338690070be9d29520d92519de555725a5d9d7172",
+    "passage_retrieval.log": "0db78c5be9b8ccdf0d860c841c64a5d6310db769b9db1e4040ea2f6f46fa115b",
+    "hotpotqa.log": "5095a0b8dc7403fa2d4d9abcecb35d112073ceb6f3d426903387ab532c98dd02",
+    "qasper.log": "9bd3f5f4ff1b005bfa87fbb433374ad97dd09ada7f1778136497d4f5afe6cf5e",
+    "manifest.json": "1e39e5f56fe22ba18d8d57e283d5328cf4e1a80e76b6a005275832d5343d374b",
+    "regression_check.json": "dd8a5cdd484768237451106abba17763b0edbbd3afd335bf038cfca44e454e66",
+    "metadata_results.json": "6aabbbad975d91edace5610cc80974ad0c3674b52df6151b8d388ed47b09411f",
+    "component_accounting.json": "729c81efb95bc9944141d99aea7c61e7ae1d112e4294176fd5b570449adb0e6a"
+  }
+}

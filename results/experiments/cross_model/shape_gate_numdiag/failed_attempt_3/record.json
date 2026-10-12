@@ -1,0 +1,128 @@
+{
+  "experiment": 14,
+  "kind": "shape_gate_numerical_diagnosis",
+  "attempt": 3,
+  "non_evidence": true,
+  "status": "failed",
+  "started_utc": "2026-09-30T17:13:04.898111+00:00",
+  "git_head": "618034c943f48fd74e88ac6d82ec85be3b22c4d8",
+  "vllm_kvquant_tree": "390fc793d47fb85321d80df03e50da96433e4a95",
+  "rabit_kv2_sha256_lf": "7e628c94eebb9fe689bf416ea61f748c0f909a82d0f229c463edd1a0df92e6ae",
+  "model_revision": "16c174980d8a1492910551634b4969e69cdc2444",
+  "checks": {
+    "clean_tree": true,
+    "wrapper_self_contained": true,
+    "image_expression_equal_to_frozen_exp14": true,
+    "isolated_remote_import_simulation": true,
+    "unicode_streaming_app_discovery_timeout_cleanup_tests": true,
+    "diagnostic_unchanged_since_e6361eb": true,
+    "shape_gate_unchanged": true,
+    "vllm_kvquant_tree_unchanged": true,
+    "vllm_kvquant_unchanged_since_backport": true,
+    "rabit_source_unchanged": true,
+    "qwen_revision_unchanged": true,
+    "exp13_evidence_unchanged": true,
+    "exp1_12_evidence_unchanged": true,
+    "attempt1_archive_unchanged": true,
+    "attempt2_archive_unchanged": true,
+    "protected_paths_clean": true,
+    "attempt3_not_already_run": true
+  },
+  "self_contained": {
+    "wrapper_imports": [
+      "__future__",
+      "modal",
+      "os",
+      "pathlib",
+      "subprocess",
+      "sys"
+    ],
+    "wrapper_imports_only_stdlib_and_modal": true,
+    "wrapper_imports_no_sibling_module": true,
+    "payload_files": {
+      "exp14_shape_gate.py": "/opt/exp14/exp14_shape_gate.py",
+      "exp14_shape_gate_numdiag.py": "/opt/exp14/exp14_shape_gate_numdiag.py"
+    },
+    "payload_exactly_expected": true,
+    "payload_sibling_imports": {
+      "exp14_shape_gate.py": [],
+      "exp14_shape_gate_numdiag.py": [
+        "exp14_shape_gate"
+      ]
+    },
+    "payload_sibling_imports_all_shipped": true,
+    "diagnostic_is_the_only_diagnostic_payload": true
+  },
+  "isolated_import": {
+    "deployment_module_importable": false,
+    "any_exp14_sibling_importable": false,
+    "import_ok": true,
+    "has_app_function_entrypoint": true,
+    "loaded_sibling_modules": [],
+    "returncode": 0,
+    "stderr_tail": "",
+    "passed": true
+  },
+  "prerun_tests": {
+    "results": {
+      "test_unicode_child_output_streams_and_child_sees_utf8_env": true,
+      "test_parent_with_strict_gbk_stdout_does_not_raise": true,
+      "test_gbk_negative_control_attempt2_runner_fails": true,
+      "test_client_dies_before_printing_app_id_new_app_still_found_and_stopped": true,
+      "test_stdout_parsed_id_is_unioned_but_preexisting_never_stopped": true,
+      "test_timeout_kills_client_and_stops_discovered_app": true,
+      "test_final_task_count_is_checked": true
+    },
+    "passed": true
+  },
+  "wall_clock_limit_s": 2700,
+  "harness_sha256": {
+    "run_exp14_shape_gate_numdiag.py": "67b4bc660b4753d8698bea27c6d1ea1c99e38dccfc6fef0e3881b50b85819392",
+    "exp14_shape_gate_numdiag_modal.py": "b9967f2989b7634be0cca8fca609bda310cbba7fb052cec2329ca4bf167fa0f7",
+    "exp14_shape_gate_numdiag.py": "d0974332dc09d2dc4e3c6433c47816381f7fb16a6a649405e2aa7cfabd1f6fe1",
+    "exp14_shape_gate.py": "12c4e23db61e39c119dc70851efbdebc8e1cf9a1d89a91a02623c6694b8d9442",
+    "test_exp14_shape_gate_numdiag.py": "252afc7c1274c77f59c8d1ffb0f9ed5b4a14c054092d10384d2953d6891bfda5"
+  },
+  "tree_clean_at_launch": true,
+  "completed_utc": "2026-09-30T17:18:00.163920+00:00",
+  "run": {
+    "returncode": 0,
+    "timed_out": false,
+    "elapsed_s": 289.4,
+    "wall_clock_limit_s": 2700,
+    "apps": {
+      "pre_launch_app_ids": [
+        "ap-afhIH3WzeKkno4wrZdHHDY",
+        "ap-pyYiSYIKytyO8KOu9mG8vX"
+      ],
+      "post_launch_app_ids": [
+        "ap-Sn0EFFWZMeaFjIlGJhs5CR",
+        "ap-afhIH3WzeKkno4wrZdHHDY",
+        "ap-pyYiSYIKytyO8KOu9mG8vX"
+      ],
+      "parsed_stdout_app_ids": [
+        "ap-Sn0EFFWZMeaFjIlGJhs5CR"
+      ],
+      "new_app_ids": [
+        "ap-Sn0EFFWZMeaFjIlGJhs5CR"
+      ],
+      "stop_actions": [],
+      "final_states": {
+        "ap-Sn0EFFWZMeaFjIlGJhs5CR": {
+          "App ID": "ap-Sn0EFFWZMeaFjIlGJhs5CR",
+          "Description": "rabit-kv-mlsys2027-exp14-shape-gate-numdiag",
+          "State": "stopped",
+          "Tasks": "0",
+          "Created at": "2026-09-30 13:13:09-04:00",
+          "Stopped at": "2026-09-30 13:17:57-04:00"
+        }
+      },
+      "cleanup_verified": true
+    }
+  },
+  "modal_app_ids": [
+    "ap-Sn0EFFWZMeaFjIlGJhs5CR"
+  ],
+  "session_log_sha256": "e0a747280382d92ce19c282a05c8adde76b63338818f14300fbaf4bf6134530d",
+  "summary_sha256": null
+}
