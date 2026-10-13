@@ -1,7 +1,8 @@
 # RABIT-KV: Initial public research release (draft)
 
-This is a preparation document, not a published release. The author entry in
-`CITATION.cff` is a draft based on Ryan Zhang's account of his contributions.
+This is a preparation document, not a published release. Ryan Zhang has
+confirmed the final software citation author as Ryan Zhang alone, with no
+affiliation. `CITATION.cff` records this confirmed authorship.
 No named acknowledgement or institutional endorsement is asserted.
 
 ## Proposed release description
@@ -87,8 +88,6 @@ scope. Frozen scientific files remain byte-identical.
 
 ## Finish before publishing
 
-- Confirm the final author metadata with Ryan Zhang. Affiliation is omitted
-  from the citation draft until he confirms the desired representation.
 - Choose the release tag/version and the exact final release commit. A
   preliminary tag such as `v0.1.0` is a proposal, not an existing release.
 - If automatic Zenodo archival is desired, enable the repository in Zenodo
