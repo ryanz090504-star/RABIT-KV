@@ -1,13 +1,32 @@
-# RABIT-KV: Initial public research release (draft)
+# RABIT-KV v0.1.0: Initial public research release (draft)
 
 This is a preparation document, not a published release. Ryan Zhang has
 confirmed the final software citation author as Ryan Zhang alone, with no
 affiliation. `CITATION.cff` records this confirmed authorship.
 No named acknowledgement or institutional endorsement is asserted.
 
-## Proposed release description
+The chosen software version is `0.1.0`, with proposed tag `v0.1.0`.
+Preparation starts from GitHub main commit
+`8c6727fa2b844247829b36dbff66842d0432c891` (merged PR #2).
+The tag and GitHub releases were checked during preparation: `v0.1.0` did not
+exist, and no GitHub releases existed. Recheck before publishing; do not
+overwrite any existing tag or release. No tag or release is created here.
+The exact final release commit remains to be selected after review.
 
-RABIT-KV provides a target-bit-aware KV-cache representation and physically
+## Proposed GitHub Release title
+
+```text
+RABIT-KV v0.1.0: Initial public research release
+```
+
+## Proposed GitHub Release body
+
+The exact proposed body starts below and ends before "Finish before publishing".
+Its links point to the verified preparation baseline.
+
+<!-- BEGIN PROPOSED RELEASE BODY -->
+
+RABIT-KV v0.1.0 provides a target-bit-aware KV-cache representation and physically
 packed serving implementation at the frozen K3/V2/G32/R4/META8g64 operating
 point. This initial public research release organizes the implementation,
 accepted evidence, historical records, and reproduction instructions.
@@ -47,9 +66,10 @@ four tokens remain BF16.
   latency, serialized execution, and model-dependent quality remain material
   limitations.
 
-See the [README](../README.md), [method](METHOD.md),
-[reproduction guide](REPRODUCIBILITY.md), and
-[public results summary](../results/summary.json) for settings, source records,
+See the [README](https://github.com/ryanz090504-star/RABIT-KV/blob/8c6727fa2b844247829b36dbff66842d0432c891/README.md),
+[method](https://github.com/ryanz090504-star/RABIT-KV/blob/8c6727fa2b844247829b36dbff66842d0432c891/docs/METHOD.md),
+[reproduction guide](https://github.com/ryanz090504-star/RABIT-KV/blob/8c6727fa2b844247829b36dbff66842d0432c891/docs/REPRODUCIBILITY.md), and
+[public results summary](https://github.com/ryanz090504-star/RABIT-KV/blob/8c6727fa2b844247829b36dbff66842d0432c891/results/summary.json) for settings, source records,
 confidence intervals, and interpretation.
 
 ### Reproduction and validation
@@ -76,23 +96,31 @@ is claimed.
 These metadata additions do not alter scientific code, raw results, protocols,
 paper assets, or the preserved research references.
 
-## Licensing decision
+### Licensing and authorship
 
 Ryan Zhang has approved Apache-2.0 for his original RABIT-KV software code.
-The official license text is in [the root LICENSE](../LICENSE), and
-[licensing scope and third-party exceptions](LICENSING.md) define the grant.
+The official license text is in [the root LICENSE](https://github.com/ryanz090504-star/RABIT-KV/blob/8c6727fa2b844247829b36dbff66842d0432c891/LICENSE), and
+[licensing scope and third-party exceptions](https://github.com/ryanz090504-star/RABIT-KV/blob/8c6727fa2b844247829b36dbff66842d0432c891/docs/LICENSING.md) define the grant.
 Existing licenses and notices remain in place. Paper assets, research data,
-and third-party materials are excluded from any blanket relicensing claim.
+third-party materials, and non-code documentation are excluded from this
+software grant; existing separate licenses or permissions continue to apply.
 The `CITATION.cff` license entry describes the covered software subject to that
 scope. Frozen scientific files remain byte-identical.
 
+The confirmed software citation author is Ryan Zhang alone, with no affiliation.
+The citation records version `0.1.0`; release date, DOI, and ORCID remain unset.
+No DOI, archival record, peer review, or conference acceptance is asserted.
+
+<!-- END PROPOSED RELEASE BODY -->
+
 ## Finish before publishing
 
-- Choose the release tag/version and the exact final release commit. A
-  preliminary tag such as `v0.1.0` is a proposal, not an existing release.
+- Select and verify the exact final release commit after review. Version
+  `0.1.0` and proposed tag `v0.1.0` are chosen; recheck tags and releases before
+  creating either, without overwriting any existing record.
 - If automatic Zenodo archival is desired, enable the repository in Zenodo
   before publishing the GitHub Release. No DOI or archive record is asserted.
-- Add the actual version and release date to `CITATION.cff` when decided;
+- Add the actual release date to `CITATION.cff` when publication is authorized;
   add DOI and paper citation only after valid records exist. ORCID is optional.
 
 Keep this document marked as draft until these decisions are complete. Extract

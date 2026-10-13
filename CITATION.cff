@@ -1,11 +1,12 @@
 # Confirmed software citation author: Ryan Zhang alone, with no affiliation.
-# Version, release date, DOI and ORCID are intentionally unset.
+# Release date, DOI and ORCID are intentionally unset.
 # Software license scope and third-party exceptions: docs/LICENSING.md.
 cff-version: "1.2.0"
 message: "If you use RABIT-KV, please cite this software using these metadata."
 type: software
 license: Apache-2.0
 title: "RABIT-KV"
+version: "0.1.0"
 authors:
   - family-names: "Zhang"
     given-names: "Ryan"
@@ -17,6 +18,10 @@ abstract: >-
   increases observed paged KV capacity on the evaluated H100 system, with
   higher latency and lower throughput. Canonical logical quality is
   model-dependent and is evaluated separately from physical serving.
+  Apache-2.0 applies to Ryan Zhang's original software code only, subject to
+  docs/LICENSING.md. Paper assets, research data, third-party materials, and
+  non-code documentation are excluded from this grant; existing third-party
+  licenses and notices remain in effect.
 keywords:
   - "KV-cache quantization"
   - "LLM inference"
