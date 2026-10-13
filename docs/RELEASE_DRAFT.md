@@ -1,28 +1,32 @@
-# RABIT-KV v0.1.0: Initial public research release (draft)
+# RABIT-KV v0.1.0: Publication and archive record
 
-This is a preparation document, not a published release. Ryan Zhang has
+This document records the completed software release and archive. Ryan Zhang has
 confirmed the final software citation author as Ryan Zhang alone, with no
 affiliation. `CITATION.cff` records this confirmed authorship.
 No named acknowledgement or institutional endorsement is asserted.
 
-The chosen software version is `0.1.0`, with proposed tag `v0.1.0`.
-Preparation starts from GitHub main commit
+The software version is `0.1.0`, published under immutable tag `v0.1.0` at
+commit `5db68a509dbc58dbb0688f7843d6af9aaf5789be`.
+Preparation started from GitHub main commit
 `8c6727fa2b844247829b36dbff66842d0432c891` (merged PR #2).
-The tag and GitHub releases were checked during preparation: `v0.1.0` did not
-exist, and no GitHub releases existed. Recheck before publishing; do not
-overwrite any existing tag or release. No tag or release is created here.
-The exact final release commit remains to be selected after review.
+Before publication, checks confirmed that `v0.1.0` did not exist and no GitHub
+releases existed. The tag and release were created without overwriting any
+existing record. This metadata follow-up does not move the tag or alter the
+published release or Zenodo record.
 
-## Proposed GitHub Release title
+## Published GitHub Release title
 
 ```text
 RABIT-KV v0.1.0: Initial public research release
 ```
 
-## Proposed GitHub Release body
+## Original published GitHub Release body
 
-The exact proposed body starts below and ends before "Finish before publishing".
-Its links point to the verified preparation baseline.
+The body between the original proposed-release markers below is preserved
+exactly as published. Its unset-date/DOI statements describe metadata at the
+time of GitHub publication; the completed archive and current citation
+metadata are recorded after the body. Its links point to the preparation
+baseline. The marker names remain for historical continuity.
 
 <!-- BEGIN PROPOSED RELEASE BODY -->
 
@@ -113,17 +117,28 @@ No DOI, archival record, peer review, or conference acceptance is asserted.
 
 <!-- END PROPOSED RELEASE BODY -->
 
-## Finish before publishing
+## Completed publication and archive
 
-- Select and verify the exact final release commit after review. Version
-  `0.1.0` and proposed tag `v0.1.0` are chosen; recheck tags and releases before
-  creating either, without overwriting any existing record.
-- If automatic Zenodo archival is desired, enable the repository in Zenodo
-  before publishing the GitHub Release. No DOI or archive record is asserted.
-- Add the actual release date to `CITATION.cff` when publication is authorized;
-  add DOI and paper citation only after valid records exist. ORCID is optional.
+- [GitHub Release v0.1.0](https://github.com/ryanz090504-star/RABIT-KV/releases/tag/v0.1.0)
+  was published on October 13, 2026 at 22:13:24 UTC (18:13:24 EDT), with
+  `draft=false` and `prerelease=false`.
+- The immutable `v0.1.0` tag points to
+  `5db68a509dbc58dbb0688f7843d6af9aaf5789be`.
+- [Zenodo record 23352595](https://zenodo.org/records/23352595) is published
+  (`state: done`, `submitted: true`), records version `v0.1.0`, and links to
+  the GitHub `v0.1.0` source tree.
+- Version DOI: [10.5281/zenodo.23352595](https://doi.org/10.5281/zenodo.23352595).
+- Concept DOI across versions:
+  [10.5281/zenodo.23352594](https://doi.org/10.5281/zenodo.23352594).
+- Zenodo's recorded `publication_date` is **October 14, 2026** (`2026-10-14`).
+  This is distinct from the GitHub release date, **October 13, 2026**.
+  `CITATION.cff` uses `date-released: "2026-10-13"` for the GitHub release and
+  the version DOI. This follow-up does not change Zenodo's recorded date.
 
-Keep this document marked as draft until these decisions are complete. Extract
-the proposed description and update its provenance when creating the actual
-release. Preparing this file does not create a tag, publish a GitHub Release,
-submit to arXiv, or submit to a conference.
+Zenodo records Ryan Zhang alone, with no affiliation, and includes the existing
+software licensing scope and exceptions in its description. ORCID remains
+unset. Software publication and archival do not assert paper publication,
+peer review, conference acceptance, or a research submission.
+
+Scientific files, existing licenses and notices, and research backup refs are
+preserved. These metadata updates do not alter the immutable release archive.

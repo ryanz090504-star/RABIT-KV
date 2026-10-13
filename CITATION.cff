@@ -1,5 +1,5 @@
 # Confirmed software citation author: Ryan Zhang alone, with no affiliation.
-# Release date, DOI and ORCID are intentionally unset.
+# ORCID is intentionally unset.
 # Software license scope and third-party exceptions: docs/LICENSING.md.
 cff-version: "1.2.0"
 message: "If you use RABIT-KV, please cite this software using these metadata."
@@ -7,6 +7,8 @@ type: software
 license: Apache-2.0
 title: "RABIT-KV"
 version: "0.1.0"
+doi: "10.5281/zenodo.23352595"
+date-released: "2026-10-13"
 authors:
   - family-names: "Zhang"
     given-names: "Ryan"
