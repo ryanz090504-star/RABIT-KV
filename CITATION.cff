@@ -1,0 +1,24 @@
+# Draft metadata: confirm authorship before merging or publishing.
+# Version, release date, DOI and ORCID are intentionally unset.
+# Software license scope and third-party exceptions: docs/LICENSING.md.
+cff-version: "1.2.0"
+message: "If you use RABIT-KV, please cite this software using these metadata."
+type: software
+license: Apache-2.0
+title: "RABIT-KV"
+authors:
+  - family-names: "Zhang"
+    given-names: "Ryan"
+repository-code: "https://github.com/ryanz090504-star/RABIT-KV"
+url: "https://github.com/ryanz090504-star/RABIT-KV"
+abstract: >-
+  Target-bit-aware KV-cache quantization and physically packed serving for
+  large language model inference. The frozen K3/V2/G32/R4/META8g64 configuration
+  increases observed paged KV capacity on the evaluated H100 system, with
+  higher latency and lower throughput. Canonical logical quality is
+  model-dependent and is evaluated separately from physical serving.
+keywords:
+  - "KV-cache quantization"
+  - "LLM inference"
+  - "memory capacity"
+  - "reproducible research"

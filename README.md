@@ -1,5 +1,9 @@
 # RABIT-KV
 
+Ryan Zhang's original RABIT-KV code is licensed under [Apache-2.0](LICENSE).
+See [licensing scope and third-party exceptions](docs/LICENSING.md) for covered
+code, preserved third-party terms, and excluded paper assets and research data.
+
 RABIT-KV is a **target-bit-aware KV-cache quantization and physically packed serving system** for LLM inference. Its frozen **K3 / V2 / G32 / R4 / META8g64** operating point jointly accounts for asymmetric precision, metadata, residual state, online aging, and allocator capacity.
 
 The **2-bit target** names the operating point centered on 2-bit values: keys use 3 bits, values use 2 bits, metadata adds storage, and the newest four tokens remain BF16. It is not literal two-bit total storage. Capacity and quality below refer to this single frozen configuration.
