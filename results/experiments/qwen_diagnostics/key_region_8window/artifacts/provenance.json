@@ -1,0 +1,109 @@
+{
+  "hardware": "NVIDIA H100 80GB HBM3, 81559, 595.91.07",
+  "torch": "2.11.0+cu130",
+  "cuda": "13.0",
+  "transformers": "4.48.2",
+  "python": "3.11.12 (main, May 21 2025, 23:34:13) [GCC 12.2.0]",
+  "files": {
+    "canonical_ppl_core.py": "dedbc68e7904569f18307d92a9b555bdf4d44237293ac896c11fb738d3c2c9b5",
+    "canonical_ppl_identity.py": "c8294974a53e00f3f8f362953a8cbe7ad5ffaf42e3387cc162843fd985598bef",
+    "canonical_quality_parity_tests.py": "6f970032642f47b30ee8de62a5a63bf4429f42e22b3685d29f2b3601e9e29096",
+    "canonical_rabit_quality.py": "4a786a3d2f4feb28c1731c2ff63baa411c8a6afdd0ab6e03d01e27381b25cd13",
+    "exp14_model_snapshot.py": "c1f64b3c7a431851b6bdbe86ef2c189d4b09f0bf54173fe9c0ab8944bcd15ca8",
+    "gpu_diag.py": "89c6ecfa4a1e59eec267541c98ea819f619216949baa2442183837cbd470b1e8",
+    "kvquant_k3.py": "fc2f9858e400a57558140da405a0c3cb59368009f019cc84dbdae5dea64b50a3",
+    "registration.json": "4a8dcb9f4d0d0e984a73d1d745b0a3f3c54f1606f72db6c604b4ffa9cedb7df4",
+    "wikitext.txt": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0"
+  },
+  "registration": {
+    "kind": "Post-hoc K group localization diagnostic, not deployable policy",
+    "windows": {
+      "qwen2_5_7b": [
+        1,
+        5,
+        9,
+        13,
+        17,
+        21,
+        25,
+        29
+      ],
+      "llama3_1_8b": [
+        1,
+        5,
+        9,
+        13,
+        17,
+        21,
+        25,
+        29
+      ]
+    },
+    "selection": "Fixed evenly spaced windows 1,5,9,13,17,21,25,29 from the frozen pool, same selection for both models, no outcome exclusions; all are previously observed.",
+    "timeout_s": 900,
+    "gpu": "H100!:1",
+    "retries": 0,
+    "image": "im-HuxOhBSvQGDiM2LySuwUTJ",
+    "arms": [
+      "bf16",
+      "passthrough",
+      "range_real",
+      "oracle_range",
+      "k_exact",
+      "oracle_k",
+      "open_exact",
+      "oracle_open",
+      "closed_exact",
+      "oracle_closed"
+    ],
+    "controls": "Window 1 pass-through and independent full-state oracle replay for each K intervention; all scientific arms on all eight windows",
+    "checkpoint_steps": [
+      1,
+      4,
+      5,
+      31,
+      32,
+      33,
+      36,
+      64,
+      127
+    ],
+    "source_commit": "8648b77552bb8d3cf756070e10838c5a8000af30",
+    "backend": "fixed FLASH_ATTENTION",
+    "prior_control_failure": "Attempt003 failed bitwise pass-through; attempt004 native repeat diverged at SDPA despite identical Q/K/V. Fixed backend is a disclosed diagnostic configuration, not canonical relabeling.",
+    "intervention": "Only incomplete K group padding repeats last real token for extrema; codes/decode and META8 otherwise unchanged; an independently modified packed oracle and separate NumPy reference validate semantics. Padding is never attended.",
+    "subprocess_timeout_s": 840,
+    "attempt": "010",
+    "execution": "detached single H100; scientific retries zero",
+    "analysis": {
+      "bootstrap_seed": 20261022,
+      "bootstrap_replicates": 20000,
+      "confidence": 0.95,
+      "resampling_unit": "paired window",
+      "primary_contrasts": [
+        "open_exact vs range_real",
+        "closed_exact vs range_real",
+        "k_exact vs range_real",
+        "range_real vs bf16",
+        "open_exact vs bf16",
+        "closed_exact vs bf16"
+      ],
+      "interpretation": "Effects are interventions with propagated activation changes, not an additive loss decomposition. Report all individual paired effects and fraction of range-vs-exactK gap removed; no equivalence threshold."
+    },
+    "scientific_arms": [
+      "bf16",
+      "range_real",
+      "k_exact",
+      "open_exact",
+      "closed_exact"
+    ],
+    "arm_definitions": {
+      "bf16": "Exact K and V native cache",
+      "range_real": "K3 excludes artificial padding zeros; frozen V2/META8 and R4",
+      "k_exact": "All K exact; frozen V2/META8 and R4",
+      "open_exact": "Only unfinished old K group exact; completed K groups padding-exclusion K3; frozen V2/META8 and exact R4",
+      "closed_exact": "Only completed old K groups exact; unfinished K group padding-exclusion K3; frozen V2/META8 and exact R4"
+    },
+    "group_definition": "For length N, old=max(N-4,0); completed=[0,32*floor(old/32)); unfinished=[32*floor(old/32),old); residual=[old,N). Reclassify each decode; exact unfinished tokens become quantized when their page closes in open_exact."
+  }
+}

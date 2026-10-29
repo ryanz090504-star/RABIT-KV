@@ -1,0 +1,182 @@
+{
+  "hardware": "NVIDIA H100 80GB HBM3, 81559, 595.91.07",
+  "torch": "2.11.0+cu130",
+  "cuda": "13.0",
+  "transformers": "4.48.2",
+  "python": "3.11.12 (main, May 21 2025, 23:34:13) [GCC 12.2.0]",
+  "files": {
+    "canonical_ppl_core.py": "dedbc68e7904569f18307d92a9b555bdf4d44237293ac896c11fb738d3c2c9b5",
+    "canonical_ppl_identity.py": "c8294974a53e00f3f8f362953a8cbe7ad5ffaf42e3387cc162843fd985598bef",
+    "canonical_quality_parity_tests.py": "6f970032642f47b30ee8de62a5a63bf4429f42e22b3685d29f2b3601e9e29096",
+    "canonical_rabit_quality.py": "4a786a3d2f4feb28c1731c2ff63baa411c8a6afdd0ab6e03d01e27381b25cd13",
+    "exp14_model_snapshot.py": "c1f64b3c7a431851b6bdbe86ef2c189d4b09f0bf54173fe9c0ab8944bcd15ca8",
+    "gpu_diag.py": "1fbaf2fcc799d9ae1ed418a529b13095a6ddbfa5df1ce6937116844181bb7e71",
+    "kvquant_k3.py": "fc2f9858e400a57558140da405a0c3cb59368009f019cc84dbdae5dea64b50a3",
+    "registration.json": "33a1c7e856f2f50325f1897af10a71904cbadd87f9fe4627efd282fe5542153a",
+    "wikitext.txt": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0"
+  },
+  "registration": {
+    "attempt": "RUNPOD-QWEN-A001",
+    "kind": "Pre-specified, privately frozen component ablation in the logical evaluator (exact metadata vs META8g64, with and without padding exclusion); descriptive; not held-out, not confirmatory, not canonical, not serving, not a deployable policy, not a tuning result",
+    "design_document": "review-003/ABLATION-A001-DESIGN-r2.md",
+    "registered_before_any_new_arm_score": true,
+    "data": {
+      "split": "canonical WikiText-2 test windows (the same 32 windows as the paper's logical evaluation and attempts 008/010)",
+      "held_out": false,
+      "construction": "frozen legacy protocol: 32 consecutive non-overlapping windows of 1024 context + 128 scored tokens"
+    },
+    "token_pool_sha256": {
+      "llama3_1_8b": "88dadfe6521c338ca71b1edfe5e85f08b8e2466e0884f8003b5b34a7ee3c849f",
+      "qwen2_5_7b": "eb424fb71baccb8b64ae53688613a30c462a54a893f82359c9e6ea5385c0f63c"
+    },
+    "selection": "All 32 test windows, fixed before scoring, no exclusions and no outcome-dependent selection.",
+    "arms": [
+      "bf16",
+      "passthrough",
+      "rabit",
+      "oracle",
+      "range_real",
+      "oracle_range",
+      "meta_exact",
+      "oracle_meta",
+      "range_meta_exact",
+      "oracle_range_meta"
+    ],
+    "scientific_arms": [
+      "bf16",
+      "rabit",
+      "range_real",
+      "meta_exact",
+      "range_meta_exact"
+    ],
+    "arm_definitions": {
+      "bf16": "Exact K and V native cache",
+      "rabit": "Frozen policy: K3 with zero-padded open group, V2, META8g64, R4 (canonical)",
+      "range_real": "Padding-only control: K3 excludes artificial padding zeros of the incomplete group (repeat-last padding for extrema); V2, META8g64, R4 unchanged",
+      "meta_exact": "Frozen policy except that K and V codes are dequantized with the exact FP32 primary minima and scales (no META8 second-level quantization)",
+      "range_meta_exact": "Padding exclusion as in range_real, plus exact FP32 primary minima and scales as in meta_exact"
+    },
+    "windows": {
+      "qwen2_5_7b": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32
+      ],
+      "llama3_1_8b": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32
+      ]
+    },
+    "controls": "Window 1: pass-through equals bf16 and each oracle replay (independent kvquant_k3 reference, with the same padding and metadata variants) equals its arm, bitwise; same-device oracle checkpoints for every quantized arm",
+    "reproduction_check": "bf16, rabit and range_real on all 32 windows must equal attempt 008 per-token NLL bit for bit (baseline008/); otherwise the run is INVALID",
+    "checkpoint_steps": [
+      1,
+      4,
+      5,
+      31,
+      32,
+      33,
+      36,
+      64,
+      127
+    ],
+    "backend": "fixed FLASH_ATTENTION",
+    "source_commit": "8648b77552bb8d3cf756070e10838c5a8000af30",
+    "models": {
+      "llama3_1_8b": {
+        "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+        "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c"
+      },
+      "qwen2_5_7b": {
+        "model_id": "Qwen/Qwen2.5-7B-Instruct",
+        "revision": "16c174980d8a1492910551634b4969e69cdc2444"
+      }
+    },
+    "execution": "single H100 80GB HBM3 Pod, scientific retries zero; no rerun without a new author approval; every attempt is reported",
+    "analysis": {
+      "script": "a001_analysis.py (frozen; sha256 in the freeze record)",
+      "bootstrap_seed": 20261029,
+      "bootstrap_replicates": 20000,
+      "resampling_unit": "paired window",
+      "interval": "two-sided 95% percentile",
+      "contrasts": [
+        "meta_exact_vs_rabit",
+        "range_meta_exact_vs_range_real",
+        "range_real_vs_rabit",
+        "rabit_vs_bf16",
+        "range_real_vs_bf16",
+        "meta_exact_vs_bf16",
+        "range_meta_exact_vs_bf16"
+      ],
+      "decision_rule": "none: descriptive ablation; no arm adopted; the paper's operating point is unchanged",
+      "reporting": "every arm and model reported whatever the direction; invalid run reported as INVALID with no quality conclusion"
+    },
+    "interpretation_limits": [
+      "logical evaluator only; serving engine unchanged and not scored",
+      "fixed FLASH_ATTENTION backend, not the canonical automatic-backend configuration; not comparable with the paper's Table 3",
+      "range_real and the exact-metadata arms exist only in the logical evaluator; no physical layout, kernel, capacity, latency or throughput is implied",
+      "exact-metadata arms use FP32 primaries; the storage counterpart is arithmetic only (3.56x vs BF16 for FP32 metadata)",
+      "paired contrasts are not additive decompositions",
+      "test windows are not held out"
+    ]
+  }
+}

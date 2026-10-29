@@ -1,0 +1,42 @@
+{
+  "bf16": {
+    "ppl": 7.513652754244617,
+    "tokens": 4096
+  },
+  "passthrough": {
+    "ppl": 3.275193037420089,
+    "tokens": 128
+  },
+  "rabit": {
+    "ppl": 7.6392058640484,
+    "tokens": 4096
+  },
+  "oracle": {
+    "ppl": 3.3608545675378707,
+    "tokens": 128
+  },
+  "range_real": {
+    "ppl": 7.619292697447732,
+    "tokens": 4096
+  },
+  "oracle_range": {
+    "ppl": 3.3952788167269525,
+    "tokens": 128
+  },
+  "meta_exact": {
+    "ppl": 7.640713759896124,
+    "tokens": 4096
+  },
+  "oracle_meta": {
+    "ppl": 3.369053336606769,
+    "tokens": 128
+  },
+  "range_meta_exact": {
+    "ppl": 7.623489729182752,
+    "tokens": 4096
+  },
+  "oracle_range_meta": {
+    "ppl": 3.3971269977229976,
+    "tokens": 128
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "window": 1,
+  "controls": [
+    "passthrough",
+    "oracle",
+    "oracle_range",
+    "oracle_meta",
+    "oracle_range_meta"
+  ],
+  "no_fallback": true
+}

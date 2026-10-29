@@ -14,6 +14,8 @@ The **2-bit target** names the operating point centered on 2-bit values: keys us
 
 **Capacity first:** on the evaluated H100 configuration, RABIT-KV provides **5.28×** the paged KV capacity of BF16, **2.64×** that of FP8, and **1.72×** that of the tested TurboQuant configuration. This comes with higher latency and lower throughput in the evaluated workloads. Quality is strongly model-dependent.
 
+**Paper (October 2026):** [RABIT-KV: A Physically Packed, Target-Bit-Aware KV Cache for LLM Serving](paper/v2/main.pdf), Ryan Zhang, with its [supplementary appendix](paper/v2/appendix.pdf) and [source](paper/v2/). It adds serving-engine perplexity, the Qwen2.5-7B diagnostics and their replication, a metadata ablation, and the full capacity accounting. The earlier paper is preserved unchanged in `paper/`.
+
 ## Matched serving results
 
 Llama-3.1-8B-Instruct, one NVIDIA H100 80GB HBM3, eager execution, single request, 2,048 prompt tokens and 32 output tokens. Latencies are medians of the two leg medians; each leg has 30 measured requests. These are descriptive statistics without confidence intervals.
@@ -33,7 +35,7 @@ Capacity is the live engine's allocated blocks times block size. It measures the
 
 ## Canonical quality
 
-These results use a validated logical Hugging Face evaluator of stored-cache representation and online aging, separately from physical serving. They do not validate serving quality end to end.
+These results use a validated logical Hugging Face evaluator of stored-cache representation and online aging, separately from physical serving. Serving-engine perplexity, measured separately, is reported [below](#serving-engine-perplexity); the two are never pooled.
 
 | Model / task | BF16 | Canonical RABIT | Outcome |
 |---|---:|---:|---|
@@ -46,15 +48,66 @@ These results use a validated logical Hugging Face evaluator of stored-cache rep
 
 Continuation PPL uses 32 paired windows, 1,024 context tokens and 128 scored tokens per window. HotpotQA uses 100 examples from the pinned 8k+ subset. Its primary scorer retains historical article handling; the secondary scorer uses the official LongBench definition on the same predictions. A confidence interval spanning zero does **not** establish equivalence. Sources: [accepted canonical record](results/experiments/canonical_quality_v2/canonical_quality_final_record.json), [PPL attempt](results/experiments/canonical_quality_v2/continuation_ppl/two_model_attempt_2/summary.json), [long-context attempt](results/experiments/canonical_quality_v2/long_context/attempt_1/summary.json).
 
-Qwen's severe quality failure occurs at the same frozen operating point; its cause is undiagnosed. Separately, Qwen serving increases paged capacity from **902,656 to 4,764,640 tokens**, while TPOT rises from **26.96 to 48.70 ms/token (+80.7%)** through untuned fallback paths. Capacity transfer does not establish quality transfer. Source: [Qwen serving](results/experiments/cross_model/serving/capacity_latency_summary.json).
+Qwen's severe quality failure occurs at the same frozen operating point. Post-hoc diagnostics localize it to the zero-padded open key group and the metadata quantization ([below](#qwen25-7b-diagnostics-replication-and-metadata-ablation)), and none of the diagnostic changes is implemented in the serving engine. Separately, Qwen serving increases paged capacity from **902,656 to 4,764,640 tokens**, while TPOT rises from **26.96 to 48.70 ms/token (+80.7%)** through untuned fallback paths. Capacity transfer does not establish quality transfer. Source: [Qwen serving](results/experiments/cross_model/serving/capacity_latency_summary.json).
+
+## Serving-engine perplexity
+
+The packed cache inside the serving engine, scored against BF16 serving in the same engine. This is physical serving
+evidence, kept separate from the logical quality above. Llama-3.1-8B-Instruct, WikiText-2 continuation, 32 windows of
+1,024 context and 128 scored tokens, one H100. The protocol was frozen locally before the run.
+
+| Windows | RABIT-KV vs BF16, single-chunk prefill | RABIT-KV vs BF16, forced two-chunk prefill |
+|---|---:|---:|
+| Primary, 5–32 (97.5% intervals) | +1.42% [+0.86%, +2.00%] | +1.96% [+1.07%, +2.93%] |
+| Secondary, all 32 (95% intervals) | +1.44% [+0.99%, +1.91%] | +2.07% [+1.36%, +2.83%] |
+
+- **What it is:** an end-to-end difference between two serving paths, not a quantization-only effect.
+- **Coverage:** Llama-3.1-8B and WikiText-2 continuation only, one request at a time.
+- **Windows:** an interrupted earlier attempt had already scored part of the primary windows, and the windows are not a held-out set.
+- **Prefill schedule:** the schedule interaction (+0.53%, 95% [-0.08%, +1.19%]) includes zero, so no schedule effect is claimed.
+- **Source:** [serving-engine perplexity](results/experiments/serving_quality/n32_attempt_002/).
+
+## Qwen2.5-7B diagnostics, replication, and metadata ablation
+
+These are post-hoc diagnostics of the Qwen2.5-7B failure in the logical evaluator, with the attention backend fixed to
+FlashAttention. They were run after the failure was known.
+
+- **Open-group padding** (32 test windows):
+  - The open key group is quantized as a 32-token group padded with zeros. Taking its range from the real tokens only lowers Qwen perplexity from 113.93 to 7.84 (BF16 6.79).
+  - That removes 94.9% of the excess mean token NLL. [Details](results/experiments/qwen_diagnostics/padding_exclusion_full32/).
+- **Which keys** (8 windows): with padding excluded, making only the closed-page keys exact removes the whole remaining gap to exact keys (fraction 1.016), while making only the open group exact removes none of it (-0.017). [Details](results/experiments/qwen_diagnostics/key_region_8window/).
+- **Replication on the validation split** (32 windows, analysis and criteria fixed before the run):
+  - padding exclusion -91.4% versus the frozen policy;
+  - fraction of excess NLL removed 0.941;
+  - exact closed pages remove 0.963 of the exact-key gap;
+  - both pre-specified decisions met their criteria. This is a replication on another split, not a held-out confirmation. [Details](results/experiments/qwen_diagnostics/validation_split_replication/).
+- **Metadata ablation** (A001, 32 test windows):
+  - On Qwen, exact FP32 group parameters remove 0.89 of the excess mean NLL when padding is excluded, but only 0.11 under the frozen policy. The two components interact, so these shares do not add up.
+  - On Llama, the ablation detects no effect of the 8-bit metadata quantization. [Details](results/experiments/metadata_ablation/).
+
+**Padding exclusion and exact metadata exist only in the logical evaluator; they are not implemented in the serving engine.** The serving engine still runs the unchanged K3/V2/G32/R4/META8g64
+operating point. Quality measured with padding exclusion or exact metadata must not be combined with the 5.28× capacity
+of the measured operating point: no system with both properties was built or measured. By the page arithmetic, the
+exact-metadata (FP32 parameter) layout would give 3.56× over BF16, not 5.28×.
+No latency, throughput, or serving quality is known for either change.
+
+## Capacity accounting
+
+- **Closed page:** a closed 32-token page occupies 24.25·H·d bytes per layer: K3 payload 12·H·d, V2 payload 8·H·d, and META8g64 metadata 4.25·H·d. That is 3.03 bits per stored element.
+- **Llama-3.1-8B pool:**
+  - RABIT-KV stores 24,832 bytes per token, against 131,072 for BF16, 65,536 for FP8 and 42,816 for the tested TurboQuant configuration.
+  - The tested TurboQuant configuration keeps four BF16 layers.
+  - The predicted ratio over BF16 (5.2784×) agrees with the observed allocator capacity (5.2785×).
+- **Side state outside the pool:** each Llama sequence holds up to 3 MiB outside the pool: the four-token residual window, the open group's BF16 keys, and its V2 codes with FP32 parameters. Counting it, BF16 needs 2.65× the KV memory of one RABIT-KV sequence at 128 tokens, 5.12× at 4,096 tokens and 5.26× at 32,768.
+- **Sources:** [`results/summary.json`](results/summary.json) (`public_update_2026_10.capacity_accounting`) and appendix C of the [paper](paper/v2/appendix.pdf).
 
 ## Scaling and limitations
 
 - At 8,192-token prompts, RABIT sustained offered concurrency 64 while BF16 reached only 47 overlapping in-flight requests. RABIT throughput was lower at every tested concurrency. See [concurrency report](results/experiments/concurrency_scaling/L8192/shadow_conditioned/combined_report.json).
 - At 32,736 prompt tokens plus 32 output tokens, median TTFT was **114.38 s** for RABIT versus **4.435 s** for BF16. This is the maximum tested model-limit point, not a demonstrated maximum feasible context. See [context scaling](results/experiments/context_scaling/attempt_2/context_scaling_summary.json).
 - Current execution serializes per-request/per-token work. Profiling is diagnostic and materially perturbs timing; it does not replace accepted unprofiled results. Long-context prefill also has substantial closed-page device work. These costs have not been shown intrinsic to the representation.
-- Evaluation covers one GPU type and one frozen operating point. Eager latency comparisons need not transfer to CUDA graphs. There are no canonical ablations, Qwen long-context results, Qasper results, or multilingual results. Retrieval saturation cannot resolve small effects.
-- Logical evaluation uses exact dense initial prefill and does not measure quality of later serving prefill chunks over packed history. CPU/CUDA states are not bit-identical; validation uses a same-device independent oracle.
+- Evaluation covers one GPU type and one frozen operating point. Eager latency comparisons need not transfer to CUDA graphs. The only component ablation is the post-hoc logical metadata ablation; there are no Qwen long-context, Qasper, or multilingual results. Retrieval saturation cannot resolve small effects.
+- Logical evaluation uses exact dense initial prefill. Serving-engine perplexity covers Llama with one single-chunk and one forced two-chunk schedule; prompts beyond the per-step token budget, concurrent requests, and long generations over many closed pages are not quality-tested. CPU/CUDA states are not bit-identical; validation uses a same-device independent oracle.
 
 ## Code, paper, and evidence
 
@@ -68,7 +121,9 @@ Qwen's severe quality failure occurs at the same frozen operating point; its cau
 - [Complete historical-to-current path manifest](docs/PATH_MIGRATION.json)
 - [Physical cache implementation](vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py)
 - [Canonical logical evaluator](benchmarks/experiments/canonical_rabit_quality.py)
-- [Preserved paper source](paper/main.tex), [supplement](paper/appendix.tex), [frozen paper PDF](paper/frozen/main.pdf), [frozen supplement PDF](paper/frozen/appendix.pdf)
+- [Paper, October 2026](paper/v2/main.pdf), [appendix](paper/v2/appendix.pdf), [source](paper/v2/)
+- [Serving-engine perplexity](results/experiments/serving_quality/n32_attempt_002/), [Qwen2.5-7B diagnostics](results/experiments/qwen_diagnostics/), [metadata ablation](results/experiments/metadata_ablation/)
+- Earlier paper, preserved unchanged: [source](paper/main.tex), [supplement](paper/appendix.tex), [frozen paper PDF](paper/frozen/main.pdf), [frozen supplement PDF](paper/frozen/appendix.pdf)
 
 Historical quality evidence in `results/legacy/quality/` and the earlier experiment directories is **legacy logical-evaluator evidence**, not canonical quality. The earlier evaluator used different value-metadata ordering and did not age generated tokens. Historical deployment sessions remain physical evidence, but their absolute latencies must not be pooled with the matched session above. The old public summary is preserved at `research-backup-2026-10-11:results/summary.json`; the new summary records its provenance instead of relabeling it canonical.
 

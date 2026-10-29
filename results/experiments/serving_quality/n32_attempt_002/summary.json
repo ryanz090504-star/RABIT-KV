@@ -1,0 +1,40 @@
+{
+  "valid": true,
+  "scored_windows": 32,
+  "cells": [
+    {
+      "valid": true,
+      "scored_tokens": 4096,
+      "ppl": 7.521094536746704,
+      "cache": "bfloat16",
+      "prefill_budget": 16384,
+      "latency_claim": false
+    },
+    {
+      "valid": true,
+      "scored_tokens": 4096,
+      "ppl": 7.629658855007268,
+      "cache": "rabit_kv2",
+      "prefill_budget": 16384,
+      "latency_claim": false
+    },
+    {
+      "valid": true,
+      "scored_tokens": 4096,
+      "ppl": 7.67672792723755,
+      "cache": "rabit_kv2",
+      "prefill_budget": 512,
+      "latency_claim": false
+    },
+    {
+      "valid": true,
+      "scored_tokens": 4096,
+      "ppl": 7.521094536746704,
+      "cache": "bfloat16",
+      "prefill_budget": 512,
+      "latency_claim": false
+    }
+  ],
+  "hf_ppl": 7.5082108965692935,
+  "scope": "Frozen N32; pending independent local audit before analysis"
+}

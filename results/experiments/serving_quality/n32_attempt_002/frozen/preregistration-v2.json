@@ -1,0 +1,296 @@
+{
+  "protocol": "e1b-n32-physical-v2",
+  "status": "preregistered_not_launched",
+  "date": "2026-10-20",
+  "freeze_scope": "Token IDs/configurations/exclusions/analysis fixed before new physical outcomes; implementation must pass new diagnostic before launch.",
+  "model_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+  "historical_llama_serving_revision": null,
+  "source_commit": "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746",
+  "cells": [
+    {
+      "dtype": "bfloat16",
+      "block_size": 32,
+      "max_model_len": 32768,
+      "max_num_seqs": 32,
+      "enable_prefix_caching": false,
+      "enable_chunked_prefill": true,
+      "gpu_memory_utilization": 0.82,
+      "enforce_eager": true,
+      "trust_remote_code": false,
+      "seed": 0,
+      "attention_config": {
+        "backend": "TRITON_ATTN"
+      },
+      "compilation_config": {
+        "mode": 0,
+        "cudagraph_mode": "NONE"
+      },
+      "model": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "kv_cache_dtype": "bfloat16",
+      "max_num_batched_tokens": 16384,
+      "logprobs_mode": "raw_logprobs"
+    },
+    {
+      "dtype": "bfloat16",
+      "block_size": 32,
+      "max_model_len": 32768,
+      "max_num_seqs": 32,
+      "enable_prefix_caching": false,
+      "enable_chunked_prefill": true,
+      "gpu_memory_utilization": 0.82,
+      "enforce_eager": true,
+      "trust_remote_code": false,
+      "seed": 0,
+      "attention_config": {
+        "backend": "TRITON_ATTN"
+      },
+      "compilation_config": {
+        "mode": 0,
+        "cudagraph_mode": "NONE"
+      },
+      "model": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "kv_cache_dtype": "rabit_kv2",
+      "max_num_batched_tokens": 16384,
+      "logprobs_mode": "raw_logprobs"
+    },
+    {
+      "dtype": "bfloat16",
+      "block_size": 32,
+      "max_model_len": 32768,
+      "max_num_seqs": 32,
+      "enable_prefix_caching": false,
+      "enable_chunked_prefill": true,
+      "gpu_memory_utilization": 0.82,
+      "enforce_eager": true,
+      "trust_remote_code": false,
+      "seed": 0,
+      "attention_config": {
+        "backend": "TRITON_ATTN"
+      },
+      "compilation_config": {
+        "mode": 0,
+        "cudagraph_mode": "NONE"
+      },
+      "model": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "kv_cache_dtype": "rabit_kv2",
+      "max_num_batched_tokens": 512,
+      "logprobs_mode": "raw_logprobs"
+    },
+    {
+      "dtype": "bfloat16",
+      "block_size": 32,
+      "max_model_len": 32768,
+      "max_num_seqs": 32,
+      "enable_prefix_caching": false,
+      "enable_chunked_prefill": true,
+      "gpu_memory_utilization": 0.82,
+      "enforce_eager": true,
+      "trust_remote_code": false,
+      "seed": 0,
+      "attention_config": {
+        "backend": "TRITON_ATTN"
+      },
+      "compilation_config": {
+        "mode": 0,
+        "cudagraph_mode": "NONE"
+      },
+      "model": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "kv_cache_dtype": "bfloat16",
+      "max_num_batched_tokens": 512,
+      "logprobs_mode": "raw_logprobs"
+    }
+  ],
+  "order": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "exposed_windows": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "previously_uninspected_physical_windows": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32
+  ],
+  "caveat": "Windows 5-32 uninspected in this physical pilot, not globally unseen: canonical logical N32 evaluations already exist. Same fixed contiguous WikiText pool; not an independent generalization holdout.",
+  "primary_population": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32
+  ],
+  "secondary_populations": [
+    [
+      1,
+      2,
+      3,
+      4
+    ],
+    [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32
+    ]
+  ],
+  "endpoints": [
+    "packed_single_minus_bf16_single",
+    "packed_later_minus_bf16_later"
+  ],
+  "effect": "mean of paired window mean token NLL differences; relative PPL=100*expm1(effect)",
+  "inference": {
+    "unit": "window, all 128 paired targets kept together",
+    "bootstrap_replicates": 100000,
+    "rng": "Python random.Random Mersenne Twister",
+    "seed": 20261020,
+    "primary_interval_quantiles": [
+      0.0125,
+      0.9875
+    ],
+    "rationale": "97.5% two-sided intervals per co-primary schedule: Bonferroni family coverage at least 95% under bootstrap assumptions",
+    "secondary_interval_quantiles": [
+      0.025,
+      0.975
+    ],
+    "blocked_sensitivity": "Resample fixed contiguous blocks of four windows: seven blocks for N28, eight for N32. No meaningful block CI for N4.",
+    "caveat": "Conditional benchmark uncertainty; contiguous windows can remain dependent across blocks. No independent-token CI or universal quality claim."
+  },
+  "exclusions": "None for quality, length, outliers, EOS, or unfavorable scores. Exactly 128 targets per window per cell. Invalid/missing/duplicate scores or gates stop the entire attempt; do not drop windows or pool partial attempts.",
+  "failure_policy": "No automatic retries; preserve failed run. Diagnose before a new full four-cell paired attempt. Any inference fix requires new implementation version and full controls; amend freeze with reason before new outcomes, preserve this version.",
+  "diagnostic_only_window": 2,
+  "diagnostic_must_not_use_new28": true,
+  "validity": [
+    "full identity hashes and dispatch/component gate",
+    "exact token IDs, positions, actual schedules, packed bytes/read/write/cleanup per request/layer",
+    "all NLL finite; exact score count=4096/cell, raw engine agreement <2e-5",
+    "BF16 aggregate PPL vs independent HF <=0.5%, report per-window and per-token discrepancies without exclusion",
+    "same-device dense/dequantized diagnostic gates pass; no unexplained first-target/control failure"
+  ],
+  "quality_not_validity": "No quality threshold filters results. Report any loss, CIs, and schedule interaction.",
+  "unforced_smokes": "Separate fixed two prompts, tagged by kind; never classify scoring/free by window>4.",
+  "resource_plan": {
+    "gpu": "one H100",
+    "max_containers": 1,
+    "retries": 0,
+    "cpu": [
+      4,
+      4
+    ],
+    "memory_mib": [
+      32768,
+      65536
+    ],
+    "setup_timeout_seconds": 600,
+    "startup_timeout_seconds": 120,
+    "function_timeout_seconds": 7200,
+    "per_cell_timeout_seconds": 1500,
+    "hf_timeout_seconds": 600,
+    "gate_timeout_seconds": 600,
+    "storage": "Existing model cache read-only; ephemeral output, no new persistent model volume.",
+    "traces": "Preserve complete path events sharded by window, with streaming per-window chronology/byte/count validation and summaries. Detailed diagnostic tensors restricted to window1. No silent truncation; planned 2GiB aggregate/64MiB per-file limits."
+  },
+  "launch_blockers": [
+    "Model-QKV/RoPE/dequantized attention diagnostic not run",
+    "N32 cloud worker generalization and offline integration required; old four-window launcher must not be used as N32"
+  ],
+  "amendment": {
+    "number": 1,
+    "reason": "Choose the inspected window with the largest absolute single-chunk first-target packed-minus-BF16 NLL discrepancy: window2 (0.05409669876098633), rather than arbitrary window1. This targets the dense-prefill control gap, not favorable quality. No N32 inputs, endpoints, exclusions, or uncertainty analysis changed.",
+    "previous_protocol_sha256": "4656888cc352b3be78cf679d53a478f87e46f06046f611d8c221f6bbc8f9ab5f",
+    "timing": "Before any new GPU diagnostic/evaluation or new physical N28 outcomes; original v1 freeze preserved."
+  }
+}

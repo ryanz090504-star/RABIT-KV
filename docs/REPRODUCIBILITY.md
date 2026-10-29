@@ -101,3 +101,35 @@ The concrete schema-consumer incompatibilities and applied migration record are 
 ## Path and historical-reference resolution
 
 The [complete path manifest](PATH_MIGRATION.json) records every pre-migration tracked path, its current alias, Git blob ID, raw/LF SHA-256 and original status records. Frozen records and historical documents keep their embedded paths and hashes unchanged. For a historical path, find its `old_path` entry and browse `new_path`; historical `commit:path` lookups still use the original path. The [history index](history/README.md), [evidence index](../results/README.md) and [source index](../benchmarks/README.md) navigate the mapped public tree.
+
+## Evidence added in October 2026
+
+These directories hold completed runs and copy their files byte-for-byte. No new experiment was run for this update.
+Each directory's `README.md` states its scope, and `results/summary.json` (`public_update_2026_10`) records the numbers
+and their sources.
+
+| Directory | Evidence class | What reproduces it |
+|---|---|---|
+| `results/experiments/serving_quality/n32_attempt_002/` | Physical serving quality, Llama-3.1-8B | `frozen/analyze_n32.py` recomputes `frozen-analysis.json` from the per-token scores. `code/` holds the in-engine scoring worker and checks, which run inside the patched vLLM snapshot of this repository on one H100 |
+| `results/experiments/qwen_diagnostics/padding_exclusion_full32/` | Logical post-hoc diagnostic | `code/gpu_diag.py` with `code/registration.json` (frozen arms, windows and bootstrap). The intervals are recomputable from `artifacts/*-scores.json` |
+| `results/experiments/qwen_diagnostics/key_region_8window/` | Logical post-hoc diagnostic | Same worker family, design in `code/registration.json`. `code/independent_check.py` reproduces all effects from the per-token scores |
+| `results/experiments/qwen_diagnostics/validation_split_replication/` | Logical pre-specified replication | `PROTOCOL.md` and `freeze-record.json` fix the arms and criteria. `code/recompute.py` reproduces `audit.json` from the per-token scores (agreement within 1e-12) |
+| `results/experiments/metadata_ablation/` | Logical component ablation | `code/a001_analysis.py` and `code/make_a001_tables.py` produce `analysis/` from the per-token scores |
+
+**Execution environment.**
+
+- **Logical runs:** Python 3.11, PyTorch 2.11.0 with CUDA 13.0, Transformers 4.48.2, BF16 weights, batch size 1, FlashAttention fixed as the attention backend, one H100 80GB.
+- **Models:** Llama-3.1-8B-Instruct and Qwen2.5-7B-Instruct at the pinned revisions in each run's identity and provenance records.
+- **Data:** WikiText-2 raw (test split; the replication uses the validation split).
+
+**Not published.**
+
+- Cloud-launch scripts, container images and provider records.
+- The independent-audit records of the validation-split replication and the metadata ablation, because they contain local file paths. For both runs, the in-run analysis (`audit.json`), the per-token scores and the recomputation or audit code are published.
+- Records of internal manuscript work.
+
+The published files are those needed to check the reported numbers.
+
+**Scope.** Padding exclusion and exact metadata exist only in the logical evaluator; the serving engine runs the
+unchanged operating point. Quality from those arms must not be combined with the 5.28× capacity of the measured operating
+point.

@@ -1,0 +1,2430 @@
+{
+  "valid": true,
+  "full_four_cell_gates": true,
+  "scored_windows": 32,
+  "input_sha256": "b1f90a924f0c8e12f4b4633e964a7d5f660bae9bd6c3cccc17ede6f6236d8670",
+  "archive_manifest_sha256": "805ff28099673956fb5d2e1ea58e50770a2ed2118f9fb9b54abdf5a6b5365748",
+  "raw_file_count": 663,
+  "raw_bytes": 1945435135,
+  "independent_hf_ppl": 7.5082108965692935,
+  "cells": [
+    {
+      "cell": 0,
+      "valid": true,
+      "ppl": 7.521094536746704,
+      "windows": [
+        {
+          "window": 1,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006491422653198242,
+            "matched_context_dense": 0.006491422653198242,
+            "matched_unified_dense": 0.006491422653198242,
+            "bf16_decode_dense": 0.009781837463378906
+          }
+        },
+        {
+          "window": 2,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008382797241210938,
+            "matched_context_dense": 0.008382797241210938,
+            "matched_unified_dense": 0.008382797241210938,
+            "bf16_decode_dense": 0.007941007614135742
+          }
+        },
+        {
+          "window": 3,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.00603795051574707,
+            "matched_context_dense": 0.00603795051574707,
+            "matched_unified_dense": 0.00603795051574707,
+            "bf16_decode_dense": 0.01104736328125
+          }
+        },
+        {
+          "window": 4,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.00528717041015625,
+            "matched_context_dense": 0.00528717041015625,
+            "matched_unified_dense": 0.00528717041015625,
+            "bf16_decode_dense": 0.007657051086425781
+          }
+        },
+        {
+          "window": 5,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006234407424926758,
+            "matched_context_dense": 0.006234407424926758,
+            "matched_unified_dense": 0.006234407424926758,
+            "bf16_decode_dense": 0.014195919036865234
+          }
+        },
+        {
+          "window": 6,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008687496185302734,
+            "matched_context_dense": 0.008687496185302734,
+            "matched_unified_dense": 0.008687496185302734,
+            "bf16_decode_dense": 0.0077326297760009766
+          }
+        },
+        {
+          "window": 7,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.00455862283706665,
+            "matched_context_dense": 0.00455862283706665,
+            "matched_unified_dense": 0.00455862283706665,
+            "bf16_decode_dense": 0.012251853942871094
+          }
+        },
+        {
+          "window": 8,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007799386978149414,
+            "matched_context_dense": 0.007799386978149414,
+            "matched_unified_dense": 0.007799386978149414,
+            "bf16_decode_dense": 0.015621662139892578
+          }
+        },
+        {
+          "window": 9,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007769107818603516,
+            "matched_context_dense": 0.007769107818603516,
+            "matched_unified_dense": 0.007769107818603516,
+            "bf16_decode_dense": 0.0075490474700927734
+          }
+        },
+        {
+          "window": 10,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007582902908325195,
+            "matched_context_dense": 0.007582902908325195,
+            "matched_unified_dense": 0.007582902908325195,
+            "bf16_decode_dense": 0.00771641731262207
+          }
+        },
+        {
+          "window": 11,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.015442848205566406,
+            "matched_context_dense": 0.015442848205566406,
+            "matched_unified_dense": 0.015442848205566406,
+            "bf16_decode_dense": 0.007384777069091797
+          }
+        },
+        {
+          "window": 12,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006475925445556641,
+            "matched_context_dense": 0.006475925445556641,
+            "matched_unified_dense": 0.006475925445556641,
+            "bf16_decode_dense": 0.015101432800292969
+          }
+        },
+        {
+          "window": 13,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006585121154785156,
+            "matched_context_dense": 0.006585121154785156,
+            "matched_unified_dense": 0.006585121154785156,
+            "bf16_decode_dense": 0.008840799331665039
+          }
+        },
+        {
+          "window": 14,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007393598556518555,
+            "matched_context_dense": 0.007393598556518555,
+            "matched_unified_dense": 0.007393598556518555,
+            "bf16_decode_dense": 0.014768600463867188
+          }
+        },
+        {
+          "window": 15,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006268024444580078,
+            "matched_context_dense": 0.006268024444580078,
+            "matched_unified_dense": 0.006268024444580078,
+            "bf16_decode_dense": 0.01187753677368164
+          }
+        },
+        {
+          "window": 16,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0059757232666015625,
+            "matched_context_dense": 0.0059757232666015625,
+            "matched_unified_dense": 0.0059757232666015625,
+            "bf16_decode_dense": 0.008145570755004883
+          }
+        },
+        {
+          "window": 17,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.014743328094482422,
+            "matched_context_dense": 0.014743328094482422,
+            "matched_unified_dense": 0.014743328094482422,
+            "bf16_decode_dense": 0.01407766342163086
+          }
+        },
+        {
+          "window": 18,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007250547409057617,
+            "matched_context_dense": 0.007250547409057617,
+            "matched_unified_dense": 0.007250547409057617,
+            "bf16_decode_dense": 0.0075550079345703125
+          }
+        },
+        {
+          "window": 19,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.011576175689697266,
+            "matched_context_dense": 0.011576175689697266,
+            "matched_unified_dense": 0.011576175689697266,
+            "bf16_decode_dense": 0.007889032363891602
+          }
+        },
+        {
+          "window": 20,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0069866180419921875,
+            "matched_context_dense": 0.0069866180419921875,
+            "matched_unified_dense": 0.0069866180419921875,
+            "bf16_decode_dense": 0.014124393463134766
+          }
+        },
+        {
+          "window": 21,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007451534271240234,
+            "matched_context_dense": 0.007451534271240234,
+            "matched_unified_dense": 0.007451534271240234,
+            "bf16_decode_dense": 0.012079715728759766
+          }
+        },
+        {
+          "window": 22,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008766651153564453,
+            "matched_context_dense": 0.008766651153564453,
+            "matched_unified_dense": 0.008766651153564453,
+            "bf16_decode_dense": 0.00754094123840332
+          }
+        },
+        {
+          "window": 23,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007016658782958984,
+            "matched_context_dense": 0.007016658782958984,
+            "matched_unified_dense": 0.007016658782958984,
+            "bf16_decode_dense": 0.009104251861572266
+          }
+        },
+        {
+          "window": 24,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.009397745132446289,
+            "matched_context_dense": 0.009397745132446289,
+            "matched_unified_dense": 0.009397745132446289,
+            "bf16_decode_dense": 0.00868844985961914
+          }
+        },
+        {
+          "window": 25,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007775068283081055,
+            "matched_context_dense": 0.007775068283081055,
+            "matched_unified_dense": 0.007775068283081055,
+            "bf16_decode_dense": 0.007451295852661133
+          }
+        },
+        {
+          "window": 26,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008136749267578125,
+            "matched_context_dense": 0.008136749267578125,
+            "matched_unified_dense": 0.008136749267578125,
+            "bf16_decode_dense": 0.010067939758300781
+          }
+        },
+        {
+          "window": 27,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.004909038543701172,
+            "matched_context_dense": 0.004909038543701172,
+            "matched_unified_dense": 0.004909038543701172,
+            "bf16_decode_dense": 0.007239818572998047
+          }
+        },
+        {
+          "window": 28,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007658243179321289,
+            "matched_context_dense": 0.007658243179321289,
+            "matched_unified_dense": 0.007658243179321289,
+            "bf16_decode_dense": 0.008076906204223633
+          }
+        },
+        {
+          "window": 29,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.011616230010986328,
+            "matched_context_dense": 0.011616230010986328,
+            "matched_unified_dense": 0.011616230010986328,
+            "bf16_decode_dense": 0.008008241653442383
+          }
+        },
+        {
+          "window": 30,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007842302322387695,
+            "matched_context_dense": 0.007842302322387695,
+            "matched_unified_dense": 0.007842302322387695,
+            "bf16_decode_dense": 0.012258529663085938
+          }
+        },
+        {
+          "window": 31,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007443904876708984,
+            "matched_context_dense": 0.007443904876708984,
+            "matched_unified_dense": 0.007443904876708984,
+            "bf16_decode_dense": 0.006768703460693359
+          }
+        },
+        {
+          "window": 32,
+          "path_events": {
+            "attention": 4096
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007171630859375,
+            "matched_context_dense": 0.007171630859375,
+            "matched_unified_dense": 0.007171630859375,
+            "bf16_decode_dense": 0.010873794555664062
+          }
+        }
+      ],
+      "replay": [
+        {
+          "kind": "original_logit",
+          "target": 0,
+          "max_abs": 3.011983267242613e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 1,
+          "max_abs": 1.008470817964735e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 4,
+          "max_abs": 1.1649845532701875e-09
+        },
+        {
+          "kind": "original_logit",
+          "target": 31,
+          "max_abs": 5.3877119654544003e-08
+        },
+        {
+          "kind": "original_logit",
+          "target": 36,
+          "max_abs": 3.917952646759204e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 127,
+          "max_abs": 6.961877474509492e-08
+        }
+      ],
+      "hf_mean_delta_nll": 0.0017144695595454618,
+      "hf_max_abs_token_delta": 0.22220206260681152
+    },
+    {
+      "cell": 1,
+      "valid": true,
+      "ppl": 7.629658855007268,
+      "windows": [
+        {
+          "window": 1,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.00587773323059082,
+            "matched_context_dense": 0.00587773323059082,
+            "matched_unified_dense": 0.00587773323059082,
+            "packed_dequantized_dense": 0.012352466583251953
+          }
+        },
+        {
+          "window": 2,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008382797241210938,
+            "matched_context_dense": 0.008382797241210938,
+            "matched_unified_dense": 0.008382797241210938,
+            "packed_dequantized_dense": 0.007125377655029297
+          }
+        },
+        {
+          "window": 3,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005985260009765625,
+            "matched_context_dense": 0.005985260009765625,
+            "matched_unified_dense": 0.005985260009765625,
+            "packed_dequantized_dense": 0.011852741241455078
+          }
+        },
+        {
+          "window": 4,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005541682243347168,
+            "matched_context_dense": 0.005541682243347168,
+            "matched_unified_dense": 0.005541682243347168,
+            "packed_dequantized_dense": 0.008913755416870117
+          }
+        },
+        {
+          "window": 5,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007134437561035156,
+            "matched_context_dense": 0.007134437561035156,
+            "matched_unified_dense": 0.007134437561035156,
+            "packed_dequantized_dense": 0.01331472396850586
+          }
+        },
+        {
+          "window": 6,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008764266967773438,
+            "matched_context_dense": 0.008764266967773438,
+            "matched_unified_dense": 0.008764266967773438,
+            "packed_dequantized_dense": 0.007984630763530731
+          }
+        },
+        {
+          "window": 7,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.004289031028747559,
+            "matched_context_dense": 0.004289031028747559,
+            "matched_unified_dense": 0.004289031028747559,
+            "packed_dequantized_dense": 0.011143207550048828
+          }
+        },
+        {
+          "window": 8,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0075948238372802734,
+            "matched_context_dense": 0.0075948238372802734,
+            "matched_unified_dense": 0.0075948238372802734,
+            "packed_dequantized_dense": 0.014935016632080078
+          }
+        },
+        {
+          "window": 9,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007403135299682617,
+            "matched_context_dense": 0.007403135299682617,
+            "matched_unified_dense": 0.007403135299682617,
+            "packed_dequantized_dense": 0.007538557052612305
+          }
+        },
+        {
+          "window": 10,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007769107818603516,
+            "matched_context_dense": 0.007769107818603516,
+            "matched_unified_dense": 0.007769107818603516,
+            "packed_dequantized_dense": 0.01563096046447754
+          }
+        },
+        {
+          "window": 11,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.013905525207519531,
+            "matched_context_dense": 0.013905525207519531,
+            "matched_unified_dense": 0.013905525207519531,
+            "packed_dequantized_dense": 0.009809017181396484
+          }
+        },
+        {
+          "window": 12,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006475925445556641,
+            "matched_context_dense": 0.006475925445556641,
+            "matched_unified_dense": 0.006475925445556641,
+            "packed_dequantized_dense": 0.014712810516357422
+          }
+        },
+        {
+          "window": 13,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006641387939453125,
+            "matched_context_dense": 0.006641387939453125,
+            "matched_unified_dense": 0.006641387939453125,
+            "packed_dequantized_dense": 0.006876349449157715
+          }
+        },
+        {
+          "window": 14,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008344292640686035,
+            "matched_context_dense": 0.008344292640686035,
+            "matched_unified_dense": 0.008344292640686035,
+            "packed_dequantized_dense": 0.014224529266357422
+          }
+        },
+        {
+          "window": 15,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006429910659790039,
+            "matched_context_dense": 0.006429910659790039,
+            "matched_unified_dense": 0.006429910659790039,
+            "packed_dequantized_dense": 0.014329373836517334
+          }
+        },
+        {
+          "window": 16,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007586479187011719,
+            "matched_context_dense": 0.007586479187011719,
+            "matched_unified_dense": 0.007586479187011719,
+            "packed_dequantized_dense": 0.008186101913452148
+          }
+        },
+        {
+          "window": 17,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.014743328094482422,
+            "matched_context_dense": 0.014743328094482422,
+            "matched_unified_dense": 0.014743328094482422,
+            "packed_dequantized_dense": 0.012514114379882812
+          }
+        },
+        {
+          "window": 18,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007250547409057617,
+            "matched_context_dense": 0.007250547409057617,
+            "matched_unified_dense": 0.007250547409057617,
+            "packed_dequantized_dense": 0.014682531356811523
+          }
+        },
+        {
+          "window": 19,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.011507511138916016,
+            "matched_context_dense": 0.011507511138916016,
+            "matched_unified_dense": 0.011507511138916016,
+            "packed_dequantized_dense": 0.008101940155029297
+          }
+        },
+        {
+          "window": 20,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006793498992919922,
+            "matched_context_dense": 0.006793498992919922,
+            "matched_unified_dense": 0.006793498992919922,
+            "packed_dequantized_dense": 0.012061119079589844
+          }
+        },
+        {
+          "window": 21,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007599353790283203,
+            "matched_context_dense": 0.007599353790283203,
+            "matched_unified_dense": 0.007599353790283203,
+            "packed_dequantized_dense": 0.012077808380126953
+          }
+        },
+        {
+          "window": 22,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008766651153564453,
+            "matched_context_dense": 0.008766651153564453,
+            "matched_unified_dense": 0.008766651153564453,
+            "packed_dequantized_dense": 0.009218692779541016
+          }
+        },
+        {
+          "window": 23,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006948709487915039,
+            "matched_context_dense": 0.006948709487915039,
+            "matched_unified_dense": 0.006948709487915039,
+            "packed_dequantized_dense": 0.00825643539428711
+          }
+        },
+        {
+          "window": 24,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.004973053932189941,
+            "matched_context_dense": 0.004973053932189941,
+            "matched_unified_dense": 0.004973053932189941,
+            "packed_dequantized_dense": 0.014079093933105469
+          }
+        },
+        {
+          "window": 25,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007786989212036133,
+            "matched_context_dense": 0.007786989212036133,
+            "matched_unified_dense": 0.007786989212036133,
+            "packed_dequantized_dense": 0.009119868278503418
+          }
+        },
+        {
+          "window": 26,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005694150924682617,
+            "matched_context_dense": 0.005694150924682617,
+            "matched_unified_dense": 0.005694150924682617,
+            "packed_dequantized_dense": 0.013890266418457031
+          }
+        },
+        {
+          "window": 27,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005834341049194336,
+            "matched_context_dense": 0.005834341049194336,
+            "matched_unified_dense": 0.005834341049194336,
+            "packed_dequantized_dense": 0.011955738067626953
+          }
+        },
+        {
+          "window": 28,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0075070858001708984,
+            "matched_context_dense": 0.0075070858001708984,
+            "matched_unified_dense": 0.0075070858001708984,
+            "packed_dequantized_dense": 0.008032083511352539
+          }
+        },
+        {
+          "window": 29,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.012059688568115234,
+            "matched_context_dense": 0.012059688568115234,
+            "matched_unified_dense": 0.012059688568115234,
+            "packed_dequantized_dense": 0.007666587829589844
+          }
+        },
+        {
+          "window": 30,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007780790328979492,
+            "matched_context_dense": 0.007780790328979492,
+            "matched_unified_dense": 0.007780790328979492,
+            "packed_dequantized_dense": 0.012338638305664062
+          }
+        },
+        {
+          "window": 31,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.004700660705566406,
+            "matched_context_dense": 0.004700660705566406,
+            "matched_unified_dense": 0.004700660705566406,
+            "packed_dequantized_dense": 0.006987214088439941
+          }
+        },
+        {
+          "window": 32,
+          "path_events": {
+            "attention": 4096,
+            "write": 160,
+            "fast_append": 4064,
+            "read": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9088,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007171630859375,
+            "matched_context_dense": 0.007171630859375,
+            "matched_unified_dense": 0.007171630859375,
+            "packed_dequantized_dense": 0.014897346496582031
+          }
+        }
+      ],
+      "replay": [
+        {
+          "kind": "original_logit",
+          "target": 0,
+          "max_abs": 5.3937746713472734e-08
+        },
+        {
+          "kind": "original_logit",
+          "target": 1,
+          "max_abs": 2.2094633322922164e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 4,
+          "max_abs": 2.4514726959523614e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 31,
+          "max_abs": 1.7313623246195675e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 36,
+          "max_abs": 6.801809853129726e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 127,
+          "max_abs": 1.2974492591411035e-08
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1025-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.00022931616705855473
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1025-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0019522997193799352
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1025-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.006182778114777854
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1028-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0004593484967986283
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1028-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0019170473733879367
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1028-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.0038955593981038206
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1055-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0003809299584065784
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1055-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0018287044923561702
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1055-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.012352560473486207
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1056-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.00021869406881842857
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1056-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0021283870814374772
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1056-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.006902701544820644
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1060-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0002175872312809024
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1060-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0019315603200478204
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1060-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.00466969382898208
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1088-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0002316639665667225
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1088-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0037632412780540525
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1088-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.007243603274265986
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1151-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0002410934277587845
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1151-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.001960609608447128
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1151-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.006595629099737099
+        }
+      ],
+      "hf_mean_delta_nll": 0.016045925378466108,
+      "hf_max_abs_token_delta": 1.9228171110153198
+    },
+    {
+      "cell": 2,
+      "valid": true,
+      "ppl": 7.67672792723755,
+      "windows": [
+        {
+          "window": 1,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.004240691661834717,
+            "matched_context_dense": 0.004240691661834717,
+            "matched_unified_dense": 0.004240691661834717,
+            "packed_dequantized_dense": 0.01355600357055664
+          }
+        },
+        {
+          "window": 2,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008382797241210938,
+            "matched_context_dense": 0.008382797241210938,
+            "matched_unified_dense": 0.008382797241210938,
+            "packed_dequantized_dense": 0.014864444732666016
+          }
+        },
+        {
+          "window": 3,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006464481353759766,
+            "matched_context_dense": 0.006464481353759766,
+            "matched_unified_dense": 0.006464481353759766,
+            "packed_dequantized_dense": 0.011430740356445312
+          }
+        },
+        {
+          "window": 4,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005541682243347168,
+            "matched_context_dense": 0.005541682243347168,
+            "matched_unified_dense": 0.005541682243347168,
+            "packed_dequantized_dense": 0.013901233673095703
+          }
+        },
+        {
+          "window": 5,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.00823211669921875,
+            "matched_context_dense": 0.00823211669921875,
+            "matched_unified_dense": 0.00823211669921875,
+            "packed_dequantized_dense": 0.014806747436523438
+          }
+        },
+        {
+          "window": 6,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008764266967773438,
+            "matched_context_dense": 0.008764266967773438,
+            "matched_unified_dense": 0.008764266967773438,
+            "packed_dequantized_dense": 0.008931994438171387
+          }
+        },
+        {
+          "window": 7,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006573677062988281,
+            "matched_context_dense": 0.006573677062988281,
+            "matched_unified_dense": 0.006573677062988281,
+            "packed_dequantized_dense": 0.011684417724609375
+          }
+        },
+        {
+          "window": 8,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0075948238372802734,
+            "matched_context_dense": 0.0075948238372802734,
+            "matched_unified_dense": 0.0075948238372802734,
+            "packed_dequantized_dense": 0.014673233032226562
+          }
+        },
+        {
+          "window": 9,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0060350894927978516,
+            "matched_context_dense": 0.0060350894927978516,
+            "matched_unified_dense": 0.0060350894927978516,
+            "packed_dequantized_dense": 0.0077207088470458984
+          }
+        },
+        {
+          "window": 10,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007769107818603516,
+            "matched_context_dense": 0.007769107818603516,
+            "matched_unified_dense": 0.007769107818603516,
+            "packed_dequantized_dense": 0.010360956192016602
+          }
+        },
+        {
+          "window": 11,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.013905525207519531,
+            "matched_context_dense": 0.013905525207519531,
+            "matched_unified_dense": 0.013905525207519531,
+            "packed_dequantized_dense": 0.011020183563232422
+          }
+        },
+        {
+          "window": 12,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.014997482299804688,
+            "matched_context_dense": 0.014997482299804688,
+            "matched_unified_dense": 0.014997482299804688,
+            "packed_dequantized_dense": 0.015443801879882812
+          }
+        },
+        {
+          "window": 13,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006641387939453125,
+            "matched_context_dense": 0.006641387939453125,
+            "matched_unified_dense": 0.006641387939453125,
+            "packed_dequantized_dense": 0.011579394340515137
+          }
+        },
+        {
+          "window": 14,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008344292640686035,
+            "matched_context_dense": 0.008344292640686035,
+            "matched_unified_dense": 0.008344292640686035,
+            "packed_dequantized_dense": 0.013866901397705078
+          }
+        },
+        {
+          "window": 15,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005141019821166992,
+            "matched_context_dense": 0.005141019821166992,
+            "matched_unified_dense": 0.005141019821166992,
+            "packed_dequantized_dense": 0.009613990783691406
+          }
+        },
+        {
+          "window": 16,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007771730422973633,
+            "matched_context_dense": 0.007771730422973633,
+            "matched_unified_dense": 0.007771730422973633,
+            "packed_dequantized_dense": 0.0077779293060302734
+          }
+        },
+        {
+          "window": 17,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.014743328094482422,
+            "matched_context_dense": 0.014743328094482422,
+            "matched_unified_dense": 0.014743328094482422,
+            "packed_dequantized_dense": 0.011637687683105469
+          }
+        },
+        {
+          "window": 18,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0074236392974853516,
+            "matched_context_dense": 0.0074236392974853516,
+            "matched_unified_dense": 0.0074236392974853516,
+            "packed_dequantized_dense": 0.01503896713256836
+          }
+        },
+        {
+          "window": 19,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.011507511138916016,
+            "matched_context_dense": 0.011507511138916016,
+            "matched_unified_dense": 0.011507511138916016,
+            "packed_dequantized_dense": 0.015175342559814453
+          }
+        },
+        {
+          "window": 20,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006570100784301758,
+            "matched_context_dense": 0.006570100784301758,
+            "matched_unified_dense": 0.006570100784301758,
+            "packed_dequantized_dense": 0.014913082122802734
+          }
+        },
+        {
+          "window": 21,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007156848907470703,
+            "matched_context_dense": 0.007156848907470703,
+            "matched_unified_dense": 0.007156848907470703,
+            "packed_dequantized_dense": 0.014388084411621094
+          }
+        },
+        {
+          "window": 22,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008766651153564453,
+            "matched_context_dense": 0.008766651153564453,
+            "matched_unified_dense": 0.008766651153564453,
+            "packed_dequantized_dense": 0.01049235463142395
+          }
+        },
+        {
+          "window": 23,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006948709487915039,
+            "matched_context_dense": 0.006948709487915039,
+            "matched_unified_dense": 0.006948709487915039,
+            "packed_dequantized_dense": 0.009858965873718262
+          }
+        },
+        {
+          "window": 24,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0048961639404296875,
+            "matched_context_dense": 0.0048961639404296875,
+            "matched_unified_dense": 0.0048961639404296875,
+            "packed_dequantized_dense": 0.008676528930664062
+          }
+        },
+        {
+          "window": 25,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007786989212036133,
+            "matched_context_dense": 0.007786989212036133,
+            "matched_unified_dense": 0.007786989212036133,
+            "packed_dequantized_dense": 0.0076448917388916016
+          }
+        },
+        {
+          "window": 26,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005694150924682617,
+            "matched_context_dense": 0.005694150924682617,
+            "matched_unified_dense": 0.005694150924682617,
+            "packed_dequantized_dense": 0.014333963394165039
+          }
+        },
+        {
+          "window": 27,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.00561976432800293,
+            "matched_context_dense": 0.00561976432800293,
+            "matched_unified_dense": 0.00561976432800293,
+            "packed_dequantized_dense": 0.012757182121276855
+          }
+        },
+        {
+          "window": 28,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0075070858001708984,
+            "matched_context_dense": 0.0075070858001708984,
+            "matched_unified_dense": 0.0075070858001708984,
+            "packed_dequantized_dense": 0.014113903045654297
+          }
+        },
+        {
+          "window": 29,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.012059688568115234,
+            "matched_context_dense": 0.012059688568115234,
+            "matched_unified_dense": 0.012059688568115234,
+            "packed_dequantized_dense": 0.013990402221679688
+          }
+        },
+        {
+          "window": 30,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007780790328979492,
+            "matched_context_dense": 0.007780790328979492,
+            "matched_unified_dense": 0.007780790328979492,
+            "packed_dequantized_dense": 0.010663986206054688
+          }
+        },
+        {
+          "window": 31,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0048552751541137695,
+            "matched_context_dense": 0.0048552751541137695,
+            "matched_unified_dense": 0.0048552751541137695,
+            "packed_dequantized_dense": 0.01419973373413086
+          }
+        },
+        {
+          "window": 32,
+          "path_events": {
+            "attention": 4128,
+            "write": 192,
+            "chunk_plan": 32,
+            "read": 20448,
+            "fast_append": 4064,
+            "cleanup": 1
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007171630859375,
+            "matched_context_dense": 0.007171630859375,
+            "matched_unified_dense": 0.007171630859375,
+            "packed_dequantized_dense": 0.015263080596923828
+          }
+        }
+      ],
+      "replay": [
+        {
+          "kind": "original_logit",
+          "target": 0,
+          "max_abs": 4.676293485772476e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 1,
+          "max_abs": 1.771332911459922e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 4,
+          "max_abs": 1.9859990274539996e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 31,
+          "max_abs": 3.276414588526677e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 36,
+          "max_abs": 5.992716438640855e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 127,
+          "max_abs": 5.993683060978583e-08
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1024-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.00022821493117157476
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1024-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0020417853160957233
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1024-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.004300008234552788
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1025-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.00022931616705855473
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1025-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0034177323479374078
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1025-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.0077997500109683315
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1028-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0004593484967986283
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1028-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0019527981444776854
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1028-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.0035968844269222977
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1055-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0003809299584065784
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1055-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0011301591017835455
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1055-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.013555995407846133
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1056-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.00021869406881842857
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1056-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.003750610613525829
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1056-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.007825577425122798
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1060-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0002175872312809024
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1060-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0019241789196634551
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1060-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.0038970410172369796
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1088-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0002316639665667225
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1088-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0025415818254047595
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1088-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.005692634602911806
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1151-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0002410934277587845
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1151-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0018731013922897999
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-1151-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.0068788015423217885
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-513-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.00044488642345266727
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-513-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.001200535545393372
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-513-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.0036594315941334
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-516-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0002350646100353071
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-516-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.0018453907465142416
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-516-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.0078108090643929096
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-544-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.00030251526140889773
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-544-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.003473047314438371
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-544-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.006878944027907785
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-548-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0003279356032960534
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-548-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.001936233069794513
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-548-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.003872790792704972
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-768-model_layers_0_self_attn_attn.pt",
+          "max_abs": 0.0003718072575008835
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-768-model_layers_15_self_attn_attn.pt",
+          "max_abs": 0.002775915511671695
+        },
+        {
+          "kind": "packed_attention",
+          "file": "packed-768-model_layers_31_self_attn_attn.pt",
+          "max_abs": 0.007492504769842867
+        }
+      ],
+      "hf_mean_delta_nll": 0.022196197322951694,
+      "hf_max_abs_token_delta": 2.4522619247436523
+    },
+    {
+      "cell": 3,
+      "valid": true,
+      "ppl": 7.521094536746704,
+      "windows": [
+        {
+          "window": 1,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0041702985763549805,
+            "matched_context_dense": 0.0041702985763549805,
+            "matched_unified_dense": 0.0041702985763549805,
+            "bf16_decode_dense": 0.009781837463378906
+          }
+        },
+        {
+          "window": 2,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008382797241210938,
+            "matched_context_dense": 0.008382797241210938,
+            "matched_unified_dense": 0.008382797241210938,
+            "bf16_decode_dense": 0.007941007614135742
+          }
+        },
+        {
+          "window": 3,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006067752838134766,
+            "matched_context_dense": 0.006067752838134766,
+            "matched_unified_dense": 0.006067752838134766,
+            "bf16_decode_dense": 0.01104736328125
+          }
+        },
+        {
+          "window": 4,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.00528717041015625,
+            "matched_context_dense": 0.00528717041015625,
+            "matched_unified_dense": 0.00528717041015625,
+            "bf16_decode_dense": 0.01541280746459961
+          }
+        },
+        {
+          "window": 5,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007241010665893555,
+            "matched_context_dense": 0.007241010665893555,
+            "matched_unified_dense": 0.007241010665893555,
+            "bf16_decode_dense": 0.014195919036865234
+          }
+        },
+        {
+          "window": 6,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008687496185302734,
+            "matched_context_dense": 0.008687496185302734,
+            "matched_unified_dense": 0.008687496185302734,
+            "bf16_decode_dense": 0.008670806884765625
+          }
+        },
+        {
+          "window": 7,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006724834442138672,
+            "matched_context_dense": 0.006724834442138672,
+            "matched_unified_dense": 0.006724834442138672,
+            "bf16_decode_dense": 0.012251853942871094
+          }
+        },
+        {
+          "window": 8,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007799386978149414,
+            "matched_context_dense": 0.007799386978149414,
+            "matched_unified_dense": 0.007799386978149414,
+            "bf16_decode_dense": 0.015621662139892578
+          }
+        },
+        {
+          "window": 9,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007806539535522461,
+            "matched_context_dense": 0.007806539535522461,
+            "matched_unified_dense": 0.007806539535522461,
+            "bf16_decode_dense": 0.007769107818603516
+          }
+        },
+        {
+          "window": 10,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007285594940185547,
+            "matched_context_dense": 0.007285594940185547,
+            "matched_unified_dense": 0.007285594940185547,
+            "bf16_decode_dense": 0.00771641731262207
+          }
+        },
+        {
+          "window": 11,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.015442848205566406,
+            "matched_context_dense": 0.015442848205566406,
+            "matched_unified_dense": 0.015442848205566406,
+            "bf16_decode_dense": 0.008044004440307617
+          }
+        },
+        {
+          "window": 12,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.014859199523925781,
+            "matched_context_dense": 0.014859199523925781,
+            "matched_unified_dense": 0.014859199523925781,
+            "bf16_decode_dense": 0.015507221221923828
+          }
+        },
+        {
+          "window": 13,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.006585121154785156,
+            "matched_context_dense": 0.006585121154785156,
+            "matched_unified_dense": 0.006585121154785156,
+            "bf16_decode_dense": 0.008840799331665039
+          }
+        },
+        {
+          "window": 14,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007393598556518555,
+            "matched_context_dense": 0.007393598556518555,
+            "matched_unified_dense": 0.007393598556518555,
+            "bf16_decode_dense": 0.014768600463867188
+          }
+        },
+        {
+          "window": 15,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0039021968841552734,
+            "matched_context_dense": 0.0039021968841552734,
+            "matched_unified_dense": 0.0039021968841552734,
+            "bf16_decode_dense": 0.01187753677368164
+          }
+        },
+        {
+          "window": 16,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007417201995849609,
+            "matched_context_dense": 0.007417201995849609,
+            "matched_unified_dense": 0.007417201995849609,
+            "bf16_decode_dense": 0.0091094970703125
+          }
+        },
+        {
+          "window": 17,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.014743328094482422,
+            "matched_context_dense": 0.014743328094482422,
+            "matched_unified_dense": 0.014743328094482422,
+            "bf16_decode_dense": 0.01407766342163086
+          }
+        },
+        {
+          "window": 18,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.00894618034362793,
+            "matched_context_dense": 0.00894618034362793,
+            "matched_unified_dense": 0.00894618034362793,
+            "bf16_decode_dense": 0.013162612915039062
+          }
+        },
+        {
+          "window": 19,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.011576175689697266,
+            "matched_context_dense": 0.011576175689697266,
+            "matched_unified_dense": 0.011576175689697266,
+            "bf16_decode_dense": 0.008828163146972656
+          }
+        },
+        {
+          "window": 20,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0069866180419921875,
+            "matched_context_dense": 0.0069866180419921875,
+            "matched_unified_dense": 0.0069866180419921875,
+            "bf16_decode_dense": 0.014124393463134766
+          }
+        },
+        {
+          "window": 21,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0073740482330322266,
+            "matched_context_dense": 0.0073740482330322266,
+            "matched_unified_dense": 0.0073740482330322266,
+            "bf16_decode_dense": 0.013798236846923828
+          }
+        },
+        {
+          "window": 22,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.008766651153564453,
+            "matched_context_dense": 0.008766651153564453,
+            "matched_unified_dense": 0.008766651153564453,
+            "bf16_decode_dense": 0.010909318923950195
+          }
+        },
+        {
+          "window": 23,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007016658782958984,
+            "matched_context_dense": 0.007016658782958984,
+            "matched_unified_dense": 0.007016658782958984,
+            "bf16_decode_dense": 0.009104251861572266
+          }
+        },
+        {
+          "window": 24,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005396842956542969,
+            "matched_context_dense": 0.005396842956542969,
+            "matched_unified_dense": 0.005396842956542969,
+            "bf16_decode_dense": 0.009851455688476562
+          }
+        },
+        {
+          "window": 25,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007775068283081055,
+            "matched_context_dense": 0.007775068283081055,
+            "matched_unified_dense": 0.007775068283081055,
+            "bf16_decode_dense": 0.007588386535644531
+          }
+        },
+        {
+          "window": 26,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.0063974857330322266,
+            "matched_context_dense": 0.0063974857330322266,
+            "matched_unified_dense": 0.0063974857330322266,
+            "bf16_decode_dense": 0.010067939758300781
+          }
+        },
+        {
+          "window": 27,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005273342132568359,
+            "matched_context_dense": 0.005273342132568359,
+            "matched_unified_dense": 0.005273342132568359,
+            "bf16_decode_dense": 0.008938312530517578
+          }
+        },
+        {
+          "window": 28,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007658243179321289,
+            "matched_context_dense": 0.007658243179321289,
+            "matched_unified_dense": 0.007658243179321289,
+            "bf16_decode_dense": 0.008076906204223633
+          }
+        },
+        {
+          "window": 29,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.011616230010986328,
+            "matched_context_dense": 0.011616230010986328,
+            "matched_unified_dense": 0.011616230010986328,
+            "bf16_decode_dense": 0.011498451232910156
+          }
+        },
+        {
+          "window": 30,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007842302322387695,
+            "matched_context_dense": 0.007842302322387695,
+            "matched_unified_dense": 0.007842302322387695,
+            "bf16_decode_dense": 0.012258529663085938
+          }
+        },
+        {
+          "window": 31,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.005160093307495117,
+            "matched_context_dense": 0.005160093307495117,
+            "matched_unified_dense": 0.005160093307495117,
+            "bf16_decode_dense": 0.014789581298828125
+          }
+        },
+        {
+          "window": 32,
+          "path_events": {
+            "attention": 4128
+          },
+          "oracle_events": 9345,
+          "maximum_error_by_kind": {
+            "actual_dense": 0.007171630859375,
+            "matched_context_dense": 0.007171630859375,
+            "matched_unified_dense": 0.007171630859375,
+            "bf16_decode_dense": 0.010873794555664062
+          }
+        }
+      ],
+      "replay": [
+        {
+          "kind": "original_logit",
+          "target": 0,
+          "max_abs": 3.011983267242613e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 1,
+          "max_abs": 1.008470817964735e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 4,
+          "max_abs": 1.1649845532701875e-09
+        },
+        {
+          "kind": "original_logit",
+          "target": 31,
+          "max_abs": 5.3877119654544003e-08
+        },
+        {
+          "kind": "original_logit",
+          "target": 36,
+          "max_abs": 3.917952646759204e-07
+        },
+        {
+          "kind": "original_logit",
+          "target": 127,
+          "max_abs": 6.961877474509492e-08
+        }
+      ],
+      "hf_mean_delta_nll": 0.0017144695595454618,
+      "hf_max_abs_token_delta": 0.22220206260681152
+    }
+  ],
+  "interpretation": "End-to-end physical serving difference, not quantization-only",
+  "limits": "Full all-window online reference events, complete physical paths, original-logit rows; detailed local tensor replay restricted by preregistration to window1. Codec reference shares ancestry with serving."
+}

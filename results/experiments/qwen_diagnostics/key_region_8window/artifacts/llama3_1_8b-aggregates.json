@@ -1,0 +1,42 @@
+{
+  "bf16": {
+    "ppl": 7.399218332586349,
+    "tokens": 1024
+  },
+  "passthrough": {
+    "ppl": 3.275193037420089,
+    "tokens": 128
+  },
+  "range_real": {
+    "ppl": 7.478932419501138,
+    "tokens": 1024
+  },
+  "oracle_range": {
+    "ppl": 3.3952788167269525,
+    "tokens": 128
+  },
+  "k_exact": {
+    "ppl": 7.493612383402662,
+    "tokens": 1024
+  },
+  "oracle_k": {
+    "ppl": 3.3748489083292017,
+    "tokens": 128
+  },
+  "open_exact": {
+    "ppl": 7.498148188052179,
+    "tokens": 1024
+  },
+  "oracle_open": {
+    "ppl": 3.3867800329823403,
+    "tokens": 128
+  },
+  "closed_exact": {
+    "ppl": 7.507393040212928,
+    "tokens": 1024
+  },
+  "oracle_closed": {
+    "ppl": 3.352468328243808,
+    "tokens": 128
+  }
+}

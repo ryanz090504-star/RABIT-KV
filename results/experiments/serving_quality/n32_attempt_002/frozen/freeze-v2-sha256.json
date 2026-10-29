@@ -1,0 +1,10 @@
+{
+  "inputs-n32.json": "b1f90a924f0c8e12f4b4633e964a7d5f660bae9bd6c3cccc17ede6f6236d8670",
+  "preregistration.json": "4656888cc352b3be78cf679d53a478f87e46f06046f611d8c221f6bbc8f9ab5f",
+  "analyze_n32.py": "038ee03dfc5839279ca4af1148d9caefec55285f294535894287edc251263d32",
+  "review_scores.py": "43318cd44c9e2b09caa3ebe875b20f98dc5d80f563bd2b3d0a214a871af735e1",
+  "freeze_protocol.py": "7c83df335945be26f7336a5006e13238afdeadf8fa2c09640b538af8ad48d060",
+  "reference_checks.py": "0b9eafa9e459a9c7c44dffbd0678f71ef111f506a4fc3777c76457afda6e8552",
+  "gpu_reference_diagnostic.py": "b963a4dc1581bf34da2f6f6f40e7541cab840fc1b04557f8d3732c018ffe6185",
+  "preregistration-v2.json": "acd0f35d29581cbae019db7f8353fae6d2926cb32a01dfca9bf827f4d40c65ed"
+}

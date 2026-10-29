@@ -1,0 +1,121 @@
+{
+ "floats_compared": 86,
+ "floats_differing": 10,
+ "all_integer_bool_fields_equal": true,
+ "max_abs": 4.547473508864641e-13,
+ "max_rel": 2.6935116158387627e-16,
+ "all_equal_at_6_significant": true,
+ "run_valid_pod_local": {
+  "qwen2_5_7b": [
+   true,
+   true
+  ],
+  "llama3_1_8b": [
+   true,
+   true
+  ]
+ },
+ "non_analysis_fields_equal": {
+  "qwen2_5_7b": {
+   "windows": true,
+   "rows_audited": true,
+   "max_reduction_rounding": true,
+   "bitwise_controls": true,
+   "oracle_checkpoints_per_arm": true,
+   "attempt008_bitwise_reproduction": true,
+   "run_valid": true
+  },
+  "llama3_1_8b": {
+   "windows": true,
+   "rows_audited": true,
+   "max_reduction_rounding": true,
+   "bitwise_controls": true,
+   "oracle_checkpoints_per_arm": true,
+   "attempt008_bitwise_reproduction": true,
+   "run_valid": true
+  }
+ },
+ "decision_rule": "none: descriptive ablation; no arm adopted; the paper's operating point is unchanged",
+ "differing_fields": [
+  {
+   "field": "qwen2_5_7b.analysis.contrasts.meta_exact_vs_rabit.ppl_change_pct",
+   "pod": -26.37979103493996,
+   "local": -26.379791034939952,
+   "abs_diff": 7.105427357601002e-15,
+   "rel_diff": 2.6935116158387627e-16,
+   "equal_at_6_significant": true
+  },
+  {
+   "field": "qwen2_5_7b.analysis.contrasts.meta_exact_vs_rabit.ci95_pct[0]",
+   "pod": -30.895356434863487,
+   "local": -30.89535643486349,
+   "abs_diff": 3.552713678800501e-15,
+   "rel_diff": 1.1499183336145246e-16,
+   "equal_at_6_significant": true
+  },
+  {
+   "field": "qwen2_5_7b.analysis.contrasts.meta_exact_vs_rabit.ci95_pct[1]",
+   "pod": -21.44055537581214,
+   "local": -21.440555375812142,
+   "abs_diff": 3.552713678800501e-15,
+   "rel_diff": 1.65700636785204e-16,
+   "equal_at_6_significant": true
+  },
+  {
+   "field": "qwen2_5_7b.analysis.contrasts.range_meta_exact_vs_range_real.ppl_change_pct",
+   "pod": -12.065662975774998,
+   "local": -12.065662975774996,
+   "abs_diff": 1.7763568394002505e-15,
+   "rel_diff": 1.4722413869563205e-16,
+   "equal_at_6_significant": true
+  },
+  {
+   "field": "qwen2_5_7b.analysis.contrasts.rabit_vs_bf16.ci95_pct[1]",
+   "pod": 1854.29704247153,
+   "local": 1854.2970424715304,
+   "abs_diff": 4.547473508864641e-13,
+   "rel_diff": 2.452397541875743e-16,
+   "equal_at_6_significant": true
+  },
+  {
+   "field": "qwen2_5_7b.analysis.contrasts.range_real_vs_bf16.ppl_change_pct",
+   "pod": 15.465952420497791,
+   "local": 15.465952420497795,
+   "abs_diff": 3.552713678800501e-15,
+   "rel_diff": 2.2971192346951187e-16,
+   "equal_at_6_significant": true
+  },
+  {
+   "field": "qwen2_5_7b.analysis.contrasts.range_real_vs_bf16.ci95_pct[1]",
+   "pod": 19.0915098992181,
+   "local": 19.091509899218103,
+   "abs_diff": 3.552713678800501e-15,
+   "rel_diff": 1.8608866965236746e-16,
+   "equal_at_6_significant": true
+  },
+  {
+   "field": "llama3_1_8b.analysis.contrasts.meta_exact_vs_rabit.ppl_change_pct",
+   "pod": 0.019741145376120494,
+   "local": 0.019741145376120497,
+   "abs_diff": 3.469446951953614e-18,
+   "rel_diff": 1.7574699369522729e-16,
+   "equal_at_6_significant": true
+  },
+  {
+   "field": "llama3_1_8b.analysis.contrasts.range_meta_exact_vs_range_real.ppl_change_pct",
+   "pod": 0.05508115404066142,
+   "local": 0.05508115404066141,
+   "abs_diff": 6.938893903907228e-18,
+   "rel_diff": 1.2597582648295412e-16,
+   "equal_at_6_significant": true
+  },
+  {
+   "field": "llama3_1_8b.analysis.contrasts.rabit_vs_bf16.ppl_change_pct",
+   "pod": 1.6710010220713638,
+   "local": 1.6710010220713643,
+   "abs_diff": 4.440892098500626e-16,
+   "rel_diff": 2.6576238074323375e-16,
+   "equal_at_6_significant": true
+  }
+ ]
+}

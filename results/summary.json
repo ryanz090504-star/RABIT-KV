@@ -292,5 +292,263 @@
     "gpu_execution_validated": false,
     "source_path_policy": "Original paths in separate pinned preserved-source Git checkout; public mapped workers are browsing archives",
     "offline_preserved_source_environment": "RABIT_PRESERVED_SOURCE"
+  },
+  "public_update_2026_10": {
+    "status": "Adds evidence from completed runs; no new experiment was run for this update",
+    "paper": {
+      "source": "paper/v2/main.tex",
+      "supplement": "paper/v2/appendix.tex",
+      "pdf": "paper/v2/main.pdf",
+      "supplement_pdf": "paper/v2/appendix.pdf",
+      "title": "RABIT-KV: A Physically Packed, Target-Bit-Aware KV Cache for LLM Serving",
+      "author": "Ryan Zhang",
+      "previous_version": "paper/main.tex, paper/frozen/ (unchanged)"
+    },
+    "serving_engine_perplexity": {
+      "source": "results/experiments/serving_quality/n32_attempt_002/frozen-analysis.json",
+      "evidence_class": "PHYSICAL serving-engine quality: end-to-end packed serving vs BF16 serving",
+      "model": "Llama-3.1-8B-Instruct @ 359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "task": "WikiText-2 continuation perplexity, 1,024 context + 128 scored tokens per window",
+      "cells_order": [
+        "bf16_single_chunk",
+        "packed_single_chunk",
+        "packed_two_chunk_512_plus_512",
+        "bf16_two_chunk"
+      ],
+      "primary_windows_5_32": {
+        "ppl_by_cell": [
+          7.493334367266323,
+          7.5997087868199955,
+          7.639868229990881,
+          7.493334367266323
+        ],
+        "packed_single_vs_bf16_pct": 1.4195872536844996,
+        "packed_single_975_interval_pct": [
+          0.8645475107755182,
+          1.9972834034566154
+        ],
+        "packed_two_chunk_vs_bf16_pct": 1.9555228092406345,
+        "packed_two_chunk_975_interval_pct": [
+          1.070662272236441,
+          2.932670574240558
+        ],
+        "schedule_interaction_pct": 0.528433974214053,
+        "schedule_interaction_95_interval_pct": [
+          -0.0777836765284569,
+          1.1911582361982211
+        ]
+      },
+      "secondary_all_32": {
+        "ppl_by_cell": [
+          7.521094536746704,
+          7.629658855007268,
+          7.67672792723755,
+          7.521094536746704
+        ],
+        "packed_single_vs_bf16_pct": 1.4434643485750327,
+        "packed_single_95_interval_pct": [
+          0.9914360449640472,
+          1.9121082932808093
+        ],
+        "packed_two_chunk_vs_bf16_pct": 2.069291773031842,
+        "packed_two_chunk_95_interval_pct": [
+          1.357506360296261,
+          2.8344905141627805
+        ]
+      },
+      "pilot_windows_1_4": {
+        "packed_single_vs_bf16_pct": 1.6107614849258316,
+        "packed_two_chunk_vs_bf16_pct": 2.8692370975711405
+      },
+      "statistics": "Paired window bootstrap, 100,000 resamples, seed 20261020; primary co-endpoints 97.5% (Bonferroni), secondary 95%",
+      "scope": [
+        "End-to-end serving difference, not a quantization-only effect",
+        "Llama-3.1-8B and WikiText-2 continuation only; one request at a time; instrumented, so no latency meaning",
+        "Primary windows 5-32 were partially exposed by an interrupted earlier attempt (BF16 single 1-32; packed single 1-23 and part of 24); the windows are not a held-out set",
+        "No equivalence claim; the schedule interaction interval includes zero, so no schedule-effect claim"
+      ]
+    },
+    "qwen_padding_diagnostic": {
+      "source": "results/experiments/qwen_diagnostics/padding_exclusion_full32/independent-audit.json",
+      "evidence_class": "LOGICAL post-hoc diagnostic, fixed FlashAttention backend; not canonical, not implemented in serving",
+      "windows": 32,
+      "ppl": {
+        "qwen2_5_7b": {
+          "bf16": 6.790927984523195,
+          "rabit": 113.93232013149184,
+          "k_exact": 6.863993492217756,
+          "range_real": 7.84120967551982
+        },
+        "llama3_1_8b": {
+          "bf16": 7.513652586774258,
+          "rabit": 7.6392057982941495,
+          "k_exact": 7.611670594057474,
+          "range_real": 7.619292862678857
+        }
+      },
+      "qwen_padding_excluded_vs_bf16_pct": 15.465952420497754,
+      "qwen_fraction_of_excess_nll_removed_by_padding_exclusion": 0.9490054432596704,
+      "arms": {
+        "rabit": "frozen operating point",
+        "range_real": "open key group quantized from its real tokens only (padding excluded)",
+        "k_exact": "keys exact, values as frozen"
+      }
+    },
+    "qwen_key_region_diagnostic": {
+      "source": "results/experiments/qwen_diagnostics/key_region_8window/independent-check.json",
+      "evidence_class": "LOGICAL post-hoc diagnostic, fixed FlashAttention backend, 8 previously observed windows",
+      "ppl_8window": {
+        "qwen2_5_7b": {
+          "bf16": 8.003052530820831,
+          "range_real": 8.955956219619269,
+          "k_exact": 8.099740488561213,
+          "open_exact": 8.971333942984645,
+          "closed_exact": 8.08702249497659
+        },
+        "llama3_1_8b": {
+          "bf16": 7.399218251411449,
+          "range_real": 7.478932296091178,
+          "k_exact": 7.493612703124457,
+          "open_exact": 7.498148217268656,
+          "closed_exact": 7.507393383293918
+        }
+      },
+      "qwen_effects_vs_padding_excluded_pct": {
+        "k_exact_vs_range_real": -9.560293843134204,
+        "closed_exact_vs_range_real": -9.70229982521754,
+        "open_exact_vs_range_real": 0.17170386933878493
+      },
+      "qwen_gap_fraction_removed": {
+        "open_exact": -0.017072555589283087,
+        "closed_exact": 1.0156379462547873
+      }
+    },
+    "qwen_validation_split_replication": {
+      "source": "results/experiments/qwen_diagnostics/validation_split_replication/audit.json (in-run) and reanalysis.json (post-run recomputation)",
+      "evidence_class": "LOGICAL pre-specified replication of the post-hoc diagnostics on the WikiText-2 validation split; not a held-out confirmation and not a fix",
+      "qwen_padding_excluded_vs_frozen_pct": -91.42776876055463,
+      "qwen_padding_fraction_of_frozen_excess": 0.9407371183418928,
+      "qwen_exact_keys_vs_padding_excluded_pct": -13.212766602229916,
+      "qwen_exact_closed_vs_padding_excluded_pct": -12.755899266222112,
+      "qwen_closed_fraction_of_exact_key_gap": 0.9629497498112332,
+      "decisions": {
+        "H1_padding_exclusion": true,
+        "H2_closed_page_localization": true
+      },
+      "qwen_open_fraction_of_exact_key_gap": 0.031243998760472354
+    },
+    "metadata_ablation": {
+      "source": "results/experiments/metadata_ablation/analysis/a001-numbers.json",
+      "evidence_class": "LOGICAL component ablation, fixed FlashAttention backend; not implemented in serving",
+      "ppl": {
+        "llama3_1_8b": {
+          "bf16": 7.513652586774258,
+          "rabit": 7.6392057982941495,
+          "range_real": 7.619292862678857,
+          "meta_exact": 7.6407138650163695,
+          "range_meta_exact": 7.623489657117358
+        },
+        "qwen2_5_7b": {
+          "bf16": 6.790927984523195,
+          "rabit": 113.93232013149184,
+          "range_real": 7.84120967551982,
+          "meta_exact": 83.87721215954542,
+          "range_meta_exact": 6.895115742847739
+        }
+      },
+      "qwen_exact_metadata_share_of_excess_mean_nll": {
+        "padding_excluded": {
+          "point": 0.8941230040432057,
+          "ci95": [
+            0.8361523358460226,
+            0.9502475992266067
+          ],
+          "denominator_ci95_nll": [
+            0.1146585889585255,
+            0.17472200235127608
+          ],
+          "denominator_crosses_zero": false
+        },
+        "frozen_policy": {
+          "point": 0.10859885630826502,
+          "ci95": [
+            0.08509699967036696,
+            0.13155516175826487
+          ],
+          "denominator_ci95_nll": [
+            2.671072910094494,
+            2.972615652702646
+          ],
+          "denominator_crosses_zero": false
+        }
+      },
+      "llama_exact_metadata_share_of_excess_mean_nll": {
+        "padding_excluded": {
+          "point": -0.03944031186760759,
+          "ci95": [
+            -0.2585625941016935,
+            0.12791382294950446
+          ],
+          "denominator_ci95_nll": [
+            0.009237659588033352,
+            0.01888034443820823
+          ],
+          "denominator_crosses_zero": false
+        },
+        "frozen_policy": {
+          "point": -0.011911221112225185,
+          "ci95": [
+            -0.22985482131680218,
+            0.13919904079761825
+          ],
+          "denominator_ci95_nll": [
+            0.011760840760216123,
+            0.02173052749577457
+          ],
+          "denominator_crosses_zero": false
+        }
+      },
+      "exact_metadata_layout_pool_ratio_over_bf16": 3.5555555555555554,
+      "notes": [
+        "Shares are ratios of differences in mean token NLL, conditional on the padding variant; they interact and are not additive",
+        "Llama: the ablation detects no effect of META8g64 (intervals include zero); this is not a statement of zero cost",
+        "Pod-vs-local recomputation differs in the last bits of 10 percentage fields (pod-vs-local-ulp-fields.json); all decisions are unchanged"
+      ]
+    },
+    "capacity_accounting": {
+      "evidence_class": "DERIVED from the page layout; agrees with the observed allocator capacity",
+      "closed_page_bytes_per_layer": "24.25*H*d (K3 payload 12Hd + V2 payload 8Hd + META8g64 4.25Hd)",
+      "bits_per_element_closed_pages": 3.03125,
+      "llama_bytes_per_token_all_layers": {
+        "rabit": 24832,
+        "bf16": 131072,
+        "fp8": 65536,
+        "tested_turboquant": 42816
+      },
+      "predicted_pool_ratio_rabit_over_bf16": 5.278350515463917,
+      "observed_pool_ratio_rabit_over_bf16": 5.278537697443413,
+      "per_sequence_side_state_outside_pool": "up to 96 KiB per layer (R4 16 KiB + open-group BF16 keys 64 KiB + open-group V2 codes and FP32 parameters 16 KiB) = 3 MiB per Llama-3.1-8B sequence",
+      "sequence_level_ratio_formula": "131072*N / (24832*N + 3145728) for an N-token Llama sequence",
+      "sequence_level_ratio_examples": {
+        "128": 2.6528497409326426,
+        "512": 4.231404958677686,
+        "1024": 4.697247706422019,
+        "4096": 5.12,
+        "8192": 5.197969543147208,
+        "32768": 5.258023106546855
+      }
+    },
+    "separation_of_claims": [
+      "Padding exclusion and exact metadata exist only in the logical evaluator; the serving engine runs the unchanged K3/V2/G32/R4/META8g64 operating point",
+      "Quality measured with those diagnostic arms must not be combined with the 5.28x capacity of the measured operating point; no system with both was built or measured",
+      "An exact-metadata (FP32 parameter) layout would give 3.56x over BF16 by the page arithmetic, not 5.28x"
+    ],
+    "run_limits": [
+      "One NVIDIA H100 80GB, eager mode, one frozen operating point",
+      "Current execution serializes per-request and per-token cache work; capacity does not translate into throughput on the tested workloads",
+      "Later prefill chunks process queries one at a time: 32,736-token prompts take a median 114.4 s TTFT versus 4.4 s for BF16",
+      "Qwen2.5-7B serves through untuned exact fallback paths",
+      "Serving-engine perplexity covers Llama-3.1-8B and WikiText-2 continuation only"
+    ]
   }
 }

@@ -1,0 +1,400 @@
+{
+  "source_commit": "45fd03d8c10f2c14f96dcaedfcad25c4f56fe746",
+  "model": {
+    "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+    "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+    "files": [
+      [
+        ".gitattributes",
+        1519,
+        "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"
+      ],
+      [
+        "LICENSE",
+        7627,
+        "64e1b2889b7892e6bbe7a7ed5bfe6ff793c61f9d584345f8f41cf9f5cb30a369"
+      ],
+      [
+        "README.md",
+        44044,
+        "ed0e2e86f7a40c38b793b0a04dfd993b2c1dfb34906804f96b999f0bbd8d70e6"
+      ],
+      [
+        "USE_POLICY.md",
+        4691,
+        "a568f2ebc73cec3fd74ba2afd992d4e945a8c7a9d851f9b66163aac834b7b859"
+      ],
+      [
+        "config.json",
+        855,
+        "29e4c210b0d6ac178b16b2a255a568bdb23b581e50ca1ef6a6d071dd85704e6e"
+      ],
+      [
+        "configuration.json",
+        48,
+        "a78221ae93dd8977b26fcd1d106fa5ad7e7f1fd3a7d93bfd9d6fba5ed00ec4d2"
+      ],
+      [
+        "generation_config.json",
+        184,
+        "189fb0c0d7fd8a527db217c0a60a0e013f0394cd8800f9697a666a9e75e5f7fd"
+      ],
+      [
+        "model-00001-of-00004.safetensors",
+        4976698672,
+        "2b1879f356aed350030bb40eb45ad362c89d9891096f79a3ab323d3ba5607668"
+      ],
+      [
+        "model-00002-of-00004.safetensors",
+        4999802720,
+        "09d433f650646834a83c580877bd60c6d1f88f7755305c12576b5c7058f9af15"
+      ],
+      [
+        "model-00003-of-00004.safetensors",
+        4915916176,
+        "fc1cdddd6bfa91128d6e94ee73d0ce62bfcdb7af29e978ddcab30c66ae9ea7fa"
+      ],
+      [
+        "model-00004-of-00004.safetensors",
+        1168138808,
+        "92ecfe1a2414458b4821ac8c13cf8cb70aed66b5eea8dc5ad9eeb4ff309d6d7b"
+      ],
+      [
+        "model.safetensors.index.json",
+        23950,
+        "146776fce3f6db1103aa6f249e65ee5544c5923ce6f971b092eee79aa6e5d37b"
+      ],
+      [
+        "original/consolidated.00.pth",
+        16060617592,
+        "ab33d910f405204e5d388bc3521503584800461dc96808e287821dd451c1edac"
+      ],
+      [
+        "original/params.json",
+        199,
+        "b15b6b31b2043c0400b028ecc25c8946e21d76ac260e9ac6a357ed8727c8865f"
+      ],
+      [
+        "original/tokenizer.model",
+        2183982,
+        "82e9d31979e92ab929cd544440f129d9ecd797b69e327f80f17e1c50d5551b55"
+      ],
+      [
+        "special_tokens_map.json",
+        296,
+        "6f38c73729248f6c127296386e3cdde96e254636cc58b4169d3fd32328d9a8ec"
+      ],
+      [
+        "tokenizer.json",
+        9085657,
+        "79e3e522635f3171300913bb421464a87de6222182a0570b9b2ccba2a964b2b4"
+      ],
+      [
+        "tokenizer_config.json",
+        55351,
+        "177c7b61e616fecb84c17ce0591acb92c6c4d60e9ac5ababfb940ff23bbcd424"
+      ]
+    ],
+    "historical_serving_revision": null,
+    "identity_note": "new serving pin matches canonical quality; old serving revision remains unknown"
+  },
+  "expected_image_packages": {
+    "torch": "2.11.0+cu130",
+    "transformers": "5.17.0",
+    "vllm": "0.10.0+kvquant",
+    "triton": "3.6.0",
+    "modelscope": "1.40.1",
+    "pytest": "9.1.1"
+  },
+  "hf_wheels": {
+    "huggingface_hub-0.36.2-py3-none-any.whl": "48f0c8eac16145dfce371e9d2d7772854a4f591bcb56c9cf548accf531d54270",
+    "tokenizers-0.21.4-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl": "51b7eabb104f46c1c50b486520555715457ae833d5aee9ff6ae853d1130506ff",
+    "transformers-4.48.2-py3-none-any.whl": "493bc5b0268b116eff305edf6656367fc89cf570e7a9d5891369e04751db698a"
+  },
+  "image_id": "im-wmzxMt1NV5d3jsopdKlrFj",
+  "cache_volume": "modelscope-llama31-cache",
+  "cache_model_path": "models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+  "cache_read_only": true,
+  "no_image_build": true,
+  "no_model_download": true,
+  "historical_serving_revision": null,
+  "resource_controls": {
+    "gpu": "H100!:1",
+    "cpu": [
+      4,
+      4
+    ],
+    "memory_mib": [
+      32768,
+      65536
+    ],
+    "retries": 0,
+    "max_containers": 1,
+    "startup_timeout": 120
+  },
+  "protocol": "e1b-n32-physical-v2",
+  "implementation": "n32-harness-v1",
+  "status": "registered_before_launch",
+  "inputs_sha256": "b1f90a924f0c8e12f4b4633e964a7d5f660bae9bd6c3cccc17ede6f6236d8670",
+  "frozen_protocol_sha256": "acd0f35d29581cbae019db7f8353fae6d2926cb32a01dfca9bf827f4d40c65ed",
+  "frozen_files": {
+    "inputs-n32.json": "b1f90a924f0c8e12f4b4633e964a7d5f660bae9bd6c3cccc17ede6f6236d8670",
+    "preregistration.json": "4656888cc352b3be78cf679d53a478f87e46f06046f611d8c221f6bbc8f9ab5f",
+    "analyze_n32.py": "038ee03dfc5839279ca4af1148d9caefec55285f294535894287edc251263d32",
+    "review_scores.py": "43318cd44c9e2b09caa3ebe875b20f98dc5d80f563bd2b3d0a214a871af735e1",
+    "freeze_protocol.py": "7c83df335945be26f7336a5006e13238afdeadf8fa2c09640b538af8ad48d060",
+    "reference_checks.py": "0b9eafa9e459a9c7c44dffbd0678f71ef111f506a4fc3777c76457afda6e8552",
+    "gpu_reference_diagnostic.py": "b963a4dc1581bf34da2f6f6f40e7541cab840fc1b04557f8d3732c018ffe6185",
+    "preregistration-v2.json": "acd0f35d29581cbae019db7f8353fae6d2926cb32a01dfca9bf827f4d40c65ed"
+  },
+  "cells": [
+    {
+      "dtype": "bfloat16",
+      "block_size": 32,
+      "max_model_len": 32768,
+      "max_num_seqs": 32,
+      "enable_prefix_caching": false,
+      "enable_chunked_prefill": true,
+      "gpu_memory_utilization": 0.82,
+      "enforce_eager": true,
+      "trust_remote_code": false,
+      "seed": 0,
+      "attention_config": {
+        "backend": "TRITON_ATTN"
+      },
+      "compilation_config": {
+        "mode": 0,
+        "cudagraph_mode": "NONE"
+      },
+      "model": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "kv_cache_dtype": "bfloat16",
+      "max_num_batched_tokens": 16384,
+      "logprobs_mode": "raw_logprobs"
+    },
+    {
+      "dtype": "bfloat16",
+      "block_size": 32,
+      "max_model_len": 32768,
+      "max_num_seqs": 32,
+      "enable_prefix_caching": false,
+      "enable_chunked_prefill": true,
+      "gpu_memory_utilization": 0.82,
+      "enforce_eager": true,
+      "trust_remote_code": false,
+      "seed": 0,
+      "attention_config": {
+        "backend": "TRITON_ATTN"
+      },
+      "compilation_config": {
+        "mode": 0,
+        "cudagraph_mode": "NONE"
+      },
+      "model": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "kv_cache_dtype": "rabit_kv2",
+      "max_num_batched_tokens": 16384,
+      "logprobs_mode": "raw_logprobs"
+    },
+    {
+      "dtype": "bfloat16",
+      "block_size": 32,
+      "max_model_len": 32768,
+      "max_num_seqs": 32,
+      "enable_prefix_caching": false,
+      "enable_chunked_prefill": true,
+      "gpu_memory_utilization": 0.82,
+      "enforce_eager": true,
+      "trust_remote_code": false,
+      "seed": 0,
+      "attention_config": {
+        "backend": "TRITON_ATTN"
+      },
+      "compilation_config": {
+        "mode": 0,
+        "cudagraph_mode": "NONE"
+      },
+      "model": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "kv_cache_dtype": "rabit_kv2",
+      "max_num_batched_tokens": 512,
+      "logprobs_mode": "raw_logprobs"
+    },
+    {
+      "dtype": "bfloat16",
+      "block_size": 32,
+      "max_model_len": 32768,
+      "max_num_seqs": 32,
+      "enable_prefix_caching": false,
+      "enable_chunked_prefill": true,
+      "gpu_memory_utilization": 0.82,
+      "enforce_eager": true,
+      "trust_remote_code": false,
+      "seed": 0,
+      "attention_config": {
+        "backend": "TRITON_ATTN"
+      },
+      "compilation_config": {
+        "mode": 0,
+        "cudagraph_mode": "NONE"
+      },
+      "model": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer": "/existing-models/models/LLM-Research--Meta-Llama-3.1-8B-Instruct/snapshots/359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "tokenizer_revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c",
+      "kv_cache_dtype": "bfloat16",
+      "max_num_batched_tokens": 512,
+      "logprobs_mode": "raw_logprobs"
+    }
+  ],
+  "order": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "scored_windows": 32,
+  "scored_tokens_per_cell": 4096,
+  "total_scored_tokens": 16384,
+  "primary_windows": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32
+  ],
+  "previously_inspected_windows": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "historical_logical_exposure": true,
+  "gpu_timeout_seconds": 7200,
+  "startup_timeout_seconds": 120,
+  "setup_timeout_seconds": 600,
+  "cell_timeout_seconds": 1500,
+  "hf_timeout_seconds": 600,
+  "retries": 0,
+  "max_containers": 1,
+  "output_bytes_limit": 2147483648,
+  "per_file_limit": 67108864,
+  "persistent_output_volume": true,
+  "result_volume_creation": "new unique named volume per attempt",
+  "result_volume_retention": "retained until explicit user-authorized removal; no automatic deletion",
+  "retention_estimate_days": 5,
+  "cost_estimate": {
+    "cold_build": 0,
+    "cached_image_startup_included": true,
+    "cpu_setup": 0,
+    "gpu_including_cpu_ram": 9.460023999999999,
+    "output_storage_five_days": 0.029999999999999995,
+    "raw_download_egress": 0.08,
+    "contingency": 1.75,
+    "total": 11.320023999999998,
+    "guaranteed_billing_cap": false,
+    "authorized_budget": null,
+    "no_rebuild_or_model_download_fallback": true
+  },
+  "oracle_attention_max_abs": 0.025,
+  "oracle_score_max_abs": 2e-05,
+  "bf16_hf_relative_tolerance": 0.005,
+  "tensor_retention": "Detailed tensors only for window1; all failing tensors; all-window online oracle events and full physical paths",
+  "d1_completion_sha256": "b8074ef6923d76789aa4ece32f33717ae4f63f2f2528fff1f0cba1a93ab025c4",
+  "d1_audit_sha256": "f15f866dea38b1ead123b6fba2cb400c6a1bdc981ceb6e8d6d8d78e510bfe0ef",
+  "d1_provenance_correction_sha256": "fad2d18cb83eea1fb37f46ab14e8d42d68cc49368f52b09690871d861465ef6e",
+  "authorization": "User authorized frozen N32 evaluation and necessary diagnosed debugging; no blind retries or changed scientific freeze",
+  "runtime_files": {
+    "budget_policy.py": "c5a9928c0d22e47436b2f0ff3362fc2bef7683f3ec7ffca324ca6669340abcd2",
+    "budget_runtime.py": "47c4c885a93ce68f2bd7338bb3f0628f96332c326f55daf3e7c08d247d845ac1",
+    "setup_runtime.py": "38e3b1479bd17bdc4ad2801a977f26de4aa3fd0bd56496efce082eb6d6429a01",
+    "core.py": "276ed1f9953c8d8dc53b96163b1a9c0019c7a029046f40acbb63a0bd57eadcf2",
+    "instrument.py": "03eff74404f657403de8d033e03a61d11a5ebcab46408632b34c4e97ea286e43",
+    "pilot_trace.py": "a5f38a1cd126ac6d3cdaf3c54cbf19c1d8cfeecc9604db7bfd71456d516667d6",
+    "pilot_sample.py": "d21da8d04c0e54e1463953fbae0c4f70876a4e6669356bedc8435e723a40a993",
+    "serving_quality_worker.py": "e05f7c22f0253eed91ea7fa19071b4da8fd292bcdc140746446cda193dbfeaa8",
+    "hf_control.py": "a2826ac0132ec03dcc574cefe3c7215c895455aef3ef25e2611ff85159836492",
+    "reference_checks.py": "0b9eafa9e459a9c7c44dffbd0678f71ef111f506a4fc3777c76457afda6e8552",
+    "gpu_reference_diagnostic.py": "b963a4dc1581bf34da2f6f6f40e7541cab840fc1b04557f8d3732c018ffe6185",
+    "d1_instrument.py": "72f3df4958c0642dacab52e99cd392d9989fb3bd032fc16ffbbc30b589983a26",
+    "d1_oracle.py": "8053d1f502f99ba845ae6320ffe43ff5756fb023018b4e46a4ffa160c62f116d",
+    "d1_modal.py": "35427b4c27a619507f84a278eb78dfc3d392a9c8b8b38bc747bb27bbda105249",
+    "n32_validate.py": "8385047f4e49df2db112a88707868750ea1a1a63de5b2ecd1cd9c68dbd1b04ed",
+    "manifest.py": "911be6f502a46c534e2081d648313c4dc9589d6dfed82bda2843ad7488011a25",
+    "run_n32.py": "5679ccf105d91b528f998f925332d795ce041ed03f1dad22738c1200d01a7142",
+    "source/tests/quantization/test_rabit_kv2_layout.py": "602941dd69c30f238cb7062df61425e906664b3237ba9962eb72a2f919939253",
+    "source/tests/quantization/test_rabit_kv2_physical.py": "f4985a6540ca43520e079b00288358bb4da3fb62829bb13bf27d93a1ac1fb4e4",
+    "source/tests/quantization/test_rabit_kv2_stage3b1.py": "4e16f54694700009c678d2ffc53ac593ac804352f8956ee3e1ecf060da904503",
+    "source/tests/quantization/test_rabit_kv2_stage3b2.py": "2e9806d8a1e91d4463ffd5a545822de985aa8e7a23c941d532c4de2a1d27527d",
+    "source/tests/quantization/test_rabit_kv2_stage3c.py": "31ca97adf773d81b5159a7ac6751968d17a17a2953bb8d2309b10bb4c088ec71",
+    "source/tests/quantization/test_rabit_kv2_stage4b1.py": "9cb5813bbab78c2b1f1cfe1a05b161b90dfb85a4d211473625a824df3c99da91",
+    "source/tests/quantization/test_rabit_kv2_stage4b1_exactmeta.py": "4e211d6430098bcb368cbbf5a9f3d1c89902d13c19b10b3a8b628148f27bb146",
+    "source/tests/quantization/test_rabit_kv2_stage4b2_exact_v2.py": "8d1e04475372bcbe6bb8db81d6bedf126cb31d3f768475ea57377707505d536b",
+    "source/tests/quantization/test_rabit_kv2_stage4b2_fixed.py": "b40a5485731aa442046754d4c4d7c2735370404ceeff17cc0cd1048a48678d89",
+    "source/tests/quantization/test_rabit_kv2_stage4b3_gqa4.py": "745e397d4db860f40ba2a3b1a1e580d953480125e5f3db338649beff70a4b1ec",
+    "source/tests/quantization/test_rabit_kv2_stage4b4_causal_prefill.py": "88150318c061b907b3e3b2abc03f4032e6842d20fbb2044f46eecd2a50accaef",
+    "source/vllm/v1/kv_cache_interface.py": "b845a4ae8d3ac3e3b60745f8f1815d78cea7fdfe2e5110bb52ccbc9c72f99303",
+    "source/vllm/v1/attention/backends/triton_attn.py": "f6dbdc486ef7b447cf0c1fd9dd12c08f12b24144be20a6648dc818c45ac8ea19",
+    "source/vllm/v1/attention/ops/kvquant_k3.py": "fc2f9858e400a57558140da405a0c3cb59368009f019cc84dbdae5dea64b50a3",
+    "source/vllm/v1/attention/ops/rabit_kv2.py": "108ba8afaac862bc4e070d2dc812493aaeae4e458837c4bda2ac703e72a57524",
+    "source/vllm/v1/worker/gpu/model_runner.py": "9aff727a93a0bc244a16796b713ed91a951445c9229812b66afc58e22c6e1645",
+    "source/vllm/v1/worker/gpu/sample/sampler.py": "f0777ab2f71522dcf0aeee6048edd0ef84b5ed102fdd36f77f93b03bdf00fa57",
+    "assets/assets.json": "c8e596da53bc9a56384b46cff163b9cb2110d6afa5ff706726f93a49f7ba13fb",
+    "assets/canonical_ppl_core.py": "408f01552882cdf5d9750f44c496c87c077e8615bcd4b1fa945155452e81ef44",
+    "assets/canonical_rabit_quality.py": "195cb4896c4708cc6ecc450930733962ea3e08e21440fc9406dedbe1bb4c11d5",
+    "assets/exp3_correctness_gate.py": "2f7239b282c5d0b93fb96ef97d14e15524ae81757256c3c11f13f8ff8b6a8cce",
+    "assets/inputs.json": "b1f90a924f0c8e12f4b4633e964a7d5f660bae9bd6c3cccc17ede6f6236d8670",
+    "assets/model_manifest.json": "5034bb2d7c81aa79f887ba9751123ffde59a17443c58cdf1329fb98794d6952a",
+    "assets/tokenizer.json": "79e3e522635f3171300913bb421464a87de6222182a0570b9b2ccba2a964b2b4",
+    "assets/vllm.zip": "e5cbf225fa93884e1db634884b47a7515fa8115a7aceccc7514bd07b9b170a9b",
+    "assets/wikitext-test.txt": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0",
+    "frozen/analyze_n32.py": "038ee03dfc5839279ca4af1148d9caefec55285f294535894287edc251263d32",
+    "frozen/freeze-sha256.json": "29b41ee31d3e7642f97b7826728b221be92beb8c6fb64acd47e6f6fc76025881",
+    "frozen/freeze-v2-sha256.json": "60a5c6649bd042eb60f1d13813a6be5574585b13afe235aa34106026b167eb0d",
+    "frozen/freeze_protocol.py": "7c83df335945be26f7336a5006e13238afdeadf8fa2c09640b538af8ad48d060",
+    "frozen/gpu_reference_diagnostic.py": "b963a4dc1581bf34da2f6f6f40e7541cab840fc1b04557f8d3732c018ffe6185",
+    "frozen/inputs-n32.json": "b1f90a924f0c8e12f4b4633e964a7d5f660bae9bd6c3cccc17ede6f6236d8670",
+    "frozen/preregistration-v2.json": "acd0f35d29581cbae019db7f8353fae6d2926cb32a01dfca9bf827f4d40c65ed",
+    "frozen/preregistration.json": "4656888cc352b3be78cf679d53a478f87e46f06046f611d8c221f6bbc8f9ab5f",
+    "frozen/reference_checks.py": "0b9eafa9e459a9c7c44dffbd0678f71ef111f506a4fc3777c76457afda6e8552",
+    "frozen/review_scores.py": "43318cd44c9e2b09caa3ebe875b20f98dc5d80f563bd2b3d0a214a871af735e1"
+  },
+  "local_audit_files": {
+    "test_n32.py": "29f46bda2f998f774c136aa6338941d1f3a3ac4bd5af94e18003330e7ff26b55",
+    "audit_n32.py": "ce969807a11426ac05ad3d83b0ed388155708c02d2c98fa6cb559a62bc54d2ac"
+  },
+  "orchestration": "detached spawn; independent retrieval; explicit app cleanup",
+  "detached_check_sha256": "2d0c49d0ebeafff628acd4e319821c88290318a636ad7d1a52d264b910c8e633",
+  "attempt001_exposure": "Partial prior attempt: BF16 single windows1-32; packed single1-23 plus88 tokens of24; never pooled",
+  "registered_utc": "2026-10-21T13:33:07.702919+00:00",
+  "result_volume_name": "rabit-n32-20261020-attempt-002-ca573136"
+}

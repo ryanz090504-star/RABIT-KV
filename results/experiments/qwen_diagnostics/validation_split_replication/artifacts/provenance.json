@@ -1,0 +1,209 @@
+{
+  "hardware": "NVIDIA H100 80GB HBM3, 81559, 595.91.07",
+  "torch": "2.11.0+cu130",
+  "cuda": "13.0",
+  "transformers": "4.48.2",
+  "python": "3.11.12 (main, May 21 2025, 23:34:13) [GCC 12.2.0]",
+  "files": {
+    "canonical_ppl_core.py": "dedbc68e7904569f18307d92a9b555bdf4d44237293ac896c11fb738d3c2c9b5",
+    "canonical_ppl_identity.py": "c8294974a53e00f3f8f362953a8cbe7ad5ffaf42e3387cc162843fd985598bef",
+    "canonical_quality_parity_tests.py": "6f970032642f47b30ee8de62a5a63bf4429f42e22b3685d29f2b3601e9e29096",
+    "canonical_rabit_quality.py": "4a786a3d2f4feb28c1731c2ff63baa411c8a6afdd0ab6e03d01e27381b25cd13",
+    "exp14_model_snapshot.py": "c1f64b3c7a431851b6bdbe86ef2c189d4b09f0bf54173fe9c0ab8944bcd15ca8",
+    "gpu_diag.py": "ddbf6109e48975facc367121bf59a4543ddcbd292d372ea97be45e6157e6448d",
+    "kvquant_k3.py": "fc2f9858e400a57558140da405a0c3cb59368009f019cc84dbdae5dea64b50a3",
+    "registration.json": "d27086605ba8ee2b6ec543b9805209520d2ac16b84615259d36f716280ed22be",
+    "wikitext.txt": "d790b833ef8cf03a90db7bf1271b7520b83c45ce07ba3c1a9699df81e239eca0",
+    "wikitext2-valid.txt": "f0737ed31fc1329026e95cb8b98e19c2a182c39c240ab909dc31abf2f8af58e8"
+  },
+  "registration": {
+    "attempt": "RUNPOD-QWEN-H001R",
+    "kind": "Pre-specified replication of two post-hoc logical-evaluator findings on the WikiText-2 validation split; not held-out, unseen-input or confirmatory validation (see input_status); not canonical, not serving, not a deployable policy",
+    "registered_before_any_replication_window_score": true,
+    "input_status": {
+      "split": "WikiText-2 validation (pytorch/examples valid.txt)",
+      "disjointness": "no 32-token sequence shared with the full test-split token stream and no shared line of 40+ characters (offline gates)",
+      "recorded_project_use": "none found in git history, local files, shell history or available agent transcripts",
+      "prior_exposure_excludable": false,
+      "why_not_excludable": "unrecoverable 2026-05-03 GPT-2 session that downloaded all WikiText-2 splits; transcripts before 2026-09-24, ChatGPT conversations, deleted scripts and remote provider logs not inspectable",
+      "audit": {
+        "file": "holdout-001/validation-split-audit/AUDIT.md",
+        "sha256": "cc04e78db5fbbdf693c15b0c9aa4b4c34038dab85d276f4f104b93261f26a73c"
+      },
+      "claim_scope": "replication only; no unseen-input, held-out or confirmatory claim is made from this run"
+    },
+    "replication_data": {
+      "source": "pytorch/examples word_language_model/data/wikitext-2/valid.txt",
+      "url": "https://raw.githubusercontent.com/pytorch/examples/d5678bc8ac0cdd79dbd5e44d4130271018bcec4e/word_language_model/data/wikitext-2/valid.txt",
+      "commit": "d5678bc8ac0cdd79dbd5e44d4130271018bcec4e",
+      "bytes": 1121681,
+      "sha256": "f0737ed31fc1329026e95cb8b98e19c2a182c39c240ab909dc31abf2f8af58e8",
+      "sibling_test_split_equals_canonical": true,
+      "construction": "frozen legacy protocol: non-empty stripped lines, 64-line blocks, no special tokens, first 32 x (1024+128) tokens, consecutive non-overlapping windows",
+      "token_pool_sha256": {
+        "llama3_1_8b": "7b1140d750fbbf6ee496fcb25564059704a66d59c36f25fac6372b3b7187bf04",
+        "qwen2_5_7b": "32cc9e1cf1476347de2237daec9c78096429072827a57c08a6d16b3418b31de0"
+      }
+    },
+    "windows": {
+      "qwen2_5_7b": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32
+      ],
+      "llama3_1_8b": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32
+      ]
+    },
+    "selection": "All 32 validation-split windows, fixed before scoring, no exclusions and no outcome-dependent selection.",
+    "arms": [
+      "bf16",
+      "rabit",
+      "passthrough",
+      "oracle",
+      "range_real",
+      "oracle_range",
+      "k_exact",
+      "oracle_k",
+      "open_exact",
+      "oracle_open",
+      "closed_exact",
+      "oracle_closed"
+    ],
+    "scientific_arms": [
+      "bf16",
+      "rabit",
+      "range_real",
+      "k_exact",
+      "open_exact",
+      "closed_exact"
+    ],
+    "arm_definitions": {
+      "bf16": "Exact K and V native cache",
+      "range_real": "K3 excludes artificial padding zeros; frozen V2/META8 and R4",
+      "k_exact": "All K exact; frozen V2/META8 and R4",
+      "open_exact": "Only unfinished old K group exact; completed K groups padding-exclusion K3; frozen V2/META8 and exact R4",
+      "closed_exact": "Only completed old K groups exact; unfinished K group padding-exclusion K3; frozen V2/META8 and exact R4",
+      "rabit": "Frozen policy: K3 with zero-padded open group, V2, META8, R4 (canonical)"
+    },
+    "group_definition": "For length N, old=max(N-4,0); completed=[0,32*floor(old/32)); unfinished=[32*floor(old/32),old); residual=[old,N). Reclassify each decode; exact unfinished tokens become quantized when their page closes in open_exact.",
+    "controls": "Window 1: pass-through equals bf16 and each oracle replay equals its arm, bitwise; same-device oracle checkpoints for every quantized arm",
+    "anchor_arms": [
+      "bf16",
+      "range_real",
+      "k_exact"
+    ],
+    "anchors": "Canonical WikiText-2 test window 1 for bf16, range_real and k_exact, compared bitwise with attempt 008 (environment fingerprint); excluded from all analysis",
+    "checkpoint_steps": [
+      1,
+      4,
+      5,
+      31,
+      32,
+      33,
+      36,
+      64,
+      127
+    ],
+    "backend": "fixed FLASH_ATTENTION",
+    "intervention": "Only incomplete K group padding repeats last real token for extrema; codes/decode and META8 otherwise unchanged; an independently modified packed oracle and separate NumPy reference validate semantics. Padding is never attended.",
+    "source_commit": "8648b77552bb8d3cf756070e10838c5a8000af30",
+    "models": {
+      "llama3_1_8b": {
+        "model_id": "LLM-Research/Meta-Llama-3.1-8B-Instruct",
+        "revision": "359efdbb8af05b788a4ad4185215c6b8caa9052c"
+      },
+      "qwen2_5_7b": {
+        "model_id": "Qwen/Qwen2.5-7B-Instruct",
+        "revision": "16c174980d8a1492910551634b4969e69cdc2444"
+      }
+    },
+    "execution": "single H100 80GB HBM3 Pod, scientific retries zero; any rerun repeats this registration byte for byte and every attempt is reported",
+    "analysis": {
+      "script": "prereg_analysis.py (frozen; sha256 in preregistration-manifest.json)",
+      "bootstrap_seed": 20261024,
+      "bootstrap_replicates": 20000,
+      "resampling_unit": "paired window",
+      "decision_interval": "two-sided 97.5% percentile (Bonferroni over H1 and H2)",
+      "reported_interval": "95% percentile",
+      "primary_replication_criteria": {
+        "H1_padding_exclusion_qwen": "range_real vs rabit 97.5% CI upper < 0, AND fraction of frozen excess NLL removed, mean(rabit-range_real)/mean(rabit-bf16), has 97.5% CI lower bound >= 0.80",
+        "H2_closed_page_localization_qwen": "k_exact vs range_real 97.5% CI upper < 0, AND closed_exact vs range_real 97.5% CI upper < 0, AND closed fraction mean(range_real-closed_exact)/mean(range_real-k_exact) 97.5% CI lower >= 0.75, AND open fraction 97.5% CI upper <= 0.25"
+      },
+      "secondary": {
+        "S1_llama_noninferiority": "range_real vs rabit 95% CI upper <= +0.5% PPL (no material harm); secondary, not a primary replication criterion"
+      },
+      "descriptive": "All other contrasts, both models; Llama gap fractions are reported but not interpreted if the denominator interval crosses zero",
+      "thresholds_rationale": "Set below the post-hoc estimates (0.949 [0.938, 0.960]; 1.016 [0.913, 1.073]; -0.017 [-0.097, 0.074]) so that the test asks whether the qualitative finding replicates on windows disjoint from those that produced the estimates, not whether its magnitude is matched",
+      "failure_rule": "If any validity control or anchor fails, no replication decision is made from the run",
+      "decision_labels": "H1 and H2 are each reported as replication criteria met or replication criteria not met, never as confirmed"
+    },
+    "interpretation_limits": [
+      "logical evaluator only; serving engine unchanged and not scored",
+      "fixed FLASH_ATTENTION backend, not the canonical automatic-backend configuration",
+      "exact-K arms are BF16-key diagnostic controls, not deployable policies",
+      "single corpus (WikiText-2); other domains untested",
+      "both models may have seen Wikipedia text in pretraining; this affects all arms equally and is not controlled"
+    ]
+  }
+}

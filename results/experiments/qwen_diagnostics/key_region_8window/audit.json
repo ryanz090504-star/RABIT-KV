@@ -1,0 +1,523 @@
+{
+  "post_hoc": true,
+  "attempt": "010",
+  "analysis": {
+    "bootstrap_seed": 20261022,
+    "bootstrap_replicates": 20000,
+    "confidence": 0.95,
+    "resampling_unit": "paired window",
+    "primary_contrasts": [
+      "open_exact vs range_real",
+      "closed_exact vs range_real",
+      "k_exact vs range_real",
+      "range_real vs bf16",
+      "open_exact vs bf16",
+      "closed_exact vs bf16"
+    ],
+    "interpretation": "Effects are interventions with propagated activation changes, not an additive loss decomposition. Report all individual paired effects and fraction of range-vs-exactK gap removed; no equivalence threshold."
+  },
+  "models": {
+    "qwen2_5_7b": {
+      "windows": [
+        1,
+        5,
+        9,
+        13,
+        17,
+        21,
+        25,
+        29
+      ],
+      "rows_audited": 45,
+      "token_losses_audited": 5760,
+      "max_reduction_rounding": 2.6374091248726472e-05,
+      "five_bitwise_controls": true,
+      "four_policy_oracle_checkpoints_each": 252,
+      "repeats008_bitwise": {
+        "bf16": true,
+        "range_real": true,
+        "k_exact": true
+      },
+      "ppl": {
+        "bf16": 8.003052530820831,
+        "range_real": 8.955956219619269,
+        "k_exact": 8.099740488561213,
+        "open_exact": 8.971333942984645,
+        "closed_exact": 8.08702249497659
+      },
+      "contrasts": {
+        "range_real_vs_bf16": {
+          "delta_nll": [
+            0.017807789428136545,
+            0.056686938339339576,
+            0.16842667963211966,
+            0.15022357731161406,
+            0.1689891145276512,
+            0.24486375060126875,
+            0.08973564798645839,
+            0.0032327028496297316
+          ],
+          "mean_delta_nll": 0.11249577508452724,
+          "ppl_relative_pct": 11.906752893707486,
+          "paired_bootstrap_95_pct": [
+            6.0121142383180946,
+            18.141763711596155
+          ],
+          "improved_windows": 0,
+          "worsened_windows": 8
+        },
+        "range_real_vs_k_exact": {
+          "delta_nll": [
+            0.007394280546900944,
+            0.041233670173141945,
+            0.15174847852595974,
+            0.12208243738409408,
+            0.14350890652155002,
+            0.23066038851447956,
+            0.10646321876176046,
+            0.0008029205570778686
+          ],
+          "mean_delta_nll": 0.10048678762312058,
+          "ppl_relative_pct": 10.570903256310975,
+          "paired_bootstrap_95_pct": [
+            5.049858145544731,
+            16.435979594942253
+          ],
+          "improved_windows": 0,
+          "worsened_windows": 8
+        },
+        "k_exact_vs_bf16": {
+          "delta_nll": [
+            0.0104135088812356,
+            0.015453268166197631,
+            0.016678201106159918,
+            0.028141139927519987,
+            0.02548020800610118,
+            0.014203362086789184,
+            -0.01672757077530207,
+            0.002429782292551863
+          ],
+          "mean_delta_nll": 0.012008987461406662,
+          "ppl_relative_pct": 1.208138486758961,
+          "paired_bootstrap_95_pct": [
+            0.20704621358348863,
+            2.039471163816679
+          ],
+          "improved_windows": 1,
+          "worsened_windows": 7
+        },
+        "k_exact_vs_range_real": {
+          "delta_nll": [
+            -0.007394280546900944,
+            -0.041233670173141945,
+            -0.15174847852595974,
+            -0.12208243738409408,
+            -0.14350890652155002,
+            -0.23066038851447956,
+            -0.10646321876176046,
+            -0.0008029205570778686
+          ],
+          "mean_delta_nll": -0.10048678762312058,
+          "ppl_relative_pct": -9.560293843134204,
+          "paired_bootstrap_95_pct": [
+            -14.115894118055069,
+            -4.807106106272168
+          ],
+          "improved_windows": 8,
+          "worsened_windows": 0
+        },
+        "open_exact_vs_bf16": {
+          "delta_nll": [
+            0.02251101460663918,
+            0.05667479508272777,
+            0.1949886607957012,
+            0.14631801330738625,
+            0.170616334990914,
+            0.251362240040109,
+            0.07268007639842722,
+            -0.0014604044042130226
+          ],
+          "mean_delta_nll": 0.11421134135221145,
+          "ppl_relative_pct": 12.098901118477373,
+          "paired_bootstrap_95_pct": [
+            5.8474209136064195,
+            18.91494976936155
+          ],
+          "improved_windows": 1,
+          "worsened_windows": 7
+        },
+        "open_exact_vs_range_real": {
+          "delta_nll": [
+            0.004703225178502635,
+            -1.2143256611807374e-05,
+            0.02656198116358155,
+            -0.003905564004227813,
+            0.0016272204632628018,
+            0.006498489438840238,
+            -0.01705557158803117,
+            -0.004693107253842754
+          ],
+          "mean_delta_nll": 0.0017155662676842098,
+          "ppl_relative_pct": 0.17170386933878493,
+          "paired_bootstrap_95_pct": [
+            -0.5788694797387174,
+            1.0214295322883056
+          ],
+          "improved_windows": 4,
+          "worsened_windows": 4
+        },
+        "open_exact_vs_k_exact": {
+          "delta_nll": [
+            0.012097505725403579,
+            0.04122152691653014,
+            0.1783104596895413,
+            0.11817687337986627,
+            0.14513612698481282,
+            0.2371588779533198,
+            0.08940764717372929,
+            -0.0038901866967648857
+          ],
+          "mean_delta_nll": 0.10220235389080479,
+          "ppl_relative_pct": 10.760757775564905,
+          "paired_bootstrap_95_pct": [
+            4.984364465879749,
+            17.02963125078118
+          ],
+          "improved_windows": 1,
+          "worsened_windows": 7
+        },
+        "closed_exact_vs_bf16": {
+          "delta_nll": [
+            0.0052314146103817905,
+            0.018240410262734486,
+            0.013325145066062305,
+            0.01302585212037144,
+            0.018460877537702203,
+            0.001138226903975692,
+            -0.0002504632184923139,
+            0.01432918053518506
+          ],
+          "mean_delta_nll": 0.010437580477240083,
+          "ppl_relative_pct": 1.0492242032946786,
+          "paired_bootstrap_95_pct": [
+            0.5523958642143719,
+            1.508199025769946
+          ],
+          "improved_windows": 1,
+          "worsened_windows": 7
+        },
+        "closed_exact_vs_range_real": {
+          "delta_nll": [
+            -0.012576374817754754,
+            -0.03844652807660509,
+            -0.15510153456605735,
+            -0.13719772519124263,
+            -0.150528236989949,
+            -0.24372552369729306,
+            -0.0899861112049507,
+            0.011096477685555328
+          ],
+          "mean_delta_nll": -0.10205819460728716,
+          "ppl_relative_pct": -9.70229982521754,
+          "paired_bootstrap_95_pct": [
+            -14.61620593670995,
+            -4.614169342054552
+          ],
+          "improved_windows": 7,
+          "worsened_windows": 1
+        },
+        "closed_exact_vs_k_exact": {
+          "delta_nll": [
+            -0.00518209427085381,
+            0.0027871420965368543,
+            -0.003353056040097613,
+            -0.015115287807148547,
+            -0.0070193304683989766,
+            -0.013065135182813492,
+            0.016477107556809756,
+            0.011899398242633197
+          ],
+          "mean_delta_nll": -0.001571406984166579,
+          "ppl_relative_pct": -0.15701729706754095,
+          "paired_bootstrap_95_pct": [
+            -0.8565712785938545,
+            0.5974268600025863
+          ],
+          "improved_windows": 5,
+          "worsened_windows": 3
+        }
+      },
+      "gap_fractions": {
+        "open_exact": {
+          "fraction_range_vs_exactK_gap_removed": -0.017072555589283087,
+          "bootstrap_95": [
+            -0.09685826512404114,
+            0.0744428276021462
+          ],
+          "denominator_crosses_zero": false,
+          "caution": "Ratio unstable when denominator near zero; do not interpret as additive attribution."
+        },
+        "closed_exact": {
+          "fraction_range_vs_exactK_gap_removed": 1.0156379462547873,
+          "bootstrap_95": [
+            0.9132514716667226,
+            1.07322732290029
+          ],
+          "denominator_crosses_zero": false,
+          "caution": "Ratio unstable when denominator near zero; do not interpret as additive attribution."
+        }
+      }
+    },
+    "llama3_1_8b": {
+      "windows": [
+        1,
+        5,
+        9,
+        13,
+        17,
+        21,
+        25,
+        29
+      ],
+      "rows_audited": 45,
+      "token_losses_audited": 5760,
+      "max_reduction_rounding": 2.9246089980006218e-05,
+      "five_bitwise_controls": true,
+      "four_policy_oracle_checkpoints_each": 288,
+      "repeats008_bitwise": {
+        "bf16": true,
+        "range_real": true,
+        "k_exact": true
+      },
+      "ppl": {
+        "bf16": 7.399218251411449,
+        "range_real": 7.478932296091178,
+        "k_exact": 7.493612703124457,
+        "open_exact": 7.498148217268656,
+        "closed_exact": 7.507393383293918
+      },
+      "contrasts": {
+        "range_real_vs_bf16": {
+          "delta_nll": [
+            0.0360090997663276,
+            0.013253450943807366,
+            0.008746039309389886,
+            -0.0011594892103232723,
+            0.008847130976846529,
+            0.001419780162564166,
+            0.022109119378001196,
+            -0.0034996296856206754
+          ],
+          "mean_delta_nll": 0.0107156877051241,
+          "ppl_relative_pct": 1.0773306310368853,
+          "paired_bootstrap_95_pct": [
+            0.2889942961033544,
+            1.989401843996152
+          ],
+          "improved_windows": 2,
+          "worsened_windows": 6
+        },
+        "range_real_vs_k_exact": {
+          "delta_nll": [
+            0.006035440621370292,
+            0.00027474975070163055,
+            -0.00795899813824974,
+            -0.00020548698284983402,
+            -0.008194042045374772,
+            -0.0024404930566106486,
+            -0.0036269939791964134,
+            0.0004280040363937587
+          ],
+          "mean_delta_nll": -0.001960977474226966,
+          "ppl_relative_pct": -0.19590560140849908,
+          "paired_bootstrap_95_pct": [
+            -0.4953422322615304,
+            0.1107771327851442
+          ],
+          "improved_windows": 5,
+          "worsened_windows": 3
+        },
+        "k_exact_vs_bf16": {
+          "delta_nll": [
+            0.02997365914495731,
+            0.012978701193105735,
+            0.016705037447639626,
+            -0.0009540022274734383,
+            0.0170411730222213,
+            0.0038602732191748146,
+            0.02573611335719761,
+            -0.003927633722014434
+          ],
+          "mean_delta_nll": 0.012676665179351065,
+          "ppl_relative_pct": 1.2757354696896614,
+          "paired_bootstrap_95_pct": [
+            0.48561152930516976,
+            2.0522236079722864
+          ],
+          "improved_windows": 2,
+          "worsened_windows": 6
+        },
+        "k_exact_vs_range_real": {
+          "delta_nll": [
+            -0.006035440621370292,
+            -0.00027474975070163055,
+            0.00795899813824974,
+            0.00020548698284983402,
+            0.008194042045374772,
+            0.0024404930566106486,
+            0.0036269939791964134,
+            -0.0004280040363937587
+          ],
+          "mean_delta_nll": 0.001960977474226966,
+          "ppl_relative_pct": 0.19629014479716958,
+          "paired_bootstrap_95_pct": [
+            -0.1106545528442073,
+            0.49780808594683795
+          ],
+          "improved_windows": 3,
+          "worsened_windows": 5
+        },
+        "open_exact_vs_bf16": {
+          "delta_nll": [
+            0.03350270972044456,
+            0.01120937423036139,
+            0.02288631486594639,
+            0.0048310667512794225,
+            0.02145223060938406,
+            -0.008416083207151814,
+            0.020250561321518035,
+            0.0005376878177685285
+          ],
+          "mean_delta_nll": 0.013281732763693821,
+          "ppl_relative_pct": 1.337032676909282,
+          "paired_bootstrap_95_pct": [
+            0.43286129264406653,
+            2.2268504376833897
+          ],
+          "improved_windows": 1,
+          "worsened_windows": 7
+        },
+        "open_exact_vs_range_real": {
+          "delta_nll": [
+            -0.0025063900458830446,
+            -0.0020440767134459747,
+            0.014140275556556503,
+            0.005990555961602695,
+            0.01260509963253753,
+            -0.00983586336971598,
+            -0.0018585580564831616,
+            0.004037317503389204
+          ],
+          "mean_delta_nll": 0.0025660450585697214,
+          "ppl_relative_pct": 0.2569340170056413,
+          "paired_bootstrap_95_pct": [
+            -0.25031360748415643,
+            0.7904743378300889
+          ],
+          "improved_windows": 4,
+          "worsened_windows": 4
+        },
+        "open_exact_vs_k_exact": {
+          "delta_nll": [
+            0.003529050575487247,
+            -0.0017693269627443442,
+            0.006181277418306763,
+            0.005785068978752861,
+            0.004411057587162759,
+            -0.012276356426326629,
+            -0.005485552035679575,
+            0.004465321539782963
+          ],
+          "mean_delta_nll": 0.0006050675843427555,
+          "ppl_relative_pct": 0.06052506746590432,
+          "paired_bootstrap_95_pct": [
+            -0.40152125060376515,
+            0.4380190610385991
+          ],
+          "improved_windows": 3,
+          "worsened_windows": 5
+        },
+        "closed_exact_vs_bf16": {
+          "delta_nll": [
+            0.023320061249028967,
+            0.009582949567004562,
+            0.009733809124213622,
+            0.002823135876099059,
+            0.03204064999943057,
+            0.016427259161133634,
+            0.02466165644091234,
+            -0.0024777895253009774
+          ],
+          "mean_delta_nll": 0.014513966486565222,
+          "ppl_relative_pct": 1.461980552632454,
+          "paired_bootstrap_95_pct": [
+            0.7015548212499677,
+            2.235257695412438
+          ],
+          "improved_windows": 1,
+          "worsened_windows": 7
+        },
+        "closed_exact_vs_range_real": {
+          "delta_nll": [
+            -0.012689038517298634,
+            -0.003670501376802804,
+            0.0009877698148237357,
+            0.003982625086422331,
+            0.02319351902258404,
+            0.015007478998569468,
+            0.002552537062911142,
+            0.001021840160319698
+          ],
+          "mean_delta_nll": 0.0037982787814411223,
+          "ppl_relative_pct": 0.3805501383882587,
+          "paired_bootstrap_95_pct": [
+            -0.30172274505132657,
+            1.113316572974562
+          ],
+          "improved_windows": 2,
+          "worsened_windows": 6
+        },
+        "closed_exact_vs_k_exact": {
+          "delta_nll": [
+            -0.006653597895928343,
+            -0.0033957516261011733,
+            -0.006971228323426004,
+            0.003777138103572497,
+            0.01499947697720927,
+            0.01256698594195882,
+            -0.0010744569162852713,
+            0.0014498441967134568
+          ],
+          "mean_delta_nll": 0.0018373013072141564,
+          "ppl_relative_pct": 0.18389901794248925,
+          "paired_bootstrap_95_pct": [
+            -0.3190191281031676,
+            0.7328472867254531
+          ],
+          "improved_windows": 4,
+          "worsened_windows": 4
+        }
+      },
+      "gap_fractions": {
+        "open_exact": {
+          "fraction_range_vs_exactK_gap_removed": 1.3085540717805941,
+          "bootstrap_95": [
+            -6.869138338564793,
+            8.752476002717666
+          ],
+          "denominator_crosses_zero": true,
+          "caution": "Ratio unstable when denominator near zero; do not interpret as additive attribution."
+        },
+        "closed_exact": {
+          "fraction_range_vs_exactK_gap_removed": 1.936931367831462,
+          "bootstrap_95": [
+            -6.32211660150851,
+            9.868327192269023
+          ],
+          "denominator_crosses_zero": true,
+          "caution": "Ratio unstable when denominator near zero; do not interpret as additive attribution."
+        }
+      }
+    }
+  }
+}

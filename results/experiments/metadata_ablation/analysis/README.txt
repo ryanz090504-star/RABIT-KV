@@ -1,0 +1,1 @@
+a001-table.tex in this folder is the r11 regeneration of ../analysis/a001-table.tex with one label corrected (range_meta_exact_vs_range_real: 'Padding excl. + exact metadata vs. padding excl.', previously 'Exact metadata vs. padding excl.'). a001-numbers.json is byte-identical to ../analysis/. The original ../analysis/ files are kept unchanged.
