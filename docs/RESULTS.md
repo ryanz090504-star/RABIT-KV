@@ -1,0 +1,116 @@
+# RABIT-KV results (October 2026 release)
+
+These sections record the **October 2026 release**: the released K3/V2/G32/R4/META8g64 operating point and its evidence, moved here unchanged from the earlier README (only relative links were adjusted for the new location). The [November 2026 research report](research/KV_CACHE_UPDATE_QWEN_LLAMA.md) separately evaluates research patches (the padding fix and BF16 key minima) that are not part of the released engine; its results are not mixed into the sections below.
+
+## Matched serving results
+
+Llama-3.1-8B-Instruct, one NVIDIA H100 80GB HBM3, eager execution, single request, 2,048 prompt tokens and 32 output tokens. Latencies are medians of the two leg medians; each leg has 30 measured requests. These are descriptive statistics without confidence intervals.
+
+| Cache | Observed allocator capacity (tokens) | TPOT (ms/token) | TTFT (ms) |
+|---|---:|---:|---:|
+| BF16 | 393,024 | 24.19 | 59.99 |
+| Native per-tensor FP8 e4m3 | 785,568 | 25.75 | 63.43 |
+| Tested TurboQuant K3/V4 | 1,203,200 | 27.79 | 55.03 |
+| RABIT-KV | 2,074,592 | 30.10 | 144.65 |
+
+RABIT-KV TPOT is **24.42% higher than BF16** and **8.33% higher than tested TurboQuant**, computed from unrounded values. TurboQuant uses `turboquant_k3v4_nc`: 28 quantized layers and four BF16 boundary layers. Its own backend plus FlashAttention v2 on those boundary layers differs from the Triton backend used by the other methods. This is a matched, method-native **system comparison**, not an isolated quantizer-kernel comparison, quality comparison, or throughput claim.
+
+Source: [matched serving summary](../results/experiments/matched_serving_baselines/exp13/matched_capacity_latency_summary.json). All methods use the same patched vLLM snapshot, including the recorded upstream TurboQuant cache-dtype dispatch fix; details are in [reproducibility](../docs/REPRODUCIBILITY.md).
+
+Capacity is the live engine's allocated blocks times block size. It measures the paged pool and excludes per-sequence residual/open-group state outside that pool; it is neither total-device-memory compression nor a throughput multiplier.
+
+## Canonical quality
+
+These results use a validated logical Hugging Face evaluator of stored-cache representation and online aging, separately from physical serving. Serving-engine perplexity, measured separately, is reported [below](#serving-engine-perplexity); the two are never pooled.
+
+| Model / task | BF16 | Canonical RABIT | Outcome |
+|---|---:|---:|---|
+| Llama-3.1-8B WikiText-2 continuation PPL | 7.515 | 7.633 | +1.56%; paired 95% CI [+1.12%, +2.05%] |
+| Qwen2.5-7B WikiText-2 continuation PPL | 6.787 | 112.39 | +1555.9%; paired 95% CI [+1320%, +1828%] |
+| Llama NIAH | 57/57 | 57/57 | No score loss on this deterministic grid |
+| Llama Passage Retrieval | 100.0% | 100.0% | 200 examples; saturated scores |
+| Llama HotpotQA, primary scorer | 59.30 F1 | 58.27 F1 | −1.03 points; paired 95% CI [−4.24, +2.20] |
+| Llama HotpotQA, official secondary scorer | 59.85 F1 | 58.71 F1 | −1.14 points; paired 95% CI [−4.30, +2.03] |
+
+Continuation PPL uses 32 paired windows, 1,024 context tokens and 128 scored tokens per window. HotpotQA uses 100 examples from the pinned 8k+ subset. Its primary scorer retains historical article handling; the secondary scorer uses the official LongBench definition on the same predictions. A confidence interval spanning zero does **not** establish equivalence. Sources: [accepted canonical record](../results/experiments/canonical_quality_v2/canonical_quality_final_record.json), [PPL attempt](../results/experiments/canonical_quality_v2/continuation_ppl/two_model_attempt_2/summary.json), [long-context attempt](../results/experiments/canonical_quality_v2/long_context/attempt_1/summary.json).
+
+Qwen's severe quality failure occurs at the same frozen operating point. Post-hoc diagnostics localize it to the zero-padded open key group and the metadata quantization ([below](#qwen25-7b-diagnostics-replication-and-metadata-ablation)), and none of the diagnostic changes is implemented in the serving engine. Separately, Qwen serving increases paged capacity from **902,656 to 4,764,640 tokens**, while TPOT rises from **26.96 to 48.70 ms/token (+80.7%)** through untuned fallback paths. Capacity transfer does not establish quality transfer. Source: [Qwen serving](../results/experiments/cross_model/serving/capacity_latency_summary.json).
+
+## Serving-engine perplexity
+
+The packed cache inside the serving engine, scored against BF16 serving in the same engine. This is physical serving
+evidence, kept separate from the logical quality above. Llama-3.1-8B-Instruct, WikiText-2 continuation, 32 windows of
+1,024 context and 128 scored tokens, one H100. The protocol was frozen locally before the run.
+
+| Windows | RABIT-KV vs BF16, single-chunk prefill | RABIT-KV vs BF16, forced two-chunk prefill |
+|---|---:|---:|
+| Primary, 5–32 (97.5% intervals) | +1.42% [+0.86%, +2.00%] | +1.96% [+1.07%, +2.93%] |
+| Secondary, all 32 (95% intervals) | +1.44% [+0.99%, +1.91%] | +2.07% [+1.36%, +2.83%] |
+
+- **What it is:** an end-to-end difference between two serving paths, not a quantization-only effect.
+- **Coverage:** Llama-3.1-8B and WikiText-2 continuation only, one request at a time.
+- **Windows:** an interrupted earlier attempt had already scored part of the primary windows, and the windows are not a held-out set.
+- **Prefill schedule:** the schedule interaction (+0.53%, 95% [-0.08%, +1.19%]) includes zero, so no schedule effect is claimed.
+- **Source:** [serving-engine perplexity](../results/experiments/serving_quality/n32_attempt_002/).
+
+## Qwen2.5-7B diagnostics, replication, and metadata ablation
+
+These are post-hoc diagnostics of the Qwen2.5-7B failure in the logical evaluator, with the attention backend fixed to
+FlashAttention. They were run after the failure was known.
+
+- **Open-group padding** (32 test windows):
+  - The open key group is quantized as a 32-token group padded with zeros. Taking its range from the real tokens only lowers Qwen perplexity from 113.93 to 7.84 (BF16 6.79).
+  - That removes 94.9% of the excess mean token NLL. [Details](../results/experiments/qwen_diagnostics/padding_exclusion_full32/).
+- **Which keys** (8 windows): with padding excluded, making only the closed-page keys exact removes the whole remaining gap to exact keys (fraction 1.016), while making only the open group exact removes none of it (-0.017). [Details](../results/experiments/qwen_diagnostics/key_region_8window/).
+- **Replication on the validation split** (32 windows, analysis and criteria fixed before the run):
+  - padding exclusion -91.4% versus the frozen policy;
+  - fraction of excess NLL removed 0.941;
+  - exact closed pages remove 0.963 of the exact-key gap;
+  - both pre-specified decisions met their criteria. This is a replication on another split, not a held-out confirmation. [Details](../results/experiments/qwen_diagnostics/validation_split_replication/).
+- **Metadata ablation** (A001, 32 test windows):
+  - On Qwen, exact FP32 group parameters remove 0.89 of the excess mean NLL when padding is excluded, but only 0.11 under the frozen policy. The two components interact, so these shares do not add up.
+  - On Llama, the ablation detects no effect of the 8-bit metadata quantization. [Details](../results/experiments/metadata_ablation/).
+
+**Padding exclusion and exact metadata exist only in the logical evaluator; they are not implemented in the serving engine.** The serving engine still runs the unchanged K3/V2/G32/R4/META8g64
+operating point. Quality measured with padding exclusion or exact metadata must not be combined with the 5.28× capacity
+of the measured operating point: no system with both properties was built or measured. By the page arithmetic, the
+exact-metadata (FP32 parameter) layout would give 3.56× over BF16, not 5.28×.
+No latency, throughput, or serving quality is known for either change.
+
+## Capacity accounting
+
+- **Closed page:** a closed 32-token page occupies 24.25·H·d bytes per layer: K3 payload 12·H·d, V2 payload 8·H·d, and META8g64 metadata 4.25·H·d. That is 3.03 bits per stored element.
+- **Llama-3.1-8B pool:**
+  - RABIT-KV stores 24,832 bytes per token, against 131,072 for BF16, 65,536 for FP8 and 42,816 for the tested TurboQuant configuration.
+  - The tested TurboQuant configuration keeps four BF16 layers.
+  - The predicted ratio over BF16 (5.2784×) agrees with the observed allocator capacity (5.2785×).
+- **Side state outside the pool:** each Llama sequence holds up to 3 MiB outside the pool: the four-token residual window, the open group's BF16 keys, and its V2 codes with FP32 parameters. Counting it, BF16 needs 2.65× the KV memory of one RABIT-KV sequence at 128 tokens, 5.12× at 4,096 tokens and 5.26× at 32,768.
+- **Sources:** [`results/summary.json`](../results/summary.json) (`public_update_2026_10.capacity_accounting`) and appendix C of the [paper](../paper/v2/appendix.pdf).
+
+## Scaling and limitations
+
+- At 8,192-token prompts, RABIT sustained offered concurrency 64 while BF16 reached only 47 overlapping in-flight requests. RABIT throughput was lower at every tested concurrency. See [concurrency report](../results/experiments/concurrency_scaling/L8192/shadow_conditioned/combined_report.json).
+- At 32,736 prompt tokens plus 32 output tokens, median TTFT was **114.38 s** for RABIT versus **4.435 s** for BF16. This is the maximum tested model-limit point, not a demonstrated maximum feasible context. See [context scaling](../results/experiments/context_scaling/attempt_2/context_scaling_summary.json).
+- Current execution serializes per-request/per-token work. Profiling is diagnostic and materially perturbs timing; it does not replace accepted unprofiled results. Long-context prefill also has substantial closed-page device work. These costs have not been shown intrinsic to the representation.
+- Evaluation covers one GPU type and one frozen operating point. Eager latency comparisons need not transfer to CUDA graphs. The only component ablation is the post-hoc logical metadata ablation; there are no Qwen long-context, Qasper, or multilingual results. Retrieval saturation cannot resolve small effects.
+- Logical evaluation uses exact dense initial prefill. Serving-engine perplexity covers Llama with one single-chunk and one forced two-chunk schedule; prompts beyond the per-step token budget, concurrent requests, and long generations over many closed pages are not quality-tested. CPU/CUDA states are not bit-identical; validation uses a same-device independent oracle.
+
+## Code, paper, and evidence
+
+- [Method and cache lifecycle](../docs/METHOD.md)
+- [Evidence, environment, and public reproduction instructions](../docs/REPRODUCIBILITY.md)
+- [Public reproduction adapter](../benchmarks/public/reproduce.py)
+- [Public machine-readable summary](../results/summary.json)
+- [Evidence directory index](../results/README.md)
+- [Scientific source navigation](../benchmarks/README.md)
+- [Historical documents](../docs/history/README.md)
+- [Complete historical-to-current path manifest](../docs/PATH_MIGRATION.json)
+- [Physical cache implementation](../vllm-kvquant/vllm/v1/attention/ops/rabit_kv2.py)
+- [Canonical logical evaluator](../benchmarks/experiments/canonical_rabit_quality.py)
+- [Paper, October 2026](../paper/v2/main.pdf), [appendix](../paper/v2/appendix.pdf), [source](../paper/v2/)
+- [Serving-engine perplexity](../results/experiments/serving_quality/n32_attempt_002/), [Qwen2.5-7B diagnostics](../results/experiments/qwen_diagnostics/), [metadata ablation](../results/experiments/metadata_ablation/)
+- Earlier paper, preserved unchanged: [source](../paper/main.tex), [supplement](../paper/appendix.tex), [frozen paper PDF](../paper/frozen/main.pdf), [frozen supplement PDF](../paper/frozen/appendix.pdf)
+
+Historical quality evidence in `results/legacy/quality/` and the earlier experiment directories is **legacy logical-evaluator evidence**, not canonical quality. The earlier evaluator used different value-metadata ordering and did not age generated tokens. Historical deployment sessions remain physical evidence, but their absolute latencies must not be pooled with the matched session above. The old public summary is preserved at `research-backup-2026-10-11:results/summary.json`; the new summary records its provenance instead of relabeling it canonical.
+
+The public adapter supports read-only planning and explicit reproduction into fresh external output directories. It preserves the frozen workers, protocols, statistics, and validity gates and never commits or pushes. See the reproduction guide for the clean-source and environment prerequisites. Frozen scientific files, evidence, historical documents and paper assets retain their original bytes. The public directory mapping is applied; embedded historical paths remain unchanged and resolve through the path manifest or the pinned preserved source checkout. The migration record and schema-consumer audit are maintained in [public release history](../docs/PUBLIC_RELEASE_HISTORY.md).
