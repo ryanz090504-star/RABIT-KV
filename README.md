@@ -16,6 +16,18 @@ The **2-bit target** names the operating point centered on 2-bit values: keys us
 
 **Paper (October 2026):** [RABIT-KV: A Physically Packed, Target-Bit-Aware KV Cache for LLM Serving](paper/v2/main.pdf), Ryan Zhang, with its [supplementary appendix](paper/v2/appendix.pdf) and [source](paper/v2/). It adds serving-engine perplexity, the Qwen2.5-7B diagnostics and their replication, a metadata ablation, and the full capacity accounting. The earlier paper is preserved unchanged in `paper/`.
 
+## Post-MLSys research update (November 2026)
+
+[Post-MLSys Research Update: Qwen and Llama](docs/research/POST_MLSYS_UPDATE_QWEN_LLAMA.md) reports serving-engine follow-up experiments run after the paper. They use **research patches that are not part of this repository or the v0.1.0 release**. Everything below this section describes the released operating point and is unchanged.
+
+| Result | Status | Finding |
+|---|---|---|
+| **Padding fix** | exploratory | On 32 Qwen windows, taking the open key group's range from its real tokens lowers serving perplexity from 120.9 to 8.63 (BF16 7.78), about −93 %. The result is still +10.9 % above BF16 |
+| **BF16 K minima in every layer** | confirmatory, 32 fresh windows per model | Qwen perplexity −4.3 % (one-chunk) and −4.2 % (two-chunk) versus the padding fix. "Within 3 % of BF16" is not supported. Llama non-regression within +0.5 % is not shown, so the pre-specified confirmation **did not pass**. Paged capacity −3.72 % (Llama 5.28× → 5.08× BF16). Latency was not measured |
+| **H1 mechanism** | exploratory BF16 replay | The switch to BF16 minima cuts Qwen's attention-score error mainly in the first and last layers. For Llama the reduction is negligible. Within a model, the size of the reduction does not predict which windows gain |
+
+Tables, frozen analysis outputs and a script that recomputes every number: [`results/experiments/post_mlsys_2026_11/`](results/experiments/post_mlsys_2026_11/).
+
 ## Matched serving results
 
 Llama-3.1-8B-Instruct, one NVIDIA H100 80GB HBM3, eager execution, single request, 2,048 prompt tokens and 32 output tokens. Latencies are medians of the two leg medians; each leg has 30 measured requests. These are descriptive statistics without confidence intervals.

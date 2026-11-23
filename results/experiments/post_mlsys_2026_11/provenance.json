@@ -1,0 +1,142 @@
+{
+ "cells": {
+  "c3_a2/qwen/bf16_single": {
+   "digest_sha256": "879e92d3262d52da0cca95c922968170e48e6b69679a2a511eadc1c7de478a86",
+   "score_files": 32
+  },
+  "c3_a2/qwen/bf16_two": {
+   "digest_sha256": "0a05855c4f200add5dd3f99b515c5d872b5186d6b7007c5317c6931b26f99f40",
+   "score_files": 32
+  },
+  "c3_a2/qwen/kmin_single": {
+   "digest_sha256": "ab434cf85fc447cf704c9e2ad9d6a7d672a17a2f5761b90ed5da8128025db3a3",
+   "score_files": 32
+  },
+  "c3_a2/qwen/kmin_two": {
+   "digest_sha256": "d795059916b5812e64124a1d59151afe4a66abd60c74f91f9896aa3239857dd7",
+   "score_files": 32
+  },
+  "c3_a2/qwen/on_single": {
+   "digest_sha256": "1229a9bb67d8517fbedb67993e26af2214849f6a84d300e39746c94d4859f511",
+   "score_files": 32
+  },
+  "c3_a2/qwen/on_two": {
+   "digest_sha256": "0ea59ec28112ab67ea0730344dfffcc29c4f41c56fdd38f78b968f86b74a06a2",
+   "score_files": 32
+  },
+  "c4/llama/base_on_single": {
+   "digest_sha256": "8470a769587d94e6b6efe3807cb00546023cdf87c1ea1682270b2c915cc3d3ec",
+   "score_files": 32
+  },
+  "c4/llama/base_on_two": {
+   "digest_sha256": "afd371cdf5617706005222037d5a0536d075363abfdfbe4bba8b23762f272144",
+   "score_files": 32
+  },
+  "c4/llama/bf16_single": {
+   "digest_sha256": "ed0e4a6818c301ef1aac3ddd58a611f92f0b0d36b6122159691f0218cfac6cee",
+   "score_files": 32
+  },
+  "c4/llama/bf16_two": {
+   "digest_sha256": "e3951f051cbb3fa09ca93e35a72b11d753baadb5e1d8b87e4a7a48c0c9f67134",
+   "score_files": 32
+  },
+  "c4/llama/kmin_single": {
+   "digest_sha256": "cf94675670592b48e21e896b578e2aba0c3e6780c3c24c4fe215aa4ac58a7bda",
+   "score_files": 32
+  },
+  "c4/llama/kmin_two": {
+   "digest_sha256": "66e3a2ea42d8c6cb1164575e8e8d6862066cfeb2c05cd0e4411b46df20e043a3",
+   "score_files": 32
+  },
+  "c4/llama/off_single": {
+   "digest_sha256": "a74442eb0df902aade63747a0d9a7ecdd2436bd715e026747cb5f844c5957342",
+   "score_files": 32
+  },
+  "c4/llama/off_two": {
+   "digest_sha256": "022c92bd3e84c8dd5f27b235a626293463424dfa30d2d1f03deae1872b48550c",
+   "score_files": 32
+  },
+  "c4/qwen/base_on_single": {
+   "digest_sha256": "c522b1a60074d535f4fe45b13cf80c1af44b177fd5f9256eeacae43958d2310a",
+   "score_files": 32
+  },
+  "c4/qwen/base_on_two": {
+   "digest_sha256": "36243cd364ae2681d64f4d608011a7c617d4951c86d8eb24d99fb71b0848c9c5",
+   "score_files": 32
+  },
+  "c4/qwen/bf16_single": {
+   "digest_sha256": "490aedde0a6d1ba9adc1360a5e2d4af918181a53253831c4c0ce862bd9331bc4",
+   "score_files": 32
+  },
+  "c4/qwen/bf16_two": {
+   "digest_sha256": "af99bfa019133b1672028baf8fd81e546ee5ad33ce85ad4a7795e8d5bbc8103e",
+   "score_files": 32
+  },
+  "c4/qwen/kmin_single": {
+   "digest_sha256": "40238e6e36d88473c9404cda7bec8169dfe6ee6940416ade70639a0d26522c97",
+   "score_files": 32
+  },
+  "c4/qwen/kmin_two": {
+   "digest_sha256": "f519ee68afa8946550d308d3151613f9d9d960c97ef5f4f52d339117a3a52b37",
+   "score_files": 32
+  },
+  "c4/qwen/off_single": {
+   "digest_sha256": "37f1102414e5b47431104890ab45c3b3841f0d6a5063baddd2e824c9719b926b",
+   "score_files": 32
+  },
+  "c4/qwen/off_two": {
+   "digest_sha256": "34aa19cd065bb7c17137eb7b036c49834d24f77a2489cfbafb401a6ef2f89421",
+   "score_files": 32
+  },
+  "h01/qwen/bf16_single": {
+   "digest_sha256": "596393d02b309ccc12ec0042ab9784d6d1c3107cc0f8eab8b4cd6d2c3e47baba",
+   "score_files": 32
+  },
+  "h01/qwen/bf16_two": {
+   "digest_sha256": "3a946a8187380b7b67da128cd1125dfc80d2a059ae4b9e39f746515b7eefb03c",
+   "score_files": 32
+  },
+  "h01/qwen/off_single": {
+   "digest_sha256": "447f51012497d31b701da01846b25d1e0d9e94a471ee1af3f219d6640303af0f",
+   "score_files": 32
+  },
+  "h01/qwen/off_two": {
+   "digest_sha256": "25d5b4f4ec996f715cd702d8e0666ef4c344451fd24443d98ddb17c2307fe184",
+   "score_files": 32
+  },
+  "h01/qwen/on_single": {
+   "digest_sha256": "d5fc29a1071baa4a3e8fe5c312f2e09abc32777c8953513f1936bc1716d266fa",
+   "score_files": 32
+  },
+  "h01/qwen/on_two": {
+   "digest_sha256": "47ff27fe3aa65fd647476c7a4bc25eb5bb7e302ded2a88108fc73c7322dd8689",
+   "score_files": 32
+  }
+ },
+ "digest_rule": "per cell: sha256 of the sorted lines \"<window_id>:<sha256 of its raw score file>\" joined by newlines",
+ "line_endings": "all published files use LF; frozen/h1-analysis.json and frozen/h1-layer-shares.json were written with CRLF on Windows and are published LF-normalized (content otherwise identical)",
+ "note": "the raw per-token score files and the Pod archives are not published; these digests let a holder of the raw files check them",
+ "public_files": {
+  "frozen/c3-a2-summary.json": "4d1e123f95a7c83d1ed1f88858ef4fc47afcb92794adeb620d829f4d65009b8a",
+  "frozen/c4-summary-llama.json": "3797f9e23ed5725d624222484398b14ec41640dd0ef418b0a500cae9e6659139",
+  "frozen/c4-summary-qwen.json": "a1d6368f03f2d51b9363318facefde73b317d535c83e76522383bc19d411f6ec",
+  "frozen/h01-summary.json": "1a18536917ce429d80d8936ee255c26bc6f1c12cf5ae9cdf3d1c0be4b83bb80c",
+  "frozen/h1-analysis.json": "9a0b0e08a325a7c0d09292ffda29ad2476ac74496d434be9ca40a98b7c889628",
+  "frozen/h1-layer-shares.json": "f891d9e891d1511977bf25aacbde9c1fe20b5965eb7d54d45341003c80c4de0a",
+  "frozen_code/analyze_h1.py": "1199faa031a1a4c4915d70028f05b0010b1fa1d35c6954d3e7d54b2abd3ce35b",
+  "frozen_code/c3_analyze.py": "5107425c4d74fc87d044ad32470475f8d70901583a9588725440f16cddf78130",
+  "frozen_code/c4_analyze.py": "80120b0d3a6f1dd14942936233f69f1122e4e1be43435247dcbedd71e21a19cc",
+  "frozen_code/h01_analyze.py": "798693366e91f760494c0c6078d067b8dfeefec4661d531f6ec0c3b060c8f27d",
+  "frozen_code/h1_capture.py": "06b636e478bd30cffb09ee490391c9c6cb89c9b576efa886eddfbabec993d997",
+  "frozen_code/h1_metric.py": "ec083c0838d600c0a0269a89a28295d007eb2b02625a5479c6767aa7783bc1df",
+  "tables/h1_layer_metrics.csv": "777ef19f23862632c985b4426bfdd914622c63067ee58534471ad44213033936",
+  "tables/serving_window_nll.csv": "885e6c5546041ec6e5aa9e0bc2fbfdd49924cdeef0a08b038f88386ac1dccf1c",
+  "windows/c4_windows.py": "1bb3f0ab822481515c792f8e99afa89a8283dadb31fc6a1d2baf49165118db70",
+  "windows/spec-r01-qwen.json": "7e7b15c6fe2791e915027a3a8bbfad2d5dc5150d50efae5210d8fe4d9f2c36c2",
+  "windows/spec-r01l-llama.json": "6847fc433a6dbce47ee87bde85e2276630d5319614ccd8b0593039efd16f7b40"
+ },
+ "rows": {
+  "h1_layer_metrics.csv": 1920,
+  "serving_window_nll.csv": 896
+ }
+}
