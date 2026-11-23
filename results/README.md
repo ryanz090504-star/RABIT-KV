@@ -16,6 +16,7 @@ Renaming a directory does not change an attempt's acceptance or scientific meani
 - [Serving-engine perplexity (physical quality)](experiments/serving_quality/n32_attempt_002/)
 - [Qwen2.5-7B post-hoc diagnostics and validation-split replication (logical)](experiments/qwen_diagnostics/)
 - [Metadata-precision ablation (logical)](experiments/metadata_ablation/)
+- [Research update, November 2026: KV-cache quantization on Qwen and Llama (serving research patches, not the released system)](experiments/kv_cache_2026_11/)
 - [Legacy original quality](legacy/quality/)
 - [Legacy original physical deployment](legacy/performance/)
 - [Legacy quality frontier](legacy/quality_frontier/)
