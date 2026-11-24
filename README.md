@@ -14,9 +14,11 @@ RABIT-KV packs keys into 3 bits and values into 2 bits, groups keys in blocks of
 
 | What I measured on Llama | What I found |
 |---|---|
-| Cache capacity | 2,074,592 token slots versus 393,024 for BF16: **5.28× BF16**, **2.64× native FP8**, and **1.72× the tested TurboQuant K3/V4 configuration**. |
-| Retrieval quality | In a separate evaluation, RABIT-KV and BF16 both scored **57/57** on needle-in-a-haystack and **100%** on 200 passage-retrieval examples. |
-| Serving speed | In the matched single-request benchmark, time to first token rose from **59.99 to 144.65 ms** (2.41×); time per output token rose from **24.19 to 30.10 ms** (+24.4%). Throughput was also lower across the tested concurrency settings. |
+| Cache capacity | 2,074,592 token slots versus 393,024 for BF16: **5.2785×** measured against **5.2784×** predicted from the page layout. That is **5.28× BF16**, **2.64× native FP8**, and **1.72× the tested TurboQuant K3/V4 configuration**. |
+| Prediction quality | In the primary WikiText-2 serving test, perplexity rose by **+1.42%** with one-chunk prefill and **+1.96%** with two-chunk prefill. |
+| Retrieval and question answering | In a separate evaluation, RABIT-KV and BF16 both scored **57/57** on needle-in-a-haystack and **100%** on 200 passage-retrieval examples. On HotpotQA, RABIT-KV scored **58.27 F1** against **59.30** for BF16 (100 examples). |
+| Latency | In the matched single-request benchmark, time to first token rose from **59.99 to 144.65 ms** (2.41×); time per output token rose from **24.19 to 30.10 ms** (+24.4%). |
+| Concurrency | With 8,192-token prompts, RABIT-KV sustained **64 concurrent requests**, while BF16 reached at most **47** in flight at once. RABIT-KV's throughput was still lower at every tested concurrency level. |
 
 ## What changed when I tested Qwen?
 
@@ -30,6 +32,8 @@ On Qwen2.5-7B, the same design produced a perplexity of 120.86 against 7.78 for 
 | Also store the key minima in BF16, keeping the keys at 3 bits | 7.88 |
 
 On **32 fresh Qwen windows**, storing minima in BF16 lowered perplexity by **4.28% with one chunk** and **4.20% with two chunks**, relative to the padding fix alone. The test did not establish that both Qwen settings were within 3% of BF16. On Llama, the two-chunk test could not rule out a perplexity increase above 0.5%, so the overall confirmation did not pass.
+
+To see where the change mattered, I replayed attention on fixed BF16 inputs across all 28 Qwen layers. Storing key minima in BF16 reduced attention-score error by about 65% in the first layer and 75% in the last. Across windows, the average error reduction showed no clear association with the gain in prediction quality.
 
 That leaves a concrete design choice. Excluding unused slots fixes how a group’s range is calculated. Spending extra bits on its minimum helped Qwen, but on Llama it reduced capacity from **5.28× to 5.08× BF16** without a demonstrated quality benefit. Both changes were tested as research patches; the released engine retains the original configuration.
 
